@@ -1,13 +1,19 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/router/router.dart';
-import 'package:leafy/ui/welcome/welcome_screen.dart';
+import 'package:path_provider/path_provider.dart';
+
+late Directory appDocumentsDirectory;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+
+  appDocumentsDirectory = await getApplicationDocumentsDirectory();
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
