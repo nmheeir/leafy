@@ -31,6 +31,13 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   commitlint_cli: ^0.8.1
   husky: ^0.1.7
+  melos: ^7.3.0
+
+melos:
+  useRootAsPackage: true
+  scripts:
+    elgen:
+      run: flutter pub run easy_localization:generate -S assets/translations -f keys -o locale_keys.g.dart
 
 flutter:
   uses-material-design: true
