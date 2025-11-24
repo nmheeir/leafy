@@ -1,9 +1,6 @@
-
-
 import 'package:leafy/core/constants/enums/index.dart' show BookFormat;
 import 'package:leafy/data/database/database_controller.dart';
-
-import 'package:leafy/data/models/index.dart';
+import 'package:leafy/data/models/book.dart';
 
 class Repository {
   final DatabaseController dbController = DatabaseController();
@@ -13,13 +10,11 @@ class Repository {
 
   Future<List<Book>> getAllBooks() => dbController.getAllBooks();
 
-  Future<List<Book>> getBooks(int status) => dbController.getBooks(
-        status: status,
-      );
+  Future<List<Book>> getBooks(int status) =>
+      dbController.getBooks(status: status);
 
-  Future<List<Book>> searchBooks(String query) => dbController.searchBooks(
-        query: query,
-      );
+  Future<List<Book>> searchBooks(String query) =>
+      dbController.searchBooks(query: query);
 
   Future<int> countBooks(int status) => dbController.countBooks(status: status);
 

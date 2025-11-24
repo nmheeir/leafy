@@ -4,10 +4,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
+import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
 
 late Directory appDocumentsDirectory;
+late BookCubit bookCubit;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

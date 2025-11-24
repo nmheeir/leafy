@@ -11,8 +11,6 @@ extension BookStatusExtension on BookStatus {
         return 2;
       case BookStatus.unfinished:
         return 3;
-      default:
-        return 0;
     }
   }
 }

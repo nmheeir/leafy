@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/index.dart';
+import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/main.dart';
 
 class Book {
@@ -12,7 +12,7 @@ class Book {
   String author;
   String? description;
   BookStatus status;
-  bool favourite;
+  bool favorite;
   bool deleted;
   int? rating;
   int? pages;
@@ -37,7 +37,7 @@ class Book {
     required this.status,
     this.subtitle,
     this.description,
-    this.favourite = false,
+    this.favorite = false,
     this.deleted = false,
     this.rating,
     this.pages,
@@ -67,7 +67,7 @@ class Book {
       title: '',
       author: '',
       status: status,
-      favourite: false,
+      favorite: false,
       deleted: false,
       bookFormat: bookFormat,
       hasCover: false,
@@ -87,7 +87,7 @@ class Book {
       description: json['description'],
       status: parseBookStatus(json['status']),
       rating: json['rating'],
-      favourite: (json['favourite'] == 1) ? true : false,
+      favorite: (json['favorite'] == 1) ? true : false,
       hasCover: (json['has_cover'] == 1) ? true : false,
       deleted: (json['deleted'] == 1) ? true : false,
       pages: json['pages'],
@@ -127,7 +127,7 @@ class Book {
     BookStatus? status,
     String? subtitle,
     String? description,
-    bool? favourite,
+    bool? favorite,
     bool? deleted,
     int? rating,
     int? pages,
@@ -152,7 +152,7 @@ class Book {
       author: author ?? this.author,
       status: status ?? this.status,
       description: description ?? this.description,
-      favourite: favourite ?? this.favourite,
+      favorite: favorite ?? this.favorite,
       deleted: deleted ?? this.deleted,
       rating: rating ?? this.rating,
       pages: pages ?? this.pages,
@@ -180,7 +180,7 @@ class Book {
       author: author,
       status: status,
       description: description,
-      favourite: favourite,
+      favorite: favorite,
       deleted: deleted,
       rating: rating,
       pages: pages,
@@ -209,7 +209,7 @@ class Book {
       'description': description,
       'status': status.value,
       'rating': rating,
-      'favourite': favourite ? 1 : 0,
+      'favorite': favorite ? 1 : 0,
       'deleted': deleted ? 1 : 0,
       'pages': pages,
       'publication_year': publicationYear,

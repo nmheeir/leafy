@@ -1,8 +1,8 @@
 import 'package:leafy/data/database/database_provider.dart';
+import 'package:leafy/data/models/book.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/index.dart';
 
 class DatabaseController {
   final dbClient = DatabaseProvider.dbProvider;
