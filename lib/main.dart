@@ -7,9 +7,11 @@ import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 late Directory appDocumentsDirectory;
 late BookCubit bookCubit;
+late DateFormat dateFormat;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +50,8 @@ class LeafyApp extends StatefulWidget {
 class _LeafyAppState extends State<LeafyApp> {
   @override
   Widget build(BuildContext context) {
+    _initializeDateFormat();
+
     final localizationsDelegates = [...context.localizationDelegates];
 
     return MaterialApp.router(
@@ -59,4 +63,9 @@ class _LeafyAppState extends State<LeafyApp> {
       locale: context.locale,
     );
   }
+}
+
+Future _initializeDateFormat() async {
+  await initializeDateFormatting();
+  dateFormat = DateFormat.yMMMd();
 }

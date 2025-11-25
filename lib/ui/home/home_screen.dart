@@ -86,7 +86,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildScaffoldBody() {
     return currentPageIndex == 0
-        ? const BooksScreen()
+        ? BooksScreen(
+            bookListsOrder: const [],
+            onBookLongPress: (book) {},
+            onBookTap: (book, heroTag) {},
+          )
         : currentPageIndex == 1
         ? const StatisticsScreen()
         : const SizedBox.shrink();

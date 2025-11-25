@@ -34,6 +34,8 @@ dependencies:
   dropdown_button2: ^2.3.9
   material_symbols_icons: ^4.2874.0
   flutter_speed_dial: ^7.0.0
+  flutter_rating_bar: ^4.0.1
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
