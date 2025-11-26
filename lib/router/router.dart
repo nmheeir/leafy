@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
-import 'package:leafy/data/models/book.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
+import 'package:leafy/ui/settings/settings_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.bookEditor,
+  initialLocation: Routes.home,
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
@@ -24,6 +24,10 @@ GoRouter router() => GoRouter(
           // initialBook: initialBook,
         );
       },
+    ),
+    GoRoute(
+      path: Routes.setting,
+      builder: (context, state) => SettingsScreen(),
     ),
   ],
   // redirect: (context, state) {

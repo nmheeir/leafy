@@ -5,4 +5,5 @@ abstract final class Routes {
   static const bookEditor = '/book-editor';
   static const books = '/books';
   static const book = '/book';
+  static const setting = '/setting';
 }

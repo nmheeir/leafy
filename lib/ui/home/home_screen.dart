@@ -145,8 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
               return PopupMenuItem<String>(
                 value: choice,
                 child: Text(choice),
-                // onTap: () => _invokeMenuOption(choice),
-                onTap: () {},
+                onTap: () => _invokeMenuOption(choice),
               );
             }).toList();
           },
@@ -219,4 +218,30 @@ class _HomeScreenState extends State<HomeScreen> {
   void _searchInOpenLibrary() {}
 
   void _scanBarcode() {}
+
+  Future<void> _invokeMenuOption(String choice) async {
+    await Future.delayed(const Duration(milliseconds: 0));
+
+    if (!mounted) return;
+
+    if (currentPageIndex == 0) {
+      if (choice == menuOptions[0]) {
+        // openSortFilterSheet();
+      } else if (choice == menuOptions[1]) {
+        // goToDisplayScreen();
+      } else if (choice == menuOptions[2]) {
+        goToSettingsScreen();
+      }
+    } else if (currentPageIndex == 1) {
+      if (choice == menuOptions[0]) {
+        goToSettingsScreen();
+      }
+    }
+  }
+
+  void goToSettingsScreen() {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    context.push(Routes.setting);
+  }
 }
