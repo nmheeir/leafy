@@ -3,6 +3,7 @@ import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_accent_color_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
@@ -12,7 +13,7 @@ import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.setting,
+  initialLocation: Routes.settingAppearance,
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
@@ -50,6 +51,10 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.settingDownLoadMissingCover,
       builder: (context, state) => SettingDownloadMissionCoverScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingAccentColor,
+      builder: (context, state) => SettingAccentColorScreen(),
     ),
   ],
   // redirect: (context, state) {

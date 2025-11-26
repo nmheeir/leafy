@@ -11,5 +11,5 @@ abstract final class Routes {
   static const settingDownLoadMissingCover = '/setting-download-missing-cover';
   static const settingBackupRestore = '/setting-backup-restore';
   static const settingAppearance = '/setting-appearance';
-
+  static const settingAccentColor = '/setting-accent-color';
 }

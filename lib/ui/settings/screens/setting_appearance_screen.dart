@@ -1,6 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 /// Một widget chỉ để hiển thị cho màn hình cài đặt Giao diện.
@@ -62,10 +66,7 @@ class SettingAppearanceScreen extends StatelessWidget {
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
                     'Select Theme Mode',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -115,14 +116,11 @@ class SettingAppearanceScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
-                    'Dark Mode Style',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    LocaleKeys.dark_mode_style.tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -163,14 +161,11 @@ class SettingAppearanceScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
-                    'Select Font',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    LocaleKeys.select_font.tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -228,14 +223,11 @@ class SettingAppearanceScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
-                    'Select Rating Type',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    LocaleKeys.seletct_rating_type.tr(),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(height: 15),
@@ -266,10 +258,7 @@ class SettingAppearanceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Appearance',
-          style: TextStyle(fontSize: 18),
-        ),
+        title: Text(LocaleKeys.apperance.tr(), style: TextStyle(fontSize: 18)),
       ),
       body: SettingsList(
         contentPadding: const EdgeInsets.only(top: 10),
@@ -279,13 +268,14 @@ class SettingAppearanceScreen extends StatelessWidget {
               : Theme.of(context).colorScheme.surfaceContainerLowest,
         ),
         lightTheme: SettingsThemeData(
-          settingsListBackground:
-              Theme.of(context).colorScheme.surfaceContainerLowest,
+          settingsListBackground: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerLowest,
         ),
         sections: [
           SettingsSection(
             tiles: <SettingsTile>[
-              _buildAccentSetting(context),
+              _buildAccentColorSetting(context),
               _buildThemeModeSetting(context),
               _buildDarkModeSetting(context),
               _buildFontSetting(context),
@@ -311,10 +301,7 @@ class SettingAppearanceScreen extends StatelessWidget {
     }
 
     return SettingsTile(
-      title: const Text(
-        'Theme Mode',
-        style: TextStyle(fontSize: 16),
-      ),
+      title: const Text('Theme Mode', style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.sunny),
       description: Text(description, style: const TextStyle()),
       onPressed: (context) => _showThemeModeDialog(context),
@@ -323,10 +310,7 @@ class SettingAppearanceScreen extends StatelessWidget {
 
   SettingsTile _buildDarkModeSetting(BuildContext context) {
     return SettingsTile(
-      title: const Text(
-        'Dark Mode Style',
-        style: TextStyle(fontSize: 16),
-      ),
+      title: const Text('Dark Mode Style', style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.contrast),
       description: Text(
         isAmoledDark ? 'AMOLED' : 'Natural',
@@ -338,10 +322,7 @@ class SettingAppearanceScreen extends StatelessWidget {
 
   SettingsTile _buildFontSetting(BuildContext context) {
     return SettingsTile(
-      title: const Text(
-        'Font',
-        style: TextStyle(fontSize: 16),
-      ),
+      title: const Text('Font', style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.font_download, size: 22),
       description: Text(
         currentFontFamily ?? 'Default',
@@ -361,22 +342,16 @@ class SettingAppearanceScreen extends StatelessWidget {
         description = 'Bar';
     }
     return SettingsTile(
-      title: const Text(
-        'Rating Type',
-        style: TextStyle(fontSize: 16),
-      ),
+      title: Text(LocaleKeys.rating_type.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.star_rounded),
       description: Text(description, style: const TextStyle()),
       onPressed: (context) => _showRatingBarDialog(context),
     );
   }
 
-  SettingsTile _buildAccentSetting(BuildContext context) {
+  SettingsTile _buildAccentColorSetting(BuildContext context) {
     return SettingsTile.navigation(
-      title: const Text(
-        'Accent Color',
-        style: TextStyle(fontSize: 16),
-      ),
+      title: Text(LocaleKeys.accent_color.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.color_lens),
       description: Text(
         isMaterialYou
@@ -385,7 +360,7 @@ class SettingAppearanceScreen extends StatelessWidget {
             : '#${currentAccentColor.value.toRadixString(16).substring(2).toUpperCase()}',
         style: const TextStyle(),
       ),
-      onPressed: (context) => onAccentColorTapped(),
+      onPressed: (context) => context.push(Routes.settingAccentColor),
     );
   }
 }
