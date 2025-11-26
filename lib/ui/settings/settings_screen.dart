@@ -1,9 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/widgets/common_dialogs.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/settings/widgets/setting_dialog_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -44,9 +47,7 @@ class SettingsScreen extends StatelessWidget {
                 contentPadding: const EdgeInsets.only(top: 10),
 
                 lightTheme: SettingsThemeData(
-                  settingsListBackground: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerLowest,
+                  settingsListBackground: context.colorScheme.surfaceContainerLowest,
                 ),
                 sections: [
                   // SettingsSection(tiles: _buildGeneralSettingsTiles(context)),
@@ -56,7 +57,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: context.colorScheme.primary,
                       ),
                     ),
                     tiles: <SettingsTile>[
@@ -73,11 +74,11 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: context.colorScheme.primary,
                       ),
                     ),
                     tiles: <SettingsTile>[
-                      _buildBackupSetting(context),
+                      _buildBackupRestoreSetting(context),
                       _buildAppearanceSetting(context),
                       _buildLanguageSetting(context),
                     ],
@@ -88,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: context.colorScheme.primary,
                       ),
                     ),
                     tiles: <SettingsTile>[
@@ -155,6 +156,7 @@ class SettingsScreen extends StatelessWidget {
         style: const TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.delete),
+      onPressed: (context) => context.push(Routes.trash),
     );
   }
 
@@ -271,11 +273,12 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  //TODO: change tab order setting -> book list order
   SettingsTile _buildTabOrderSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(LocaleKeys.tabs_order.tr(), style: TextStyle(fontSize: 16)),
-      leading: const Icon(Icons.tab_unselected),
-      onPressed: (context) {},
+      leading: const FaIcon(FontAwesomeIcons.tableColumns),
+      onPressed: (context) => context.push(Routes.settingBookListOrder),
     );
   }
 
@@ -298,33 +301,30 @@ class SettingsScreen extends StatelessWidget {
         LocaleKeys.download_missing_covers.tr(),
         style: TextStyle(fontSize: 16),
       ),
-      leading: const Icon(Icons.download_for_offline),
+      leading: const Icon(Icons.image),
+      onPressed: (context) => context.push(Routes.settingDownLoadMissingCover),
     );
   }
 
-  SettingsTile _buildBackupSetting(BuildContext context) {
+  SettingsTile _buildBackupRestoreSetting(BuildContext context) {
     return SettingsTile.navigation(
-      title: const Text(
-        'Backup & Restore', // Placeholder, use localization key
+      title: Text(
+        LocaleKeys.backup_and_restore.tr(),
         style: TextStyle(fontSize: 16),
       ),
-      leading: const Icon(Icons.backup),
-      onPressed: (context) {
-        // TODO: Implement backup logic
-      },
+      leading: const Icon(Icons.settings_backup_restore_rounded),
+      onPressed: (context) => context.push(Routes.settingBackupRestore)
     );
   }
 
   SettingsTile _buildAppearanceSetting(BuildContext context) {
     return SettingsTile.navigation(
-      title: const Text(
-        'Appearance', // Placeholder, use localization key
+      title: Text(
+        LocaleKeys.apperance.tr(),
         style: TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.palette),
-      onPressed: (context) {
-        // TODO: Implement appearance logic
-      },
+      onPressed: (context) => context.push(Routes.settingAppearance)
     );
   }
 

@@ -3,7 +3,12 @@ import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
+import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
+import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
@@ -28,6 +33,23 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.setting,
       builder: (context, state) => SettingsScreen(),
+    ),
+    GoRoute(path: Routes.trash, builder: (context, state) => TrashScreen()),
+    GoRoute(
+      path: Routes.settingBackupRestore,
+      builder: (context, state) => SettingBackupRestoreScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingBookListOrder,
+      builder: (context, state) => SettingsBookListOrderScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingAppearance,
+      builder: (context, state) => SettingAppearanceScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingDownLoadMissingCover,
+      builder: (context, state) => SettingDownloadMissionCoverScreen(),
     ),
   ],
   // redirect: (context, state) {

@@ -6,4 +6,10 @@ abstract final class Routes {
   static const books = '/books';
   static const book = '/book';
   static const setting = '/setting';
+  static const trash = '/trash';
+  static const settingBookListOrder = '/setting-book-list-order';
+  static const settingDownLoadMissingCover = '/setting-download-missing-cover';
+  static const settingBackupRestore = '/setting-backup-restore';
+  static const settingAppearance = '/setting-appearance';
+
 }
