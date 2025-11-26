@@ -3,6 +3,8 @@ abstract final class Constants {
 
   static const blurHashX = 2;
   static const blurHashY = 2;
+
+  static const double formHeight = 60.0;
 }
 
 const double cornerRadius = 8;

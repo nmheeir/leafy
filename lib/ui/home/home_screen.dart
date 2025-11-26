@@ -5,6 +5,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/constants/enums/book_status.dart';
+import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/books/books_screen.dart';
@@ -13,6 +15,7 @@ import 'package:leafy/ui/home/widgets/home_navigation_bar.dart';
 import 'package:leafy/ui/home/widgets/multi_select_fab.dart';
 import 'package:leafy/ui/statistics/statistics_screen.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildScaffoldBody() {
     return currentPageIndex == 0
         ? BooksScreen(
-            bookListsOrder: const [],
+            bookListsOrder: BookStatus.values,
             onBookLongPress: (book) {},
             onBookTap: (book, heroTag) {},
           )
@@ -180,17 +183,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onFabPressed() {
     if (Platform.isIOS) {
-      // showCupertinoModalBottomSheet(
-      //   context: context,
-      //   expand: false,
-      //   builder: (_) {
-      //     return AddBookSheet(
-      //       addManually: _addBookManually,
-      //       searchInOpenLibrary: _searchInOpenLibrary,
-      //       scanBarcode: _scanBarcode,
-      //     );
-      //   },
-      // );
+      showCupertinoModalBottomSheet(
+        context: context,
+        expand: false,
+        builder: (_) {
+          return AddBookSheet(
+            addManually: _addBookManually,
+            searchInOpenLibrary: _searchInOpenLibrary,
+            scanBarcode: _scanBarcode,
+          );
+        },
+      );
     } else if (Platform.isAndroid) {
       showModalBottomSheet(
         context: context,
@@ -206,9 +209,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _addBookManually() {}
+  void _addBookManually() {
+    context.push(
+      Routes.bookEditor,
+      extra: {'appBarTitle': 'Add New Book', 'initialBook': Book.empty()},
+    );
+  }
 
-  // ignore: strict_top_level_inference
   void _searchInOpenLibrary() {}
 
   void _scanBarcode() {}

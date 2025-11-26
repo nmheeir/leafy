@@ -30,7 +30,7 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
       destinations: <Widget>[
         NavigationDestination(
           icon: Icon(
-            Symbols.menu,
+            Symbols.book,
             color: widget.currentIndex == 0
                 ? context.colorScheme.onPrimaryContainer
                 : context.colorScheme.onSurface,
