@@ -12,7 +12,7 @@ import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.home,
+  initialLocation: Routes.setting,
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
