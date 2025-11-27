@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -38,8 +39,8 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
           label: LocaleKeys.books_settings.tr(),
         ),
         NavigationDestination(
-          icon: Icon(
-            Symbols.chart_data,
+          icon: FaIcon(
+            FontAwesomeIcons.chartSimple,
             color: widget.currentIndex == 1
                 ? context.colorScheme.onPrimaryContainer
                 : context.colorScheme.onSurface,

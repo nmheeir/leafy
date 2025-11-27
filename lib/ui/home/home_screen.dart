@@ -25,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentPageIndex = 0;
+  int currentPageIndex = 1;
 
   late List<String> menuOptions;
   late double appBarHeight;
