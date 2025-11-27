@@ -10,7 +10,7 @@ class BookListsOrderCubit extends HydratedCubit<List<BookStatus>> {
         BookStatus.unfinished,
       ]);
 
-  updateOrder(int oldIndex, int newIndex) {
+  void updateOrder(int oldIndex, int newIndex) {
     if (oldIndex < newIndex) {
       newIndex -= 1;
     }

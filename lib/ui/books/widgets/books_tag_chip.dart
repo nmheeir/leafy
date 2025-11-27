@@ -17,7 +17,7 @@ class BooksTagChip extends StatefulWidget {
 }
 
 class _BookTabChipState extends State<BooksTagChip> {
-  _scrollToChip(int index, BuildContext context) {
+  void _scrollToChip(int index, BuildContext context) {
 // ...existing code...
     Scrollable.ensureVisible(
       context,
