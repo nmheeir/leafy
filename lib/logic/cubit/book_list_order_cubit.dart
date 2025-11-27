@@ -4,7 +4,7 @@ import 'package:leafy/core/constants/enums/index.dart';
 class BookListsOrderCubit extends HydratedCubit<List<BookStatus>> {
   BookListsOrderCubit()
     : super([
-        BookStatus.read,
+        BookStatus.finished,
         BookStatus.inProgress,
         BookStatus.forLater,
         BookStatus.unfinished,

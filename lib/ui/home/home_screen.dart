@@ -8,6 +8,7 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/main.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/books/books_screen.dart';
 import 'package:leafy/ui/home/widgets/add_book_sheet.dart';
@@ -25,7 +26,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int currentPageIndex = 1;
+  int currentPageIndex = 0;
 
   late List<String> menuOptions;
   late double appBarHeight;

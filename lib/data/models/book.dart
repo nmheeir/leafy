@@ -57,7 +57,7 @@ class Book {
   });
 
   factory Book.empty({
-    BookStatus status = BookStatus.read,
+    BookStatus status = BookStatus.finished,
     BookFormat bookFormat = BookFormat.paperback,
   }) {
     final newBookDate = DateTime.now();

@@ -1,27 +1,26 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/data/models/book.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 
 class BookTypeDropdown extends StatelessWidget {
   const BookTypeDropdown({
     super.key,
     required this.bookTypes,
     required this.changeBookType,
-    // Tham số mới thay thế cho BLoC
-    required this.selectedFormat,
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
   });
 
   final List<String> bookTypes;
   final Function(String?) changeBookType;
-  // BookFormat được chọn, truyền từ widget cha
-  final BookFormat selectedFormat;
   final EdgeInsets padding;
 
   String _getBookTypeDropdownValue(BookFormat bookType) {
-// ...existing code...
     switch (bookType) {
       case BookFormat.paperback:
         return bookTypes[0];
@@ -36,75 +35,71 @@ class BookTypeDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-// ...existing code...
     return Padding(
       padding: padding,
       child: Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha:  0.5),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(cornerRadius),
-            bottomLeft: Radius.circular(cornerRadius),
-            topRight: Radius.circular(cornerRadius),
-            bottomRight: Radius.circular(cornerRadius),
-          ),
+          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(cornerRadius),
         ),
-        // Loại bỏ BlocBuilder
-        child: Row(
-          children: [
-            Container(
-              height: 60,
-              padding: EdgeInsets.fromLTRB(
-                10,
-                0,
-                // Sử dụng `selectedFormat` thay vì `state.bookFormat`
-                selectedFormat == BookFormat.audiobook
-                    ? 2
-                    : selectedFormat == BookFormat.ebook
+        child: BlocBuilder<EditBookCubit, Book>(
+          builder: (context, state) {
+            return Row(
+              children: [
+                Container(
+                  height: Constants.formHeight,
+                  padding: EdgeInsets.fromLTRB(
+                    10,
+                    0,
+                    state.bookFormat == BookFormat.audiobook
+                        ? 2
+                        : state.bookFormat == BookFormat.ebook
                         ? 4
                         : 0,
-                0,
-              ),
-              child: Center(
-                child: FaIcon(
-                  // Sử dụng `selectedFormat` thay vì `state.bookFormat`
-                  selectedFormat == BookFormat.audiobook
-                      ? FontAwesomeIcons.headphones
-                      : selectedFormat == BookFormat.ebook
+                    0,
+                  ),
+                  child: Center(
+                    child: FaIcon(
+                      state.bookFormat == BookFormat.audiobook
+                          ? FontAwesomeIcons.headphones
+                          : state.bookFormat == BookFormat.ebook
                           ? FontAwesomeIcons.tabletScreenButton
                           : FontAwesomeIcons.bookOpen,
-                  size: 20,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-            Expanded(
-              child: DropdownButtonHideUnderline(
-                child: DropdownButton2(
-                  isExpanded: true,
-                  buttonStyleData: const ButtonStyleData(
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
+                      size: 20,
+                      color: context.colorScheme.primary,
                     ),
                   ),
-                  items: bookTypes
-                      .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14)),
-                          ))
-                      .toList(),
-                  // Sử dụng `selectedFormat` thay vì `state.bookFormat`
-                  value: _getBookTypeDropdownValue(selectedFormat),
-                  onChanged: (value) {
-                    changeBookType(value);
-                  },
                 ),
-              ),
-            ),
-          ],
+                Expanded(
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton2(
+                      isExpanded: true,
+                      buttonStyleData: ButtonStyleData(
+                        height: Constants.formHeight,
+                        decoration: BoxDecoration(color: Colors.transparent),
+                      ),
+                      items: bookTypes
+                          .map(
+                            (item) => DropdownMenuItem<String>(
+                              value: item,
+                              child: Text(
+                                item,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                      value: _getBookTypeDropdownValue(state.bookFormat),
+                      onChanged: (value) {
+                        changeBookType(value);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

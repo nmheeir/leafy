@@ -311,7 +311,7 @@ class BookCardListCompact extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              book.status == BookStatus.read
+              book.status == BookStatus.finished
                   ? _buildRating(context)
                   : const SizedBox(),
               _buildSortAttribute(),

@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
+import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -21,6 +24,8 @@ void main() async {
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
+  bookCubit = BookCubit();
+
   runApp(
     EasyLocalization(
       supportedLocales: localeCodes,
@@ -34,9 +39,23 @@ void main() async {
 class App extends StatelessWidget {
   const App({super.key});
 
+  dynamic _listOfBlocProviders(BuildContext context) {
+    final bookProviders = [
+      BlocProvider(create: (context) => EditBookCubit()),
+      BlocProvider(create: (context) => BookCubit()),
+      BlocProvider(create: (context) => CurrentBookCubit()),
+      BlocProvider(create: (context) => EditBookCoverCubit()),
+    ];
+
+    return [...bookProviders];
+  }
+
   @override
   Widget build(BuildContext context) {
-    return LeafyApp();
+    return MultiBlocProvider(
+      providers: _listOfBlocProviders(context),
+      child: LeafyApp(),
+    );
   }
 }
 

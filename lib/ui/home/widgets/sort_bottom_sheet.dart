@@ -270,7 +270,7 @@ class SortBottomSheetState extends State<SortBottomSheet> {
         const SizedBox(height: 5),
         _buildSortDropdown(bookStatus, sortState),
         const SizedBox(height: 5),
-        if (bookStatus == BookStatus.read)
+        if (bookStatus == BookStatus.finished)
           _buildOnlyFavoriteSwitch(bookStatus, sortState.onlyFavorite),
         const SizedBox(height: 5),
         Text(
@@ -279,7 +279,7 @@ class SortBottomSheetState extends State<SortBottomSheet> {
         ),
         const SizedBox(height: 5),
         _buildBookTypeFilter(bookStatus, sortState.bookType),
-        if (bookStatus == BookStatus.read)
+        if (bookStatus == BookStatus.finished)
           _buildFilterByFinishYears(bookStatus, sortState.years),
         _buildFilterByTags(bookStatus, sortState.tags),
         _buildFilterTagsAsAnd(bookStatus, sortState.filterTagsAsAnd),
@@ -666,7 +666,7 @@ class SortBottomSheetState extends State<SortBottomSheet> {
 
 List<SortType> _getValidSortOptions(BookStatus bookStatus) {
   switch (bookStatus) {
-    case BookStatus.read:
+    case BookStatus.finished:
       return [
         SortType.byTitle,
         SortType.byAuthor,

@@ -14,7 +14,7 @@ class StatsBloc extends Bloc<StatsEvent, StatsState> {
   StatsBloc() : super(StatsLoading()) {
     on<StatsLoad>((event, emit) {
       final allBooks = event.books;
-      final finishedBooks = _filterBooksByStatus(allBooks, BookStatus.read);
+      final finishedBooks = _filterBooksByStatus(allBooks, BookStatus.finished);
 
       if (finishedBooks.isEmpty) {
         emit(StatsError(LocaleKeys.add_books_and_come_back.tr()));

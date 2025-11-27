@@ -169,7 +169,7 @@ class _BooksScreenState extends State<BooksScreen>
     for (var status in bookListsOrder) {
       String title;
       switch (status) {
-        case BookStatus.read:
+        case BookStatus.finished:
           title = 'Finished';
           break;
         case BookStatus.inProgress:

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 
 import 'package:blurhash_dart/blurhash_dart.dart' as blurhash_dart;
@@ -93,7 +95,7 @@ class BookCubit extends Cubit {
     }
   }
 
-  removeAllBooks() async {
+  Future<void> removeAllBooks() async {
     await repository.removeAllBooks();
 
     await getAllBooks();
@@ -107,34 +109,34 @@ class BookCubit extends Cubit {
     await getUnfinishedBooks();
   }
 
-  getFinishedBooks() async {
+  Future<void> getFinishedBooks() async {
     List<Book> books = await repository.getBooks(0);
 
     _finishedBooksFetcher.sink.add(books);
     _finishedYearsFetcher.sink.add(_getFinishedYears(books));
   }
 
-  getInProgressBooks() async {
+  Future<void> getInProgressBooks() async {
     List<Book> books = await repository.getBooks(1);
     _inProgressBooksFetcher.sink.add(books);
   }
 
-  getToReadBooks() async {
+  Future<void> getToReadBooks() async {
     List<Book> books = await repository.getBooks(2);
     _toReadBooksFetcher.sink.add(books);
   }
 
-  getDeletedBooks() async {
+  Future<void> getDeletedBooks() async {
     List<Book> books = await repository.getDeletedBooks();
     _deletedBooksFetcher.sink.add(books);
   }
 
-  getUnfinishedBooks() async {
+  Future<void> getUnfinishedBooks() async {
     List<Book> books = await repository.getBooks(3);
     _unfinishedBooksFetcher.sink.add(books);
   }
 
-  getSearchBooks(String query) async {
+  Future<void> getSearchBooks(String query) async {
     if (query.isEmpty) {
       _searchBooksFetcher.sink.add(List.empty());
     } else {
@@ -148,14 +150,20 @@ class BookCubit extends Cubit {
     bool refreshBooks = true,
     Uint8List? cover,
   }) async {
+    debugPrint('[BookCubit] addBook started for book: ${book.title}');
     final bookID = await repository.insertBook(book);
+    debugPrint('[BookCubit] Book inserted with ID: $bookID');
 
     await _saveCoverToStorage(bookID, cover);
+    debugPrint('[BookCubit] Cover saved to storage for book ID: $bookID');
 
     if (refreshBooks) {
+      debugPrint('[BookCubit] Refreshing book lists...');
       getAllBooksByStatus();
       getAllBooks();
+      debugPrint('[BookCubit] Book lists refreshed.');
     }
+    debugPrint('[BookCubit] addBook finished, returning ID: $bookID');
     return bookID;
   }
 
@@ -201,19 +209,19 @@ class BookCubit extends Cubit {
     getAllBooks();
   }
 
-  bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) async {
+  Future<void> bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) async {
     repository.bulkUpdateBookFormat(ids, bookFormat);
     getAllBooksByStatus();
     getAllBooks();
   }
 
-  bulkUpdateBookAuthor(Set<int> ids, String author) async {
+  Future<void> bulkUpdateBookAuthor(Set<int> ids, String author) async {
     repository.bulkUpdateBookAuthor(ids, author);
     getAllBooksByStatus();
     getAllBooks();
   }
 
-  deleteBook(int id) async {
+  Future<void> deleteBook(int id) async {
     repository.deleteBook(id);
     getAllBooksByStatus();
     getAllBooks();
@@ -227,22 +235,20 @@ class BookCubit extends Cubit {
   }
 
   List<int> _getFinishedYears(List<Book> books) {
-    final years = List<int>.empty(growable: true);
+    final yearsSet = <int>{};
 
-    for (var book in books) {
-      for (var date in book.readings) {
-        if (date.finishDate != null) {
-          if (!years.contains(date.finishDate!.year)) {
-            //TODO check if years should be duplicated or not
-            years.add(date.finishDate!.year);
-          }
+    for (final book in books) {
+      for (final reading in book.readings) {
+        if (reading.finishDate != null) {
+          yearsSet.add(reading.finishDate!.year);
         }
       }
     }
 
-    years.sort((a, b) => b.compareTo(a));
+    final yearsList = yearsSet.toList();
+    yearsList.sort((a, b) => b.compareTo(a));
 
-    return years;
+    return yearsList;
   }
 
   List<String> _getTags(List<Book> books) {
@@ -309,7 +315,7 @@ class BookCubit extends Cubit {
     prefs.setBool(SharedPreferencesKeys.coverMigrationDone, true);
   }
 
-  getBooksWithSameTag(String tag) async {
+  Future<void> getBooksWithSameTag(String tag) async {
     _booksWithSameTagFetcher.sink.add(null);
 
     List<Book> books = await repository.getBooksWithSameTag(tag);

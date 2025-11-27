@@ -1,14 +1,23 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
-import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
-import 'package:leafy/ui/book_editor/widgets/reading_row.dart';
+import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
+import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/tags_fiels.dart';
+import 'package:leafy/ui/book_editor/widgets/reading_row.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 
 // Default empty callbacks for BookEditorScreen
@@ -77,79 +86,58 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   final _animDuration = const Duration(milliseconds: 250);
 
+  List<String> bookTypes = [
+    LocaleKeys.book_format_paperback.tr(),
+    LocaleKeys.book_format_hardcover.tr(),
+    LocaleKeys.book_format_ebook.tr(),
+    LocaleKeys.book_format_audiobook.tr(),
+  ];
+
+  void _changeBookType(String? bookType) {
+    if (bookType == null) return;
+
+    if (bookType == bookTypes[0]) {
+      context.read<EditBookCubit>().setBookFormat(BookFormat.paperback);
+    } else if (bookType == bookTypes[1]) {
+      context.read<EditBookCubit>().setBookFormat(BookFormat.hardcover);
+    } else if (bookType == bookTypes[2]) {
+      context.read<EditBookCubit>().setBookFormat(BookFormat.ebook);
+    } else if (bookType == bookTypes[3]) {
+      context.read<EditBookCubit>().setBookFormat(BookFormat.audiobook);
+    } else {
+      context.read<EditBookCubit>().setBookFormat(BookFormat.paperback);
+    }
+
+    FocusManager.instance.primaryFocus?.unfocus();
+  }
+
   @override
   void initState() {
     super.initState();
-    _prefillForm(widget.initialBook);
+
+    final book = context.read<EditBookCubit>().state;
+
+    _prefillBookDetails(book);
     _attachListeners();
   }
 
-  void _prefillForm(Book book) {
-    _titleCtrl.text = book.title;
-    _subtitleCtrl.text = book.subtitle ?? '';
-    _authorCtrl.text = book.author;
-    _pubYearCtrl.text = (book.publicationYear ?? '').toString();
-    _pagesCtrl.text = (book.pages ?? '').toString();
-    _descriptionCtrl.text = book.description ?? '';
-    _isbnCtrl.text = book.isbn ?? '';
-    _olidCtrl.text = book.olid ?? '';
-    _myReviewCtrl.text = book.myReview ?? '';
-    _notesCtrl.text = book.notes ?? '';
-  }
-
   void _attachListeners() {
-    // Mỗi khi một trường thay đổi, tạo một bản sao của cuốn sách,
-    // cập nhật giá trị và gọi callback onValueChanged.
-    _titleCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(title: _titleCtrl.text),
-      ),
-    );
-    _subtitleCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(subtitle: _subtitleCtrl.text),
-      ),
-    );
-    _authorCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(author: _authorCtrl.text),
-      ),
-    );
-    _pagesCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(pages: int.tryParse(_pagesCtrl.text)),
-      ),
-    );
-    _pubYearCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(
-          publicationYear: int.tryParse(_pubYearCtrl.text),
-        ),
-      ),
-    );
-    _descriptionCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(description: _descriptionCtrl.text),
-      ),
-    );
-    _isbnCtrl.addListener(
-      () =>
-          _handleValueChange(widget.initialBook.copyWith(isbn: _isbnCtrl.text)),
-    );
-    _olidCtrl.addListener(
-      () =>
-          _handleValueChange(widget.initialBook.copyWith(olid: _olidCtrl.text)),
-    );
-    _myReviewCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(myReview: _myReviewCtrl.text),
-      ),
-    );
-    _notesCtrl.addListener(
-      () => _handleValueChange(
-        widget.initialBook.copyWith(notes: _notesCtrl.text),
-      ),
-    );
+    final cubit = context.read<EditBookCubit>();
+
+    void bind(TextEditingController ctrl, Function(String) action) {
+      ctrl.addListener(() => action(ctrl.text));
+    }
+
+    bind(_titleCtrl, cubit.setTitle);
+    bind(_subtitleCtrl, cubit.setSubtitle);
+    bind(_authorCtrl, cubit.setAuthor);
+    bind(_pagesCtrl, cubit.setPages);
+    bind(_descriptionCtrl, cubit.setDescription);
+    bind(_isbnCtrl, cubit.setISBN);
+    bind(_olidCtrl, cubit.setOLID);
+    bind(_pubYearCtrl, cubit.setPublicationYear);
+    bind(_myReviewCtrl, cubit.setMyReview);
+    bind(_notesCtrl, cubit.setNotes);
   }
 
   void _handleValueChange(Book updatedBook) {
@@ -172,24 +160,89 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     super.dispose();
   }
 
+  void _showSnackbar(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  bool _validate() {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+    final book = context.read<EditBookCubit>().state;
+
+    if (book.title.isEmpty) {
+      _showSnackbar(LocaleKeys.title_cannot_be_empty.tr());
+      return false;
+    }
+
+    return true;
+  }
+
+  void _prefillBookDetails(Book book) {
+    _titleCtrl.text = book.title;
+    _subtitleCtrl.text = book.subtitle ?? '';
+    _authorCtrl.text = book.author;
+    _pubYearCtrl.text = (book.publicationYear ?? '').toString();
+    _pagesCtrl.text = (book.pages ?? '').toString();
+    _descriptionCtrl.text = book.description ?? '';
+    _isbnCtrl.text = book.isbn ?? '';
+    _olidCtrl.text = book.olid ?? '';
+    _myReviewCtrl.text = book.myReview ?? '';
+    _notesCtrl.text = book.notes ?? '';
+  }
+
+  void _saveNewBook(Book book) async {
+    print('New ${book.toJSON()}');
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    if (!_validate()) return;
+    if (!mounted) return;
+
+    Uint8List? cover;
+
+    book.hasCover == false
+        ? context.read<EditBookCoverCubit>().deleteCover(book.id)
+        : cover = context.read<EditBookCoverCubit>().state;
+
+    final newBookID = await context.read<EditBookCubit>().addNewBook(cover);
+    book = book.copyWith(id: newBookID);
+    if (!mounted) return;
+
+    context.read<CurrentBookCubit>().setBook(book);
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const BookScreen(heroTag: "")),
+      (route) => route.isFirst,
+    );
+  }
+
+  void _updateBook(Book book) async {
+     print('Update ${book.toJSON()}');
+    
+    if (_validate()) return;
+
+    if (!mounted) return;
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Hardcoded book types list, vì widget này không phụ thuộc vào localization
-    final List<String> bookTypes = [
-      'Paperback',
-      'Hardcover',
-      'E-book',
-      'Audiobook',
-    ];
-
     return KeyboardDismissible(
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.appBarTitle, style: const TextStyle(fontSize: 18)),
           actions: [
-            TextButton(
-              onPressed: widget.onSave, // Gọi callback
-              child: const Text('Save', style: TextStyle(fontSize: 16)),
+            BlocBuilder<EditBookCubit, Book>(
+              builder: (context, state) {
+                return TextButton(
+                  onPressed: (state.id == null)
+                      ? () => _saveNewBook(state)
+                      : () => _updateBook(state),
+                  child: Text(
+                    LocaleKeys.save.tr(),
+                    style: TextStyle(fontSize: 16),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -219,14 +272,22 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                 // --- Các trường thông tin cơ bản ---
                 BookTextField(
                   controller: _titleCtrl,
-                  hint: 'Title',
+                  hint: LocaleKeys.enter_title.tr(),
                   keyboardType: TextInputType.text,
                   icon: Icons.book,
                 ),
                 const SizedBox(height: 10),
                 BookTextField(
+                  controller: _subtitleCtrl,
+                  hint: LocaleKeys.enter_subtitle.tr(),
+                  keyboardType: TextInputType.text,
+                  icon: Icons.book,
+                ),
+
+                const SizedBox(height: 10),
+                BookTextField(
                   controller: _authorCtrl,
-                  hint: 'Author',
+                  hint: LocaleKeys.enter_author.tr(),
                   keyboardType: TextInputType.text,
                   icon: Icons.person,
                   suggestions: widget.authorSuggestions,
@@ -235,22 +296,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
                 // --- Trạng thái và Lịch sử đọc ---
                 BookStatusRow(
-                  status: widget.initialBook.status,
-                  onStatusChanged: (status) => _handleValueChange(
-                    widget.initialBook.copyWith(status: status),
-                  ),
                   animDuration: _animDuration,
-                  defaultHeight: 60.0,
+                  defaultHeight: Constants.formHeight,
                 ),
                 const SizedBox(height: 10),
-                BookRatingBar(
-                  rating: widget.initialBook.rating,
-                  status: widget.initialBook.status,
-                  onRatingChanged: (rating) => _handleValueChange(
-                    widget.initialBook.copyWith(rating: rating),
-                  ),
-                  animDuration: _animDuration,
-                ),
+                BookRatingBar(animDuration: _animDuration),
                 ...widget.initialBook.readings.asMap().entries.map((entry) {
                   return ReadingRow(index: entry.key, reading: entry.value);
                 }),
@@ -258,12 +308,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
                   child: FilledButton.tonal(
                     onPressed: widget.onAddReading, // Gọi callback
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.add),
                         SizedBox(width: 10),
-                        Text('Add reading session'),
+                        Text(LocaleKeys.add_additional_reading_time.tr()),
                       ],
                     ),
                   ),
@@ -271,24 +321,17 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                 const Padding(padding: EdgeInsets.all(10), child: Divider()),
 
                 // --- Các thông tin chi tiết khác ---
-                // BookTypeDropdown(
-                //   bookTypes: bookTypes,
-                //   selectedFormat: widget.initialBook.bookFormat,
-                //   changeBookType: (format) {
-                //     if (format != null) {
-                //       _handleValueChange(
-                //         widget.initialBook.copyWith(bookFormat: format),
-                //       );
-                //     }
-                //   },
-                // ),
+                BookTypeDropdown(
+                  bookTypes: bookTypes,
+                  changeBookType: _changeBookType,
+                ),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     Expanded(
                       child: BookTextField(
                         controller: _pagesCtrl,
-                        hint: 'Pages',
+                        hint: LocaleKeys.enter_pages.tr(),
                         icon: FontAwesomeIcons.solidFileLines,
                         keyboardType: TextInputType.number,
                       ),
@@ -296,7 +339,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     Expanded(
                       child: BookTextField(
                         controller: _pubYearCtrl,
-                        hint: 'Publication Year',
+                        hint: LocaleKeys.enter_publication_year.tr(),
                         icon: FontAwesomeIcons.solidCalendar,
                         keyboardType: TextInputType.number,
                       ),
@@ -306,7 +349,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                 const SizedBox(height: 10),
                 BookTextField(
                   controller: _descriptionCtrl,
-                  hint: 'Description',
+                  hint: LocaleKeys.description.tr(),
                   keyboardType: TextInputType.text,
                   icon: FontAwesomeIcons.solidKeyboard,
                   maxLines: 15,
@@ -317,7 +360,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     Expanded(
                       child: BookTextField(
                         controller: _isbnCtrl,
-                        hint: 'ISBN',
+                        hint: LocaleKeys.isbn.tr(),
                         keyboardType: TextInputType.text,
                         icon: FontAwesomeIcons.i,
                       ),
@@ -341,7 +384,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                 const SizedBox(height: 10),
                 TagsField(
                   controller: _tagsCtrl,
-                  hint: 'Tags',
+                  hint: LocaleKeys.enter_tags.tr(),
                   icon: FontAwesomeIcons.tags,
                   tags: widget.initialBook.tags?.split('|||||') ?? [],
                   allTags: widget.tagSuggestions,
@@ -378,7 +421,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       flex: 10,
                       child: FilledButton.tonal(
                         onPressed: widget.onCancel, // Gọi callback
-                        child: const Center(child: Text('Cancel')),
+                        child: Center(child: Text(LocaleKeys.cancel.tr())),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -386,7 +429,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       flex: 19,
                       child: FilledButton(
                         onPressed: widget.onSave, // Gọi callback
-                        child: const Center(child: Text('Save')),
+                        child: Center(child: Text(LocaleKeys.save.tr())),
                       ),
                     ),
                     const SizedBox(width: 10),
