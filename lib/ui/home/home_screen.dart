@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/router/routes.dart';
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void __goToSearchInUserBooksPage() {
-    context.push(Routes.search);
+    context.push(Routes.searchOl, extra: BookStatus.finished);
   }
 
   @override

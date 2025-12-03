@@ -1,0 +1,47 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:leafy/core/constants/enums/ol_search_type.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
+
+class OLSearchRadio extends StatelessWidget {
+  const OLSearchRadio({
+    super.key,
+    required this.searchType,
+    required this.activeSearchType,
+    required this.onChanged,
+  });
+
+  final OLSearchType searchType;
+  final OLSearchType activeSearchType;
+  final Function(OLSearchType?) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    //TODO: Change to RadioGroup
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Radio<OLSearchType>(
+          value: searchType,
+          groupValue: activeSearchType,
+          visualDensity: VisualDensity.compact,
+          onChanged: onChanged,
+        ),
+        Text(
+          searchType == OLSearchType.general
+              ? LocaleKeys.general_search.tr()
+              : searchType == OLSearchType.author
+                  ? LocaleKeys.author.tr()
+                  : searchType == OLSearchType.title
+                      ? LocaleKeys.title.tr()
+                      : searchType == OLSearchType.isbn
+                          ? LocaleKeys.isbn.tr()
+                          : '',
+          style: const TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
+}

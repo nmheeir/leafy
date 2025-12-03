@@ -7,8 +7,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
+import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
+import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -67,6 +69,8 @@ class App extends StatelessWidget {
       BlocProvider(create: (_) => SortForLaterBooksBloc()),
       BlocProvider(create: (_) => SortUnfinishedBooksBloc()),
       BlocProvider(create: (_) => RatingTypeBloc()),
+      BlocProvider(create: (_) => ThemeBloc()),
+      BlocProvider(create: (_) => OpenLibSearchBloc()),
     ];
 
     return [...bookProviders];

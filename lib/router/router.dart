@@ -1,8 +1,10 @@
 import 'package:go_router/go_router.dart';
+import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
+import 'package:leafy/ui/search_ol/search_ol_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_accent_color_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
@@ -55,6 +57,13 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.settingAccentColor,
       builder: (context, state) => SettingAccentColorScreen(),
+    ),
+    GoRoute(
+      path: Routes.searchOl,
+      builder: (context, state) {
+        final scan = state.extra as BookStatus;
+        return SearchOLScreen(status: scan);
+      },
     ),
   ],
   // redirect: (context, state) {
