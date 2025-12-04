@@ -29,6 +29,8 @@ import 'package:leafy/ui/book_editor/widgets/reading_row.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+// TODO: Sữa lỗi màn hình tự động lấy dữ liệu cũ khi nhấn nút tạo mới từ bottom sheet ở trang home
+
 class BookEditorScreen extends StatefulWidget {
   const BookEditorScreen({
     super.key,
