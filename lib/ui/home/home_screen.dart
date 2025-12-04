@@ -3,11 +3,14 @@ import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/books/books_screen.dart';
 import 'package:leafy/ui/home/widgets/add_book_sheet.dart';
@@ -54,36 +57,42 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     _generateMenuOptions();
 
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
+    return BlocBuilder<SelectedBooksCubit, List<int>>(
+      builder: (context, state) {
+        return PopScope(
+          canPop: false,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
+              return;
+            }
 
-        if (currentPageIndex == 0) {
-          // context.read<SelectedBooksCubit>().resetSelection();
-        } else {
-          setState(() {
-            currentPageIndex = 0;
-          });
-        }
-      },
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        resizeToAvoidBottomInset: true,
-        appBar: _buildAppBar(context),
-        floatingActionButton: _buildFAB(context),
-        body: _buildScaffoldBody(),
-        bottomNavigationBar: HomeNavigationBar(
-          currentIndex: currentPageIndex,
-          onTap: (index) {
-            setState(() {
-              currentPageIndex = index;
-            });
+            if (currentPageIndex == 0) {
+              // context.read<SelectedBooksCubit>().resetSelection();
+            } else {
+              setState(() {
+                currentPageIndex = 0;
+              });
+            }
           },
-        ),
-      ),
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            resizeToAvoidBottomInset: true,
+            appBar: state.isNotEmpty
+                ? _buildMultiSelectAppBar(context, state)
+                : _buildAppBar(context),
+            floatingActionButton: _buildFAB(context, state),
+            body: _buildScaffoldBody(),
+            bottomNavigationBar: HomeNavigationBar(
+              currentIndex: currentPageIndex,
+              onTap: (index) {
+                setState(() {
+                  currentPageIndex = index;
+                });
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -103,8 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
       title: Row(
         children: [
           IconButton(
-            icon: const Icon(Symbols.close, size: 18),
-            onPressed: () {},
+            icon: const FaIcon(FontAwesomeIcons.xmark, size: 18),
+            onPressed: () {
+              context.read<SelectedBooksCubit>().resetSelection();
+            },
           ),
           Text(
             '${LocaleKeys.selected.tr()} ${multiSelectList.length}',
@@ -162,10 +173,7 @@ class _HomeScreenState extends State<HomeScreen> {
           );
   }
 
-  Widget _buildFAB(
-    BuildContext context, [
-    List<int> multiSelectList = const [],
-  ]) {
+  Widget _buildFAB(BuildContext context, List<int> multiSelectList) {
     return currentPageIndex != 0
         ? const SizedBox.shrink()
         : multiSelectList.isNotEmpty
