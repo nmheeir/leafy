@@ -2,17 +2,21 @@ import 'dart:io';
 import 'package:diacritic/diacritic.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:leafy/core/constants/enums/index.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:leafy/core/constants/enums/book_format.dart';
+import 'package:leafy/core/constants/enums/book_status.dart';
+import 'package:leafy/core/constants/enums/sort_type.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
+import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
+import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
+import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/main.dart';
-import 'package:material_symbols_icons/symbols.dart';
-
-// Enum để thay thế cho RatingTypeBloc state
-enum RatingDisplayType { bar, number }
 
 class BookCardList extends StatelessWidget {
   const BookCardList({
@@ -23,12 +27,6 @@ class BookCardList extends StatelessWidget {
     required this.addBottomPadding,
     this.onLongPressed,
     this.cardColor,
-    // Các tham số mới để thay thế state từ BLoC
-    this.showSortAttribute = false,
-    this.currentSortType,
-    this.showTags = false,
-    this.showBookFormatIcon = false,
-    this.ratingDisplayType = RatingDisplayType.bar,
   });
 
   final Book book;
@@ -38,22 +36,34 @@ class BookCardList extends StatelessWidget {
   final Function()? onLongPressed;
   final Color? cardColor;
 
-  // Cờ và dữ liệu được truyền từ widget cha
-  final bool showSortAttribute;
-  final SortType? currentSortType;
-  final bool showTags;
-  final bool showBookFormatIcon;
-  final RatingDisplayType ratingDisplayType;
-
   Widget _buildSortAttribute() {
-    if (!showSortAttribute || currentSortType == null) {
-      return const SizedBox();
-    }
-    return _buildSortAttributeContent(currentSortType!);
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (context, state) {
+        if (!state.sortAttributesOnList) return const SizedBox();
+
+        switch (book.status) {
+          case BookStatus.finished:
+            return BlocBuilder<SortFinishedBooksBloc, SortState>(
+              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+            );
+          case BookStatus.inProgress:
+            return BlocBuilder<SortInProgressBooksBloc, SortState>(
+              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+            );
+          case BookStatus.forLater:
+            return BlocBuilder<SortForLaterBooksBloc, SortState>(
+              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+            );
+          case BookStatus.unfinished:
+            return BlocBuilder<SortUnfinishedBooksBloc, SortState>(
+              builder: (_, state) => _buildSortAttributeContent(state.sortType),
+            );
+        }
+      },
+    );
   }
 
   Widget _buildSortAttributeContent(SortType sortType) {
-    // ...existing code...
     if (sortType == SortType.byPages) {
       return (book.pages != null) ? _buildPagesAttribute() : const SizedBox();
     } else if (sortType == SortType.byStartDate) {
@@ -101,7 +111,6 @@ class BookCardList extends StatelessWidget {
       Text('${book.pages} ${LocaleKeys.pages_lowercase.tr()}');
 
   Column _buildPublicationYearAttribute() {
-    // ...existing code...
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
@@ -118,7 +127,6 @@ class BookCardList extends StatelessWidget {
   }
 
   Column _buildDateAttribute(DateTime date, String label, bool includeTime) {
-    // ...existing code...
     const timeTextStyle = TextStyle(fontSize: 13, fontWeight: FontWeight.bold);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -135,7 +143,24 @@ class BookCardList extends StatelessWidget {
   }
 
   Widget _buildTags(BuildContext context) {
-    if (showTags) {
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (_, state) {
+        switch (book.status) {
+          case BookStatus.finished:
+            return _buildTagsContent(state.tagsOnList, context);
+          case BookStatus.inProgress:
+            return _buildTagsContent(state.tagsOnList, context);
+          case BookStatus.forLater:
+            return _buildTagsContent(state.tagsOnList, context);
+          case BookStatus.unfinished:
+            return _buildTagsContent(state.tagsOnList, context);
+        }
+      },
+    );
+  }
+
+  Widget _buildTagsContent(bool displayTags, BuildContext context) {
+    if (displayTags) {
       return (book.tags == null)
           ? const SizedBox()
           : Row(
@@ -147,11 +172,11 @@ class BookCardList extends StatelessWidget {
               ],
             );
     }
+
     return const SizedBox();
   }
 
   Widget _buildTagChip({required String tag, required BuildContext context}) {
-    // ...existing code...
     return Padding(
       padding: const EdgeInsets.only(right: 10),
       child: FilterChip(
@@ -163,7 +188,6 @@ class BookCardList extends StatelessWidget {
   }
 
   List<Widget> _generateTagChips({required BuildContext context}) {
-    // ...existing code...
     final chips = List<Widget>.empty(growable: true);
 
     if (book.tags == null) {
@@ -187,7 +211,6 @@ class BookCardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ...existing code...
     final coverFile = book.getCoverFile();
 
     return Padding(
@@ -215,7 +238,6 @@ class BookCardList extends StatelessWidget {
   }
 
   Expanded _buildDetails(BuildContext context) {
-    // ...existing code...
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -238,8 +260,8 @@ class BookCardList extends StatelessWidget {
               book.favorite
                   ? Padding(
                       padding: const EdgeInsets.only(left: 10),
-                      child: Icon(
-                        Symbols.favorite,
+                      child: FaIcon(
+                        FontAwesomeIcons.solidHeart,
                         size: 15,
                         color: context.colorScheme.primaryContainer,
                       ),
@@ -288,21 +310,24 @@ class BookCardList extends StatelessWidget {
   }
 
   Widget _buildBookFormatIcon(BuildContext context) {
-    if (!showBookFormatIcon) return const SizedBox();
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (context, state) {
+        if (!state.bookFormatOnList) return const SizedBox();
 
-    return Icon(
-      book.bookFormat == BookFormat.audiobook
-          ? Symbols.headphones_rounded
-          : book.bookFormat == BookFormat.ebook
-          ? Symbols.tablet_mac_rounded
-          : Symbols.menu_book_rounded,
-      size: 15,
-      color: context.colorScheme.primaryContainer,
+        return FaIcon(
+          book.bookFormat == BookFormat.audiobook
+              ? FontAwesomeIcons.headphones
+              : book.bookFormat == BookFormat.ebook
+              ? FontAwesomeIcons.tabletScreenButton
+              : FontAwesomeIcons.bookOpen,
+          size: 15,
+          color: context.colorScheme.primaryContainer,
+        );
+      },
     );
   }
 
   SizedBox _buildCover(File? coverFile) {
-    // ...existing code...
     const coverWidth = 85.0;
     const coverHeight = coverWidth * 1.5;
 
@@ -344,34 +369,38 @@ class BookCardList extends StatelessWidget {
   }
 
   Widget _buildRating(BuildContext context) {
-    if (ratingDisplayType == RatingDisplayType.bar) {
-      return RatingBar.builder(
-        initialRating: (book.rating == null) ? 0 : (book.rating! / 10),
-        allowHalfRating: true,
-        unratedColor: context.colorScheme.surfaceContainerLow,
-        glow: false,
-        glowRadius: 1,
-        itemSize: 18,
-        ignoreGestures: true,
-        itemPadding: const EdgeInsets.only(right: 3),
-        itemBuilder: (context, _) => Icon(
-          Symbols.start_rounded,
-          color: context.colorScheme.primaryContainer,
-        ),
-        onRatingUpdate: (_) {},
-      );
-    } else {
-      return Row(
-        children: [
-          Text((book.rating == null) ? '0' : '${(book.rating! / 10)}'),
-          const SizedBox(width: 5),
-          Icon(
-            Symbols.star_rounded,
-            color: context.colorScheme.primaryContainer,
-            size: 14,
-          ),
-        ],
-      );
-    }
+    return BlocBuilder<RatingTypeBloc, RatingTypeState>(
+      builder: (context, state) {
+        if (state is RatingTypeBar) {
+          return RatingBar.builder(
+            initialRating: (book.rating == null) ? 0 : (book.rating! / 10),
+            allowHalfRating: true,
+            unratedColor: context.colorScheme.surfaceContainerLow,
+            glow: false,
+            glowRadius: 1,
+            itemSize: 18,
+            ignoreGestures: true,
+            itemPadding: const EdgeInsets.only(right: 3),
+            itemBuilder: (context, _) => FaIcon(
+              FontAwesomeIcons.solidStar,
+              color: context.colorScheme.primaryContainer,
+            ),
+            onRatingUpdate: (_) {},
+          );
+        } else {
+          return Row(
+            children: [
+              Text((book.rating == null) ? '0' : '${(book.rating! / 10)}'),
+              const SizedBox(width: 5),
+              FaIcon(
+                FontAwesomeIcons.solidStar,
+                color: context.colorScheme.primaryContainer,
+                size: 14,
+              ),
+            ],
+          );
+        }
+      },
+    );
   }
 }

@@ -1,13 +1,16 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:leafy/core/constants/enums/index.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leafy/core/constants/enums/display_type.dart';
 import 'package:leafy/data/models/book.dart';
+import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/display_cubit.dart';
+import 'package:leafy/logic/cubit/selected_book_cubit.dart';
+import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_grid.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_grid_detail.dart';
-
-// Ghi chú: Việc điều hướng (Navigator.push) và quản lý sách hiện tại (CurrentBookCubit)
-// nên được xử lý bên trong callback onBookTap ở widget cha.
+import 'package:leafy/ui/books/widgets/number_of_books.dart';
 
 class BooksGrid extends StatefulWidget {
   const BooksGrid({
@@ -18,10 +21,6 @@ class BooksGrid extends StatefulWidget {
     required this.gridType,
     required this.gridSize,
     required this.titleOverCover,
-    // --- CÁC THAM SỐ MỚI THAY THẾ BLOC ---
-    required this.selectedBookIds,
-    required this.onBookTap,
-    required this.onBookLongPress,
   });
 
   final List<Book> books;
@@ -31,29 +30,49 @@ class BooksGrid extends StatefulWidget {
   final int gridSize;
   final bool titleOverCover;
 
-  // --- TRẠNG THÁI VÀ CALLBACKS TỪ BÊN NGOÀI ---
-  final List<int> selectedBookIds;
-  final void Function(Book book, String heroTag) onBookTap;
-  final void Function(Book book) onBookLongPress;
-
   @override
   State<BooksGrid> createState() => _BooksGridState();
 }
 
 class _BooksGridState extends State<BooksGrid>
     with AutomaticKeepAliveClientMixin {
+  void _onPressed(int index, bool multiSelectMode, String heroTag) {
+    if (widget.books[index].id == null) return;
+
+    if (multiSelectMode) {
+      context.read<SelectedBooksCubit>().onBookPressed(widget.books[index].id!);
+      return;
+    }
+
+    context.read<CurrentBookCubit>().setBook(widget.books[index]);
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => BookScreen(heroTag: heroTag)),
+    );
+  }
+
+  void onLongPressed(int index) {
+    if (widget.books[index].id == null) return;
+
+    context.read<SelectedBooksCubit>().onBookPressed(widget.books[index].id!);
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
 
     return CustomScrollView(
       slivers: [
-        // NumberOfBooks(
-        //   filteredBooksCount: widget.books.length,
-        //   allBooksCount: widget.allBooksCount,
-        // ),
-        // Loại bỏ BlocBuilder, truyền trực tiếp danh sách selectedBookIds
-        _buildGrid(list: widget.selectedBookIds),
+        NumberOfBooks(
+          filteredBooksCount: widget.books.length,
+          allBooksCount: widget.allBooksCount,
+        ),
+        BlocBuilder<SelectedBooksCubit, List<int>>(
+          builder: (context, list) {
+            return _buildGrid(list: list);
+          },
+        ),
       ],
     );
   }
@@ -62,7 +81,6 @@ class _BooksGridState extends State<BooksGrid>
   bool get wantKeepAlive => true;
 
   Widget _buildGrid({required List<int> list}) {
-    // ...existing code...
     bool multiSelectMode = list.isNotEmpty;
 
     return SliverPadding(
@@ -80,14 +98,15 @@ class _BooksGridState extends State<BooksGrid>
         ),
         itemCount: widget.books.length,
         itemBuilder: (context, index) {
-          final book = widget.books[index];
-          final heroTag = 'tag_${widget.listNumber}_${book.id}';
-          final isSelected = multiSelectMode && list.contains(book.id);
-
-          Color borderColor = isSelected
+          final heroTag = 'tag_${widget.listNumber}_${widget.books[index].id}';
+          Color borderColor =
+              multiSelectMode && list.contains(widget.books[index].id)
               ? Theme.of(context).colorScheme.secondary
               : Colors.transparent;
-          final double borderWidth = isSelected ? 3.0 : 0.0;
+          final double borderWidth =
+              multiSelectMode && list.contains(widget.books[index].id)
+              ? 3.0
+              : 0.0;
 
           return Container(
             decoration: multiSelectMode
@@ -99,8 +118,8 @@ class _BooksGridState extends State<BooksGrid>
             child: Stack(
               fit: StackFit.expand,
               children: [
-                _buildCard(index, heroTag),
-                _buildMultiSelectOverlay(isSelected, index, heroTag),
+                _buildCard(index, heroTag, multiSelectMode),
+                _buildMultiSelectOverlay(multiSelectMode, list, index, heroTag),
               ],
             ),
           );
@@ -109,16 +128,19 @@ class _BooksGridState extends State<BooksGrid>
     );
   }
 
-  Widget _buildMultiSelectOverlay(bool isSelected, int index, String heroTag) {
-    if (!isSelected) {
+  Widget _buildMultiSelectOverlay(
+    bool multiSelectMode,
+    List<int> list,
+    int index,
+    String heroTag,
+  ) {
+    if (!multiSelectMode || !list.contains(widget.books[index].id)) {
       return const SizedBox();
     }
-    final book = widget.books[index];
 
     return InkWell(
-      // Gọi callback được truyền từ widget cha
-      onTap: () => widget.onBookTap(book, heroTag),
-      onLongPress: () => widget.onBookLongPress(book),
+      onTap: () => _onPressed(index, multiSelectMode, heroTag),
+      onLongPress: () => onLongPressed(index),
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 0.5, sigmaY: 0.5),
         child: Container(
@@ -130,30 +152,27 @@ class _BooksGridState extends State<BooksGrid>
     );
   }
 
-  Widget _buildCard(int index, String heroTag) {
-    final book = widget.books[index];
-
-    // Loại bỏ BlocBuilder, sử dụng trực tiếp widget.gridType
-    if (widget.gridType == DisplayType.detailedGrid) {
-      return BookCardGridDetailed(
-        book: book,
-        heroTag: heroTag,
-        addBottomPadding: (widget.books.length == index + 1),
-        // Truyền trực tiếp cờ showTitleOverCover
-        showTitleOverCover: widget.titleOverCover,
-        // Gọi callback được truyền từ widget cha
-        onPressed: () => widget.onBookTap(book, heroTag),
-        onLongPressed: () => widget.onBookLongPress(book),
-      );
-    } else {
-      return BookCardGrid(
-        book: book,
-        heroTag: heroTag,
-        addBottomPadding: (widget.books.length == index + 1),
-        // Gọi callback được truyền từ widget cha
-        onPressed: () => widget.onBookTap(book, heroTag),
-        onLongPressed: () => widget.onBookLongPress(book),
-      );
-    }
+  Widget _buildCard(int index, String heroTag, bool multiSelectMode) {
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (context, state) {
+        if (state.type == DisplayType.detailedGrid) {
+          return BookCardGridDetailed(
+            book: widget.books[index],
+            heroTag: heroTag,
+            addBottomPadding: (widget.books.length == index + 1),
+            onPressed: () => _onPressed(index, multiSelectMode, heroTag),
+            onLongPressed: () => onLongPressed(index),
+          );
+        } else {
+          return BookCardGrid(
+            book: widget.books[index],
+            heroTag: heroTag,
+            addBottomPadding: (widget.books.length == index + 1),
+            onPressed: () => _onPressed(index, multiSelectMode, heroTag),
+            onLongPressed: () => onLongPressed(index),
+          );
+        }
+      },
+    );
   }
 }
