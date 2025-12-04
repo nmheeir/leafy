@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -26,8 +27,8 @@ class BookCardOL extends StatelessWidget {
   final String? subtitle;
   final String author;
   final String? coverKey;
-  final Function() onChooseEditionPressed;
-  final Function() onAddBookPressed;
+  final VoidCallback onChooseEditionPressed;
+  final VoidCallback onAddBookPressed;
   final List<String>? editions;
   final int? pagesMedian;
   final int? firstPublishYear;
@@ -42,9 +43,7 @@ class BookCardOL extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: Theme.of(
-            context,
-          ).colorScheme.secondaryContainer.withAlpha(120),
+          color: context.colorScheme.secondaryContainer.withAlpha(120),
           borderRadius: BorderRadius.circular(cornerRadius),
         ),
         child: IntrinsicHeight(
@@ -60,19 +59,10 @@ class BookCardOL extends StatelessWidget {
                           placeholder: (context, url) => Center(
                             child: Container(
                               padding: const EdgeInsets.all(5),
-                              child: Platform.isIOS
-                                  ? CupertinoActivityIndicator(
-                                      radius: 20,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                    )
-                                  : LoadingAnimationWidget.threeArchedCircle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      size: 24,
-                                    ),
+                              child: LoadingAnimationWidget.discreteCircle(
+                                color: context.colorScheme.primary,
+                                size: 24,
+                              ),
                             ),
                           ),
                           errorWidget: (context, url, error) =>
@@ -83,7 +73,7 @@ class BookCardOL extends StatelessWidget {
                         width: 100,
                         height: 120,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
+                          color: context.colorScheme.surface,
                           borderRadius: BorderRadius.circular(cornerRadius),
                         ),
                         child: Center(child: Text(LocaleKeys.no_cover.tr())),
@@ -238,12 +228,10 @@ class BookCardOL extends StatelessWidget {
                                       onPressed: onChooseEditionPressed,
                                       style: TextButton.styleFrom(
                                         elevation: 0,
-                                        backgroundColor: Theme.of(
-                                          context,
-                                        ).colorScheme.secondary,
-                                        foregroundColor: Theme.of(
-                                          context,
-                                        ).colorScheme.onSecondary,
+                                        backgroundColor:
+                                            context.colorScheme.secondary,
+                                        foregroundColor:
+                                            context.colorScheme.onSecondary,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(
                                             cornerRadius,
@@ -271,12 +259,10 @@ class BookCardOL extends StatelessWidget {
                                   onPressed: onAddBookPressed,
                                   style: ElevatedButton.styleFrom(
                                     elevation: 0,
-                                    backgroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    foregroundColor: Theme.of(
-                                      context,
-                                    ).colorScheme.onPrimary,
+                                    backgroundColor:
+                                        context.colorScheme.primary,
+                                    foregroundColor:
+                                        context.colorScheme.onPrimary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                         cornerRadius,

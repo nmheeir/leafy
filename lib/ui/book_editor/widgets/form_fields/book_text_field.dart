@@ -4,7 +4,6 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 
-
 class BookTextField extends StatefulWidget {
   const BookTextField({
     super.key,
@@ -72,7 +71,9 @@ class _BookTextFieldState extends State<BookTextField> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha:  0.5),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(cornerRadius),
         ),
         child: widget.suggestions != null && widget.suggestions!.isNotEmpty
@@ -84,44 +85,40 @@ class _BookTextFieldState extends State<BookTextField> {
 
   TypeAheadField<String> _buildTypeAheadField() {
     return TypeAheadField(
-        controller: widget.controller,
-        hideOnLoading: true,
-        hideOnEmpty: true,
-        itemBuilder: (context, suggestion) {
-          return Container(
-            color: context.colorScheme.surfaceContainerHighest,
-            child: ListTile(
-              title: Text(suggestion),
-            ),
-          );
-        },
-        decorationBuilder: (context, child) {
-          return Container(
-            padding: const EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(cornerRadius),
-              // border: Border.all(color: dividerColor),
-            ),
-            child: child,
-          );
-        },
-        suggestionsCallback: (pattern) {
-          return widget.suggestions!.where((String option) {
-            return option.toLowerCase().startsWith(pattern.toLowerCase());
-          }).toList();
-        },
-        onSelected: (suggestion) {
-          widget.controller.text = suggestion;
-        },
-        builder: (_, _, focusNode) {
-          return _buildTextField(context, focusNode: focusNode);
-        });
+      controller: widget.controller,
+      hideOnLoading: true,
+      hideOnEmpty: true,
+      itemBuilder: (context, suggestion) {
+        return Container(
+          color: context.colorScheme.surfaceContainerHighest,
+          child: ListTile(title: Text(suggestion)),
+        );
+      },
+      decorationBuilder: (context, child) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(cornerRadius),
+            // border: Border.all(color: dividerColor),
+          ),
+          child: child,
+        );
+      },
+      suggestionsCallback: (pattern) {
+        return widget.suggestions!.where((String option) {
+          return option.toLowerCase().startsWith(pattern.toLowerCase());
+        }).toList();
+      },
+      onSelected: (suggestion) {
+        widget.controller.text = suggestion;
+      },
+      builder: (_, _, focusNode) {
+        return _buildTextField(context, focusNode: focusNode);
+      },
+    );
   }
 
-  TextField _buildTextField(
-    BuildContext context, {
-    FocusNode? focusNode,
-  }) {
+  TextField _buildTextField(BuildContext context, {FocusNode? focusNode}) {
     return TextField(
       autofocus: widget.autofocus,
       keyboardType: widget.keyboardType,
@@ -133,16 +130,16 @@ class _BookTextFieldState extends State<BookTextField> {
       maxLines: widget.maxLines,
       maxLength: widget.maxLength,
       textInputAction: widget.textInputAction,
+      textAlignVertical: widget.controller.text.isNotEmpty
+          ? TextAlignVertical.center
+          : null,
       style: const TextStyle(fontSize: 14),
       onSubmitted: widget.onSubmitted ?? (_) {},
       decoration: InputDecoration(
         labelText: widget.hint,
         labelStyle: const TextStyle(fontSize: 14),
         icon: (widget.icon != null)
-            ? Icon(
-                widget.icon,
-                color: context.colorScheme.primary,
-              )
+            ? Icon(widget.icon, color: context.colorScheme.primary)
             : null,
         border: InputBorder.none,
         counterText: widget.hideCounter ? "" : null,

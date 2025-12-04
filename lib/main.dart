@@ -21,14 +21,19 @@ import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
 
 late Directory appDocumentsDirectory;
+late Directory appTempDirectory;
 late BookCubit bookCubit;
 late DateFormat dateFormat;
+late GlobalKey<ScaffoldMessengerState> snackbarKey;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
   appDocumentsDirectory = await getApplicationDocumentsDirectory();
+  appTempDirectory = await getTemporaryDirectory();
+
+   snackbarKey = GlobalKey<ScaffoldMessengerState>();
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
@@ -102,6 +107,7 @@ class _LeafyAppState extends State<LeafyApp> {
     return MaterialApp.router(
       routerConfig: router(),
       title: Constants.appName,
+      scaffoldMessengerKey: snackbarKey,
       debugShowCheckedModeBanner: false,
       localizationsDelegates: localizationsDelegates,
       supportedLocales: context.supportedLocales,

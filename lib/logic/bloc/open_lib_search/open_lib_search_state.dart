@@ -12,6 +12,12 @@ final class OpenLibSearchGeneralState extends OpenLibSearchState {
   List<Object> get props => [];
 }
 
+final class OpenLibSearchTitleState extends OpenLibSearchState {
+  @override
+  // TODO: implement props
+  List<Object> get props => [];
+}
+
 final class OpenLibSearchAuthorState extends OpenLibSearchState {
   @override
   List<Object> get props => [];

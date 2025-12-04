@@ -9,14 +9,16 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/core/constants/enums/ol_search_type.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/ol_edition_result.dart';
 import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:leafy/ui/search_ol/widgets/book_card_ol.dart';
@@ -49,106 +51,111 @@ class _SearchOLScreenState extends State<SearchOLScreen>
 
   late final _pagingController = PagingController<int, OLSearchResultDoc>(
     fetchPage: (pageKey) => _fetchPage(pageKey),
-    // TODO: Gỡ bỏ getNextPageKey vì PagingController sẽ tự động xử lý nó.
     getNextPageKey: (state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
   );
 
-  // TODO: Hoàn thiện chức năng lưu sách không có phiên bản cụ thể.
-  // void _saveNoEdition({
-  //   required List<String> editions,
-  //   required String title,
-  //   String? subtitle,
-  //   required String author,
-  //   int? firstPublishYear,
-  //   int? pagesMedian,
-  //   int? cover,
-  //   List<String>? isbn,
-  //   String? olid,
-  // }) {
-  //   final defaultBookFormat = context.read<DefaultBooksFormatCubit>().state;
-  //   final defaultTags = context.read<DefaultBookTagsCubit>().state;
+  late final OpenLibraryService _openLibService;
+  late final EditBookCubit _editBookCubit;
 
-  //   final book = Book(
-  //     title: title,
-  //     subtitle: subtitle,
-  //     author: author,
-  //     status: widget.status,
-  //     favorite: false,
-  //     pages: pagesMedian,
-  //     isbn: (isbn != null && isbn.isNotEmpty) ? isbn[0] : null,
-  //     olid: (olid != null) ? olid.replaceAll('/works/', '') : null,
-  //     publicationYear: firstPublishYear,
-  //     bookFormat: defaultBookFormat,
-  //     readings: List<Reading>.empty(growable: true),
-  //     tags: defaultTags.isNotEmpty ? defaultTags.join('|||||') : null,
-  //     dateAdded: DateTime.now(),
-  //     dateModified: DateTime.now(),
-  //   );
+  void _saveNoEdition({
+    required List<String> editions,
+    required String title,
+    String? subtitle,
+    required String author,
+    int? firstPublishYear,
+    int? pagesMedian,
+    int? cover,
+    List<String>? isbn,
+    String? olid,
+  }) {
+    final defaultBookFormat = BookFormat.paperback;
+    final defaultTags = [];
 
-  //   context.read<EditBookCubit>().setBook(book);
+    final book = Book(
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      status: widget.status,
+      favorite: false,
+      pages: pagesMedian,
+      isbn: (isbn != null && isbn.isNotEmpty) ? isbn[0] : null,
+      olid: (olid != null) ? olid.replaceAll('/works/', '') : null,
+      publicationYear: firstPublishYear,
+      bookFormat: defaultBookFormat,
+      readings: List<Reading>.empty(growable: true),
+      tags: defaultTags.isNotEmpty
+          ? defaultTags.join('Constants.tagDelimeter')
+          : null,
+      dateAdded: DateTime.now(),
+      dateModified: DateTime.now(),
+    );
 
-  // TODO: Kích hoạt lại điều hướng đến màn hình thêm sách (AddBookScreen).
-  //   // Navigator.of(context).push(
-  //   //   MaterialPageRoute(
-  //   //     builder: (_) => AddBookScreen(
-  //   //       fromOpenLibrary: true,
-  //   //       coverOpenLibraryID: cover,
-  //   //       work: olid,
-  //   //     ),
-  //   //   ),
-  //   // );
-  // }
+    _editBookCubit.setBook(book);
 
-  // TODO: Hoàn thiện chức năng lưu một phiên bản sách cụ thể.
-  // void _saveEdition({
-  //   required OLEditionResult result,
-  //   required int? cover,
-  //   String? work,
-  //   String? authors,
-  // }) {
-  //   if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BookEditorScreen(
+          fromOpenLibrary: true,
+          coverOpenLibraryID: cover,
+          work: olid,
+        ),
+      ),
+    );
+  }
 
-  //   final defaultBookFormat = context.read<DefaultBooksFormatCubit>().state;
-  //   final defaultTags = context.read<DefaultBookTagsCubit>().state;
+  void _saveEdition({
+    required OLEditionResult result,
+    required int? cover,
+    String? work,
+    String? authors,
+  }) {
+    if (!mounted) return;
 
-  //   final addDate = DateTime.now();
+    // TODO: Change to use Cubit
+    // final defaultBookFormat = context.read<DefaultBooksFormatCubit>().state;
+    // final defaultTags = context.read<DefaultBookTagsCubit>().state;
+    final defaultBookFormat = BookFormat.paperback;
+    final defaultTags = [];
 
-  //   final book = Book(
-  //     title: result.title!,
-  //     subtitle: result.subtitle,
-  //     author: authors ?? '',
-  //     pages: result.numberOfPages,
-  //     status: widget.status,
-  //     favourite: false,
-  //     isbn: (result.isbn13 != null && result.isbn13!.isNotEmpty)
-  //         ? result.isbn13![0]
-  //         : (result.isbn10 != null && result.isbn10!.isNotEmpty)
-  //             ? result.isbn10![0]
-  //             : null,
-  //     olid: (result.key != null) ? result.key!.replaceAll('/books/', '') : null,
-  //     publicationYear: int.tryParse(result.publishDate ?? ''),
-  //     bookFormat: result.physicalFormat ?? defaultBookFormat,
-  //     readings: List<Reading>.empty(growable: true),
-  //     tags: defaultTags.isNotEmpty == true ? defaultTags.join('|||||') : null,
-  //     dateAdded: addDate,
-  //     dateModified: addDate,
-  //   );
+    final addDate = DateTime.now();
 
-  //   context.read<EditBookCubit>().setBook(book);
+    final book = Book(
+      title: result.title!,
+      subtitle: result.subtitle,
+      author: authors ?? '',
+      pages: result.numberOfPages,
+      status: widget.status,
+      favorite: false,
+      isbn: (result.isbn13 != null && result.isbn13!.isNotEmpty)
+          ? result.isbn13![0]
+          : (result.isbn10 != null && result.isbn10!.isNotEmpty)
+          ? result.isbn10![0]
+          : null,
+      olid: (result.key != null) ? result.key!.replaceAll('/books/', '') : null,
+      publicationYear: int.tryParse(result.publishDate ?? ''),
+      bookFormat: result.physicalFormat ?? defaultBookFormat,
+      readings: List<Reading>.empty(growable: true),
+      tags: defaultTags.isNotEmpty == true
+          ? defaultTags.join(Constants.tagDelimeter)
+          : null,
+      dateAdded: addDate,
+      dateModified: addDate,
+    );
 
-  // TODO: Kích hoạt lại điều hướng đến màn hình thêm sách (AddBookScreen) với dữ liệu từ phiên bản.
-  //   // Navigator.of(context).push(
-  //   //   MaterialPageRoute(
-  //   //     builder: (_) => AddBookScreen(
-  //   //       fromOpenLibrary: true,
-  //   //       fromOpenLibraryEdition: true,
-  //   //       work: work,
-  //   //       coverOpenLibraryID: cover,
-  //   //     ),
-  //   //   ),
-  //   // );
-  // }
+    _editBookCubit.setBook(book);
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BookEditorScreen(
+          fromOpenLibrary: true,
+          fromOpenLibraryEdition: true,
+          work: work,
+          coverOpenLibraryID: cover,
+        ),
+      ),
+    );
+  }
 
   Future<List<OLSearchResultDoc>> _fetchPage(int pageKey) async {
     final searchTimestampSaved = DateTime.now().millisecondsSinceEpoch;
@@ -208,42 +215,38 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     });
     final edition = await OpenLibraryService().getEditionByISBN(isbn: isbn);
 
-    final authors = List<String>.empty(growable: true);
-    for (final author in edition?.authors ?? []) {
-      // TODO: Cân nhắc xử lý song song các yêu cầu API để cải thiện hiệu suất.
-      final authorResult = await OpenLibraryService().getAuthor(
-        key: author.key,
-      );
-
-      if (authorResult?.name != null) {
-        authors.add(authorResult!.name!);
-      }
-    }
-
-    if (!mounted)
-      return; // TODO: Thêm kiểm tra `mounted` sau các hoạt động bất đồng bộ.
-    if (edition != null) {
-      setState(() {
-        searchActivated = false;
-      });
-      // TODO: Khôi phục lại lời gọi _saveEdition và tích hợp với luồng EditBookCubit.
-      // _saveEdition(
-      //   result: edition,
-      //   cover: edition.covers != null && edition.covers!.isNotEmpty
-      //       ? edition.covers![0]
-      //       : null,
-      //   work: edition.works != null && edition.works!.isNotEmpty
-      //       ? edition.works![0].key
-      //       : null,
-      //   authors: authors.join(', '),
-      // );
-    } else {
+    if (edition == null) {
       setState(() {
         _searchingISBN = false;
         _searchingISBNError = true;
       });
-      // TODO: Cung cấp phản hồi cụ thể hơn cho người dùng khi không tìm thấy ISBN.
+      return;
     }
+    final authorFutures = (edition.authors ?? []).map((author) {
+      return OpenLibraryService().getAuthor(key: author.key ?? '');
+    }).toList();
+
+    final authors = await Future.wait(authorFutures);
+
+    final authorNames = authors
+        .where((author) => author?.name != null)
+        .map((author) => author!.name!)
+        .toList();
+
+    setState(() {
+      searchActivated = false;
+    });
+
+    _saveEdition(
+      result: edition,
+      cover: edition.covers != null && edition.covers!.isNotEmpty
+          ? edition.covers![0]
+          : null,
+      work: edition.works != null && edition.works!.isNotEmpty
+          ? edition.works![0].key
+          : null,
+      authors: authorNames.join(', '),
+    );
   }
 
   // TODO: Bỏ bình luận và hoàn thiện chức năng quét mã vạch.
@@ -282,6 +285,8 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       return OLSearchType.author;
     } else if (state is OpenLibSearchISBNState) {
       return OLSearchType.isbn;
+    } else if (state is OpenLibSearchTitleState) {
+      return OLSearchType.title;
     } else {
       return OLSearchType.general;
     }
@@ -295,8 +300,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
         openLibrarySearchBloc.add(const OpenLibSearchAuthorEvent());
         break;
       case OLSearchType.title:
-        // TODO: Triển khai logic cho sự kiện tìm kiếm theo tiêu đề (OpenLibrarySearchSetTitle).
-        // openLibrarySearchBloc.add(const OpenLibrarySearchSetTitle());
+        openLibrarySearchBloc.add(const OpenLibSearchTitleEvent());
         break;
       case OLSearchType.isbn:
         openLibrarySearchBloc.add(const OpenLibSearchISBNEvent());
@@ -332,14 +336,14 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       dateModified: DateTime.now(),
     );
 
-    context.read<EditBookCubit>().setBook(book);
+    _editBookCubit.setBook(book);
 
     // TODO: Kích hoạt lại điều hướng đến màn hình thêm sách thủ công (AddBookScreen).
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (_) => const AddBookScreen(fromOpenLibrary: true),
-    //   ),
-    // );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const BookEditorScreen(fromOpenLibrary: true),
+      ),
+    );
   }
 
   void _onChooseEditionPressed(OLSearchResultDoc item) {
@@ -369,6 +373,8 @@ class _SearchOLScreenState extends State<SearchOLScreen>
   @override
   void initState() {
     super.initState();
+    _openLibService = OpenLibraryService();
+    _editBookCubit = context.read<EditBookCubit>();
     if (widget.scan) {
       // TODO: Bỏ bình luận lời gọi _startScanner() để kích hoạt quét khi màn hình khởi tạo.
       // _startScanner();
@@ -417,7 +423,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
                         ? _buildFirstPageProgressIndicator(context)
                         : _searchingISBNError
                         ? _buildNoItemsFoundIndicator()
-                        : _buildSearchResults(),
+                        : _buildSearchResultsList(),
                   )
                 : const SizedBox.shrink(),
           ],
@@ -426,10 +432,8 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     );
   }
 
-  // TODO: Đổi tên widget này thành một tên rõ ràng hơn, ví dụ `_buildSearchResultsList`.
-  Scrollbar _buildSearchResults() {
+  Scrollbar _buildSearchResultsList() {
     return Scrollbar(
-      // TODO: Loại bỏ PagingListener vì PagedListView đã xử lý listener bên trong.
       child: PagingListener(
         controller: _pagingController,
         builder: (context, state, fetchNextPage) =>
@@ -452,15 +456,10 @@ class _SearchOLScreenState extends State<SearchOLScreen>
 
   Center _buildFirstPageProgressIndicator(BuildContext context) {
     return Center(
-      child: Platform.isIOS
-          ? CupertinoActivityIndicator(
-              radius: 20,
-              color: Theme.of(context).colorScheme.primary,
-            )
-          : LoadingAnimationWidget.staggeredDotsWave(
-              color: Theme.of(context).colorScheme.primary,
-              size: 42,
-            ),
+      child: LoadingAnimationWidget.staggeredDotsWave(
+        color: context.colorScheme.primary,
+        size: 42,
+      ),
     );
   }
 
@@ -477,21 +476,19 @@ class _SearchOLScreenState extends State<SearchOLScreen>
           editions: item.editionKey,
           pagesMedian: item.medianPages,
           firstPublishYear: item.firstPublishYear,
-          // TODO: Kích hoạt lại chức năng onAddBookPressed bằng cách bỏ bình luận lời gọi _saveNoEdition.
-          onAddBookPressed: () {},
-          // onAddBookPressed: () => _saveNoEdition(
-          //   editions: item.editionKey!,
-          //   title: item.title ?? '',
-          //   subtitle: item.subtitle,
-          //   author: (item.authorName != null && item.authorName!.isNotEmpty)
-          //       ? item.authorName![0]
-          //       : '',
-          //   pagesMedian: item.medianPages,
-          //   isbn: item.isbn,
-          //   olid: item.key,
-          //   firstPublishYear: item.firstPublishYear,
-          //   cover: item.coverI,
-          // ),
+          onAddBookPressed: () => _saveNoEdition(
+            editions: item.editionKey!,
+            title: item.title ?? '',
+            subtitle: item.subtitle,
+            author: (item.authorName != null && item.authorName!.isNotEmpty)
+                ? item.authorName![0]
+                : '',
+            pagesMedian: item.medianPages,
+            isbn: item.isbn,
+            olid: item.key,
+            firstPublishYear: item.firstPublishYear,
+            cover: item.coverI,
+          ),
           onChooseEditionPressed: () => _onChooseEditionPressed(item),
         );
       },
@@ -532,23 +529,16 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Platform.isIOS
-            ? CupertinoActivityIndicator(
-                radius: 20,
-                color: Theme.of(context).colorScheme.primary,
-              )
-            : LoadingAnimationWidget.staggeredDotsWave(
-                color: Theme.of(context).colorScheme.primary,
-                size: 42,
-              ),
+        child: LoadingAnimationWidget.staggeredDotsWave(
+          color: context.colorScheme.primary,
+          size: 42,
+        ),
       ),
     );
   }
 
   Widget _buildNumberOfResults() {
-    // TODO: Chuyển kiểu trả về thành Widget.
-    return (numberOfResults != null &&
-            numberOfResults! > 0) // TODO: Sửa điều kiện thành > 0
+    return (numberOfResults != null && numberOfResults! > 0)
         ? Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
             child: Row(
@@ -566,7 +556,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
               ],
             ),
           )
-        : const SizedBox.shrink(); // TODO: Dùng SizedBox.shrink() cho gọn.
+        : const SizedBox.shrink();
   }
 
   Padding _buildDivider() {
@@ -584,16 +574,16 @@ class _SearchOLScreenState extends State<SearchOLScreen>
           return Wrap(
             alignment: WrapAlignment.start,
             crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 5, // TODO: Sử dụng thuộc tính `spacing` của Wrap.
-            children: OLSearchType.values
-                .map(
-                  (searchType) => OLSearchRadio(
-                    searchType: searchType,
-                    activeSearchType: _getOLSearchTypeEnum(state),
-                    onChanged: _changeSearchType,
-                  ),
-                )
-                .toList(), // TODO: Đơn giản hóa vòng lặp.
+            children: [
+              for (var i = 0; i < 4; i++) ...[
+                if (i != 0) const SizedBox(width: 5),
+                OLSearchRadio(
+                  searchType: OLSearchType.values[i],
+                  activeSearchType: _getOLSearchTypeEnum(state),
+                  onChanged: _changeSearchType,
+                ),
+              ],
+            ],
           );
         },
       ),
@@ -623,8 +613,8 @@ class _SearchOLScreenState extends State<SearchOLScreen>
               onPressed: _startNewSearch,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                backgroundColor: context.colorScheme.primary,
+                foregroundColor: context.colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(cornerRadius),
                 ),

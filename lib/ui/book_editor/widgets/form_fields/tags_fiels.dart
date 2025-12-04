@@ -1,21 +1,21 @@
-
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/data/models/book.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 
-/// Một widget chỉ để hiển thị cho trường nhập liệu và danh sách các tag.
-/// Nó nhận vào danh sách các tag hiện tại và các callback để xử lý tương tác.
 class TagsField extends StatelessWidget {
   const TagsField({
     super.key,
     this.controller,
     this.hint,
     this.icon,
-    this.keyboardType = TextInputType.text,
-    this.maxLength = 100,
+    required this.keyboardType,
+    required this.maxLength,
     this.inputFormatters,
     this.autofocus = false,
     this.maxLines = 1,
@@ -25,9 +25,7 @@ class TagsField extends StatelessWidget {
     this.onSubmitted,
     this.onEditingComplete,
     this.unselectTag,
-    this.allTags = const [],
-    // Tham số mới thay thế cho BLoC
-    required this.tags,
+    this.allTags,
   });
 
   final TextEditingController? controller;
@@ -45,16 +43,13 @@ class TagsField extends StatelessWidget {
   final Function()? onEditingComplete;
 
   final Function(String)? unselectTag;
-  final List<String> allTags;
-  // Danh sách các tag được chọn, truyền từ widget cha
-  final List<String> tags;
+  final List<String>? allTags;
 
   Widget _buildTagChip(
     BuildContext context, {
     required String tag,
     required bool selected,
   }) {
-// ...existing code...
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: FilterChip(
@@ -68,8 +63,7 @@ class TagsField extends StatelessWidget {
           maxLines: 5,
         ),
         clipBehavior: Clip.none,
-        checkmarkColor:
-            selected ? context.colorScheme.onSecondary : null,
+        checkmarkColor: selected ? context.colorScheme.onSecondary : null,
         selected: selected,
         selectedColor: context.colorScheme.secondary,
         onSelected: (_) {
@@ -80,21 +74,17 @@ class TagsField extends StatelessWidget {
     );
   }
 
-  List<Widget> _generateTagChips(
-    BuildContext context,
-    List<String> tags,
-  ) {
+  List<Widget> _generateTagChips(BuildContext context, List<String> tags) {
     final chips = List<Widget>.empty(growable: true);
 
-    tags.sort((a, b) => removeDiacritics(a.toLowerCase())
-        .compareTo(removeDiacritics(b.toLowerCase())));
+    tags.sort(
+      (a, b) => removeDiacritics(
+        a.toLowerCase(),
+      ).compareTo(removeDiacritics(b.toLowerCase())),
+    );
 
     for (var tag in tags) {
-      chips.add(_buildTagChip(
-        context,
-        tag: tag,
-        selected: true,
-      ));
+      chips.add(_buildTagChip(context, tag: tag, selected: true));
     }
 
     return chips;
@@ -102,13 +92,14 @@ class TagsField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-// ...existing code...
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(cornerRadius),
           // border: Border.all(color: dividerColor),
         ),
@@ -120,17 +111,16 @@ class TagsField extends StatelessWidget {
                 itemBuilder: (context, suggestion) {
                   return Container(
                     color: context.colorScheme.surfaceContainerHighest,
-                    child: ListTile(
-                      title: Text(suggestion),
-                    ),
+                    child: ListTile(title: Text(suggestion)),
                   );
                 },
                 suggestionsCallback: (pattern) =>
-                    allTags.where((String option) {
-                      return option
-                          .toLowerCase()
-                          .startsWith(pattern.toLowerCase());
-                    }).toList(),
+                    allTags?.where((String option) {
+                      return option.toLowerCase().startsWith(
+                        pattern.toLowerCase(),
+                      );
+                    }).toList() ??
+                    [],
                 onSelected: (suggestion) {
                   controller?.text = suggestion;
                   if (onSubmitted != null) {
@@ -168,10 +158,7 @@ class TagsField extends StatelessWidget {
                       labelText: hint,
                       labelStyle: const TextStyle(fontSize: 14),
                       icon: (icon != null)
-                          ? Icon(
-                              icon,
-                              color: context.colorScheme.primary,
-                            )
+                          ? Icon(icon, color: context.colorScheme.primary)
                           : null,
                       border: InputBorder.none,
                       counterText: hideCounter ? "" : null,
@@ -188,19 +175,22 @@ class TagsField extends StatelessWidget {
                       vertical: 5,
                       horizontal: 2.5,
                     ),
-                    // Loại bỏ BlocBuilder và sử dụng trực tiếp danh sách 'tags'
-                    child: tags.isNotEmpty
-                        ? Wrap(
-                            children: _generateTagChips(
-                              context,
-                              tags, // Truyền danh sách tags vào hàm
-                            ),
-                          )
-                        : const SizedBox(),
+                    child: BlocBuilder<EditBookCubit, Book>(
+                      builder: (context, state) {
+                        return state.tags != null
+                            ? Wrap(
+                                children: _generateTagChips(
+                                  context,
+                                  state.tags!.split('|||||'),
+                                ),
+                              )
+                            : const SizedBox();
+                      },
+                    ),
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),

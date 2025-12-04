@@ -19,7 +19,6 @@ class OLSearchRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TODO: Change to RadioGroup
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [

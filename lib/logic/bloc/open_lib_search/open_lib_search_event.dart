@@ -14,6 +14,13 @@ final class OpenLibSearchGeneralEvent extends OpenLibSearchEvent {
   List<Object> get props => [];
 }
 
+final class OpenLibSearchTitleEvent extends OpenLibSearchEvent {
+  const OpenLibSearchTitleEvent();
+
+  @override
+  List<Object> get props => [];
+}
+
 final class OpenLibSearchAuthorEvent extends OpenLibSearchEvent {
   const OpenLibSearchAuthorEvent();
 

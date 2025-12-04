@@ -1,15 +1,23 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'dart:io';
+import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/main.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
@@ -19,53 +27,25 @@ import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart
 import 'package:leafy/ui/book_editor/widgets/form_fields/tags_fiels.dart';
 import 'package:leafy/ui/book_editor/widgets/reading_row.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-// Default empty callbacks for BookEditorScreen
-void _defaultOnValueChanged(Book value) {}
-void _defaultVoidCallback() {}
-void _defaultOnRemoveReading(int value) {}
-void _defaultOnReadingChanged(int index, Reading reading) {}
-
-/// Một widget chỉ để hiển thị (presentational widget) cho màn hình thêm/sửa sách.
-/// Widget này không chứa logic nghiệp vụ. Nó nhận dữ liệu để hiển thị
-/// và sử dụng các hàm callback để thông báo cho widget cha về các tương tác của người dùng.
 class BookEditorScreen extends StatefulWidget {
-  BookEditorScreen({
+  const BookEditorScreen({
     super.key,
-    this.appBarTitle = 'Add Book',
-    this.coverImage,
-    this.isCoverLoading = false,
-    this.authorSuggestions = const [],
-    this.tagSuggestions = const [],
-    this.onValueChanged = _defaultOnValueChanged,
-    this.onSave = _defaultVoidCallback,
-    this.onCancel = _defaultVoidCallback,
-    this.onCoverPicked = _defaultVoidCallback,
-    this.onCoverDeleted = _defaultVoidCallback,
-    this.onScanBarcode = _defaultVoidCallback,
-    this.onAddReading = _defaultVoidCallback,
-    this.onRemoveReading = _defaultOnRemoveReading,
-    this.onReadingChanged = _defaultOnReadingChanged,
+    this.fromOpenLibrary = false,
+    this.fromOpenLibraryEdition = false,
+    this.editingExistingBook = false,
+    this.duplicatingBook = false,
+    this.coverOpenLibraryID,
+    this.work,
   });
 
-  // --- Dữ liệu và trạng thái UI được truyền từ bên ngoài ---
-  final String appBarTitle;
-  final Book initialBook = Book.empty();
-  final Uint8List? coverImage;
-  final bool isCoverLoading;
-  final List<String> authorSuggestions;
-  final List<String> tagSuggestions;
-
-  // --- Callbacks để thông báo cho widget cha ---
-  final ValueChanged<Book> onValueChanged;
-  final VoidCallback onSave;
-  final VoidCallback onCancel;
-  final VoidCallback onCoverPicked;
-  final VoidCallback onCoverDeleted;
-  final VoidCallback onScanBarcode;
-  final VoidCallback onAddReading;
-  final ValueChanged<int> onRemoveReading;
-  final void Function(int index, Reading reading) onReadingChanged;
+  final bool fromOpenLibrary;
+  final bool fromOpenLibraryEdition;
+  final bool editingExistingBook;
+  final bool duplicatingBook;
+  final int? coverOpenLibraryID;
+  final String? work;
 
   @override
   State<BookEditorScreen> createState() => _BookEditorScreenState();
@@ -86,12 +66,173 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   final _animDuration = const Duration(milliseconds: 250);
 
+  bool _isCoverDownloading = false;
+
+  static const String coverBaseUrl = 'https://covers.openlibrary.org/';
+  late final String coverUrl =
+      '${coverBaseUrl}b/id/${widget.coverOpenLibraryID}-L.jpg';
+
   List<String> bookTypes = [
     LocaleKeys.book_format_paperback.tr(),
     LocaleKeys.book_format_hardcover.tr(),
     LocaleKeys.book_format_ebook.tr(),
     LocaleKeys.book_format_audiobook.tr(),
   ];
+
+  void _prefillBookDetails(Book book) {
+    _titleCtrl.text = book.title;
+    _subtitleCtrl.text = book.subtitle ?? '';
+    _authorCtrl.text = book.author;
+    _pubYearCtrl.text = (book.publicationYear ?? '').toString();
+    _pagesCtrl.text = (book.pages ?? '').toString();
+    _descriptionCtrl.text = book.description ?? '';
+    _isbnCtrl.text = book.isbn ?? '';
+    _olidCtrl.text = book.olid ?? '';
+    _myReviewCtrl.text = book.myReview ?? '';
+    _notesCtrl.text = book.notes ?? '';
+
+    if (!widget.fromOpenLibrary && !widget.fromOpenLibraryEdition) {
+      if (!widget.duplicatingBook) {
+        context.read<EditBookCoverCubit>().setCover(book.getCoverBytes());
+      }
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  bool _validate() {
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
+
+    final book = context.read<EditBookCubit>().state;
+
+    if (book.title.isEmpty) {
+      _showSnackbar(LocaleKeys.title_cannot_be_empty.tr());
+      return false;
+    }
+
+    if (book.author.isEmpty) {
+      _showSnackbar(LocaleKeys.author_cannot_be_empty.tr());
+      return false;
+    }
+    for (final reading in book.readings) {
+      if (reading.startDate != null && reading.finishDate != null) {
+        if (reading.finishDate!.isBefore(reading.startDate!)) {
+          _showSnackbar(LocaleKeys.finish_date_before_start.tr());
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  void _saveNewBook(Book book) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    if (!_validate()) return;
+    if (await _checkIfWaitForCoverDownload(context) == true) return;
+    if (!mounted) return;
+
+    Uint8List? cover;
+
+    book.hasCover == false
+        ? context.read<EditBookCoverCubit>().deleteCover(book.id)
+        : cover = context.read<EditBookCoverCubit>().state;
+
+    final newBookID = await context.read<EditBookCubit>().addNewBook(cover);
+    book = book.copyWith(id: newBookID);
+    if (!mounted) return;
+
+    context.read<CurrentBookCubit>().setBook(book);
+
+    // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [book]));
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const BookScreen(heroTag: "")),
+      (route) => route.isFirst,
+    );
+  }
+
+  void _updateBook(Book book) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    if (!_validate()) return;
+    if (await _checkIfWaitForCoverDownload(context) == true) return;
+    if (!mounted) return;
+
+    book = book.copyWith(dateModified: DateTime.now());
+    context.read<EditBookCubit>().setBook(book);
+
+    if (book.hasCover == false) {
+      context.read<EditBookCoverCubit>().deleteCover(book.id);
+      context.read<EditBookCubit>().updateBook(null, context);
+    } else {
+      context.read<EditBookCubit>().updateBook(
+        context.read<EditBookCoverCubit>().state,
+        context,
+      );
+    }
+
+    // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [book]));
+
+    Navigator.pop(context);
+  }
+
+  Future<bool?> _checkIfWaitForCoverDownload(BuildContext context) {
+    if (_isCoverDownloading) {
+      return showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog.adaptive(
+            title: Text(LocaleKeys.cover_still_downloaded.tr()),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              Platform.isIOS
+                  ? CupertinoDialogAction(
+                      isDefaultAction: true,
+                      child: Text(LocaleKeys.wait_for_downloading_to_finish.tr()),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    )
+                  : TextButton(
+                      child: Text(LocaleKeys.wait_for_downloading_to_finish.tr()),
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                    ),
+              Platform.isIOS
+                  ? CupertinoDialogAction(
+                      isDestructiveAction: true,
+                      child: Text(LocaleKeys.save_without_cover.tr()),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    )
+                  : TextButton(
+                      child: Text(
+                        LocaleKeys.save_without_cover.tr(),
+                        style: TextStyle(
+                          color: context.colorScheme.error,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                    ),
+            ],
+          );
+        },
+      );
+    } else {
+      return Future.value(false);
+    }
+  }
 
   void _changeBookType(String? bookType) {
     if (bookType == null) return;
@@ -111,37 +252,157 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _downloadCover() async {
+    setState(() {
+      _isCoverDownloading = true;
+    });
 
-    final book = context.read<EditBookCubit>().state;
+    http.get(Uri.parse(coverUrl)).then((response) async {
+      if (!mounted) return;
 
-    _prefillBookDetails(book);
-    _attachListeners();
+      if (!mounted) return;
+      await generateBlurHash(response.bodyBytes, context);
+
+      if (!mounted) return;
+      context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
+      context.read<EditBookCubit>().setHasCover(true);
+
+      setState(() {
+        _isCoverDownloading = false;
+      });
+    });
+  }
+
+  void _downloadWork() async {
+    if (widget.work != null) {
+      final openLibraryWork = await OpenLibraryService().getWork(widget.work!);
+
+      if (!mounted) return;
+
+      setState(() {
+        if (openLibraryWork.description != null) {
+          _descriptionCtrl.text = openLibraryWork.description ?? '';
+        }
+      });
+    }
+  }
+
+  Widget _buildCover() {
+    if (_isCoverDownloading) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 50),
+        child: Platform.isIOS
+            ? CupertinoActivityIndicator(
+                radius: 20,
+                color: context.colorScheme.primary,
+              )
+            : LoadingAnimationWidget.threeArchedCircle(
+                color: context.colorScheme.primary,
+                size: 36,
+              ),
+      );
+    } else {
+      return const CoverViewEdit();
+    }
+  }
+
+  void _addNewTag() {
+    final tag = _tagsCtrl.text;
+
+    if (tag.isEmpty) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      return;
+    }
+
+    context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
+
+    _tagsCtrl.clear();
+  }
+
+  void _unselectTag(String tag) {
+    context.read<EditBookCubit>().removeTag(tag);
   }
 
   void _attachListeners() {
-    final cubit = context.read<EditBookCubit>();
+    _titleCtrl.addListener(() {
+      context.read<EditBookCubit>().setTitle(_titleCtrl.text);
+    });
 
-    void bind(TextEditingController ctrl, Function(String) action) {
-      ctrl.addListener(() => action(ctrl.text));
-    }
+    _subtitleCtrl.addListener(() {
+      context.read<EditBookCubit>().setSubtitle(_subtitleCtrl.text);
+    });
 
-    bind(_titleCtrl, cubit.setTitle);
-    bind(_subtitleCtrl, cubit.setSubtitle);
-    bind(_authorCtrl, cubit.setAuthor);
-    bind(_pagesCtrl, cubit.setPages);
-    bind(_descriptionCtrl, cubit.setDescription);
-    bind(_isbnCtrl, cubit.setISBN);
-    bind(_olidCtrl, cubit.setOLID);
-    bind(_pubYearCtrl, cubit.setPublicationYear);
-    bind(_myReviewCtrl, cubit.setMyReview);
-    bind(_notesCtrl, cubit.setNotes);
+    _authorCtrl.addListener(() {
+      context.read<EditBookCubit>().setAuthor(_authorCtrl.text);
+    });
+
+    _pagesCtrl.addListener(() {
+      context.read<EditBookCubit>().setPages(_pagesCtrl.text);
+    });
+
+    _descriptionCtrl.addListener(() {
+      context.read<EditBookCubit>().setDescription(_descriptionCtrl.text);
+    });
+
+    _isbnCtrl.addListener(() {
+      context.read<EditBookCubit>().setISBN(_isbnCtrl.text);
+    });
+
+    _olidCtrl.addListener(() {
+      context.read<EditBookCubit>().setOLID(_olidCtrl.text);
+    });
+
+    _pubYearCtrl.addListener(() {
+      context.read<EditBookCubit>().setPublicationYear(_pubYearCtrl.text);
+    });
+
+    _myReviewCtrl.addListener(() {
+      context.read<EditBookCubit>().setMyReview(_myReviewCtrl.text);
+    });
+
+    _notesCtrl.addListener(() {
+      context.read<EditBookCubit>().setNotes(_notesCtrl.text);
+    });
   }
 
-  void _handleValueChange(Book updatedBook) {
-    widget.onValueChanged(updatedBook);
+  // TODO: uncomment this
+  // void _setDefaultTags(Book book) {
+  //   final defaultTags = context.read<DefaultBookTagsCubit>().state;
+
+  //   if (book.id == null) {
+  //     context.read<EditBookCubit>().setBook(
+  //       book.copyWith(
+  //         tags: defaultTags.isNotEmpty ? defaultTags.join('|||||') : null,
+  //       ),
+  //     );
+  //   }
+  // }
+
+  void _downloadInitData() {
+    if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
+      if (widget.coverOpenLibraryID != null) {
+        _downloadCover();
+      } else {
+        // Remove temp cover file if book/edition has no cover
+        context.read<EditBookCoverCubit>().setCover(null);
+      }
+
+      if (widget.fromOpenLibrary) {
+        _downloadWork();
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    final book = context.read<EditBookCubit>().state;
+
+    // _setDefaultTags(book);
+    _prefillBookDetails(book);
+    _attachListeners();
+    _downloadInitData();
+
+    super.initState();
   }
 
   @override
@@ -157,71 +418,8 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     _tagsCtrl.dispose();
     _myReviewCtrl.dispose();
     _notesCtrl.dispose();
+
     super.dispose();
-  }
-
-  void _showSnackbar(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  bool _validate() {
-    ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-    final book = context.read<EditBookCubit>().state;
-
-    if (book.title.isEmpty) {
-      _showSnackbar(LocaleKeys.title_cannot_be_empty.tr());
-      return false;
-    }
-
-    return true;
-  }
-
-  void _prefillBookDetails(Book book) {
-    _titleCtrl.text = book.title;
-    _subtitleCtrl.text = book.subtitle ?? '';
-    _authorCtrl.text = book.author;
-    _pubYearCtrl.text = (book.publicationYear ?? '').toString();
-    _pagesCtrl.text = (book.pages ?? '').toString();
-    _descriptionCtrl.text = book.description ?? '';
-    _isbnCtrl.text = book.isbn ?? '';
-    _olidCtrl.text = book.olid ?? '';
-    _myReviewCtrl.text = book.myReview ?? '';
-    _notesCtrl.text = book.notes ?? '';
-  }
-
-  void _saveNewBook(Book book) async {
-    print('New ${book.toJSON()}');
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    if (!_validate()) return;
-    if (!mounted) return;
-
-    Uint8List? cover;
-
-    book.hasCover == false
-        ? context.read<EditBookCoverCubit>().deleteCover(book.id)
-        : cover = context.read<EditBookCoverCubit>().state;
-
-    final newBookID = await context.read<EditBookCubit>().addNewBook(cover);
-    book = book.copyWith(id: newBookID);
-    if (!mounted) return;
-
-    context.read<CurrentBookCubit>().setBook(book);
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const BookScreen(heroTag: "")),
-      (route) => route.isFirst,
-    );
-  }
-
-  void _updateBook(Book book) async {
-     print('Update ${book.toJSON()}');
-    
-    if (_validate()) return;
-
-    if (!mounted) return;
   }
 
   @override
@@ -229,17 +427,22 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     return KeyboardDismissible(
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.appBarTitle, style: const TextStyle(fontSize: 18)),
+          title: Text(
+            widget.editingExistingBook
+                ? LocaleKeys.edit_book.tr()
+                : LocaleKeys.add_new_book.tr(),
+            style: const TextStyle(fontSize: 18),
+          ),
           actions: [
             BlocBuilder<EditBookCubit, Book>(
               builder: (context, state) {
                 return TextButton(
-                  onPressed: (state.id == null)
-                      ? () => _saveNewBook(state)
-                      : () => _updateBook(state),
+                  onPressed: (state.id != null)
+                      ? () => _updateBook(state)
+                      : () => _saveNewBook(state),
                   child: Text(
                     LocaleKeys.save.tr(),
-                    style: TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 16),
                   ),
                 );
               },
@@ -247,80 +450,73 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           ],
         ),
         body: SafeArea(
-          bottom: false,
           child: SingleChildScrollView(
             child: Column(
               children: <Widget>[
-                // --- Phần ảnh bìa ---
-                if (widget.isCoverLoading)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 50),
-                    child: CircularProgressIndicator(),
-                  )
-                else
-                  CoverViewEdit(
-                    onDeleteCover: () {},
-                    onEditCover: () {},
-                    onLoadFromOpenLibrary: () {},
-                    onPickFromGallery: () {},
-                    onSearchOnline: () {},
-                    // Giả sử CoverViewEdit cũng là pure UI
-                    coverBytes: widget.coverImage,
-                  ),
+                _buildCover(),
                 const Padding(padding: EdgeInsets.all(10), child: Divider()),
-
-                // --- Các trường thông tin cơ bản ---
                 BookTextField(
                   controller: _titleCtrl,
                   hint: LocaleKeys.enter_title.tr(),
-                  keyboardType: TextInputType.text,
                   icon: Icons.book,
+                  keyboardType: TextInputType.text,
+                  autofocus:
+                      (widget.fromOpenLibrary || widget.editingExistingBook)
+                      ? false
+                      : true,
+                  maxLines: 5,
+                  maxLength: 255,
+                  textCapitalization: TextCapitalization.sentences,
                 ),
                 const SizedBox(height: 10),
                 BookTextField(
                   controller: _subtitleCtrl,
                   hint: LocaleKeys.enter_subtitle.tr(),
-                  keyboardType: TextInputType.text,
                   icon: Icons.book,
-                ),
-
-                const SizedBox(height: 10),
-                BookTextField(
-                  controller: _authorCtrl,
-                  hint: LocaleKeys.enter_author.tr(),
                   keyboardType: TextInputType.text,
-                  icon: Icons.person,
-                  suggestions: widget.authorSuggestions,
+                  maxLines: 5,
+                  maxLength: 255,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 10),
+                StreamBuilder<List<String>>(
+                  stream: bookCubit.authors,
+                  builder: (context, AsyncSnapshot<List<String>?> snapshot) {
+                    return BookTextField(
+                      controller: _authorCtrl,
+                      hint: LocaleKeys.enter_author.tr(),
+                      icon: Icons.person,
+                      keyboardType: TextInputType.text,
+                      maxLines: 5,
+                      maxLength: 255,
+                      textCapitalization: TextCapitalization.words,
+                      suggestions: snapshot.data,
+                    );
+                  },
                 ),
                 const Padding(padding: EdgeInsets.all(10), child: Divider()),
-
-                // --- Trạng thái và Lịch sử đọc ---
                 BookStatusRow(
                   animDuration: _animDuration,
                   defaultHeight: Constants.formHeight,
                 ),
                 const SizedBox(height: 10),
                 BookRatingBar(animDuration: _animDuration),
-                ...widget.initialBook.readings.asMap().entries.map((entry) {
-                  return ReadingRow(index: entry.key, reading: entry.value);
-                }),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-                  child: FilledButton.tonal(
-                    onPressed: widget.onAddReading, // Gọi callback
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                BlocBuilder<EditBookCubit, Book>(
+                  builder: (context, state) {
+                    return Column(
                       children: [
-                        Icon(Icons.add),
-                        SizedBox(width: 10),
-                        Text(LocaleKeys.add_additional_reading_time.tr()),
+                        ...state.readings.asMap().entries.map((entry) {
+                          return ReadingRow(
+                            index: entry.key,
+                            reading: entry.value,
+                          );
+                        }),
                       ],
-                    ),
-                  ),
+                    );
+                  },
                 ),
+                _buildAddNewReadingButton(context),
                 const Padding(padding: EdgeInsets.all(10), child: Divider()),
-
-                // --- Các thông tin chi tiết khác ---
                 BookTypeDropdown(
                   bookTypes: bookTypes,
                   changeBookType: _changeBookType,
@@ -334,6 +530,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                         hint: LocaleKeys.enter_pages.tr(),
                         icon: FontAwesomeIcons.solidFileLines,
                         keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        maxLength: 10,
+                        padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
                       ),
                     ),
                     Expanded(
@@ -342,6 +543,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                         hint: LocaleKeys.enter_publication_year.tr(),
                         icon: FontAwesomeIcons.solidCalendar,
                         keyboardType: TextInputType.number,
+                        inputFormatters: <TextInputFormatter>[
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        maxLength: 4,
+                        padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
                       ),
                     ),
                   ],
@@ -349,10 +555,13 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                 const SizedBox(height: 10),
                 BookTextField(
                   controller: _descriptionCtrl,
-                  hint: LocaleKeys.description.tr(),
-                  keyboardType: TextInputType.text,
+                  hint: LocaleKeys.enter_description.tr(),
                   icon: FontAwesomeIcons.solidKeyboard,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: 5000,
+                  hideCounter: false,
                   maxLines: 15,
+                  textCapitalization: TextCapitalization.sentences,
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -361,20 +570,46 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       child: BookTextField(
                         controller: _isbnCtrl,
                         hint: LocaleKeys.isbn.tr(),
-                        keyboardType: TextInputType.text,
                         icon: FontAwesomeIcons.i,
+                        textCapitalization: TextCapitalization.characters,
+                        keyboardType: TextInputType.text,
+                        maxLength: 20,
                       ),
                     ),
                     InkWell(
-                      onTap: widget.onScanBarcode, // Gọi callback
+                      customBorder: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(cornerRadius),
+                      ),
+                      onTap: () async {
+                        var result = await BarcodeScanner.scan(
+                          options: ScanOptions(
+                            strings: {
+                              'cancel': LocaleKeys.cancel.tr(),
+                              'flash_on': LocaleKeys.flash_on.tr(),
+                              'flash_off': LocaleKeys.flash_off.tr(),
+                            },
+                          ),
+                        );
+
+                        if (result.type == ResultType.Barcode) {
+                          setState(() {
+                            _isbnCtrl.text = result.rawContent;
+                          });
+                        }
+                      },
                       child: Container(
                         height: 60,
                         width: 60,
                         padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(cornerRadius),
+                          color: context.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                        ),
                         child: Icon(
                           FontAwesomeIcons.barcode,
                           size: 28,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: context.colorScheme.primary,
                         ),
                       ),
                     ),
@@ -382,54 +617,92 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                TagsField(
-                  controller: _tagsCtrl,
-                  hint: LocaleKeys.enter_tags.tr(),
-                  icon: FontAwesomeIcons.tags,
-                  tags: widget.initialBook.tags?.split('|||||') ?? [],
-                  allTags: widget.tagSuggestions,
-                  unselectTag: (tag) {
-                    final newTags = List<String>.from(
-                      widget.initialBook.tags?.split('|||||') ?? [],
+                BookTextField(
+                  controller: _olidCtrl,
+                  hint: LocaleKeys.open_library_ID.tr(),
+                  icon: FontAwesomeIcons.o,
+                  keyboardType: TextInputType.text,
+                  maxLength: 20,
+                  textCapitalization: TextCapitalization.characters,
+                ),
+                const SizedBox(height: 10),
+                StreamBuilder<List<String>>(
+                  stream: bookCubit.tags,
+                  builder: (context, AsyncSnapshot<List<String>?> snapshot) {
+                    return TagsField(
+                      controller: _tagsCtrl,
+                      hint: LocaleKeys.enter_tags.tr(),
+                      icon: FontAwesomeIcons.tags,
+                      keyboardType: TextInputType.text,
+                      maxLength: Constants.maxTagLength,
+                      onSubmitted: (_) => _addNewTag(),
+                      onEditingComplete: () {},
+                      unselectTag: (tag) => _unselectTag(tag),
+                      allTags: snapshot.data,
                     );
-                    newTags.remove(tag);
-                    _handleValueChange(
-                      widget.initialBook.copyWith(tags: newTags.join('|||||')),
-                    );
-                  },
-                  onSubmitted: (tag) {
-                    final newTags = List<String>.from(
-                      widget.initialBook.tags?.split('|||||') ?? [],
-                    );
-                    if (tag.isNotEmpty && !newTags.contains(tag)) {
-                      newTags.add(tag);
-                    }
-                    _tagsCtrl.clear();
-                    _handleValueChange(
-                      widget.initialBook.copyWith(tags: newTags.join('|||||')),
-                    );
-                    FocusScope.of(context).unfocus();
                   },
                 ),
-
-                // --- Các nút bấm dưới cùng ---
-                const SizedBox(height: 50.0),
+                const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                BookTextField(
+                  controller: _myReviewCtrl,
+                  hint: LocaleKeys.my_review.tr(),
+                  icon: FontAwesomeIcons.solidKeyboard,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: 5000,
+                  hideCounter: false,
+                  maxLines: 15,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 10),
+                BookTextField(
+                  controller: _notesCtrl,
+                  hint: LocaleKeys.notes.tr(),
+                  icon: FontAwesomeIcons.noteSticky,
+                  keyboardType: TextInputType.multiline,
+                  maxLength: 5000,
+                  hideCounter: false,
+                  maxLines: 15,
+                  textCapitalization: TextCapitalization.sentences,
+                ),
+                const SizedBox(height: 30),
                 Row(
                   children: [
                     const SizedBox(width: 10),
                     Expanded(
                       flex: 10,
                       child: FilledButton.tonal(
-                        onPressed: widget.onCancel, // Gọi callback
+                        onPressed: () => Navigator.pop(context),
+                        style: ButtonStyle(
+                          shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(cornerRadius),
+                            ),
+                          ),
+                        ),
                         child: Center(child: Text(LocaleKeys.cancel.tr())),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       flex: 19,
-                      child: FilledButton(
-                        onPressed: widget.onSave, // Gọi callback
-                        child: Center(child: Text(LocaleKeys.save.tr())),
+                      child: BlocBuilder<EditBookCubit, Book>(
+                        builder: (context, state) {
+                          return FilledButton(
+                            onPressed: (state.id != null)
+                                ? () => _updateBook(state)
+                                : () => _saveNewBook(state),
+                            style: ButtonStyle(
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                    cornerRadius,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            child: Center(child: Text(LocaleKeys.save.tr())),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -439,6 +712,32 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Padding _buildAddNewReadingButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+      child: FilledButton.tonal(
+        onPressed: () {
+          context.read<EditBookCubit>().addNewReading(Reading());
+        },
+        style: ButtonStyle(
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(cornerRadius),
+            ),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.add),
+            const SizedBox(width: 10),
+            Text(LocaleKeys.add_additional_reading_time.tr()),
+          ],
         ),
       ),
     );

@@ -23,14 +23,8 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.bookEditor,
       builder: (context, state) {
-        // final args = state.extra as Map<String, dynamic>;
-        // final appBarTitle = args['appBarTitle'] as String;
-        // final initialBook = args['initialBook'] as Book;
-
-        return BookEditorScreen(
-          appBarTitle: 'Add Book',
-          // initialBook: initialBook,
-        );
+        // final args = state.extra as Map<String, dynamic>? ?? {};
+        return BookEditorScreen();
       },
     ),
     GoRoute(
@@ -61,8 +55,8 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.searchOl,
       builder: (context, state) {
-        final scan = state.extra as BookStatus;
-        return SearchOLScreen(status: scan);
+        final status = state.extra as BookStatus? ?? BookStatus.finished;
+        return SearchOLScreen(status: status);
       },
     ),
   ],

@@ -5,6 +5,10 @@ abstract final class Constants {
   static const blurHashY = 2;
 
   static const double formHeight = 60.0;
+
+  static const maxTagLength = 10;
+
+  static const tagDelimeter = '|||||';
 }
 
 const double cornerRadius = 8;
