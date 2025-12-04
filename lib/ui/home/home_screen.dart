@@ -44,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void __goToSearchInUserBooksPage() {
-    context.push(Routes.searchOl, extra: BookStatus.finished);
+    context.push(Routes.search);
   }
 
   @override
@@ -219,7 +219,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _searchInOpenLibrary() {}
+  void _searchInOpenLibrary() {
+    context.push(Routes.searchOl);
+  }
 
   void _scanBarcode() {}
 

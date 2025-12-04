@@ -138,7 +138,8 @@ class BookCubit extends Cubit {
 
   Future<void> getSearchBooks(String query) async {
     if (query.isEmpty) {
-      _searchBooksFetcher.sink.add(List.empty());
+      final books = await repository.getAllNotDeletedBooks();
+      _searchBooksFetcher.sink.add(books);
     } else {
       List<Book> books = await repository.searchBooks(query);
       _searchBooksFetcher.sink.add(books);
