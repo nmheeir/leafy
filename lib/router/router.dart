@@ -38,7 +38,7 @@ GoRouter router() => GoRouter(
     ),
     GoRoute(
       path: Routes.settingBookListOrder,
-      builder: (context, state) => SettingsBookListOrderScreen(),
+      builder: (context, state) => SettingBookListOrderScreen(),
     ),
     GoRoute(
       path: Routes.settingAppearance,
