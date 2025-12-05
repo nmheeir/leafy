@@ -49,7 +49,8 @@ class SettingsScreen extends StatelessWidget {
                 contentPadding: const EdgeInsets.only(top: 10),
 
                 lightTheme: SettingsThemeData(
-                  settingsListBackground: context.colorScheme.surfaceContainerLowest,
+                  settingsListBackground:
+                      context.colorScheme.surfaceContainerLowest,
                 ),
                 sections: [
                   // SettingsSection(tiles: _buildGeneralSettingsTiles(context)),
@@ -294,7 +295,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       leading: const Icon(FontAwesomeIcons.tags),
       onPressed: (context) {
-        // TODO: Implement default tags logic
+        context.push(Routes.settingDefautlBookTag);
       },
     );
   }
@@ -317,18 +318,15 @@ class SettingsScreen extends StatelessWidget {
         style: TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.settings_backup_restore_rounded),
-      onPressed: (context) => context.push(Routes.settingBackupRestore)
+      onPressed: (context) => context.push(Routes.settingBackupRestore),
     );
   }
 
   SettingsTile _buildAppearanceSetting(BuildContext context) {
     return SettingsTile.navigation(
-      title: Text(
-        LocaleKeys.apperance.tr(),
-        style: TextStyle(fontSize: 16),
-      ),
+      title: Text(LocaleKeys.apperance.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.palette),
-      onPressed: (context) => context.push(Routes.settingAppearance)
+      onPressed: (context) => context.push(Routes.settingAppearance),
     );
   }
 

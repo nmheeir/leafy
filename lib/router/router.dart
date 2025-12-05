@@ -8,6 +8,7 @@ import 'package:leafy/ui/search_ol/search_ol_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_accent_color_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_default_book_tag_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
 import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
@@ -15,7 +16,7 @@ import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.home,
+  initialLocation: Routes.setting,
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
@@ -58,6 +59,10 @@ GoRouter router() => GoRouter(
         final status = state.extra as BookStatus? ?? BookStatus.finished;
         return SearchOLScreen(status: status);
       },
+    ),
+    GoRoute(
+      path: Routes.settingDefautlBookTag,
+      builder: (context, state) => SettingDefaultBookTagScreen(),
     ),
   ],
   // redirect: (context, state) {

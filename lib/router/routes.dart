@@ -13,4 +13,5 @@ abstract final class Routes {
   static const settingBackupRestore = '/setting-backup-restore';
   static const settingAppearance = '/setting-appearance';
   static const settingAccentColor = '/setting-accent-color';
+  static const settingDefautlBookTag = '/setting-default-book-tag';
 }
