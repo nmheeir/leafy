@@ -33,7 +33,7 @@ final class ChangeThemeEvent extends ThemeEvent {
 }
 
 final class ChangeAccentEvent extends ThemeEvent {
-  final Color primaryColor;
+  final Color? primaryColor;
   final bool useMaterialYou;
 
   const ChangeAccentEvent({
@@ -42,5 +42,5 @@ final class ChangeAccentEvent extends ThemeEvent {
   });
 
   @override
-  List<Object> get props => [primaryColor, useMaterialYou];
+  List<Object?> get props => [primaryColor, useMaterialYou];
 }

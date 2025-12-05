@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 
 class SettingAccentColorScreen extends StatefulWidget {
   const SettingAccentColorScreen({super.key});
@@ -15,29 +18,39 @@ class SettingAccentColorScreen extends StatefulWidget {
 class _SettingAccentColorScreenState extends State<SettingAccentColorScreen> {
   late Color pickerColor;
 
-  /// Hàm placeholder, không thực hiện logic.
   void _setMaterialYou(BuildContext context) {
-    // Không làm gì cả
+    BlocProvider.of<ThemeBloc>(
+      context,
+    ).add(const ChangeAccentEvent(primaryColor: null, useMaterialYou: true));
+
+    context.pop();
   }
 
-  /// Hàm placeholder, không thực hiện logic.
   void _setCustomColor(BuildContext context) {
-    // Không làm gì cả
+    BlocProvider.of<ThemeBloc>(
+      context,
+    ).add(ChangeAccentEvent(primaryColor: pickerColor, useMaterialYou: false));
+
+    context.pop();
   }
 
   @override
   void initState() {
     super.initState();
-    // Khởi tạo màu mặc định, không phụ thuộc vào BLoC.
-    pickerColor = Colors.blue;
+
+    final state = context.read<ThemeBloc>().state;
+
+    if (state is SetThemeState) {
+      pickerColor = state.primaryColor;
+    } else {
+      pickerColor = Colors.blue;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(LocaleKeys.select_accent_color.tr()),
-      ),
+      appBar: AppBar(title: Text(LocaleKeys.select_accent_color.tr())),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(8),
@@ -70,9 +83,8 @@ class _SettingAccentColorScreenState extends State<SettingAccentColorScreen> {
                   borderRadius: 50,
                   columnSpacing: 12,
                   wheelSquarePadding: 16,
-                  onColorChanged: (Color color) => setState(
-                    () => pickerColor = color,
-                  ),
+                  onColorChanged: (Color color) =>
+                      setState(() => pickerColor = color),
                   heading: Text(
                     LocaleKeys.select_color.tr(),
                     style: Theme.of(context).textTheme.headlineSmall,
