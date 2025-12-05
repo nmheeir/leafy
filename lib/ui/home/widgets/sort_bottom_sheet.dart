@@ -4,11 +4,16 @@ import 'package:diacritic/diacritic.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
+import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
+import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
+import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/home/widgets/tag_filter_chip.dart';
 import 'package:leafy/ui/home/widgets/year_filter_chip.dart';
@@ -21,6 +26,19 @@ class SortBottomSheet extends StatefulWidget {
 }
 
 class SortBottomSheetState extends State<SortBottomSheet> {
+  Bloc _getBlocProvider(BookStatus bookStatus) {
+    return switch (bookStatus) {
+      BookStatus.finished => BlocProvider.of<SortFinishedBooksBloc>(context),
+      BookStatus.inProgress => BlocProvider.of<SortInProgressBooksBloc>(
+        context,
+      ),
+      BookStatus.forLater => BlocProvider.of<SortForLaterBooksBloc>(context),
+      BookStatus.unfinished => BlocProvider.of<SortUnfinishedBooksBloc>(
+        context,
+      ),
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -45,7 +63,42 @@ class SortBottomSheetState extends State<SortBottomSheet> {
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-              child: _buildBody(BookStatus.forLater, SortState.fromJson({})),
+              child: BlocBuilder<BookListsOrderCubit, List<BookStatus>>(
+                builder: (context, bookStatus) {
+                  return BlocBuilder<BookTabIndexCubit, int>(
+                    builder: (context, tabIndex) {
+                      switch (bookStatus[tabIndex]) {
+                        case BookStatus.finished:
+                          return BlocBuilder<SortFinishedBooksBloc, SortState>(
+                            builder: (context, state) =>
+                                _buildBody(BookStatus.finished, state),
+                          );
+                        case BookStatus.inProgress:
+                          return BlocBuilder<
+                            SortInProgressBooksBloc,
+                            SortState
+                          >(
+                            builder: (context, state) =>
+                                _buildBody(BookStatus.inProgress, state),
+                          );
+                        case BookStatus.forLater:
+                          return BlocBuilder<SortForLaterBooksBloc, SortState>(
+                            builder: (context, state) =>
+                                _buildBody(BookStatus.forLater, state),
+                          );
+                        case BookStatus.unfinished:
+                          return BlocBuilder<
+                            SortUnfinishedBooksBloc,
+                            SortState
+                          >(
+                            builder: (context, state) =>
+                                _buildBody(BookStatus.unfinished, state),
+                          );
+                      }
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
@@ -61,8 +114,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
         icon: sortState.isAsc
             ? const Icon(Icons.arrow_upward, size: 18)
             : const Icon(Icons.arrow_downward, size: 18),
-        onPressed: () {},
-        // _getBlocProvider(bookStatus).add(const ToggleOrderEvent()),
+        onPressed: () {
+          _getBlocProvider(bookStatus).add(const ToggleOrderEvent());
+        },
       ),
     );
   }
@@ -86,11 +140,11 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       }
     }
 
-    // _getBlocProvider(bookStatus).add(
-    //   ChangeYearsEvent(
-    //     selectedYearsList.isEmpty ? null : selectedYearsList.join('|||||'),
-    //   ),
-    // );
+    _getBlocProvider(bookStatus).add(
+      ChangeYearsEvent(
+        selectedYearsList.isEmpty ? null : selectedYearsList.join('|||||'),
+      ),
+    );
   }
 
   void _onTagChipPressed({
@@ -112,11 +166,11 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       }
     }
 
-    // _getBlocProvider(bookStatus).add(
-    //   ChangeTagsEvent(
-    //     selectedTagsList.isEmpty ? null : selectedTagsList.join('|||||'),
-    //   ),
-    // );
+    _getBlocProvider(bookStatus).add(
+      ChangeTagsEvent(
+        selectedTagsList.isEmpty ? null : selectedTagsList.join('|||||'),
+      ),
+    );
   }
 
   List<Widget> _buildYearChips(
@@ -172,14 +226,13 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       YearFilterChip(
         dbYear: null,
         selected: selectedYears == dbYears.join('|||||'),
-        // onYearChipPressed: (_) => _getBlocProvider(bookStatus).add(
-        //   ChangeYearsEvent(
-        //     selectedYears == dbYears.join('|||||')
-        //         ? null
-        //         : dbYears.join('|||||'),
-        //   ),
-        // ),
-        onYearChipPressed: (_) {},
+        onYearChipPressed: (_) => _getBlocProvider(bookStatus).add(
+          ChangeYearsEvent(
+            selectedYears == dbYears.join('|||||')
+                ? null
+                : dbYears.join('|||||'),
+          ),
+        ),
       ),
     );
 
@@ -249,12 +302,11 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       TagFilterChip(
         tag: null,
         selected: selectedTags == dbTags.join('|||||'),
-        // onTagChipPressed: (_) => _getBlocProvider(bookStatus).add(
-        //   ChangeTagsEvent(
-        //     selectedTags == dbTags.join('|||||') ? null : dbTags.join('|||||'),
-        //   ),
-        // ),
-        onTagChipPressed: (_) {},
+        onTagChipPressed: (_) => _getBlocProvider(bookStatus).add(
+          ChangeTagsEvent(
+            selectedTags == dbTags.join('|||||') ? null : dbTags.join('|||||'),
+          ),
+        ),
       ),
     );
 
@@ -293,10 +345,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       children: [
         Expanded(
           child: InkWell(
-            onTap: () {},
-            // onTap: () => _getBlocProvider(
-            //   bookStatus,
-            // ).add(ChangeFilterOutTags(!filterOutTags)),
+            onTap: () => _getBlocProvider(
+              bookStatus,
+            ).add(ChangeFilterOutTags(!filterOutTags)),
             child: _buildBooksExceptTags(bookStatus, filterOutTags),
           ),
         ),
@@ -309,10 +360,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       children: [
         Expanded(
           child: InkWell(
-            onTap: () {},
-            // onTap: () => _getBlocProvider(
-            //   bookStatus,
-            // ).add(ChangeFilterTagsAsAnd(!filterTagsAsAnd)),
+            onTap: () => _getBlocProvider(
+              bookStatus,
+            ).add(ChangeFilterTagsAsAnd(!filterTagsAsAnd)),
             child: _buildOnlyBooksWithAllTags(bookStatus, filterTagsAsAnd),
           ),
         ),
@@ -450,10 +500,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       children: [
         Expanded(
           child: InkWell(
-            onTap: () {},
-            // onTap: () => _getBlocProvider(
-            //   bookStatus,
-            // ).add(ChangeOnlyFavouriteEvent(!onlyFavourite)),
+            onTap: () => _getBlocProvider(
+              bookStatus,
+            ).add(ChangeOnlyFavouriteEvent(!onlyFavourite)),
             child: Container(
               decoration: BoxDecoration(
                 color: context.colorScheme.surfaceContainerHighest,
@@ -466,10 +515,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
                     height: 40,
                     child: Switch.adaptive(
                       value: onlyFavourite,
-                      onChanged: (value) {},
-                      // onChanged: (value) => _getBlocProvider(
-                      //   bookStatus,
-                      // ).add(ChangeOnlyFavouriteEvent(value)),
+                      onChanged: (value) => _getBlocProvider(
+                        bookStatus,
+                      ).add(ChangeOnlyFavouriteEvent(value)),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -513,12 +561,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
                   )
                   .toList(),
               value: sortState.sortType,
-              onChanged: (value) {
-                //TODO: onChanged
-              },
-              // onChanged: (value) => _getBlocProvider(
-              //   bookStatus,
-              // ).add(ChangeSortTypeEvent(value ?? SortType.byTitle)),
+              onChanged: (value) => _getBlocProvider(
+                bookStatus,
+              ).add(ChangeSortTypeEvent(value ?? SortType.byTitle)),
             ),
           ),
         ),
@@ -566,8 +611,8 @@ class SortBottomSheetState extends State<SortBottomSheet> {
           ),
         ],
         value: bookFormat,
-        // onChanged: (value) =>
-        //     _getBlocProvider(bookStatus).add(ChangeBookTypeEvent(value)),
+        onChanged: (value) =>
+            _getBlocProvider(bookStatus).add(ChangeBookTypeEvent(value)),
       ),
     );
   }
@@ -592,10 +637,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
                 children: [
                   Switch.adaptive(
                     value: filterTagsAsAnd,
-                    onChanged: (value) {},
-                    // onChanged: (value) => _getBlocProvider(
-                    //   bookStatus,
-                    // ).add(ChangeFilterTagsAsAnd(value)),
+                    onChanged: (value) => _getBlocProvider(
+                      bookStatus,
+                    ).add(ChangeFilterTagsAsAnd(value)),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -636,10 +680,9 @@ class SortBottomSheetState extends State<SortBottomSheet> {
                 children: [
                   Switch.adaptive(
                     value: filterOutTags,
-                    // onChanged: (value) => _getBlocProvider(
-                    //   bookStatus,
-                    // ).add(ChangeFilterOutTags(value)),
-                    onChanged: (value) {},
+                    onChanged: (value) => _getBlocProvider(
+                      bookStatus,
+                    ).add(ChangeFilterOutTags(value)),
                   ),
                   const SizedBox(width: 10),
                   Expanded(

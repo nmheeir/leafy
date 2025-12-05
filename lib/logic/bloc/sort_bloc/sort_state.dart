@@ -48,13 +48,14 @@ class SortState extends Equatable {
   }
 
   factory SortState.fromJson(Map<String, dynamic> json) {
-    final sortTypeInt = json['sort_type'] as int;
-    final isAsc = json['sort_order'] as bool;
-    final onlyFavourite = json['only_favourite'] as bool;
+    final sortTypeInt = json['sort_type'] as int? ?? SortType.byTitle.index;
+    
+    final isAsc = json['sort_order'] as bool? ?? true;
+    final onlyFavourite = json['only_favourite'] as bool? ?? false;
     final years = json['years'] as String?;
     final tags = json['tags'] as String?;
-    final filterTagsAsAnd = json['filter_tags_as_and'] as bool;
-    final filterOutTags = json['filter_out_tags'] as bool;
+    final filterTagsAsAnd = json['filter_tags_as_and'] as bool? ?? false;
+    final filterOutTags = json['filter_out_tags'] as bool? ?? false;
     final bookType = json['filter_book_type'] as String?;
 
     final sortType = sortTypeInt < SortType.values.length

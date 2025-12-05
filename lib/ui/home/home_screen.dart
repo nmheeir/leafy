@@ -18,6 +18,7 @@ import 'package:leafy/ui/books/books_screen.dart';
 import 'package:leafy/ui/home/widgets/add_book_sheet.dart';
 import 'package:leafy/ui/home/widgets/home_navigation_bar.dart';
 import 'package:leafy/ui/home/widgets/multi_select_fab.dart';
+import 'package:leafy/ui/home/widgets/sort_bottom_sheet.dart';
 import 'package:leafy/ui/statistics/statistics_screen.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -238,6 +239,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _scanBarcode() {}
 
+  void _openSortFilterSheet() {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => SortBottomSheet(),
+    );
+  }
+
   Future<void> _invokeMenuOption(String choice) async {
     await Future.delayed(const Duration(milliseconds: 0));
 
@@ -245,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (currentPageIndex == 0) {
       if (choice == menuOptions[0]) {
-        // openSortFilterSheet();
+        _openSortFilterSheet();
       } else if (choice == menuOptions[1]) {
         // goToDisplayScreen();
       } else if (choice == menuOptions[2]) {
