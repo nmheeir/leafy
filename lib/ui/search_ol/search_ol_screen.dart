@@ -23,6 +23,7 @@ import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:leafy/ui/search_ol/widgets/book_card_ol.dart';
 import 'package:leafy/ui/search_ol/widgets/ol_search_radio.dart';
+import 'package:leafy/ui/search_ol_edition/search_ol_edition_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SearchOLScreen extends StatefulWidget {
@@ -349,25 +350,24 @@ class _SearchOLScreenState extends State<SearchOLScreen>
   void _onChooseEditionPressed(OLSearchResultDoc item) {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    // TODO: Kích hoạt lại điều hướng đến màn hình chọn phiên bản (SearchOLEditionsScreen).
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => SearchOLEditionsScreen(
-    //       status: widget.status,
-    //       editions: item.editionKey!,
-    //       title: item.title!,
-    //       subtitle: item.subtitle,
-    //       author: (item.authorName != null && item.authorName!.isNotEmpty)
-    //           ? item.authorName![0]
-    //           : '',
-    //       pagesMedian: item.medianPages,
-    //       isbn: item.isbn,
-    //       olid: item.key,
-    //       firstPublishYear: item.firstPublishYear,
-    //     ),
-    //   ),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchOLEditionsScreen(
+          status: widget.status,
+          editions: item.editionKey!,
+          title: item.title!,
+          subtitle: item.subtitle,
+          author: (item.authorName != null && item.authorName!.isNotEmpty)
+              ? item.authorName![0]
+              : '',
+          pagesMedian: item.medianPages,
+          isbn: item.isbn,
+          olid: item.key,
+          firstPublishYear: item.firstPublishYear,
+        ),
+      ),
+    );
   }
 
   @override
