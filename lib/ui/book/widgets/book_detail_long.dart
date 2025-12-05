@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//TODO: add supprot markdown text
 class BookDetailLong extends StatelessWidget {
   const BookDetailLong({super.key, required this.title, required this.text});
 

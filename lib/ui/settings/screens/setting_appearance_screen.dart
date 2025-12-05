@@ -429,6 +429,7 @@ class SettingAppearanceScreen extends StatelessWidget {
     );
   }
 
+  //TODO: apply ThemeBloc
   SettingsTile _buildAccentColorSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(LocaleKeys.accent_color.tr(), style: TextStyle(fontSize: 16)),

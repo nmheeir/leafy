@@ -130,6 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  //TODO: change to SliverAppBar if can
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     AppBar appBar = AppBar(
       elevation: 0,
@@ -169,6 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               )
             : const SizedBox(),
+        //TODO: add prefix icon
         PopupMenuButton<String>(
           onSelected: (_) {},
           itemBuilder: (_) {
@@ -279,6 +281,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _openSortFilterSheet();
       } else if (choice == menuOptions[1]) {
         // goToDisplayScreen();
+        //TODO: show bottom sheet instead of goToDisplayScreen
       } else if (choice == menuOptions[2]) {
         goToSettingsScreen();
       }

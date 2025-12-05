@@ -31,6 +31,7 @@ class LikeButton extends StatelessWidget {
       child: FaIcon(
         FontAwesomeIcons.solidHeart,
         color: isLiked
+        //TODO: change color to primary
             ? context.colorScheme.primaryContainer
             : context.colorScheme.surfaceContainerHighest,
         size: 30,

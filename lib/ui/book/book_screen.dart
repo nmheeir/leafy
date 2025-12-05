@@ -15,6 +15,7 @@ import 'package:leafy/ui/book/widgets/book_title_detail.dart';
 import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
 
+//TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
   const BookScreen({super.key, required this.heroTag});
 

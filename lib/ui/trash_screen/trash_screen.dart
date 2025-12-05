@@ -5,6 +5,7 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
 
+//TODO: add some logic (delete_all button, dismissible to delete or recovery)
 class TrashScreen extends StatelessWidget {
   const TrashScreen({super.key});
 
