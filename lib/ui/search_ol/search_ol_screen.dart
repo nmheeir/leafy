@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:barcode_scan2/barcode_scan2.dart';
+// import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +42,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
   final _pageSize = 10;
   String? _searchTerm;
   int? numberOfResults;
-  ScanResult? scanResult;
+  // ScanResult? scanResult;
   int searchTimestamp = 0;
 
   bool searchActivated = false;
