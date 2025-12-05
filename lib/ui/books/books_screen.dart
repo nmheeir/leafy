@@ -13,6 +13,7 @@ import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/books/widgets/books_tag_chip.dart';
 import 'package:leafy/ui/books/widgets/empty_books_list.dart';
+import 'package:leafy/ui/books/widgets/layouts/books_grid.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
 
 class BooksScreen extends StatefulWidget {
@@ -168,10 +169,7 @@ class _BooksScreenState extends State<BooksScreen>
     }
   }
 
-  List<Book> _filterTagsModeOr(
-    List<Book> list,
-    String tags,
-  ) {
+  List<Book> _filterTagsModeOr(List<Book> list, String tags) {
     final tagsList = tags.split(('|||||'));
 
     final filteredOut = List<Book>.empty(growable: true);
@@ -197,10 +195,7 @@ class _BooksScreenState extends State<BooksScreen>
     return filteredOut;
   }
 
-  List<Book> _filterOutBookTypes(
-    List<Book> list,
-    BookFormat bookType,
-  ) {
+  List<Book> _filterOutBookTypes(List<Book> list, BookFormat bookType) {
     final filteredOut = List<Book>.empty(growable: true);
 
     for (var book in list) {
@@ -212,10 +207,7 @@ class _BooksScreenState extends State<BooksScreen>
     return filteredOut;
   }
 
-  List<Book> _filterTagsModeAnd(
-    List<Book> list,
-    String tags,
-  ) {
+  List<Book> _filterTagsModeAnd(List<Book> list, String tags) {
     final tagsList = tags.split(('|||||'));
 
     final filteredOut = List<Book>.empty(growable: true);
@@ -242,10 +234,7 @@ class _BooksScreenState extends State<BooksScreen>
   }
 
   // Return list of books that do not have selected tags
-  List<Book> _filterOutSelectedTags(
-    List<Book> list,
-    String tags,
-  ) {
+  List<Book> _filterOutSelectedTags(List<Book> list, String tags) {
     final tagsList = tags.split(('|||||'));
 
     final filteredOut = List<Book>.empty(growable: true);
@@ -300,27 +289,28 @@ class _BooksScreenState extends State<BooksScreen>
     }
   }
 
-  List<Book> _sortByTitle({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByTitle({required List<Book> list, required bool isAsc}) {
     isAsc
-        ? list.sort((a, b) => removeDiacritics(a.title.toString().toLowerCase())
-            .compareTo(removeDiacritics(b.title.toString().toLowerCase())))
-        : list.sort((b, a) => removeDiacritics(a.title.toString().toLowerCase())
-            .compareTo(removeDiacritics(b.title.toString().toLowerCase())));
+        ? list.sort(
+            (a, b) => removeDiacritics(
+              a.title.toString().toLowerCase(),
+            ).compareTo(removeDiacritics(b.title.toString().toLowerCase())),
+          )
+        : list.sort(
+            (b, a) => removeDiacritics(
+              a.title.toString().toLowerCase(),
+            ).compareTo(removeDiacritics(b.title.toString().toLowerCase())),
+          );
     // no secondary sorting
 
     return list;
   }
 
-  List<Book> _sortByAuthor({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByAuthor({required List<Book> list, required bool isAsc}) {
     list.sort((a, b) {
-      int authorSorting = removeDiacritics(a.author.toString().toLowerCase())
-          .compareTo(removeDiacritics(b.author.toString().toLowerCase()));
+      int authorSorting = removeDiacritics(
+        a.author.toString().toLowerCase(),
+      ).compareTo(removeDiacritics(b.author.toString().toLowerCase()));
       if (!isAsc) {
         authorSorting *= -1;
       } // descending
@@ -335,8 +325,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -350,10 +341,7 @@ class _BooksScreenState extends State<BooksScreen>
     return list;
   }
 
-  List<Book> _sortByRating({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByRating({required List<Book> list, required bool isAsc}) {
     List<Book> booksNotRated = List.empty(growable: true);
     List<Book> booksRated = List.empty(growable: true);
 
@@ -377,8 +365,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -392,10 +381,7 @@ class _BooksScreenState extends State<BooksScreen>
     return booksRated + booksNotRated;
   }
 
-  List<Book> _sortByPages({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByPages({required List<Book> list, required bool isAsc}) {
     List<Book> booksWithoutPages = List.empty(growable: true);
     List<Book> booksWithPages = List.empty(growable: true);
 
@@ -421,8 +407,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -436,13 +423,11 @@ class _BooksScreenState extends State<BooksScreen>
     return booksWithPages + booksWithoutPages;
   }
 
-  List<Book> _sortByDateAdded({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByDateAdded({required List<Book> list, required bool isAsc}) {
     list.sort((a, b) {
-      int dateAddedSorting = a.dateAdded.millisecondsSinceEpoch
-          .compareTo(b.dateAdded.millisecondsSinceEpoch);
+      int dateAddedSorting = a.dateAdded.millisecondsSinceEpoch.compareTo(
+        b.dateAdded.millisecondsSinceEpoch,
+      );
 
       if (!isAsc) {
         dateAddedSorting *= -1;
@@ -458,8 +443,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -478,8 +464,9 @@ class _BooksScreenState extends State<BooksScreen>
     required bool isAsc,
   }) {
     list.sort((a, b) {
-      int dateModifiedSorting = a.dateModified.millisecondsSinceEpoch
-          .compareTo(b.dateModified.millisecondsSinceEpoch);
+      int dateModifiedSorting = a.dateModified.millisecondsSinceEpoch.compareTo(
+        b.dateModified.millisecondsSinceEpoch,
+      );
 
       if (!isAsc) {
         dateModifiedSorting *= -1;
@@ -495,8 +482,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -510,10 +498,7 @@ class _BooksScreenState extends State<BooksScreen>
     return list;
   }
 
-  List<Book> _sortByStartDate({
-    required List<Book> list,
-    required bool isAsc,
-  }) {
+  List<Book> _sortByStartDate({required List<Book> list, required bool isAsc}) {
     List<Book> booksWithoutStartDate = List.empty(growable: true);
     List<Book> booksWithStartDate = List.empty(growable: true);
 
@@ -552,8 +537,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -609,8 +595,9 @@ class _BooksScreenState extends State<BooksScreen>
         }
         if (releaseSorting == 0) {
           // tertiary sorting, by title
-          int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-              .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+          int titleSorting = removeDiacritics(
+            a.title.toString().toLowerCase(),
+          ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
           if (!isAsc) {
             titleSorting *= -1;
           }
@@ -638,15 +625,17 @@ class _BooksScreenState extends State<BooksScreen>
     }
 
     booksWithPublicationDate.sort((a, b) {
-      int publicationYearSorting =
-          a.publicationYear!.compareTo(b.publicationYear!);
+      int publicationYearSorting = a.publicationYear!.compareTo(
+        b.publicationYear!,
+      );
       if (!isAsc) {
         publicationYearSorting *= -1;
       }
 
       if (publicationYearSorting == 0) {
-        int titleSorting = removeDiacritics(a.title.toString().toLowerCase())
-            .compareTo(removeDiacritics(b.title.toString().toLowerCase()));
+        int titleSorting = removeDiacritics(
+          a.title.toString().toLowerCase(),
+        ).compareTo(removeDiacritics(b.title.toString().toLowerCase()));
         if (!isAsc) {
           titleSorting *= -1;
         }
@@ -720,7 +709,7 @@ class _BooksScreenState extends State<BooksScreen>
   }
 
   BlocBuilder<SortInProgressBooksBloc, SortState>
-      _buildInProgressBooksTabView() {
+  _buildInProgressBooksTabView() {
     return BlocBuilder<SortInProgressBooksBloc, SortState>(
       builder: (context, state) {
         return _buildBooksTabView(
@@ -747,7 +736,7 @@ class _BooksScreenState extends State<BooksScreen>
   }
 
   BlocBuilder<SortUnfinishedBooksBloc, SortState>
-      _buildUnfinishedBooksTabView() {
+  _buildUnfinishedBooksTabView() {
     return BlocBuilder<SortUnfinishedBooksBloc, SortState>(
       builder: (context, state) {
         return _buildBooksTabView(
@@ -764,10 +753,8 @@ class _BooksScreenState extends State<BooksScreen>
     required int listNumber,
     required Stream<List<Book>> stream,
     required SortState sortState,
-    List<Book> Function({
-      required SortState state,
-      required List<Book> list,
-    })? sorting,
+    List<Book> Function({required SortState state, required List<Book> list})?
+    sorting,
   }) {
     return StreamBuilder<List<Book>>(
       stream: stream,
@@ -780,14 +767,20 @@ class _BooksScreenState extends State<BooksScreen>
           return BlocBuilder<DisplayCubit, DisplayState>(
             builder: (context, displayState) {
               if (_displayIsGrid(displayState)) {
-                return Container();
+                return BooksGrid(
+                  books: sorting != null
+                      ? sorting(state: sortState, list: snapshot.data!)
+                      : snapshot.data!,
+                  listNumber: listNumber,
+                  allBooksCount: snapshot.data!.length,
+                  gridType: displayState.type,
+                  gridSize: displayState.gridSize,
+                  titleOverCover: displayState.showTitleOverCover,
+                );
               } else {
                 return BooksList(
                   books: sorting != null
-                      ? sorting(
-                          state: sortState,
-                          list: snapshot.data!,
-                        )
+                      ? sorting(state: sortState, list: snapshot.data!)
                       : snapshot.data!,
                   listNumber: listNumber,
                   allBooksCount: snapshot.data!.length,
@@ -804,7 +797,6 @@ class _BooksScreenState extends State<BooksScreen>
     );
   }
 
-
   //TODO: Need to optimized code
   List<Widget> _buildTabChips(
     BuildContext context,
@@ -816,32 +808,40 @@ class _BooksScreenState extends State<BooksScreen>
     for (var status in bookListsOrder) {
       switch (status) {
         case BookStatus.finished:
-          tabChips.add(BooksTagChip(
-            index: index,
-            tabController: _tabController,
-            title: LocaleKeys.books_finished.tr(),
-          ));
+          tabChips.add(
+            BooksTagChip(
+              index: index,
+              tabController: _tabController,
+              title: LocaleKeys.books_finished.tr(),
+            ),
+          );
           break;
         case BookStatus.inProgress:
-          tabChips.add(BooksTagChip(
-            index: index,
-            tabController: _tabController,
-            title: LocaleKeys.books_in_progress.tr(),
-          ));
+          tabChips.add(
+            BooksTagChip(
+              index: index,
+              tabController: _tabController,
+              title: LocaleKeys.books_in_progress.tr(),
+            ),
+          );
           break;
         case BookStatus.forLater:
-          tabChips.add(BooksTagChip(
-            index: index,
-            tabController: _tabController,
-            title: LocaleKeys.books_for_later.tr(),
-          ));
+          tabChips.add(
+            BooksTagChip(
+              index: index,
+              tabController: _tabController,
+              title: LocaleKeys.books_for_later.tr(),
+            ),
+          );
           break;
         case BookStatus.unfinished:
-          tabChips.add(BooksTagChip(
-            index: index,
-            tabController: _tabController,
-            title: LocaleKeys.books_unfinished.tr(),
-          ));
+          tabChips.add(
+            BooksTagChip(
+              index: index,
+              tabController: _tabController,
+              title: LocaleKeys.books_unfinished.tr(),
+            ),
+          );
           break;
       }
 

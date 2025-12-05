@@ -11,6 +11,7 @@ import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
+import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/routes.dart';
@@ -146,6 +147,26 @@ class _HomeScreenState extends State<HomeScreen> {
             ? IconButton(
                 onPressed: __goToSearchInUserBooksPage,
                 icon: const Icon(Icons.search),
+              )
+            : const SizedBox(),
+        currentPageIndex == 0
+            ? BlocBuilder<DisplayCubit, DisplayState>(
+                builder: (context, state) {
+                  return IconButton(
+                    onPressed: () {
+                      context.read<DisplayCubit>().setDisplayType(
+                        state.type == DisplayType.list
+                            ? DisplayType.grid
+                            : DisplayType.list,
+                      );
+                    },
+                    icon: Icon(
+                      state.type == DisplayType.grid
+                          ? Icons.grid_view
+                          : Icons.list,
+                    ),
+                  );
+                },
               )
             : const SizedBox(),
         PopupMenuButton<String>(
