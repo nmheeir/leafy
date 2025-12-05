@@ -200,7 +200,7 @@ class BookCardListCompact extends StatelessWidget {
             itemPadding: const EdgeInsets.only(right: 3),
             itemBuilder: (context, _) => FaIcon(
               FontAwesomeIcons.solidStar,
-              color: context.colorScheme.primaryContainer,
+              color: context.colorScheme.primary,
             ),
             onRatingUpdate: (_) {},
           );

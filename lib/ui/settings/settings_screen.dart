@@ -1,11 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/widgets/common_dialogs.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/settings/widgets/setting_dialog_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -178,6 +180,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  //TODO: improve dialog UI
   void _showDefaultBooksFormatDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -230,6 +233,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _setDefaultBooksFormat(BuildContext context, BookFormat bookFormat) {
+    context.read<DefaultBookFormatCubit>().setBookFormat(bookFormat);
     Navigator.of(context).pop();
   }
 

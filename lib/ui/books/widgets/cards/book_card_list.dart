@@ -383,7 +383,7 @@ class BookCardList extends StatelessWidget {
             itemPadding: const EdgeInsets.only(right: 3),
             itemBuilder: (context, _) => FaIcon(
               FontAwesomeIcons.solidStar,
-              color: context.colorScheme.primaryContainer,
+              color: context.colorScheme.primary,
             ),
             onRatingUpdate: (_) {},
           );
@@ -394,7 +394,7 @@ class BookCardList extends StatelessWidget {
               const SizedBox(width: 5),
               FaIcon(
                 FontAwesomeIcons.solidStar,
-                color: context.colorScheme.primaryContainer,
+                color: context.colorScheme.primary,
                 size: 14,
               ),
             ],

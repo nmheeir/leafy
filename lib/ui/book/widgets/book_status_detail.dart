@@ -212,7 +212,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
             itemPadding: const EdgeInsets.only(right: 3),
             itemBuilder: (context, _) => FaIcon(
               FontAwesomeIcons.solidStar,
-              color: context.colorScheme.primaryContainer,
+              color: context.colorScheme.primary,
             ),
             onRatingUpdate: (_) {},
           );
@@ -232,7 +232,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
               const SizedBox(width: 8),
               FaIcon(
                 FontAwesomeIcons.solidStar,
-                color: context.colorScheme.primaryContainer,
+                color: context.colorScheme.primary,
                 size: 16,
               ),
             ],

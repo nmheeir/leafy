@@ -14,6 +14,7 @@ import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
@@ -67,6 +68,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => BookListsOrderCubit()),
       BlocProvider(create: (context) => DisplayCubit()),
       BlocProvider(create: (context) => SelectedBooksCubit()),
+      BlocProvider(create: (context) => DefaultBookFormatCubit()),
 
       //Sort
       BlocProvider(create: (_) => SortFinishedBooksBloc()),

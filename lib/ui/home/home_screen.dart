@@ -7,9 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/core/constants/enums/book_status.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/books/books_screen.dart';
@@ -212,7 +214,17 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _setEmptyBookForEditorScreen() {
+    final status = BookStatus.finished;
+    final bookFormat = context.read<DefaultBookFormatCubit>().state;
+
+    context.read<EditBookCubit>().setBook(
+      Book.empty(status: status, bookFormat: bookFormat),
+    );
+  }
+
   void _addBookManually() {
+    _setEmptyBookForEditorScreen();
     context.push(
       Routes.bookEditor,
       extra: {'appBarTitle': 'Add New Book', 'initialBook': Book.empty()},
@@ -220,6 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _searchInOpenLibrary() {
+    _setEmptyBookForEditorScreen();
     context.push(Routes.searchOl);
   }
 
