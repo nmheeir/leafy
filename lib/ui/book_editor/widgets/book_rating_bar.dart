@@ -7,6 +7,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 
+//TODO: xảy ra lỗi tràn màn hình khi xoay ngang
 class BookRatingBar extends StatelessWidget {
   const BookRatingBar({super.key, required this.animDuration});
 
@@ -14,7 +15,6 @@ class BookRatingBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Loại bỏ BlocBuilder
     return BlocBuilder<EditBookCubit, Book>(
       builder: (context, state) {
         return Column(

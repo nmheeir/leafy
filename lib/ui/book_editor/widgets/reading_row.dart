@@ -3,10 +3,13 @@ import 'dart:io';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/ui/book_editor/widgets/book_reading_time_field.dart';
 import 'package:leafy/ui/book_editor/widgets/cupertino_date_picker_bottom_sheet.dart';
 import 'package:leafy/ui/book_editor/widgets/set_date_button.dart';
@@ -22,6 +25,14 @@ class ReadingRow extends StatefulWidget {
 }
 
 class _ReadingRowState extends State<ReadingRow> {
+  late final EditBookCubit _editBookCubit;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _editBookCubit = context.read<EditBookCubit>();
+  }
+
   void _showStartDatePicker() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
@@ -32,7 +43,9 @@ class _ReadingRowState extends State<ReadingRow> {
           return CupertinoDatePickerBottomSheet(
             text: LocaleKeys.select_start_date.tr(),
             initialDate: widget.reading.startDate ?? DateTime.now(),
-            onDateTimeChanged: (value) {},
+            onDateTimeChanged: (value) {
+              _editBookCubit.setReadingStartDate(value, widget.index);
+            },
           );
         },
       );
@@ -45,7 +58,9 @@ class _ReadingRowState extends State<ReadingRow> {
         helpText: LocaleKeys.select_start_date.tr(),
       );
 
-      if (mounted && startDate != null) {}
+      if (mounted && startDate != null) {
+        _editBookCubit.setReadingStartDate(startDate, widget.index);
+      }
     }
   }
 
@@ -59,7 +74,9 @@ class _ReadingRowState extends State<ReadingRow> {
           return CupertinoDatePickerBottomSheet(
             text: LocaleKeys.select_finish_date.tr(),
             initialDate: widget.reading.finishDate ?? DateTime.now(),
-            onDateTimeChanged: (value) {},
+            onDateTimeChanged: (value) {
+              _editBookCubit.setReadingFinishDate(value, widget.index);
+            },
           );
         },
       );
@@ -72,13 +89,19 @@ class _ReadingRowState extends State<ReadingRow> {
         helpText: LocaleKeys.select_finish_date.tr(),
       );
 
-      if (mounted && finishDate != null) {}
+      if (mounted && finishDate != null) {
+        _editBookCubit.setReadingFinishDate(finishDate, widget.index);
+      }
     }
   }
 
-  void _clearStartDate() {}
+  void _clearStartDate() {
+    _editBookCubit.setReadingStartDate(null, widget.index);
+  }
 
-  void _clearFinishDate() {}
+  void _clearFinishDate() {
+    _editBookCubit.setReadingFinishDate(null, widget.index);
+  }
 
   void _changeReadingTime(
     String daysString,
