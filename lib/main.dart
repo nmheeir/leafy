@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -27,6 +29,7 @@ late Directory appTempDirectory;
 late BookCubit bookCubit;
 late DateFormat dateFormat;
 late GlobalKey<ScaffoldMessengerState> snackbarKey;
+final _router = router();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +38,7 @@ void main() async {
   appDocumentsDirectory = await getApplicationDocumentsDirectory();
   appTempDirectory = await getTemporaryDirectory();
 
-   snackbarKey = GlobalKey<ScaffoldMessengerState>();
+  snackbarKey = GlobalKey<ScaffoldMessengerState>();
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
@@ -89,13 +92,23 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: _listOfBlocProviders(context),
-      child: LeafyApp(),
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          if (state is SetThemeState) {
+            return LeafyApp(themeState: state);
+          } else {
+            return const SizedBox();
+          }
+        },
+      ),
     );
   }
 }
 
 class LeafyApp extends StatefulWidget {
-  const LeafyApp({super.key});
+  const LeafyApp({super.key, required this.themeState});
+
+  final SetThemeState themeState;
 
   @override
   State<LeafyApp> createState() => _LeafyAppState();
@@ -108,14 +121,105 @@ class _LeafyAppState extends State<LeafyApp> {
 
     final localizationsDelegates = [...context.localizationDelegates];
 
-    return MaterialApp.router(
-      routerConfig: router(),
-      title: Constants.appName,
-      scaffoldMessengerKey: snackbarKey,
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: localizationsDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+        final themeMode = widget.themeState.themeMode;
+
+        final lightColorScheme = ColorScheme.fromSeed(
+          seedColor: widget.themeState.useMaterialYou && lightDynamic != null
+              ? lightDynamic.primary
+              : widget.themeState.primaryColor,
+          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+          brightness: Brightness.light,
+        );
+
+        final lightTheme =
+            ThemeData(
+              colorScheme: lightColorScheme,
+              brightness: Brightness.light,
+              fontFamily: widget.themeState.fontFamily,
+            ).copyWith(
+              scaffoldBackgroundColor: lightColorScheme.surfaceContainerLowest,
+              appBarTheme: AppBarTheme(
+                backgroundColor: lightColorScheme.surfaceContainerLowest,
+              ),
+              navigationBarTheme: NavigationBarThemeData(
+                backgroundColor: lightColorScheme.surfaceContainerLow,
+              ),
+            );
+
+        final darkColorScheme = ColorScheme.fromSeed(
+          seedColor: widget.themeState.useMaterialYou && darkDynamic != null
+              ? darkDynamic.primary
+              : widget.themeState.primaryColor,
+          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+          brightness: Brightness.dark,
+          surface: widget.themeState.amoledDark ? Colors.black : null,
+          surfaceContainer: widget.themeState.amoledDark ? Colors.black : null,
+        );
+
+        final darkTheme =
+            ThemeData(
+              colorScheme: darkColorScheme,
+              brightness: Brightness.dark,
+              fontFamily: widget.themeState.fontFamily,
+            ).copyWith(
+              scaffoldBackgroundColor: widget.themeState.amoledDark
+                  ? Colors.black
+                  : darkColorScheme.surfaceContainerLowest,
+              appBarTheme: AppBarTheme(
+                backgroundColor: widget.themeState.amoledDark
+                    ? Colors.black
+                    : darkColorScheme.surfaceContainerLowest,
+              ),
+              navigationBarTheme: NavigationBarThemeData(
+                backgroundColor: widget.themeState.amoledDark
+                    ? Colors.black
+                    : darkColorScheme.surfaceContainerLow,
+              ),
+            );
+
+        return AnnotatedRegion(
+          value: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            systemNavigationBarColor: Colors.transparent,
+            statusBarBrightness: themeMode == ThemeMode.system
+                ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? Brightness.light
+                      : Brightness.dark
+                : themeMode == ThemeMode.dark
+                ? Brightness.light
+                : Brightness.dark,
+            statusBarIconBrightness: themeMode == ThemeMode.system
+                ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? Brightness.light
+                      : Brightness.dark
+                : themeMode == ThemeMode.dark
+                ? Brightness.light
+                : Brightness.dark,
+            systemNavigationBarIconBrightness: themeMode == ThemeMode.system
+                ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
+                      ? Brightness.light
+                      : Brightness.dark
+                : themeMode == ThemeMode.dark
+                ? Brightness.light
+                : Brightness.dark,
+          ),
+          child: MaterialApp.router(
+            routerConfig: _router,
+            title: Constants.appName,
+            theme: lightTheme,
+            darkTheme: darkTheme,
+            themeMode: themeMode,
+            scaffoldMessengerKey: snackbarKey,
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: localizationsDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
+          ),
+        );
+      },
     );
   }
 }

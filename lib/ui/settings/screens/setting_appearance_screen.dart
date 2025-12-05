@@ -295,7 +295,6 @@ class SettingAppearanceScreen extends StatelessWidget {
     );
   }
 
-  //TODO: dark mode not change
   void _setDarkMode(
     BuildContext context,
     SetThemeState state,
