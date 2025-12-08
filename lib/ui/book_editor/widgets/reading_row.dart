@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';

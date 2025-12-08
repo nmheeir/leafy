@@ -1,12 +1,13 @@
 import 'dart:io';
+
+import 'package:easy_localization/easy_localization.dart';
 // import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
@@ -16,6 +17,7 @@ import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/book/book_screen.dart';
@@ -197,13 +199,17 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
               Platform.isIOS
                   ? CupertinoDialogAction(
                       isDefaultAction: true,
-                      child: Text(LocaleKeys.wait_for_downloading_to_finish.tr()),
+                      child: Text(
+                        LocaleKeys.wait_for_downloading_to_finish.tr(),
+                      ),
                       onPressed: () {
                         Navigator.of(context).pop(true);
                       },
                     )
                   : TextButton(
-                      child: Text(LocaleKeys.wait_for_downloading_to_finish.tr()),
+                      child: Text(
+                        LocaleKeys.wait_for_downloading_to_finish.tr(),
+                      ),
                       onPressed: () {
                         Navigator.of(context).pop(true);
                       },
@@ -219,9 +225,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   : TextButton(
                       child: Text(
                         LocaleKeys.save_without_cover.tr(),
-                        style: TextStyle(
-                          color: context.colorScheme.error,
-                        ),
+                        style: TextStyle(color: context.colorScheme.error),
                       ),
                       onPressed: () {
                         Navigator.of(context).pop(false);

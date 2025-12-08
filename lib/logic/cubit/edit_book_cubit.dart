@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,10 +18,11 @@ class EditBookCubit extends Cubit<Book> {
 
     bookCubit.updateBook(state, cover: cover, context: context);
   }
+
   Future<int> addNewBook(Uint8List? cover) async {
     debugPrint('[EditBookCubit] Attempting to add new book: ${state.title}');
     final bookID = await bookCubit.addBook(state, cover: cover);
-    
+
     debugPrint('[EditBookCubit] Book added successfully with ID: $bookID');
 
     return bookID;
@@ -83,8 +82,9 @@ class EditBookCubit extends Cubit<Book> {
 
   void setPublicationYear(String publicationYear) {
     final book = state.copyWith();
-    book.publicationYear =
-        publicationYear.isEmpty ? null : int.parse(publicationYear);
+    book.publicationYear = publicationYear.isEmpty
+        ? null
+        : int.parse(publicationYear);
 
     emit(book);
   }
@@ -202,31 +202,5 @@ class EditBookCubit extends Cubit<Book> {
     book.readings = readings;
 
     emit(book);
-  }
-}
-
-class EditBookCoverCubit extends Cubit<Uint8List?> {
-  EditBookCoverCubit() : super(null);
-
-  void setCover(Uint8List? cover) {
-    imageCache.clear();
-
-    emit(cover);
-  }
-
-  Future<void> deleteCover(int? bookID) async {
-    if (bookID == null) return;
-
-    emit(null);
-
-    final coverExists = await File(
-      '${appDocumentsDirectory.path}/$bookID.jpg',
-    ).exists();
-
-    if (coverExists) {
-      await File(
-        '${appDocumentsDirectory.path}/$bookID.jpg',
-      ).delete();
-    }
   }
 }

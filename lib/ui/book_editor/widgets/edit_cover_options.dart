@@ -15,10 +15,10 @@ class EditCoverOptions extends StatelessWidget {
     required this.editCurrentCover,
   });
 
-  final void Function() loadCoverFromStorage;
-  final void Function() searchForCoverOnline;
-  final void Function() loadCoverFromOpenLibrary;
-  final void Function() editCurrentCover;
+  final VoidCallback loadCoverFromStorage;
+  final VoidCallback searchForCoverOnline;
+  final VoidCallback loadCoverFromOpenLibrary;
+  final VoidCallback editCurrentCover;
 
   @override
   Widget build(BuildContext context) {
@@ -66,14 +66,14 @@ class EditCoverOptions extends StatelessWidget {
               ),
               onTap: loadCoverFromOpenLibrary,
             ),
-            // ListTile(
-            //   title: Text(LocaleKeys.edit_current_cover.tr()),
-            //   leading: FaIcon(
-            //     FontAwesomeIcons.image,
-            //     color: context.colorScheme.primary,
-            //   ),
-            //   onTap: editCurrentCover,
-            // ),
+            ListTile(
+              title: Text(LocaleKeys.edit_current_cover.tr()),
+              leading: FaIcon(
+                FontAwesomeIcons.image,
+                color: context.colorScheme.primary,
+              ),
+              onTap: editCurrentCover,
+            ),
           ],
         ),
       ),
