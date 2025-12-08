@@ -10,7 +10,7 @@ sealed class ThemeEvent extends Equatable {
 final class ChangeThemeEvent extends ThemeEvent {
   final ThemeMode themeMode;
   final Color primaryColor;
-  final String fontFamily;
+  final String? fontFamily;
   final bool useMaterialYou;
   final bool amoledDark;
 

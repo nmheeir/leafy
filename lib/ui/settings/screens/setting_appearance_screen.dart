@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -13,37 +14,7 @@ import 'package:leafy/ui/settings/widgets/setting_dialog_button.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingAppearanceScreen extends StatelessWidget {
-  const SettingAppearanceScreen({
-    super.key,
-    this.currentThemeMode = ThemeMode.system,
-    this.isAmoledDark = false,
-    this.currentFontFamily,
-    this.isMaterialYou = false,
-    this.currentAccentColor = Colors.blue,
-
-    // --- Callbacks mặc định là hàm rỗng ---
-    this.onThemeModeSelected = _emptyValueChanged,
-    this.onAmoledDarkSelected = _emptyValueChanged,
-    this.onFontSelected = _emptyValueChanged,
-    this.onAccentColorTapped = _emptyVoidCallback,
-  });
-
-  // --- State ---
-  final ThemeMode currentThemeMode;
-  final bool isAmoledDark;
-  final String? currentFontFamily;
-  final bool isMaterialYou;
-  final Color currentAccentColor;
-
-  // --- Callbacks ---
-  final ValueChanged<ThemeMode> onThemeModeSelected;
-  final ValueChanged<bool> onAmoledDarkSelected;
-  final ValueChanged<String?> onFontSelected;
-  final VoidCallback onAccentColorTapped;
-
-  // ---- Default empty handlers ----
-  static void _emptyValueChanged<T>(T _) {}
-  static void _emptyVoidCallback() {}
+  const SettingAppearanceScreen({super.key});
 
   void _showThemeModeDialog(BuildContext context) {
     showDialog(
@@ -176,50 +147,62 @@ class SettingAppearanceScreen extends StatelessWidget {
           backgroundColor: context.colorScheme.surface,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 10),
-                  child: Text(
-                    LocaleKeys.select_font.tr(),
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 15),
-                Expanded(
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        // mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SettingDialogButton(
-                            text: LocaleKeys.default_locale.tr(),
-                            onPressed: () {
-                              onFontSelected(null);
-                              context.pop();
-                            },
+            child: BlocBuilder<ThemeBloc, ThemeState>(
+              builder: (context, state) {
+                if (state is SetThemeState) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 10),
+                        child: Text(
+                          LocaleKeys.select_font.tr(),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          // TODO: add fonts
-                          // for (var font in Constants.fonts) ...[
-                          //   const SizedBox(height: 5),
-                          //   SettingsDialogButton(
-                          //     text: font['text'] as String,
-                          //     fontFamily: font['family'] as String,
-                          //     onPressed: () {
-                          //       onFontSelected(font['family'] as String);
-                          //       context.pop();
-                          //     },
-                          //   ),
-                          // ],
-                        ],
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              ],
+                      const SizedBox(height: 15),
+                      Expanded(
+                        child: Scrollbar(
+                          thumbVisibility: true,
+                          child: SingleChildScrollView(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              // mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SettingDialogButton(
+                                  text: LocaleKeys.font_default.tr(),
+                                  onPressed: () {
+                                    _setFont(context, state, null);
+                                  },
+                                ),
+                                for (var font in Constants.fonts) ...[
+                                  const SizedBox(height: 5),
+                                  SettingDialogButton(
+                                    text: font['text'] as String,
+                                    fontFamily: font['family'] as String,
+                                    onPressed: () {
+                                      _setFont(
+                                        context,
+                                        state,
+                                        font['family'] as String,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                } else {
+                  return const SizedBox();
+                }
+              },
             ),
           ),
         );
@@ -307,6 +290,20 @@ class SettingAppearanceScreen extends StatelessWidget {
         fontFamily: state.fontFamily,
         useMaterialYou: state.useMaterialYou,
         amoledDark: amoledDark,
+      ),
+    );
+
+    context.pop();
+  }
+
+  void _setFont(BuildContext context, SetThemeState state, String? fontFamily) {
+    BlocProvider.of<ThemeBloc>(context).add(
+      ChangeThemeEvent(
+        themeMode: state.themeMode,
+        primaryColor: state.primaryColor,
+        fontFamily: fontFamily,
+        useMaterialYou: state.useMaterialYou,
+        amoledDark: state.amoledDark,
       ),
     );
 
@@ -403,11 +400,24 @@ class SettingAppearanceScreen extends StatelessWidget {
 
   SettingsTile _buildFontSetting(BuildContext context) {
     return SettingsTile(
-      title: const Text('Font', style: TextStyle(fontSize: 16)),
+      title: Text(
+        LocaleKeys.font_default.tr(),
+        style: TextStyle(fontSize: 16),
+      ),
       leading: const Icon(Icons.font_download, size: 22),
-      description: Text(
-        currentFontFamily ?? 'Default',
-        style: const TextStyle(),
+      description: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          if (state is SetThemeState) {
+            return Text(
+              state.fontFamily != null
+                  ? state.fontFamily!
+                  : LocaleKeys.font_default.tr(),
+              style: const TextStyle(),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
       ),
       onPressed: (context) => _showFontDialog(context),
     );
@@ -434,12 +444,20 @@ class SettingAppearanceScreen extends StatelessWidget {
     return SettingsTile.navigation(
       title: Text(LocaleKeys.accent_color.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.color_lens),
-      description: Text(
-        isMaterialYou
-            ? 'Material You'
-            // Chuyển đổi Color thành chuỗi Hex
-            : '#${currentAccentColor.value.toRadixString(16).substring(2).toUpperCase()}',
-        style: const TextStyle(),
+      description: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          if (state is SetThemeState) {
+            return Text(
+              state.useMaterialYou
+                  ? LocaleKeys.use_material_you.tr()
+                  // Chuyển đổi Color thành chuỗi Hex
+                  : '0xFF${state.primaryColor.hex}',
+              style: const TextStyle(),
+            );
+          } else {
+            return const SizedBox();
+          }
+        },
       ),
       onPressed: (context) => context.push(Routes.settingAccentColor),
     );

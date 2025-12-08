@@ -4,22 +4,20 @@ sealed class ThemeState extends Equatable {
   const ThemeState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class ChangingThemeState extends ThemeState {
   const ChangingThemeState();
 
   @override
-  List<Object> get props => [];
-
-
+  List<Object?> get props => [];
 }
 
 final class SetThemeState extends ThemeState {
   final ThemeMode themeMode;
   final Color primaryColor;
-  final String fontFamily;
+  final String? fontFamily;
   final bool useMaterialYou;
   final bool amoledDark;
 
@@ -48,12 +46,11 @@ final class SetThemeState extends ThemeState {
   }
 
   @override
-  List<Object> get props => [
-        themeMode,
-        primaryColor,
-        fontFamily,
-        useMaterialYou,
-        amoledDark,
-      ];
+  List<Object?> get props => [
+    themeMode,
+    primaryColor,
+    fontFamily,
+    useMaterialYou,
+    amoledDark,
+  ];
 }
-

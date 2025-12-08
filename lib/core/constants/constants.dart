@@ -9,6 +9,13 @@ abstract final class Constants {
   static const maxTagLength = 10;
 
   static const tagDelimeter = '|||||';
+  
+  static const fonts = [
+    {
+      'text': 'Nunito',
+      'family': 'Nunito' 
+    }
+  ];
 }
 
 const double cornerRadius = 8;
