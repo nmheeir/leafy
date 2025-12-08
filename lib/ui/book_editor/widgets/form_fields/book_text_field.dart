@@ -21,7 +21,7 @@ class BookTextField extends StatefulWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 10),
     this.onSubmitted,
     this.suggestions,
-    this.readOnly = false,
+    this.enable = true,
   });
 
   final TextEditingController controller;
@@ -38,7 +38,7 @@ class BookTextField extends StatefulWidget {
   final Function(String)? onSubmitted;
   final EdgeInsets padding;
   final List<String>? suggestions;
-  final bool readOnly;
+  final bool enable;
 
   @override
   State<BookTextField> createState() => _BookTextFieldState();
@@ -123,7 +123,7 @@ class _BookTextFieldState extends State<BookTextField> {
   TextField _buildTextField(BuildContext context, {FocusNode? focusNode}) {
     return TextField(
       // readOnly: widget.readOnly,
-      enabled: widget.readOnly,
+      enabled: widget.enable,
       autofocus: widget.autofocus,
       keyboardType: widget.keyboardType,
       inputFormatters: widget.inputFormatters,

@@ -631,7 +631,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
               textInputAction: TextInputAction.search,
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _startNewSearch(),
-              readOnly: canSearch,
+              enable: canSearch,
             ),
           ),
           const SizedBox(width: 10),
