@@ -1,6 +1,9 @@
 abstract final class Constants {
   static const appName = 'Leafy';
 
+  static const duckDuckGoURL = 'https://duckduckgo.com/';
+  static const duckDuckGoImagesURL = 'https://duckduckgo.com/i.js';
+
   static const blurHashX = 2;
   static const blurHashY = 2;
 
@@ -9,12 +12,9 @@ abstract final class Constants {
   static const maxTagLength = 10;
 
   static const tagDelimeter = '|||||';
-  
+
   static const fonts = [
-    {
-      'text': 'Nunito',
-      'family': 'Nunito' 
-    }
+    {'text': 'Nunito', 'family': 'Nunito'},
   ];
 }
 

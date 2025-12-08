@@ -18,7 +18,9 @@ import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_placeholder.dart';
+import 'package:leafy/ui/book_editor/widgets/duck_duck_go_alert.dart';
 import 'package:leafy/ui/book_editor/widgets/edit_cover_options.dart';
+import 'package:leafy/ui/search_covers/search_covers_screen.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -169,16 +171,16 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     _setCoverLoading(false);
   }
 
-  // TODO: uncomment this
-  // void _showDuckDuckGoWarning(BuildContext context) {
-  //   showDialog(
-  //       context: context,
-  //       builder: (BuildContext _) {
-  //         return DuckDuckGoAlert(
-  //           openDuckDuckGoSearchScreen: _openDuckDuckGoSearchScreen,
-  //         );
-  //       });
-  // }
+  void _showDuckDuckGoWarning(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext _) {
+        return DuckDuckGoAlert(
+          openDuckDuckGoSearchScreen: _openDuckDuckGoSearchScreen,
+        );
+      },
+    );
+  }
 
   Future<void> _searchForCoverOnline(BuildContext context) async {
     Navigator.of(context).pop();
@@ -188,24 +190,23 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       SharedPreferencesKeys.duckDuckGoWarning,
     );
 
+
     if (showDuckDuckGoWarning == false) {
-      // _openDuckDuckGoSearchScreen(context);
+      _openDuckDuckGoSearchScreen(context);
     } else {
-      // _showDuckDuckGoWarning(context);
+      _showDuckDuckGoWarning(context);
     }
   }
 
-  // TODO: uncomment this
-  // _openDuckDuckGoSearchScreen(BuildContext context) {
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (context) => SearchCoversScreen(
-  //         book: context.read<EditBookCubit>().state,
-  //       ),
-  //     ),
-  //   );
-  // }
+  void _openDuckDuckGoSearchScreen(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            SearchCoversScreen(book: context.read<EditBookCubit>().state),
+      ),
+    );
+  }
 
   void showCoverLoadBottomSheet(BuildContext context) {
     FocusManager.instance.primaryFocus?.unfocus();
