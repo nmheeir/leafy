@@ -1,14 +1,21 @@
+import 'dart:convert';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leafy/data/models/yearly_challenge.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/ui/statistics/widgets/book_by_status.dart';
 import 'package:leafy/ui/statistics/widgets/read_stats.dart';
 import 'package:leafy/ui/statistics/widgets/read_stats_by_month.dart';
+import 'package:leafy/ui/statistics/widgets/reading_challenge.dart';
+import 'package:leafy/ui/statistics/widgets/set_challenge_box.dart';
 
 class Statistics extends StatelessWidget {
   final StatsLoaded state;
-  final Function(int books, int pages, int year) setChallenge;
+  final void Function(int books, int pages, int year) setChallenge;
 
   const Statistics({
     super.key,
@@ -64,6 +71,7 @@ class Statistics extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                _buildBooksChallenge(context, state, null),
                 _buildAllBooksStat(context),
                 _buildFinishedBooksByMonth(context, state, null),
                 _buildFinishedPagesByMonth(context, state, null),
@@ -96,6 +104,7 @@ class Statistics extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
+                        _buildBooksChallenge(context, state, year),
                         _buildFinishedBooksByMonth(context, state, year),
                         _buildFinishedPagesByMonth(context, state, year),
                         _buildNumberOfFinishedBooks(context, state, year),
@@ -119,6 +128,72 @@ class Statistics extends StatelessWidget {
     }
 
     return tabs;
+  }
+
+  BlocBuilder<dynamic, dynamic> _buildBooksChallenge(
+    BuildContext context,
+    StatsLoaded state,
+    int? year,
+  ) {
+    return BlocBuilder<ChallengeBloc, ChallengeState>(
+      builder: (context, challengeState) {
+        if (challengeState is SetChallengeState &&
+            challengeState.yearlyChallenges != null) {
+          final yearlyChallenges = List<YearlyChallenge>.empty(growable: true);
+
+          final jsons = challengeState.yearlyChallenges!.split('|||||');
+          for (var json in jsons) {
+            final decodedJson = jsonDecode(json);
+            final yearlyChallenge = YearlyChallenge.fromJSON(decodedJson);
+            yearlyChallenges.add(yearlyChallenge);
+          }
+
+          final selectedTarget = yearlyChallenges.where((element) {
+            return (year == null)
+                ? element.year == DateTime.now().year
+                : element.year == year;
+          });
+
+          final selectedValue = state.finishedBooksByMonthAllTypes.where((
+            element,
+          ) {
+            return (year == null)
+                ? element.year == DateTime.now().year
+                : element.year == year;
+          });
+
+          final value = selectedValue.isNotEmpty
+              ? selectedValue.first.values.reduce((a, b) => a + b)
+              : 0;
+
+          if (selectedTarget.isEmpty || selectedTarget.first.books == null) {
+            return (year == null)
+                ? SetChallengeBox(
+                    setChallenge: setChallenge,
+                    year: year ?? DateTime.now().year,
+                  )
+                : const SizedBox();
+          } else {
+            return ReadingChallenge(
+              title: LocaleKeys.books_challenge.tr(),
+              value: value,
+              target: selectedTarget.first.books ?? 0,
+              setChallenge: setChallenge,
+              booksTarget: selectedTarget.first.books,
+              pagesTarget: selectedTarget.first.pages,
+              year: year ?? DateTime.now().year,
+            );
+          }
+        } else {
+          return (year == null)
+              ? SetChallengeBox(
+                  setChallenge: setChallenge,
+                  year: year ?? DateTime.now().year,
+                )
+              : const SizedBox();
+        }
+      },
+    );
   }
 
   Widget _buildAllBooksStat(BuildContext context) {
