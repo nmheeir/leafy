@@ -9,10 +9,13 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
+import 'package:leafy/domain/services/connectivity_service.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
+import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
+import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
@@ -88,23 +91,38 @@ class App extends StatelessWidget {
       BlocProvider(create: (_) => ThemeBloc()),
       BlocProvider(create: (_) => OpenLibSearchBloc()),
       BlocProvider(create: (_) => ChallengeBloc()),
+      BlocProvider(create: (_) => StatsBloc()),
     ];
 
-    return [...bookProviders];
+    final openLibraryProvider = [
+      BlocProvider<OpenLibBloc>(
+        create: (context) =>
+            OpenLibBloc(RepositoryProvider.of<ConnectivityService>(context)),
+      ),
+    ];
+
+    return [...bookProviders, ...openLibraryProvider];
+  }
+
+  dynamic _listOfRepositoryProviders(BuildContext context) {
+    return [RepositoryProvider(create: (_) => ConnectivityService())];
   }
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: _listOfBlocProviders(context),
-      child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          if (state is SetThemeState) {
-            return LeafyApp(themeState: state);
-          } else {
-            return const SizedBox();
-          }
-        },
+    return MultiRepositoryProvider(
+      providers: _listOfRepositoryProviders(context),
+      child: MultiBlocProvider(
+        providers: _listOfBlocProviders(context),
+        child: BlocBuilder<ThemeBloc, ThemeState>(
+          builder: (context, state) {
+            if (state is SetThemeState) {
+              return LeafyApp(themeState: state);
+            } else {
+              return const SizedBox();
+            }
+          },
+        ),
       ),
     );
   }

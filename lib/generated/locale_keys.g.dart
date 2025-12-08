@@ -285,5 +285,7 @@ abstract class  LocaleKeys {
   static const show_sort_attributes = 'show_sort_attributes';
   static const grid_size = 'grid_size';
   static const show_title_over_cover = 'show_title_over_cover';
+  static const no_internet_connection = 'no_internet_connection';
+  static const retry = 'retry';
 
 }

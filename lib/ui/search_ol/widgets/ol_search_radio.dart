@@ -8,11 +8,13 @@ import 'package:leafy/generated/locale_keys.g.dart';
 class OLSearchRadio extends StatelessWidget {
   const OLSearchRadio({
     super.key,
+    required this.canSearch,
     required this.searchType,
     required this.activeSearchType,
     required this.onChanged,
   });
 
+  final bool canSearch;
   final OLSearchType searchType;
   final OLSearchType activeSearchType;
   final Function(OLSearchType?) onChanged;
@@ -26,18 +28,18 @@ class OLSearchRadio extends StatelessWidget {
           value: searchType,
           groupValue: activeSearchType,
           visualDensity: VisualDensity.compact,
-          onChanged: onChanged,
+          onChanged: canSearch ? onChanged : null,
         ),
         Text(
           searchType == OLSearchType.general
               ? LocaleKeys.general_search.tr()
               : searchType == OLSearchType.author
-                  ? LocaleKeys.author.tr()
-                  : searchType == OLSearchType.title
-                      ? LocaleKeys.title.tr()
-                      : searchType == OLSearchType.isbn
-                          ? LocaleKeys.isbn.tr()
-                          : '',
+              ? LocaleKeys.author.tr()
+              : searchType == OLSearchType.title
+              ? LocaleKeys.title.tr()
+              : searchType == OLSearchType.isbn
+              ? LocaleKeys.isbn.tr()
+              : '',
           style: const TextStyle(fontSize: 12),
         ),
       ],

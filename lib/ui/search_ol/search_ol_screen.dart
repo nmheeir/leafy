@@ -13,6 +13,7 @@ import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
@@ -408,23 +409,51 @@ class _SearchOLScreenState extends State<SearchOLScreen>
             ),
           ],
         ),
-        body: Column(
-          children: [
-            _buildSearchField(context),
-            _buildSearchTypesRadio(),
-            _buildDivider(),
-            _buildNumberOfResults(),
-            (searchActivated)
-                ? Expanded(
-                    child: _searchingISBN
-                        ? _buildFirstPageProgressIndicator(context)
-                        : _searchingISBNError
-                        ? _buildNoItemsFoundIndicator()
-                        : _buildSearchResultsList(),
-                  )
-                : const SizedBox.shrink(),
-          ],
+        body: BlocBuilder<OpenLibBloc, OpenLibState>(
+          builder: (context, state) {
+            final canSearch = state is OpenLibReadyState;
+            return Column(
+              children: [
+                _buildSearchField(context, canSearch),
+                _buildSearchTypesRadio(canSearch),
+                _buildDivider(),
+                if (state is OpenLibLoadingState)
+                  LoadingAnimationWidget.fourRotatingDots(
+                    color: context.colorScheme.primary,
+                    size: 40,
+                  ),
+                _buildNumberOfResults(),
+                (canSearch)
+                    ? Expanded(
+                        child: _searchingISBN
+                            ? _buildFirstPageProgressIndicator(context)
+                            : _searchingISBNError
+                            ? _buildNoItemsFoundIndicator()
+                            : _buildSearchResultsList(),
+                      )
+                    : _buildReconect(),
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+
+  Widget _buildReconect() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(LocaleKeys.no_internet_connection.tr()),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            child: Text(LocaleKeys.retry.tr()),
+            onPressed: () {
+              context.read<OpenLibBloc>().add(ReconnectInternetEvent());
+            },
+          ),
+        ],
       ),
     );
   }
@@ -563,7 +592,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     );
   }
 
-  Align _buildSearchTypesRadio() {
+  Align _buildSearchTypesRadio(bool canSearch) {
     return Align(
       alignment: Alignment.centerLeft,
       child: BlocBuilder<OpenLibSearchBloc, OpenLibSearchState>(
@@ -575,6 +604,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
               for (var i = 0; i < 4; i++) ...[
                 if (i != 0) const SizedBox(width: 5),
                 OLSearchRadio(
+                  canSearch: canSearch,
                   searchType: OLSearchType.values[i],
                   activeSearchType: _getOLSearchTypeEnum(state),
                   onChanged: _changeSearchType,
@@ -587,7 +617,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     );
   }
 
-  Padding _buildSearchField(BuildContext context) {
+  Padding _buildSearchField(BuildContext context, bool canSearch) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 10, 10, 5),
       child: Row(
@@ -601,13 +631,14 @@ class _SearchOLScreenState extends State<SearchOLScreen>
               textInputAction: TextInputAction.search,
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _startNewSearch(),
+              readOnly: canSearch,
             ),
           ),
           const SizedBox(width: 10),
           SizedBox(
             height: 48,
             child: ElevatedButton(
-              onPressed: _startNewSearch,
+              onPressed: canSearch ? _startNewSearch : null,
               style: ElevatedButton.styleFrom(
                 elevation: 0,
                 backgroundColor: context.colorScheme.primary,
