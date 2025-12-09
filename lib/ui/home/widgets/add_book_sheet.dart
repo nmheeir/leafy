@@ -11,11 +11,13 @@ class AddBookSheet extends StatefulWidget {
     super.key,
     required this.addManually,
     required this.searchInOpenLibrary,
+    required this.searchInGutendex,
     required this.scanBarcode,
   });
 
   final VoidCallback addManually;
   final VoidCallback searchInOpenLibrary;
+  final VoidCallback searchInGutendex;
   final VoidCallback scanBarcode;
 
   @override
@@ -57,6 +59,11 @@ class _AddBookSheetState extends State<AddBookSheet> {
               title: Text(LocaleKeys.add_search.tr()),
               leading: Icon(Symbols.search, color: context.colorScheme.primary),
               onTap: widget.searchInOpenLibrary,
+            ),
+            ListTile(
+              title: Text(LocaleKeys.search_in_gutendex.tr()),
+              leading: Icon(Symbols.search, color: context.colorScheme.primary),
+              onTap: widget.searchInGutendex,
             ),
             ListTile(
               title: Text(LocaleKeys.add_scan.tr()),

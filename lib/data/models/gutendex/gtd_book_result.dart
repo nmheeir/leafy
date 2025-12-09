@@ -70,16 +70,22 @@ class GtdBookResult {
       title: json["title"],
       authors: json["authors"] == null
           ? []
-          : List<GtdPerson>.from(json["authors"]!.map((x) => GtdPerson.fromJson(x))),
+          : List<GtdPerson>.from(
+              json["authors"]!.map((x) => GtdPerson.fromJson(x)),
+            ),
       summaries: json["summaries"] == null
           ? []
           : List<String>.from(json["summaries"]!.map((x) => x)),
       editors: json["editors"] == null
           ? []
-          : List<GtdPerson>.from(json["editors"]!.map((x) => x)),
+          : List<GtdPerson>.from(
+              json["editors"]!.map((x) => GtdPerson.fromJson(x)),
+            ),
       translators: json["translators"] == null
           ? []
-          : List<GtdPerson>.from(json["translators"]!.map((x) => x)),
+          : List<GtdPerson>.from(
+              json["translators"]!.map((x) => GtdPerson.fromJson(x)),
+            ),
       subjects: json["subjects"] == null
           ? []
           : List<String>.from(json["subjects"]!.map((x) => x)),
@@ -119,7 +125,6 @@ class GtdBookResult {
     return "$id, $title, $authors, $summaries, $editors, $translators, $subjects, $bookshelves, $languages, $copyright, $mediaType, $formats, $downloadCount, ";
   }
 }
-
 
 /*
 {

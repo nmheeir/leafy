@@ -218,6 +218,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) {
           return AddBookSheet(
             addManually: _addBookManually,
+            searchInGutendex: _searchInGutendexLibrary,
             searchInOpenLibrary: _searchInOpenLibrary,
             scanBarcode: _scanBarcode,
           );
@@ -230,6 +231,7 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) {
           return AddBookSheet(
             addManually: _addBookManually,
+            searchInGutendex: _searchInGutendexLibrary,
             searchInOpenLibrary: _searchInOpenLibrary,
             scanBarcode: _scanBarcode,
           );
@@ -258,6 +260,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void _searchInOpenLibrary() {
     _setEmptyBookForEditorScreen();
     context.push(Routes.searchOl);
+  }
+
+  void _searchInGutendexLibrary() {
+    _setEmptyBookForEditorScreen();
+    context.push(Routes.searchGutendex);
   }
 
   void _scanBarcode() {}

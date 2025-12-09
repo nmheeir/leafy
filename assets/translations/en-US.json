@@ -291,5 +291,6 @@
     "grid_size": "Grid size",
     "show_title_over_cover": "Show title over cover",
     "no_internet_connection": "No internet connection",
-    "retry": "Retry"
+    "retry": "Retry",
+    "search_in_gutendex": "Search in Gutendex"
 }

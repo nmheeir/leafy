@@ -287,5 +287,6 @@ abstract class  LocaleKeys {
   static const show_title_over_cover = 'show_title_over_cover';
   static const no_internet_connection = 'no_internet_connection';
   static const retry = 'retry';
+  static const search_in_gutendex = 'search_in_gutendex';
 
 }
