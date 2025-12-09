@@ -14,4 +14,5 @@ abstract final class Routes {
   static const settingAppearance = '/setting-appearance';
   static const settingAccentColor = '/setting-accent-color';
   static const settingDefautlBookTag = '/setting-default-book-tag';
+  static const epubView = '/epub-view';
 }

@@ -13,7 +13,7 @@ rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
     afterEvaluate {
-        if (name.contains("blurhash") || name.contains("flutter_keyboard_visibility")) {
+        if (name.contains("blurhash") || name.contains("flutter_keyboard_visibility") || name.contains("vocsy_epub_viewer")) {
             (extensions.findByName("android") as? com.android.build.gradle.BaseExtension)?.apply {
                 compileSdkVersion(36)
             }
