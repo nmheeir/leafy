@@ -12,6 +12,16 @@ val newBuildDir: Directory =
 rootProject.layout.buildDirectory.value(newBuildDir)
 
 subprojects {
+    afterEvaluate {
+        if (name.contains("blurhash") || name.contains("flutter_keyboard_visibility")) {
+            (extensions.findByName("android") as? com.android.build.gradle.BaseExtension)?.apply {
+                compileSdkVersion(36)
+            }
+        }
+    }
+}
+
+subprojects {
     val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
