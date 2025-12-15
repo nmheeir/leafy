@@ -13,7 +13,7 @@ class DatabaseProvider {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute("""
           CREATE TABLE booksTable (
@@ -45,8 +45,43 @@ class DatabaseProvider {
           )
         """);
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (newVersion > oldVersion) {
+          var batch = db.batch();
+
+          switch (oldVersion) {
+            case 1:
+              _updateDatabaseV1toLatest(batch);
+              break;
+          }
+
+          await batch.commit();
+        }
+      },
     );
   }
+
+  void _executeBatch(Batch batch, List<String> scripts) {
+    for (var script in scripts) {
+      batch.execute(script);
+    }
+  }
+
+  void _updateDatabaseV1toLatest(Batch batch) {
+    _executeBatch(batch, migrationScriptV2);
+  }
+
+  final migrationScriptV2 = [
+    """
+      CREATE TABLE epub_cache (
+        id TEXT PRIMARY KEY,
+        url TEXT,
+        title TEXT,
+        lastReadCfi TEXT,
+        progress REAL
+      )
+    """,
+  ];
 
   Future<void> close() async {
     final database = await db;
