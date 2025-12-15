@@ -55,6 +55,9 @@ dependencies:
   dio: ^5.9.0
   flutter_epub_viewer: ^1.2.6
   logger: ^2.6.2
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +67,9 @@ dev_dependencies:
   commitlint_cli: ^0.8.1
   husky: ^0.1.7
   melos: ^7.3.0
+  build_runner: ^2.10.4
+  freezed: ^3.2.3
+  json_serializable: ^6.11.2
 
 melos:
   useRootAsPackage: true

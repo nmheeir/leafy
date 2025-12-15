@@ -7,6 +7,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/gutendex/gtd_book_result.dart';
 import 'package:leafy/domain/services/gutendex_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/ui/epub_view/epub_view_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SearchGtdScreen extends StatefulWidget {
@@ -73,7 +74,17 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
                 _buildNewPageProgressIndicator(context),
             noItemsFoundIndicatorBuilder: (_) => _buildNoItemsFoundIndicator(),
             itemBuilder: (context, item, index) {
-              return Text(item.title.toString());
+              return ListTile(
+                title: Text(item.title.toString()),
+                contentPadding: EdgeInsets.all(8),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => EpubViewScreen(
+                      epubUrl: item.formats!.applicationEpubZip!,
+                    ),
+                  ),
+                ),
+              );
             },
           ),
         );

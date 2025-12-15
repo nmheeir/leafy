@@ -18,7 +18,7 @@ import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.home,
+  initialLocation: Routes.epubView,
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
@@ -67,12 +67,12 @@ GoRouter router() => GoRouter(
       builder: (context, state) => SettingDefaultBookTagScreen(),
     ),
     GoRoute(
-      path: Routes.epubView,
-      builder: (context, state) => EpubViewScreen(),
-    ),
-    GoRoute(
       path: Routes.searchGutendex,
       builder: (context, state) => SearchGtdScreen(),
+    ),
+    GoRoute(
+      path: Routes.epubView,
+      builder: (context, state) => EpubViewScreen(),
     ),
   ],
   // redirect: (context, state) {

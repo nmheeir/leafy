@@ -1,8 +1,20 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_epub_viewer/flutter_epub_viewer.dart';
+import 'package:go_router/go_router.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/utils/helpers/reading_touching_handler.dart';
+import 'package:leafy/domain/services/epub_cached_service.dart';
+import 'package:leafy/ui/epub_view/widgets/chapter_drawer.dart';
 
 class EpubViewScreen extends StatefulWidget {
-  const EpubViewScreen({super.key});
+  final String epubUrl;
+  const EpubViewScreen({
+    super.key,
+    this.epubUrl = 'https://www.gutenberg.org/ebooks/84.epub3.images',
+  });
 
   @override
   State<EpubViewScreen> createState() => _EpubViewScreenState();
@@ -11,183 +23,198 @@ class EpubViewScreen extends StatefulWidget {
 class _EpubViewScreenState extends State<EpubViewScreen> {
   final epubController = EpubController();
 
-  var textSelectionCfi = '';
+  late EpubDisplaySettings _epubDisplaySettings;
 
-  bool isLoading = true;
+  final EpubCachedService _service = EpubCachedService();
+  CancelToken? _cancelToken;
+  double _downloadProgress = 0.0;
+  bool _isLoading = true;
+  File? _epubFile;
+  String? _error;
 
-  double progress = 0.0;
+  final ValueNotifier<double> _readingProgressNotifier = ValueNotifier(0.0);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      drawer: ChapterDrawer(controller: epubController),
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text('Title'),
-        actions: [IconButton(icon: const Icon(Icons.search), onPressed: () {})],
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.transparent,
-            ),
-            Expanded(
-              child: Stack(
-                children: [
-                  EpubViewer(
-                    // initialCfi: 'epubcfi(/6/20!/4/2[introduction]/2[c1_h]/1:0)',
-                    epubSource: EpubSource.fromUrl(
-                      'https://www.gutenberg.org/ebooks/1524.epub3.images',
-                    ),
-                    epubController: epubController,
-                    displaySettings: EpubDisplaySettings(
-                      spread: EpubSpread.always,
-                      flow: EpubFlow.scrolled,
-                      useSnapAnimationAndroid: false,
-                      snap: true,
-                      theme: EpubTheme.light(),
-                      allowScriptedContent: true,
-                    ),
-                    selectionContextMenu: ContextMenu(
-                      menuItems: [
-                        ContextMenuItem(
-                          title: "Highlight",
-                          id: 1,
-                          action: () async {
-                            epubController.addHighlight(cfi: textSelectionCfi);
-                            debugPrint(
-                              'DEBUG: ContextMenu: Highlight action triggered for CFI: $textSelectionCfi',
-                            );
-                          },
-                        ),
-                      ],
-                      settings: ContextMenuSettings(
-                        hideDefaultSystemContextMenuItems: true,
-                      ),
-                    ),
-                    onChaptersLoaded: (chapters) {
-                      setState(() {
-                        isLoading = false;
-                      });
-                      debugPrint(
-                        'DEBUG: onChaptersLoaded: ${chapters.length} chapters loaded. isLoading set to false.',
-                      );
-                    },
-                    onEpubLoaded: () async {
-                      debugPrint(
-                        'DEBUG: onEpubLoaded: Epub has been successfully loaded.',
-                      );
-                    },
-                    onRelocated: (value) {
-                      debugPrint(
-                        "DEBUG: onRelocated: Relocated to ${value.toJson()} with progress: ${value.progress}",
-                      );
-                      setState(() {
-                        progress = value.progress;
-                      });
-                    },
-                    onAnnotationClicked: (cfi, data) {
-                      debugPrint(
-                        "DEBUG: onAnnotationClicked: Annotation clicked at CFI: $cfi with data: $data",
-                      );
-                    },
-                    onTextSelected: (epubTextSelection) {
-                      textSelectionCfi = epubTextSelection.selectionCfi;
-                      debugPrint(
-                        "DEBUG: onTextSelected: Text selected: '${epubTextSelection.selectedText}' at CFI: $textSelectionCfi",
-                      );
-                    },
-                    onLocationLoaded: () {
-                      debugPrint(
-                        'DEBUG: onLocationLoaded: Epub location data has been loaded. Progress is now available.',
-                      );
-                    },
-                    onSelection: (selectedText, cfiRange, selectionRect, viewRect) {
-                      debugPrint(
-                        "DEBUG: onSelection: Selection changed. Selected text: '$selectedText', CFI range: '$cfiRange', Selection Rect: $selectionRect, View Rect: $viewRect",
-                      );
-                    },
-                    onDeselection: () {
-                      debugPrint(
-                        "DEBUG: onDeselection: Text selection has been deselected.",
-                      );
-                    },
-                    onSelectionChanging: () {
-                      debugPrint(
-                        "DEBUG: onSelectionChanging: User is actively changing text selection.",
-                      );
-                    },
-                    onTouchDown: (x, y) {
-                      debugPrint(
-                        "DEBUG: onTouchDown: Touch down event at X: $x, Y: $y",
-                      );
-                    },
-                    onTouchUp: (x, y) {
-                      debugPrint(
-                        "DEBUG: onTouchUp: Touch up event at X: $x, Y: $y",
-                      );
-                    },
-                    selectAnnotationRange: true,
-                  ),
+  final ReadingTouchHandler _touchHandler = ReadingTouchHandler(
+    centerZoneScale: 0.5,
+  );
 
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: IconButton(
-                      onPressed: () {
-                        epubController.next();
-                      },
-                      icon: Icon(Icons.arrow_forward_ios),
-                    ),
-                  ),
-                  Visibility(
-                    visible: isLoading,
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ChapterDrawer extends StatefulWidget {
-  const ChapterDrawer({super.key, required this.controller});
-
-  final EpubController controller;
-
-  @override
-  State<ChapterDrawer> createState() => _ChapterDrawerState();
-}
-
-class _ChapterDrawerState extends State<ChapterDrawer> {
-  late List<EpubChapter> chapters;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
-    chapters = widget.controller.getChapters();
     super.initState();
+    _epubDisplaySettings = EpubDisplaySettings(
+      spread: EpubSpread.always,
+      flow: EpubFlow.scrolled,
+      useSnapAnimationAndroid: false,
+      snap: true,
+      theme: EpubTheme.light(),
+      allowScriptedContent: true,
+    );
+    _downloadAndOpen();
+  }
+
+  Future<void> _downloadAndOpen() async {
+    _cancelToken = CancelToken();
+    try {
+      final file = await _service.getEpub(
+        url: widget.epubUrl,
+        cancelToken: _cancelToken,
+        onProgress: (progress) {
+          if (mounted) {
+            setState(() {
+              _downloadProgress = progress;
+            });
+          }
+        },
+      );
+      if (mounted) {
+        setState(() {
+          _epubFile = file;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print(e);
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _cancelToken?.cancel();
+    _readingProgressNotifier.dispose();
+    debugPrint('Progress: ${_readingProgressNotifier.value}');
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Drawer(
-      child: ListView.builder(
-        itemCount: chapters.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(chapters[index].title),
-            onTap: () {
-              widget.controller.display(cfi: chapters[index].href);
-              Navigator.pop(context);
+    print('Epub View Screen build');
+    if (_isLoading) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(value: _downloadProgress),
+              SizedBox(height: 10),
+              Text(
+                'Đang tải sách: ${(_downloadProgress * 100).toStringAsFixed(0)}%',
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Scaffold(body: Center(child: Text('Lỗi: $_error')));
+    }
+
+    if (_epubFile == null) {
+      return const Scaffold(body: Center(child: Text("Không tìm thấy file")));
+    }
+
+    // Hiển thị FlutterEpubViewer khi đã có file
+    return Scaffold(
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: const Text('Title'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              context.pop();
             },
-          );
-        },
+            icon: Icon(Icons.arrow_back_ios),
+          ),
+        ],
+      ),
+      drawer: ChapterDrawer(controller: epubController),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              ValueListenableBuilder<double>(
+                valueListenable: _readingProgressNotifier,
+                builder: (context, value, child) {
+                  return LinearProgressIndicator(
+                    value: value,
+                    backgroundColor: Colors.transparent,
+                    color: context.colorScheme.inversePrimary,
+                  );
+                },
+              ),
+              Expanded(
+                child: EpubViewer(
+                  epubController: epubController,
+                  epubSource: EpubSource.fromFile(_epubFile!),
+                  displaySettings: _epubDisplaySettings,
+                  onRelocated: (value) {
+                    _readingProgressNotifier.value = value.progress;
+                  },
+                  onTouchDown: (x, y) {
+                    debugPrint('on touch down');
+                    final shouldOpenMenu = _touchHandler.shouldToggleMenu(
+                      x: x,
+                      y: y,
+                      scaffoldKey: _scaffoldKey,
+                    );
+
+                    debugPrint('shouldOpenMenu: $shouldOpenMenu');
+
+                    if (shouldOpenMenu) {
+                      // _toggleMenu();
+                    } else {
+                      // Để thư viện tự xử lý lật trang
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+
+          IgnorePointer(
+            ignoring: true,
+            child: Center(
+              child: FractionallySizedBox(
+                widthFactor: 0.5, // ~70.7% chiều rộng
+                heightFactor: 0.5, // ~70.7% chiều cao
+                child: Container(
+                  decoration: BoxDecoration(
+                    // Màu cơ bản nhạt (Primary Color với độ mờ 20%)
+                    color: context.colorScheme.primaryContainer.withValues(
+                      alpha: 0.2,
+                    ),
+                    // Viền nét đứt hoặc nét liền để dễ nhìn biên
+                    border: Border.all(
+                      color: context.colorScheme.primaryContainer.withValues(
+                        alpha: 0.5,
+                      ),
+                      width: 2,
+                      style: BorderStyle.solid,
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "Touch Zone (50% Area)",
+                      style: TextStyle(
+                        color: context.colorScheme.primaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
