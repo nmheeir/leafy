@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
+import 'package:leafy/core/utils/extensions/history_observer.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/epub_view/epub_view_screen.dart';
@@ -18,7 +19,8 @@ import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
-  initialLocation: Routes.epubView,
+  initialLocation: Routes.home,
+  observers: [HistoryObserver()],
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
