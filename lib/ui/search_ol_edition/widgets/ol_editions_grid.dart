@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/ol_edition_result.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/ui/search_ol_edition/widgets/book_card_ol_edition.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -62,7 +63,7 @@ class OLEditionsGrid extends StatelessWidget {
     }
 
     final fetchedResults = await Future.wait(
-      keysToFetch.map((key) => OpenLibraryService().getEdition(key)),
+      keysToFetch.map((key) => getIt<OpenLibraryService>().getEdition(key)),
     );
 
     for (final newResult in fetchedResults) {

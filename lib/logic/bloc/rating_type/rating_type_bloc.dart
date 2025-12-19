@@ -1,10 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/rating_type.dart';
 
 part 'rating_type_event.dart';
 part 'rating_type_state.dart';
 
+@injectable
 class RatingTypeBloc extends HydratedBloc<RatingTypeEvent, RatingTypeState> {
   RatingTypeBloc() : super(RatingTypeBar()) {
     on<RatingTypeChange>((event, emit) {

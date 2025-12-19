@@ -1,44 +1,49 @@
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart' show BookFormat;
 import 'package:leafy/data/database/database_controller.dart';
 import 'package:leafy/data/models/book.dart';
 
+@lazySingleton
 class Repository {
-  final DatabaseController dbController = DatabaseController();
+  final DatabaseController _dbController;
+
+  Repository(this._dbController);
 
   Future<List<Book>> getAllNotDeletedBooks() =>
-      dbController.getAllNotDeletedBooks();
+      _dbController.getAllNotDeletedBooks();
 
-  Future<List<Book>> getAllBooks() => dbController.getAllBooks();
+  Future<List<Book>> getAllBooks() => _dbController.getAllBooks();
 
   Future<List<Book>> getBooks(int status) =>
-      dbController.getBooks(status: status);
+      _dbController.getBooks(status: status);
 
   Future<List<Book>> searchBooks(String query) =>
-      dbController.searchBooks(query: query);
+      _dbController.searchBooks(query: query);
 
-  Future<int> countBooks(int status) => dbController.countBooks(status: status);
+  Future<int> countBooks(int status) =>
+      _dbController.countBooks(status: status);
 
-  Future<int> insertBook(Book book) => dbController.createBook(book);
+  Future<int> insertBook(Book book) => _dbController.createBook(book);
 
-  Future updateBook(Book book) => dbController.updateBook(book);
+  Future updateBook(Book book) => _dbController.updateBook(book);
 
   Future bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) =>
-      dbController.bulkUpdateBookFormat(ids, bookFormat);
+      _dbController.bulkUpdateBookFormat(ids, bookFormat);
 
   Future bulkUpdateBookAuthor(Set<int> ids, String author) =>
-      dbController.bulkUpdateBookAuthor(ids, author);
+      _dbController.bulkUpdateBookAuthor(ids, author);
 
-  Future deleteBook(int index) => dbController.deleteBook(index);
+  Future deleteBook(int index) => _dbController.deleteBook(index);
 
-  Future<Book?> getBook(int index) => dbController.getBook(index);
+  Future<Book?> getBook(int index) => _dbController.getBook(index);
 
-  Future<List<Book>> getDeletedBooks() => dbController.getDeletedBooks();
+  Future<List<Book>> getDeletedBooks() => _dbController.getDeletedBooks();
 
-  Future<int> removeAllBooks() => dbController.removeAllBooks();
+  Future<int> removeAllBooks() => _dbController.removeAllBooks();
 
   Future<List<Book>> getBooksWithSameTag(String tag) =>
-      dbController.getBooksWithSameTag(tag);
+      _dbController.getBooksWithSameTag(tag);
 
   Future<List<Book>> getBooksWithSameAuthor(String author) =>
-      dbController.getBooksWithSameAuthor(author);
+      _dbController.getBooksWithSameAuthor(author);
 }

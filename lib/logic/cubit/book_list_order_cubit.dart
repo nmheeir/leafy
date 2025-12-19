@@ -1,6 +1,8 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 
+@injectable
 class BookListsOrderCubit extends HydratedCubit<List<BookStatus>> {
   BookListsOrderCubit()
     : super([

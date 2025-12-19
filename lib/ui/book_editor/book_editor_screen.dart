@@ -14,6 +14,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -279,7 +280,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   void _downloadWork() async {
     if (widget.work != null) {
-      final openLibraryWork = await OpenLibraryService().getWork(widget.work!);
+      final openLibraryWork = await getIt<OpenLibraryService>().getWork(widget.work!);
 
       if (!mounted) return;
 

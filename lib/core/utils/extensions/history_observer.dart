@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 
+@lazySingleton
 class HistoryObserver extends NavigatorObserver {
+  final Logger _logger;
   final List<Route<dynamic>> _history = [];
 
-  // Hàm helper để in log stack hiện tại
-  void _printStack() {
-    print('--- CURRENT NAVIGATION STACK ---');
+  HistoryObserver(this._logger);
+
+  // Helper để log stack hiện tại gom vào 1 message
+  void _logStack() {
     if (_history.isEmpty) {
-      print('Stack is empty');
-    } else {
-      // Duyệt qua history và in tên route (hoặc path trong GoRouter)
-      for (var i = 0; i < _history.length; i++) {
-        final route = _history[i];
-        final name = route.settings.name ?? 'Unnamed Route';
-        final args = route.settings.arguments != null
-            ? ' | Args: ${route.settings.arguments}'
-            : '';
-        print('Index $i: $name $args');
-      }
+      _logger.d('Navigation Stack: [EMPTY]');
+      return;
     }
-    print('--------------------------------');
+
+    final buffer = StringBuffer('--- CURRENT NAVIGATION STACK ---\n');
+    for (var i = 0; i < _history.length; i++) {
+      final route = _history[i];
+      final name = route.settings.name ?? 'Unnamed Route';
+      final args = route.settings.arguments != null
+          ? ' | Args: ${route.settings.arguments}'
+          : '';
+      buffer.writeln('[$i] $name $args');
+    }
+    _logger.d(buffer.toString());
   }
 
   @override
@@ -27,33 +33,35 @@ class HistoryObserver extends NavigatorObserver {
     super.didPush(route, previousRoute);
     _history.add(route);
 
-    print('🔴 ACTION: Push -> ${route.settings.name}');
+    _logger.i('🔴 ACTION: Push -> ${route.settings.name}');
 
-    // NẾU LÀ ROUTE SEARCH-OL BỊ LỖI, HÃY IN STACK TRACE
+    // Logic debug đặc biệt cho /search-ol
     if (route.settings.name == '/search-ol') {
-      // Hoặc check biến Routes.searchOl
-      print('🔍 TÌM THẤY KẺ GỌI SEARCH-OL! Dưới đây là bằng chứng:');
-      // In 10 dòng đầu tiên của stack trace để biết file nào gọi lệnh push
-      print(StackTrace.current.toString().split('\n').join('\n'));
+      _logger.w(
+        '🔍 TÌM THẤY KẺ GỌI SEARCH-OL!',
+        error: 'Route /search-ol vừa được push vào stack.',
+        stackTrace:
+            StackTrace.current, // Logger sẽ tự format stack trace đẹp hơn
+      );
     }
 
-    _printStack();
+    _logStack();
   }
 
   @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPop(route, previousRoute);
     _history.remove(route);
-    print('ACTION: Pop');
-    _printStack();
+    _logger.i('ACTION: Pop -> ${route.settings.name}');
+    _logStack();
   }
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didRemove(route, previousRoute);
     _history.remove(route);
-    print('ACTION: Remove');
-    _printStack();
+    _logger.i('ACTION: Remove -> ${route.settings.name}');
+    _logStack();
   }
 
   @override
@@ -68,7 +76,7 @@ class HistoryObserver extends NavigatorObserver {
         if (newRoute != null) _history.add(newRoute);
       }
     }
-    print('ACTION: Replace');
-    _printStack();
+    _logger.i('ACTION: Replace');
+    _logStack();
   }
 }

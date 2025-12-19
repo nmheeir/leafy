@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 part 'theme_state.dart';
 part 'theme_event.dart';
 
+@injectable
 class ThemeBloc extends HydratedBloc<ThemeEvent, ThemeState> {
   String? fontFamily = 'Nunito';
 

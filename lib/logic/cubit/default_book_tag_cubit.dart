@@ -1,5 +1,7 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class DefaultBookTagCubit extends HydratedCubit<List<String>> {
   DefaultBookTagCubit() : super([]);
 

@@ -1,4 +1,5 @@
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/sort_type.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
@@ -70,6 +71,7 @@ class SortBloc extends HydratedBloc<SortEvent, SortState> {
 }
 
 // 1. Class cho sách đã đọc xong
+@injectable
 class SortFinishedBooksBloc extends SortBloc {
   SortFinishedBooksBloc()
     : super(
@@ -84,6 +86,7 @@ class SortFinishedBooksBloc extends SortBloc {
 }
 
 // 2. Class cho sách đang đọc
+@injectable
 class SortInProgressBooksBloc extends SortBloc {
   SortInProgressBooksBloc()
     : super(
@@ -98,6 +101,7 @@ class SortInProgressBooksBloc extends SortBloc {
 }
 
 // 3. Class cho sách đọc sau
+@injectable
 class SortForLaterBooksBloc extends SortBloc {
   SortForLaterBooksBloc()
     : super(
@@ -112,6 +116,7 @@ class SortForLaterBooksBloc extends SortBloc {
 }
 
 // 4. Class cho sách bỏ dở
+@injectable
 class SortUnfinishedBooksBloc extends SortBloc {
   SortUnfinishedBooksBloc()
     : super(

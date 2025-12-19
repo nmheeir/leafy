@@ -6,9 +6,11 @@ import 'package:blurhash_dart/blurhash_dart.dart' as blurhash_dart;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/repositories/repository.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -18,8 +20,13 @@ import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image/image.dart' as img;
 
+@injectable
 class BookCubit extends Cubit {
-  final Repository repository = Repository();
+  final Repository _repository;
+
+  BookCubit(this._repository) : super(null) {
+    _initLoad();
+  }
 
   final BehaviorSubject<List<Book>> _booksFetcher =
       BehaviorSubject<List<Book>>();
@@ -63,10 +70,6 @@ class BookCubit extends Cubit {
 
   Stream<Book?> get book => _bookFetcher.stream;
 
-  BookCubit() : super(null) {
-    _initLoad();
-  }
-
   Future<void> _initLoad() async {
     if (!await _checkIfCoverMigrationDone()) {
       await _migrateCoversFromDatabaseToStorage();
@@ -83,7 +86,7 @@ class BookCubit extends Cubit {
     bool getTags = true,
     bool getAuthors = true,
   }) async {
-    List<Book> books = await repository.getAllNotDeletedBooks();
+    List<Book> books = await _repository.getAllNotDeletedBooks();
     _booksFetcher.sink.add(books);
 
     if (getTags) {
@@ -96,7 +99,7 @@ class BookCubit extends Cubit {
   }
 
   Future<void> removeAllBooks() async {
-    await repository.removeAllBooks();
+    await _repository.removeAllBooks();
 
     await getAllBooks();
     await getAllBooksByStatus();
@@ -110,38 +113,38 @@ class BookCubit extends Cubit {
   }
 
   Future<void> getFinishedBooks() async {
-    List<Book> books = await repository.getBooks(0);
+    List<Book> books = await _repository.getBooks(0);
 
     _finishedBooksFetcher.sink.add(books);
     _finishedYearsFetcher.sink.add(_getFinishedYears(books));
   }
 
   Future<void> getInProgressBooks() async {
-    List<Book> books = await repository.getBooks(1);
+    List<Book> books = await _repository.getBooks(1);
     _inProgressBooksFetcher.sink.add(books);
   }
 
   Future<void> getToReadBooks() async {
-    List<Book> books = await repository.getBooks(2);
+    List<Book> books = await _repository.getBooks(2);
     _toReadBooksFetcher.sink.add(books);
   }
 
   Future<void> getDeletedBooks() async {
-    List<Book> books = await repository.getDeletedBooks();
+    List<Book> books = await _repository.getDeletedBooks();
     _deletedBooksFetcher.sink.add(books);
   }
 
   Future<void> getUnfinishedBooks() async {
-    List<Book> books = await repository.getBooks(3);
+    List<Book> books = await _repository.getBooks(3);
     _unfinishedBooksFetcher.sink.add(books);
   }
 
   Future<void> getSearchBooks(String query) async {
     if (query.isEmpty) {
-      final books = await repository.getAllNotDeletedBooks();
+      final books = await _repository.getAllNotDeletedBooks();
       _searchBooksFetcher.sink.add(books);
     } else {
-      List<Book> books = await repository.searchBooks(query);
+      List<Book> books = await _repository.searchBooks(query);
       _searchBooksFetcher.sink.add(books);
     }
   }
@@ -152,7 +155,7 @@ class BookCubit extends Cubit {
     Uint8List? cover,
   }) async {
     debugPrint('[BookCubit] addBook started for book: ${book.title}');
-    final bookID = await repository.insertBook(book);
+    final bookID = await _repository.insertBook(book);
     debugPrint('[BookCubit] Book inserted with ID: $bookID');
 
     await _saveCoverToStorage(bookID, cover);
@@ -172,7 +175,7 @@ class BookCubit extends Cubit {
     final importedBookIDs = List<int>.empty(growable: true);
 
     for (var book in books) {
-      final id = await repository.insertBook(book);
+      final id = await _repository.insertBook(book);
       importedBookIDs.add(id);
     }
 
@@ -194,7 +197,7 @@ class BookCubit extends Cubit {
     Uint8List? cover,
     BuildContext? context,
   }) async {
-    repository.updateBook(book);
+    _repository.updateBook(book);
     await _saveCoverToStorage(book.id!, cover);
 
     if (context != null) {
@@ -211,25 +214,25 @@ class BookCubit extends Cubit {
   }
 
   Future<void> bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) async {
-    repository.bulkUpdateBookFormat(ids, bookFormat);
+    _repository.bulkUpdateBookFormat(ids, bookFormat);
     getAllBooksByStatus();
     getAllBooks();
   }
 
   Future<void> bulkUpdateBookAuthor(Set<int> ids, String author) async {
-    repository.bulkUpdateBookAuthor(ids, author);
+    _repository.bulkUpdateBookAuthor(ids, author);
     getAllBooksByStatus();
     getAllBooks();
   }
 
   Future<void> deleteBook(int id) async {
-    repository.deleteBook(id);
+    _repository.deleteBook(id);
     getAllBooksByStatus();
     getAllBooks();
   }
 
   Future<Book?> getBook(int id) async {
-    Book? book = await repository.getBook(id);
+    Book? book = await _repository.getBook(id);
     _bookFetcher.sink.add(book);
 
     return book;
@@ -292,7 +295,7 @@ class BookCubit extends Cubit {
   }
 
   Future<void> _migrateCoversFromDatabaseToStorage() async {
-    List<Book> allBooks = await repository.getAllBooks();
+    List<Book> allBooks = await _repository.getAllBooks();
 
     for (var book in allBooks) {
       if (book.cover != null) {
@@ -304,7 +307,7 @@ class BookCubit extends Cubit {
         Book updatedBook = book.copyWithNullCover();
         updatedBook = book.copyWith(hasCover: true);
 
-        await repository.updateBook(updatedBook);
+        await _repository.updateBook(updatedBook);
       }
     }
 
@@ -319,7 +322,7 @@ class BookCubit extends Cubit {
   Future<void> getBooksWithSameTag(String tag) async {
     _booksWithSameTagFetcher.sink.add(null);
 
-    List<Book> books = await repository.getBooksWithSameTag(tag);
+    List<Book> books = await _repository.getBooksWithSameTag(tag);
 
     _booksWithSameTagFetcher.sink.add(books);
   }
@@ -327,7 +330,7 @@ class BookCubit extends Cubit {
   Future<void> getBooksWithSameAuthor(String author) async {
     _booksWithSameAuthorFetcher.sink.add(null);
 
-    List<Book> books = await repository.getBooksWithSameAuthor(author);
+    List<Book> books = await _repository.getBooksWithSameAuthor(author);
 
     _booksWithSameAuthorFetcher.sink.add(books);
   }
@@ -336,7 +339,7 @@ class BookCubit extends Cubit {
     if (book.isbn == null) return false;
     if (book.isbn!.isEmpty) return false;
 
-    final cover = await OpenLibraryService().getCover(book.isbn!);
+    final cover = await getIt<OpenLibraryService>().getCover(book.isbn!);
     if (cover == null) return false;
 
     final file = File('${appDocumentsDirectory.path}/${book.id}.jpg');

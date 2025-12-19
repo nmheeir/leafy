@@ -1,20 +1,24 @@
+import 'package:injectable/injectable.dart';
 import 'package:leafy/data/database/database_provider.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:leafy/core/constants/enums/index.dart';
 
+@lazySingleton
 class DatabaseController {
-  final dbClient = DatabaseProvider.dbProvider;
+  final DatabaseProvider _dbProvider;
+
+  DatabaseController(this._dbProvider);
 
   Future<int> createBook(Book book) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     return db.insert("booksTable", book.toJSON());
   }
 
   Future<List<Book>> getAllNotDeletedBooks({List<String>? columns}) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",
@@ -28,7 +32,7 @@ class DatabaseController {
   }
 
   Future<List<Book>> getAllBooks({List<String>? columns}) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query("booksTable", columns: columns);
 
@@ -41,7 +45,7 @@ class DatabaseController {
     List<String>? columns,
     required int status,
   }) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",
@@ -59,7 +63,7 @@ class DatabaseController {
     List<String>? columns,
     required String query,
   }) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",
@@ -75,7 +79,7 @@ class DatabaseController {
   }
 
   Future<int> countBooks({List<String>? columns, required int status}) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
@@ -87,7 +91,7 @@ class DatabaseController {
   }
 
   Future<int> updateBook(Book book) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     return await db.update(
       "booksTable",
@@ -98,13 +102,13 @@ class DatabaseController {
   }
 
   Future<int> deleteBook(int id) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     return await db.delete("booksTable", where: 'id = ?', whereArgs: [id]);
   }
 
   Future<Book?> getBook(int id) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",
@@ -119,7 +123,7 @@ class DatabaseController {
   }
 
   Future<List<Book>> getDeletedBooks() async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query("booksTable", where: 'deleted = 1');
 
@@ -129,7 +133,7 @@ class DatabaseController {
   }
 
   Future<int> removeAllBooks() async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
     return await db.delete("booksTable");
   }
 
@@ -137,7 +141,7 @@ class DatabaseController {
     Set<int> ids,
     BookFormat bookFormat,
   ) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
     var batch = db.batch();
 
     String bookFormatString = bookFormat == BookFormat.audiobook
@@ -165,7 +169,7 @@ class DatabaseController {
     Set<int> ids,
     String author,
   ) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
     var batch = db.batch();
 
     for (int id in ids) {
@@ -180,7 +184,7 @@ class DatabaseController {
   }
 
   Future<List<Book>> getBooksWithSameTag(String tag) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",
@@ -207,7 +211,7 @@ class DatabaseController {
   }
 
   Future<List<Book>> getBooksWithSameAuthor(String author) async {
-    final db = await dbClient.db;
+    final db = await _dbProvider.db;
 
     var result = await db.query(
       "booksTable",

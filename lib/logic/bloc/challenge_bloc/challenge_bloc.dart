@@ -2,11 +2,13 @@ import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/data/models/yearly_challenge.dart';
 
 part 'challenge_state.dart';
 part 'challenge_event.dart';
 
+@injectable
 class ChallengeBloc extends HydratedBloc<ChallengeEvent, ChallengeState> {
   String? _yearlyChallenges;
 

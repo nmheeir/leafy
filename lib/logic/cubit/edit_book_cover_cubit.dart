@@ -3,8 +3,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/main.dart';
 
+@injectable
 class EditBookCoverCubit extends Cubit<Uint8List?> {
   EditBookCoverCubit() : super(null);
 

@@ -6,6 +6,7 @@ import 'package:flutter_epub_viewer/flutter_epub_viewer.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/reading_touching_handler.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/epub_cached_service.dart';
 import 'package:leafy/ui/epub_view/widgets/chapter_drawer.dart';
 
@@ -25,7 +26,6 @@ class _EpubViewScreenState extends State<EpubViewScreen> {
 
   late EpubDisplaySettings _epubDisplaySettings;
 
-  final EpubCachedService _service = EpubCachedService();
   CancelToken? _cancelToken;
   double _downloadProgress = 0.0;
   bool _isLoading = true;
@@ -57,7 +57,7 @@ class _EpubViewScreenState extends State<EpubViewScreen> {
   Future<void> _downloadAndOpen() async {
     _cancelToken = CancelToken();
     try {
-      final file = await _service.getEpub(
+      final file = await getIt<EpubCachedService>().getEpub(
         url: widget.epubUrl,
         cancelToken: _cancelToken,
         onProgress: (progress) {

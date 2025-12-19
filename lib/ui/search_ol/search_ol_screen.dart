@@ -11,6 +11,7 @@ import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/ol_edition_result.dart';
 import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
@@ -54,7 +55,6 @@ class _SearchOLScreenState extends State<SearchOLScreen>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
   );
 
-  late final OpenLibraryService _openLibService;
   late final EditBookCubit _editBookCubit;
 
   void _saveNoEdition({
@@ -163,7 +163,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
     try {
       if (_searchTerm == null) return [];
 
-      final newItems = await OpenLibraryService().getResults(
+      final newItems = await getIt<OpenLibraryService>().getResults(
         query: _searchTerm!,
         offset: (pageKey - 1) * _pageSize,
         limit: _pageSize,
@@ -212,7 +212,9 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       _searchingISBNError = false;
       _searchingISBN = true;
     });
-    final edition = await OpenLibraryService().getEditionByISBN(isbn: isbn);
+    final edition = await getIt<OpenLibraryService>().getEditionByISBN(
+      isbn: isbn,
+    );
 
     if (edition == null) {
       setState(() {
@@ -222,7 +224,7 @@ class _SearchOLScreenState extends State<SearchOLScreen>
       return;
     }
     final authorFutures = (edition.authors ?? []).map((author) {
-      return OpenLibraryService().getAuthor(key: author.key ?? '');
+      return getIt<OpenLibraryService>().getAuthor(key: author.key ?? '');
     }).toList();
 
     final authors = await Future.wait(authorFutures);
@@ -371,7 +373,6 @@ class _SearchOLScreenState extends State<SearchOLScreen>
   @override
   void initState() {
     super.initState();
-    _openLibService = OpenLibraryService();
     _editBookCubit = context.read<EditBookCubit>();
     if (widget.scan) {
       // TODO: Bỏ bình luận lời gọi _startScanner() để kích hoạt quét khi màn hình khởi tạo.

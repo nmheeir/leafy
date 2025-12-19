@@ -1,7 +1,9 @@
+import 'package:injectable/injectable.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
+@singleton
 class DatabaseProvider {
   static final DatabaseProvider dbProvider = DatabaseProvider();
 

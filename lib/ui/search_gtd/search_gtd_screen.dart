@@ -5,6 +5,7 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/gutendex/gtd_book_result.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/gutendex_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/ui/epub_view/epub_view_screen.dart';
@@ -94,7 +95,7 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
 
   Future<List<GtdBookResult>> _fetchPage(int pageKey) async {
     try {
-      final newItems = await GutendexService().getBooks(page: pageKey);
+      final newItems = await getIt<GutendexService>().getBooks(page: pageKey);
 
       _numberOfResults = newItems.count;
 

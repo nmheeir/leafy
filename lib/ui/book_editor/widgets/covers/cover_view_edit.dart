@@ -12,6 +12,7 @@ import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
@@ -147,7 +148,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
 
     _setCoverLoading(true);
 
-    final cover = await OpenLibraryService().getCover(isbn);
+    final cover = await getIt<OpenLibraryService>().getCover(isbn);
 
     if (cover == null) {
       CoverViewEdit.showInfoSnackbar(LocaleKeys.cover_not_found_in_ol.tr());

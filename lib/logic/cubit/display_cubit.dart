@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/display_type.dart';
 
+@injectable
 class DisplayCubit extends HydratedCubit<DisplayState> {
   DisplayCubit() : super(DisplayState.initial());
 

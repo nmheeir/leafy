@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/book_read_stat.dart';
@@ -10,6 +11,7 @@ import 'package:leafy/generated/locale_keys.g.dart';
 part 'stats_event.dart';
 part 'stats_state.dart';
 
+@injectable
 class StatsBloc extends Bloc<StatsEvent, StatsState> {
   StatsBloc() : super(StatsLoading()) {
     on<StatsLoad>((event, emit) {

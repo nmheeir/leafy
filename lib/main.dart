@@ -9,6 +9,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/connectivity_service.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
@@ -41,6 +42,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
+  configureDependencies();
+
   appDocumentsDirectory = await getApplicationDocumentsDirectory();
   appTempDirectory = await getTemporaryDirectory();
 
@@ -48,7 +51,7 @@ void main() async {
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
-  bookCubit = BookCubit();
+  bookCubit = getIt<BookCubit>();
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: HydratedStorageDirectory(
@@ -71,27 +74,27 @@ class App extends StatelessWidget {
 
   dynamic _listOfBlocProviders(BuildContext context) {
     final bookProviders = [
-      BlocProvider(create: (context) => EditBookCubit()),
-      BlocProvider(create: (context) => BookCubit()),
-      BlocProvider(create: (context) => CurrentBookCubit()),
-      BlocProvider(create: (context) => EditBookCoverCubit()),
-      BlocProvider(create: (context) => BookListsOrderCubit()),
-      BlocProvider(create: (context) => DisplayCubit()),
-      BlocProvider(create: (context) => SelectedBooksCubit()),
-      BlocProvider(create: (context) => DefaultBookFormatCubit()),
-      BlocProvider(create: (context) => DefaultBookTagCubit()),
-      BlocProvider(create: (context) => BookTabIndexCubit()),
+      BlocProvider(create: (context) => getIt<EditBookCubit>()),
+      BlocProvider(create: (context) => getIt<BookCubit>()),
+      BlocProvider(create: (context) => getIt<CurrentBookCubit>()),
+      BlocProvider(create: (context) => getIt<EditBookCoverCubit>()),
+      BlocProvider(create: (context) => getIt<BookListsOrderCubit>()),
+      BlocProvider(create: (context) => getIt<DisplayCubit>()),
+      BlocProvider(create: (context) => getIt<SelectedBooksCubit>()),
+      BlocProvider(create: (context) => getIt<DefaultBookFormatCubit>()),
+      BlocProvider(create: (context) => getIt<DefaultBookTagCubit>()),
+      BlocProvider(create: (context) => getIt<BookTabIndexCubit>()),
 
       //Sort
-      BlocProvider(create: (_) => SortFinishedBooksBloc()),
-      BlocProvider(create: (_) => SortInProgressBooksBloc()),
-      BlocProvider(create: (_) => SortForLaterBooksBloc()),
-      BlocProvider(create: (_) => SortUnfinishedBooksBloc()),
-      BlocProvider(create: (_) => RatingTypeBloc()),
-      BlocProvider(create: (_) => ThemeBloc()),
-      BlocProvider(create: (_) => OpenLibSearchBloc()),
-      BlocProvider(create: (_) => ChallengeBloc()),
-      BlocProvider(create: (_) => StatsBloc()),
+      BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),
+      BlocProvider(create: (_) => getIt<SortFinishedBooksBloc>()),
+      BlocProvider(create: (_) => getIt<SortForLaterBooksBloc>()),
+      BlocProvider(create: (_) => getIt<SortUnfinishedBooksBloc>()),
+      BlocProvider(create: (_) => getIt<RatingTypeBloc>()),
+      BlocProvider(create: (_) => getIt<ThemeBloc>()),
+      BlocProvider(create: (_) => getIt<OpenLibSearchBloc>()),
+      BlocProvider(create: (_) => getIt<ChallengeBloc>()),
+      BlocProvider(create: (_) => getIt<StatsBloc>()),
     ];
 
     final openLibraryProvider = [
@@ -105,7 +108,7 @@ class App extends StatelessWidget {
   }
 
   dynamic _listOfRepositoryProviders(BuildContext context) {
-    return [RepositoryProvider(create: (_) => ConnectivityService())];
+    return [RepositoryProvider(create: (_) => getIt<ConnectivityService>())];
   }
 
   @override

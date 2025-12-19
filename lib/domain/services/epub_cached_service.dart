@@ -3,71 +3,62 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter_epub_viewer/flutter_epub_viewer.dart';
+import 'package:injectable/injectable.dart';
+import 'package:logger/logger.dart';
 import 'package:leafy/data/models/epub_cache/epub_cache.dart';
-import 'package:path_provider/path_provider.dart';
 
+@lazySingleton
 class EpubCachedService {
   final Dio _dio;
+  final Logger _logger;
+  final Directory _documentsDir;
 
-  Directory? _cachedDir;
-
-  // Cho phép inject Dio instance từ bên ngoài (tốt cho testing và global config)
-  EpubCachedService({Dio? dio})
-    : _dio =
-          dio ??
-          Dio(
-            BaseOptions(
-              connectTimeout: const Duration(seconds: 30),
-              receiveTimeout: const Duration(seconds: 30),
-            ),
-          );
-
-  Future<Directory> get _dir async {
-    if (_cachedDir != null) return _cachedDir!;
-    _cachedDir = await getApplicationDocumentsDirectory();
-    return _cachedDir!;
-  }
+  EpubCachedService(this._dio, this._logger, this._documentsDir);
 
   String _hash(String url) => md5.convert(utf8.encode(url)).toString();
 
-  Future<File> _epubFile(String url) async {
-    final dir = await _dir;
-    return File('${dir.path}/${_hash(url)}.epub');
+  File _epubFile(String url) {
+    // Không cần async nữa vì _documentsDir đã có sẵn
+    return File('${_documentsDir.path}/${_hash(url)}.epub');
   }
 
-  Future<File> _metaFile(String url) async {
-    final dir = await _dir;
-    return File('${dir.path}/${_hash(url)}.json');
+  File _metaFile(String url) {
+    return File('${_documentsDir.path}/${_hash(url)}.json');
   }
 
   // ===============================
   // VALIDATE FILE
   // ===============================
   Future<bool> _isValidEpub(File file) async {
-    // 1. Kiểm tra file tồn tại
-    if (!await file.exists()) return false;
+    if (!await file.exists()) {
+      _logger.d('Validate EPUB: File not found at ${file.path}');
+      return false;
+    }
 
-    // 2. Kiểm tra dung lượng file (Epub thật thường > 1KB)
-    // Nếu file quá nhỏ (vd: 0 byte hoặc vài byte lỗi mạng), coi như lỗi.
-    if (await file.length() < 100) return false;
+    if (await file.length() < 100) {
+      _logger.w('Validate EPUB: File too small (<100 bytes) at ${file.path}');
+      return false;
+    }
 
     try {
-      // 3. Kiểm tra Header (Magic Bytes)
-      // Epub là định dạng ZIP. 4 byte đầu tiên của file ZIP chuẩn luôn là:
-      // 0x50, 0x4B, 0x03, 0x04 (Tương ứng ký tự 'PK..')
       final List<int> bytes = await file.openRead(0, 4).first;
-
       if (bytes.length < 4) return false;
 
-      // Kiểm tra xem 2 byte đầu có phải là 'PK' (50 4B) không
-      if (bytes[0] == 0x50 && bytes[1] == 0x4B) {
-        return true;
+      final isValid = bytes[0] == 0x50 && bytes[1] == 0x4B;
+
+      if (!isValid) {
+        _logger.w(
+          'Validate EPUB: Invalid Magic Bytes [${bytes[0]}, ${bytes[1]}]',
+        );
       }
 
-      return false;
-    } catch (e) {
-      print('Lỗi kiểm tra file: $e');
+      return isValid;
+    } catch (e, st) {
+      _logger.e(
+        'Validate EPUB: Error reading header',
+        error: e,
+        stackTrace: st,
+      );
       return false;
     }
   }
@@ -75,19 +66,22 @@ class EpubCachedService {
   // ===============================
   // GET OR DOWNLOAD EPUB
   // ===============================
-  /// [cancelToken]: Dùng để hủy download nếu user thoát màn hình
   Future<File> getEpub({
     required String url,
     bool forceReload = false,
     Function(double progress)? onProgress,
     CancelToken? cancelToken,
   }) async {
-    final file = await _epubFile(url);
+    final file = _epubFile(url);
+    final fileName = file.uri.pathSegments.last;
 
-    // Nếu không bắt buộc tải lại và file hợp lệ thì trả về ngay
+    // Check Cache
     if (!forceReload && await _isValidEpub(file)) {
+      _logger.d('Cache hit: $fileName');
       return file;
     }
+
+    _logger.i('Start downloading EPUB: $url -> $fileName');
 
     try {
       await _dio.download(
@@ -101,15 +95,25 @@ class EpubCachedService {
           }
         },
       );
+
+      _logger.i('Download complete: $fileName');
     } on DioException catch (e) {
       if (CancelToken.isCancel(e)) {
+        _logger.i('Download cancelled by user');
         throw Exception('Download cancelled');
       }
+      _logger.e('DioError downloading EPUB', error: e);
+      rethrow;
+    } catch (e, st) {
+      _logger.e('Error downloading EPUB', error: e, stackTrace: st);
       rethrow;
     }
 
-    // Kiểm tra lại lần cuối sau khi tải
+    // Validate post-download
     if (!await _isValidEpub(file)) {
+      _logger.e('Download finished but file is invalid/corrupt');
+      // Xóa file lỗi để tránh lần sau nhận diện nhầm
+      if (await file.exists()) await file.delete();
       throw Exception('EPUB file corrupt or invalid');
     }
 
@@ -121,17 +125,17 @@ class EpubCachedService {
   // ===============================
   Future<void> saveMeta(EpubCache epubCache) async {
     try {
-      final file = await _metaFile(epubCache.url);
+      final file = _metaFile(epubCache.url);
       await file.writeAsString(jsonEncode(epubCache.toJson()));
-    } catch (e) {
-      // Log error nếu cần, không nên để crash app vì lỗi lưu cache phụ
-      print('Error saving meta: $e');
+      _logger.d('Saved metadata for ${epubCache.url}');
+    } catch (e, st) {
+      _logger.e('Error saving meta', error: e, stackTrace: st);
     }
   }
 
   Future<EpubCache?> loadMeta(String url) async {
     try {
-      final file = await _metaFile(url);
+      final file = _metaFile(url);
       if (!await file.exists()) return null;
 
       final content = await file.readAsString();
@@ -139,7 +143,12 @@ class EpubCachedService {
 
       final json = jsonDecode(content);
       return EpubCache.fromJson(json);
-    } catch (e) {
+    } catch (e, st) {
+      _logger.w(
+        'Error loading meta (might be corrupt json)',
+        error: e,
+        stackTrace: st,
+      );
       return null;
     }
   }

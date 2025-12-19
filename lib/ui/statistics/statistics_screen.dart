@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/main.dart';
@@ -42,7 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           if (asyncSnapshot.hasData) {
             return BlocProvider(
               create: (context) =>
-                  StatsBloc()..add(StatsLoad(asyncSnapshot.data!)),
+                 getIt<StatsBloc>()..add(StatsLoad(asyncSnapshot.data!)),
               child: SelectableRegion(
                 selectionControls: materialTextSelectionControls,
                 focusNode: _focusNode,

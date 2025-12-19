@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book.dart';
@@ -8,6 +9,7 @@ import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/data/models/reading_time.dart';
 import 'package:leafy/main.dart';
 
+@injectable
 class EditBookCubit extends Cubit<Book> {
   EditBookCubit() : super(Book.empty());
 
