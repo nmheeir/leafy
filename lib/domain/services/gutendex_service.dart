@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
-import 'package:leafy/data/models/gutendex/gtd_book_result.dart';
-import 'package:leafy/data/models/gutendex/gtd_books_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result.dart';
 import 'package:logger/logger.dart'; // Import for Logger
 
 @lazySingleton

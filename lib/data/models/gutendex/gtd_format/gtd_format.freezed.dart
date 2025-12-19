@@ -1,0 +1,295 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'gtd_format.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$GtdFormat {
+
+ String? get textHtml; String? get applicationEpubZip; String? get applicationXMobipocketEbook; String? get textPlainCharsetUsAscii; String? get applicationRdfXml; String? get imageJpeg; String? get applicationOctetStream;
+/// Create a copy of GtdFormat
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GtdFormatCopyWith<GtdFormat> get copyWith => _$GtdFormatCopyWithImpl<GtdFormat>(this as GtdFormat, _$identity);
+
+  /// Serializes this GtdFormat to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GtdFormat&&(identical(other.textHtml, textHtml) || other.textHtml == textHtml)&&(identical(other.applicationEpubZip, applicationEpubZip) || other.applicationEpubZip == applicationEpubZip)&&(identical(other.applicationXMobipocketEbook, applicationXMobipocketEbook) || other.applicationXMobipocketEbook == applicationXMobipocketEbook)&&(identical(other.textPlainCharsetUsAscii, textPlainCharsetUsAscii) || other.textPlainCharsetUsAscii == textPlainCharsetUsAscii)&&(identical(other.applicationRdfXml, applicationRdfXml) || other.applicationRdfXml == applicationRdfXml)&&(identical(other.imageJpeg, imageJpeg) || other.imageJpeg == imageJpeg)&&(identical(other.applicationOctetStream, applicationOctetStream) || other.applicationOctetStream == applicationOctetStream));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,textHtml,applicationEpubZip,applicationXMobipocketEbook,textPlainCharsetUsAscii,applicationRdfXml,imageJpeg,applicationOctetStream);
+
+@override
+String toString() {
+  return 'GtdFormat(textHtml: $textHtml, applicationEpubZip: $applicationEpubZip, applicationXMobipocketEbook: $applicationXMobipocketEbook, textPlainCharsetUsAscii: $textPlainCharsetUsAscii, applicationRdfXml: $applicationRdfXml, imageJpeg: $imageJpeg, applicationOctetStream: $applicationOctetStream)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GtdFormatCopyWith<$Res>  {
+  factory $GtdFormatCopyWith(GtdFormat value, $Res Function(GtdFormat) _then) = _$GtdFormatCopyWithImpl;
+@useResult
+$Res call({
+ String? textHtml, String? applicationEpubZip, String? applicationXMobipocketEbook, String? textPlainCharsetUsAscii, String? applicationRdfXml, String? imageJpeg, String? applicationOctetStream
+});
+
+
+
+
+}
+/// @nodoc
+class _$GtdFormatCopyWithImpl<$Res>
+    implements $GtdFormatCopyWith<$Res> {
+  _$GtdFormatCopyWithImpl(this._self, this._then);
+
+  final GtdFormat _self;
+  final $Res Function(GtdFormat) _then;
+
+/// Create a copy of GtdFormat
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? textHtml = freezed,Object? applicationEpubZip = freezed,Object? applicationXMobipocketEbook = freezed,Object? textPlainCharsetUsAscii = freezed,Object? applicationRdfXml = freezed,Object? imageJpeg = freezed,Object? applicationOctetStream = freezed,}) {
+  return _then(_self.copyWith(
+textHtml: freezed == textHtml ? _self.textHtml : textHtml // ignore: cast_nullable_to_non_nullable
+as String?,applicationEpubZip: freezed == applicationEpubZip ? _self.applicationEpubZip : applicationEpubZip // ignore: cast_nullable_to_non_nullable
+as String?,applicationXMobipocketEbook: freezed == applicationXMobipocketEbook ? _self.applicationXMobipocketEbook : applicationXMobipocketEbook // ignore: cast_nullable_to_non_nullable
+as String?,textPlainCharsetUsAscii: freezed == textPlainCharsetUsAscii ? _self.textPlainCharsetUsAscii : textPlainCharsetUsAscii // ignore: cast_nullable_to_non_nullable
+as String?,applicationRdfXml: freezed == applicationRdfXml ? _self.applicationRdfXml : applicationRdfXml // ignore: cast_nullable_to_non_nullable
+as String?,imageJpeg: freezed == imageJpeg ? _self.imageJpeg : imageJpeg // ignore: cast_nullable_to_non_nullable
+as String?,applicationOctetStream: freezed == applicationOctetStream ? _self.applicationOctetStream : applicationOctetStream // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [GtdFormat].
+extension GtdFormatPatterns on GtdFormat {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GtdFormat value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GtdFormat() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GtdFormat value)  $default,){
+final _that = this;
+switch (_that) {
+case _GtdFormat():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GtdFormat value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GtdFormat() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GtdFormat() when $default != null:
+return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)  $default,) {final _that = this;
+switch (_that) {
+case _GtdFormat():
+return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)?  $default,) {final _that = this;
+switch (_that) {
+case _GtdFormat() when $default != null:
+return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _GtdFormat implements GtdFormat {
+   _GtdFormat({required this.textHtml, required this.applicationEpubZip, required this.applicationXMobipocketEbook, required this.textPlainCharsetUsAscii, required this.applicationRdfXml, required this.imageJpeg, required this.applicationOctetStream});
+  factory _GtdFormat.fromJson(Map<String, dynamic> json) => _$GtdFormatFromJson(json);
+
+@override final  String? textHtml;
+@override final  String? applicationEpubZip;
+@override final  String? applicationXMobipocketEbook;
+@override final  String? textPlainCharsetUsAscii;
+@override final  String? applicationRdfXml;
+@override final  String? imageJpeg;
+@override final  String? applicationOctetStream;
+
+/// Create a copy of GtdFormat
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GtdFormatCopyWith<_GtdFormat> get copyWith => __$GtdFormatCopyWithImpl<_GtdFormat>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GtdFormatToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GtdFormat&&(identical(other.textHtml, textHtml) || other.textHtml == textHtml)&&(identical(other.applicationEpubZip, applicationEpubZip) || other.applicationEpubZip == applicationEpubZip)&&(identical(other.applicationXMobipocketEbook, applicationXMobipocketEbook) || other.applicationXMobipocketEbook == applicationXMobipocketEbook)&&(identical(other.textPlainCharsetUsAscii, textPlainCharsetUsAscii) || other.textPlainCharsetUsAscii == textPlainCharsetUsAscii)&&(identical(other.applicationRdfXml, applicationRdfXml) || other.applicationRdfXml == applicationRdfXml)&&(identical(other.imageJpeg, imageJpeg) || other.imageJpeg == imageJpeg)&&(identical(other.applicationOctetStream, applicationOctetStream) || other.applicationOctetStream == applicationOctetStream));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,textHtml,applicationEpubZip,applicationXMobipocketEbook,textPlainCharsetUsAscii,applicationRdfXml,imageJpeg,applicationOctetStream);
+
+@override
+String toString() {
+  return 'GtdFormat(textHtml: $textHtml, applicationEpubZip: $applicationEpubZip, applicationXMobipocketEbook: $applicationXMobipocketEbook, textPlainCharsetUsAscii: $textPlainCharsetUsAscii, applicationRdfXml: $applicationRdfXml, imageJpeg: $imageJpeg, applicationOctetStream: $applicationOctetStream)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GtdFormatCopyWith<$Res> implements $GtdFormatCopyWith<$Res> {
+  factory _$GtdFormatCopyWith(_GtdFormat value, $Res Function(_GtdFormat) _then) = __$GtdFormatCopyWithImpl;
+@override @useResult
+$Res call({
+ String? textHtml, String? applicationEpubZip, String? applicationXMobipocketEbook, String? textPlainCharsetUsAscii, String? applicationRdfXml, String? imageJpeg, String? applicationOctetStream
+});
+
+
+
+
+}
+/// @nodoc
+class __$GtdFormatCopyWithImpl<$Res>
+    implements _$GtdFormatCopyWith<$Res> {
+  __$GtdFormatCopyWithImpl(this._self, this._then);
+
+  final _GtdFormat _self;
+  final $Res Function(_GtdFormat) _then;
+
+/// Create a copy of GtdFormat
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? textHtml = freezed,Object? applicationEpubZip = freezed,Object? applicationXMobipocketEbook = freezed,Object? textPlainCharsetUsAscii = freezed,Object? applicationRdfXml = freezed,Object? imageJpeg = freezed,Object? applicationOctetStream = freezed,}) {
+  return _then(_GtdFormat(
+textHtml: freezed == textHtml ? _self.textHtml : textHtml // ignore: cast_nullable_to_non_nullable
+as String?,applicationEpubZip: freezed == applicationEpubZip ? _self.applicationEpubZip : applicationEpubZip // ignore: cast_nullable_to_non_nullable
+as String?,applicationXMobipocketEbook: freezed == applicationXMobipocketEbook ? _self.applicationXMobipocketEbook : applicationXMobipocketEbook // ignore: cast_nullable_to_non_nullable
+as String?,textPlainCharsetUsAscii: freezed == textPlainCharsetUsAscii ? _self.textPlainCharsetUsAscii : textPlainCharsetUsAscii // ignore: cast_nullable_to_non_nullable
+as String?,applicationRdfXml: freezed == applicationRdfXml ? _self.applicationRdfXml : applicationRdfXml // ignore: cast_nullable_to_non_nullable
+as String?,imageJpeg: freezed == imageJpeg ? _self.imageJpeg : imageJpeg // ignore: cast_nullable_to_non_nullable
+as String?,applicationOctetStream: freezed == applicationOctetStream ? _self.applicationOctetStream : applicationOctetStream // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+// dart format on

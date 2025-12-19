@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/gutendex/gtd_book_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/gutendex_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
@@ -81,6 +81,7 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (context) => EpubViewScreen(
+                      // BUG: Null check operator used on a null value
                       epubUrl: item.formats!.applicationEpubZip!,
                     ),
                   ),
