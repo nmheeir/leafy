@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GtdFormat {
 
- String? get textHtml; String? get applicationEpubZip; String? get applicationXMobipocketEbook; String? get textPlainCharsetUsAscii; String? get applicationRdfXml; String? get imageJpeg; String? get applicationOctetStream;
+@JsonKey(name: 'text/html') String? get textHtml;@JsonKey(name: 'application/epub+zip') String? get applicationEpubZip;@JsonKey(name: 'application/x-mobipocket-ebook') String? get applicationXMobipocketEbook;@JsonKey(name: 'text/plain; charset=us-ascii') String? get textPlainCharsetUsAscii;@JsonKey(name: 'application/rdf+xml') String? get applicationRdfXml;@JsonKey(name: 'image/jpeg') String? get imageJpeg;@JsonKey(name: 'application/octet-stream') String? get applicationOctetStream;
 /// Create a copy of GtdFormat
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $GtdFormatCopyWith<$Res>  {
   factory $GtdFormatCopyWith(GtdFormat value, $Res Function(GtdFormat) _then) = _$GtdFormatCopyWithImpl;
 @useResult
 $Res call({
- String? textHtml, String? applicationEpubZip, String? applicationXMobipocketEbook, String? textPlainCharsetUsAscii, String? applicationRdfXml, String? imageJpeg, String? applicationOctetStream
+@JsonKey(name: 'text/html') String? textHtml,@JsonKey(name: 'application/epub+zip') String? applicationEpubZip,@JsonKey(name: 'application/x-mobipocket-ebook') String? applicationXMobipocketEbook,@JsonKey(name: 'text/plain; charset=us-ascii') String? textPlainCharsetUsAscii,@JsonKey(name: 'application/rdf+xml') String? applicationRdfXml,@JsonKey(name: 'image/jpeg') String? imageJpeg,@JsonKey(name: 'application/octet-stream') String? applicationOctetStream
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'text/html')  String? textHtml, @JsonKey(name: 'application/epub+zip')  String? applicationEpubZip, @JsonKey(name: 'application/x-mobipocket-ebook')  String? applicationXMobipocketEbook, @JsonKey(name: 'text/plain; charset=us-ascii')  String? textPlainCharsetUsAscii, @JsonKey(name: 'application/rdf+xml')  String? applicationRdfXml, @JsonKey(name: 'image/jpeg')  String? imageJpeg, @JsonKey(name: 'application/octet-stream')  String? applicationOctetStream)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GtdFormat() when $default != null:
 return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
@@ -180,7 +180,7 @@ return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'text/html')  String? textHtml, @JsonKey(name: 'application/epub+zip')  String? applicationEpubZip, @JsonKey(name: 'application/x-mobipocket-ebook')  String? applicationXMobipocketEbook, @JsonKey(name: 'text/plain; charset=us-ascii')  String? textPlainCharsetUsAscii, @JsonKey(name: 'application/rdf+xml')  String? applicationRdfXml, @JsonKey(name: 'image/jpeg')  String? imageJpeg, @JsonKey(name: 'application/octet-stream')  String? applicationOctetStream)  $default,) {final _that = this;
 switch (_that) {
 case _GtdFormat():
 return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
@@ -200,7 +200,7 @@ return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? textHtml,  String? applicationEpubZip,  String? applicationXMobipocketEbook,  String? textPlainCharsetUsAscii,  String? applicationRdfXml,  String? imageJpeg,  String? applicationOctetStream)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'text/html')  String? textHtml, @JsonKey(name: 'application/epub+zip')  String? applicationEpubZip, @JsonKey(name: 'application/x-mobipocket-ebook')  String? applicationXMobipocketEbook, @JsonKey(name: 'text/plain; charset=us-ascii')  String? textPlainCharsetUsAscii, @JsonKey(name: 'application/rdf+xml')  String? applicationRdfXml, @JsonKey(name: 'image/jpeg')  String? imageJpeg, @JsonKey(name: 'application/octet-stream')  String? applicationOctetStream)?  $default,) {final _that = this;
 switch (_that) {
 case _GtdFormat() when $default != null:
 return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipocketEbook,_that.textPlainCharsetUsAscii,_that.applicationRdfXml,_that.imageJpeg,_that.applicationOctetStream);case _:
@@ -215,16 +215,16 @@ return $default(_that.textHtml,_that.applicationEpubZip,_that.applicationXMobipo
 @JsonSerializable()
 
 class _GtdFormat implements GtdFormat {
-   _GtdFormat({required this.textHtml, required this.applicationEpubZip, required this.applicationXMobipocketEbook, required this.textPlainCharsetUsAscii, required this.applicationRdfXml, required this.imageJpeg, required this.applicationOctetStream});
+   _GtdFormat({@JsonKey(name: 'text/html') required this.textHtml, @JsonKey(name: 'application/epub+zip') required this.applicationEpubZip, @JsonKey(name: 'application/x-mobipocket-ebook') required this.applicationXMobipocketEbook, @JsonKey(name: 'text/plain; charset=us-ascii') required this.textPlainCharsetUsAscii, @JsonKey(name: 'application/rdf+xml') required this.applicationRdfXml, @JsonKey(name: 'image/jpeg') required this.imageJpeg, @JsonKey(name: 'application/octet-stream') required this.applicationOctetStream});
   factory _GtdFormat.fromJson(Map<String, dynamic> json) => _$GtdFormatFromJson(json);
 
-@override final  String? textHtml;
-@override final  String? applicationEpubZip;
-@override final  String? applicationXMobipocketEbook;
-@override final  String? textPlainCharsetUsAscii;
-@override final  String? applicationRdfXml;
-@override final  String? imageJpeg;
-@override final  String? applicationOctetStream;
+@override@JsonKey(name: 'text/html') final  String? textHtml;
+@override@JsonKey(name: 'application/epub+zip') final  String? applicationEpubZip;
+@override@JsonKey(name: 'application/x-mobipocket-ebook') final  String? applicationXMobipocketEbook;
+@override@JsonKey(name: 'text/plain; charset=us-ascii') final  String? textPlainCharsetUsAscii;
+@override@JsonKey(name: 'application/rdf+xml') final  String? applicationRdfXml;
+@override@JsonKey(name: 'image/jpeg') final  String? imageJpeg;
+@override@JsonKey(name: 'application/octet-stream') final  String? applicationOctetStream;
 
 /// Create a copy of GtdFormat
 /// with the given fields replaced by the non-null parameter values.
@@ -259,7 +259,7 @@ abstract mixin class _$GtdFormatCopyWith<$Res> implements $GtdFormatCopyWith<$Re
   factory _$GtdFormatCopyWith(_GtdFormat value, $Res Function(_GtdFormat) _then) = __$GtdFormatCopyWithImpl;
 @override @useResult
 $Res call({
- String? textHtml, String? applicationEpubZip, String? applicationXMobipocketEbook, String? textPlainCharsetUsAscii, String? applicationRdfXml, String? imageJpeg, String? applicationOctetStream
+@JsonKey(name: 'text/html') String? textHtml,@JsonKey(name: 'application/epub+zip') String? applicationEpubZip,@JsonKey(name: 'application/x-mobipocket-ebook') String? applicationXMobipocketEbook,@JsonKey(name: 'text/plain; charset=us-ascii') String? textPlainCharsetUsAscii,@JsonKey(name: 'application/rdf+xml') String? applicationRdfXml,@JsonKey(name: 'image/jpeg') String? imageJpeg,@JsonKey(name: 'application/octet-stream') String? applicationOctetStream
 });
 
 

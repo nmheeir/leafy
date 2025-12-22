@@ -18,9 +18,9 @@ abstract class GtdBookResult with _$GtdBookResult {
     required List<String> bookshelves,
     required List<String> languages,
     required bool? copyright,
-    required String? mediaType,
+    @JsonKey(name: 'media_type') required String? mediaType,
     required GtdFormat? formats,
-    required int? downloadCount,
+    @JsonKey(name: 'download_count') required int? downloadCount,
   }) = _GtdBookResult;
 
   factory GtdBookResult.fromJson(Map<String, dynamic> json) =>

@@ -78,14 +78,17 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
               return ListTile(
                 title: Text(item.title.toString()),
                 contentPadding: EdgeInsets.all(8),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => EpubViewScreen(
-                      // BUG: Null check operator used on a null value
-                      epubUrl: item.formats!.applicationEpubZip!,
+                onTap: () {
+                  debugPrint(item.formats.toString());
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => EpubViewScreen(
+                        // BUG: Null check operator used on a null value
+                        epubUrl: item.formats!.applicationEpubZip!,
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               );
             },
           ),

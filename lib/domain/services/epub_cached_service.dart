@@ -18,7 +18,6 @@ class EpubCachedService {
   String _hash(String url) => md5.convert(utf8.encode(url)).toString();
 
   File _epubFile(String url) {
-    // Không cần async nữa vì _documentsDir đã có sẵn
     return File('${_documentsDir.path}/${_hash(url)}.epub');
   }
 
