@@ -1,0 +1,41 @@
+import 'package:dio/dio.dart';
+import 'package:fpdart/src/either.dart';
+import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/ol_search_type.dart';
+import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/data/datasources/ol_remote_data_source.dart';
+import 'package:leafy/domain/entities/ol_search_result.dart';
+import 'package:leafy/domain/repositories/open_lib_repository.dart';
+
+@LazySingleton(as: OpenLibRepository)
+class OpenLibRepositoryImpl implements OpenLibRepository {
+  final OlRemoteDataSource remoteDataSource;
+
+  const OpenLibRepositoryImpl(this.remoteDataSource);
+
+  @override
+  Future<Either<Failure, OLSearchResult>> search({
+    required String query,
+    required int offset,
+    required int limit,
+    required OLSearchType searchType,
+  }) async {
+    try {
+      // Logic chuyển đổi từ Enum sang tham số cụ thể của Retrofit
+      final result = await remoteDataSource.getResults(
+        query: searchType == OLSearchType.general ? query : null,
+        author: searchType == OLSearchType.author ? query : null,
+        title: searchType == OLSearchType.title ? query : null,
+        isbn: searchType == OLSearchType.isbn ? query : null,
+        olid: searchType == OLSearchType.openlibraryId ? query : null,
+        limit: 20,
+        offset: offset,
+      );
+
+      return Left(ServerFailure("API Error"));
+      // return Right(result.toEntity());
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message ?? "API Error"));
+    }
+  }
+}

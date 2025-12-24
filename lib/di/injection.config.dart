@@ -20,6 +20,11 @@ import 'package:logger/web.dart' as _i120;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/database/database_controller.dart' as _i188;
 import '../data/database/database_provider.dart' as _i1014;
+import '../data/datasources/ol_remote_data_source.dart' as _i893;
+import '../data/repositories/book_repository_impl.dart' as _i329;
+import '../data/repositories/open_lib_repository_impl.dart' as _i946;
+import '../domain/repositories/book_repository.dart' as _i168;
+import '../domain/repositories/open_lib_repository.dart' as _i996;
 import '../domain/repositories/repository.dart' as _i1001;
 import '../domain/services/connectivity_service.dart' as _i394;
 import '../domain/services/epub_cached_service.dart' as _i374;
@@ -93,6 +98,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i394.ConnectivityService>(
       () => _i394.ConnectivityService(),
     );
+    gh.lazySingleton<_i996.OpenLibRepository>(
+      () => _i946.OpenLibRepositoryImpl(gh<_i893.OlRemoteDataSource>()),
+    );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
     );
@@ -108,6 +116,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i188.DatabaseController>(
       () => _i188.DatabaseController(gh<_i1014.DatabaseProvider>()),
+    );
+    gh.lazySingleton<_i168.BookRepository>(
+      () => _i329.BookRepositoryImpl(gh<_i893.OlRemoteDataSource>()),
     );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
