@@ -20,7 +20,7 @@ import 'package:logger/web.dart' as _i120;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/database/database_controller.dart' as _i188;
 import '../data/database/database_provider.dart' as _i1014;
-import '../data/datasources/ol_remote_data_source.dart' as _i893;
+import '../data/datasources/remote/ol_remote_data_source.dart' as _i893;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../domain/repositories/book_repository.dart' as _i168;
