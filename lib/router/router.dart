@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/core/utils/extensions/history_observer.dart';
-import 'package:leafy/di/injection.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/epub_view/epub_view_screen.dart';
@@ -16,6 +15,7 @@ import 'package:leafy/ui/settings/screens/setting_default_book_tag_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
 import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
+import 'package:leafy/ui/test/test_search_screen.dart';
 import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
@@ -61,8 +61,9 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.searchOl,
       builder: (context, state) {
-        final status = state.extra as BookStatus? ?? BookStatus.finished;
-        return SearchOLScreen(status: status);
+        // final status = state.extra as BookStatus? ?? BookStatus.finished;
+        return TestSearchOLScreen();
+        // return SearchOLScreen(status: status);
       },
     ),
     GoRoute(

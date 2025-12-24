@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/ol_search_type.dart';
 import 'package:leafy/core/errors/failures.dart';

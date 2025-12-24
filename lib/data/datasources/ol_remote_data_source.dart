@@ -5,6 +5,7 @@ import 'package:retrofit/retrofit.dart';
 
 part 'ol_remote_data_source.g.dart';
 
+@lazySingleton
 @RestApi(baseUrl: "https://openlibrary.org")
 abstract class OlRemoteDataSource {
   @factoryMethod
