@@ -32,11 +32,11 @@ _GtdBookResult _$GtdBookResultFromJson(Map<String, dynamic> json) =>
           .map((e) => e as String)
           .toList(),
       copyright: json['copyright'] as bool?,
-      mediaType: json['mediaType'] as String?,
+      mediaType: json['media_type'] as String?,
       formats: json['formats'] == null
           ? null
           : GtdFormat.fromJson(json['formats'] as Map<String, dynamic>),
-      downloadCount: (json['downloadCount'] as num?)?.toInt(),
+      downloadCount: (json['download_count'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$GtdBookResultToJson(_GtdBookResult instance) =>
@@ -51,7 +51,7 @@ Map<String, dynamic> _$GtdBookResultToJson(_GtdBookResult instance) =>
       'bookshelves': instance.bookshelves,
       'languages': instance.languages,
       'copyright': instance.copyright,
-      'mediaType': instance.mediaType,
+      'media_type': instance.mediaType,
       'formats': instance.formats,
-      'downloadCount': instance.downloadCount,
+      'download_count': instance.downloadCount,
     };

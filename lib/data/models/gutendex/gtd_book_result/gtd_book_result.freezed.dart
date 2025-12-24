@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GtdBookResult {
 
- int? get id; String? get title; List<GtdPerson> get authors; List<String> get summaries; List<GtdPerson> get editors; List<GtdPerson> get translators; List<String> get subjects; List<String> get bookshelves; List<String> get languages; bool? get copyright; String? get mediaType; GtdFormat? get formats; int? get downloadCount;
+ int? get id; String? get title; List<GtdPerson> get authors; List<String> get summaries; List<GtdPerson> get editors; List<GtdPerson> get translators; List<String> get subjects; List<String> get bookshelves; List<String> get languages; bool? get copyright;@JsonKey(name: 'media_type') String? get mediaType; GtdFormat? get formats;@JsonKey(name: 'download_count') int? get downloadCount;
 /// Create a copy of GtdBookResult
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $GtdBookResultCopyWith<$Res>  {
   factory $GtdBookResultCopyWith(GtdBookResult value, $Res Function(GtdBookResult) _then) = _$GtdBookResultCopyWithImpl;
 @useResult
 $Res call({
- int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright, String? mediaType, GtdFormat? formats, int? downloadCount
+ int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormat? formats,@JsonKey(name: 'download_count') int? downloadCount
 });
 
 
@@ -177,7 +177,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright,  String? mediaType,  GtdFormat? formats,  int? downloadCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GtdBookResult() when $default != null:
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -198,7 +198,7 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright,  String? mediaType,  GtdFormat? formats,  int? downloadCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)  $default,) {final _that = this;
 switch (_that) {
 case _GtdBookResult():
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -218,7 +218,7 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright,  String? mediaType,  GtdFormat? formats,  int? downloadCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,) {final _that = this;
 switch (_that) {
 case _GtdBookResult() when $default != null:
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -233,7 +233,7 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 @JsonSerializable()
 
 class _GtdBookResult implements GtdBookResult {
-  const _GtdBookResult({required this.id, required this.title, required final  List<GtdPerson> authors, required final  List<String> summaries, required final  List<GtdPerson> editors, required final  List<GtdPerson> translators, required final  List<String> subjects, required final  List<String> bookshelves, required final  List<String> languages, required this.copyright, required this.mediaType, required this.formats, required this.downloadCount}): _authors = authors,_summaries = summaries,_editors = editors,_translators = translators,_subjects = subjects,_bookshelves = bookshelves,_languages = languages;
+  const _GtdBookResult({required this.id, required this.title, required final  List<GtdPerson> authors, required final  List<String> summaries, required final  List<GtdPerson> editors, required final  List<GtdPerson> translators, required final  List<String> subjects, required final  List<String> bookshelves, required final  List<String> languages, required this.copyright, @JsonKey(name: 'media_type') required this.mediaType, required this.formats, @JsonKey(name: 'download_count') required this.downloadCount}): _authors = authors,_summaries = summaries,_editors = editors,_translators = translators,_subjects = subjects,_bookshelves = bookshelves,_languages = languages;
   factory _GtdBookResult.fromJson(Map<String, dynamic> json) => _$GtdBookResultFromJson(json);
 
 @override final  int? id;
@@ -288,9 +288,9 @@ class _GtdBookResult implements GtdBookResult {
 }
 
 @override final  bool? copyright;
-@override final  String? mediaType;
+@override@JsonKey(name: 'media_type') final  String? mediaType;
 @override final  GtdFormat? formats;
-@override final  int? downloadCount;
+@override@JsonKey(name: 'download_count') final  int? downloadCount;
 
 /// Create a copy of GtdBookResult
 /// with the given fields replaced by the non-null parameter values.
@@ -325,7 +325,7 @@ abstract mixin class _$GtdBookResultCopyWith<$Res> implements $GtdBookResultCopy
   factory _$GtdBookResultCopyWith(_GtdBookResult value, $Res Function(_GtdBookResult) _then) = __$GtdBookResultCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright, String? mediaType, GtdFormat? formats, int? downloadCount
+ int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormat? formats,@JsonKey(name: 'download_count') int? downloadCount
 });
 
 

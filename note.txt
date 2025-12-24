@@ -1,0 +1,6 @@
+- Domain: 
+    - Entity: Chỉ chứa dữ liệu thuần tuý, không phụ thuộc vào các layer khác
+
+- Data:
+    - Model: chứa dữ liệu phục vụ cho việc truy vấn API hoặc local
+    
