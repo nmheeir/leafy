@@ -23,6 +23,7 @@ class SearchTabData {
   final bool hasReachedMax;
   final int numberOfResults;
   final String queryAtMoment;
+  final bool hasNoResults;
 
   const SearchTabData({
     this.books = const [],
@@ -30,5 +31,6 @@ class SearchTabData {
     this.hasReachedMax = false,
     this.numberOfResults = 0,
     this.queryAtMoment = '',
+    this.hasNoResults = false,
   });
 }

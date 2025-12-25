@@ -38,69 +38,127 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   void _onTypeChanged(_TypeChanged event, Emitter<SearchState> emit) {
-    _logger.i('[SearchBloc] TypeChanged: ${state.searchType} → ${event.type}');
+    _logger.d('[SearchBloc] _onTypeChanged event: ${event.type}');
 
-    _logger.d(
-      '[SearchBloc] Save cache for ${state.searchType} | '
-      'books=${state.books.length}, page=${state.page}',
-    );
-    // 1. LƯU DỮ LIỆU CŨ VÀO CACHE
-    // Tạo object data từ state hiện tại
+    // 1. LƯU DỮ LIỆU TAB CŨ VÀO CACHE
+    // Tạo snapshot dữ liệu hiện tại
+    // Lưu ý: Tính toán hasNoResults cho tab hiện tại trước khi lưu
+    // Nếu books rỗng VÀ status là success -> nghĩa là không tìm thấy kết quả
+    final bool currentTabHasNoResults =
+        state.books.isEmpty && state.status == SearchStatus.success;
+
     final dataToSave = SearchTabData(
       books: state.books,
       page: state.page,
       hasReachedMax: state.hasReachedMax,
       numberOfResults: state.numberOfResults,
-      queryAtMoment: state.currentQuery, // Lưu từ khoá lúc tìm ra kết quả này
+      hasNoResults: currentTabHasNoResults,
+    );
+    _logger.d(
+      '[SearchBloc] Caching old tab data for type ${state.searchType}: '
+      'books_count=${dataToSave.books.length}, page=${dataToSave.page}, '
+      'hasReachedMax=${dataToSave.hasReachedMax}, '
+      'numberOfResults=${dataToSave.numberOfResults}',
     );
 
-    // Cập nhật map cache: Giữ cache cũ và thêm/đè data của type hiện tại
+    // Copy cache cũ và cập nhật dữ liệu mới cho searchType hiện tại
     final updatedCache = Map<OLSearchType, SearchTabData>.from(state.cache);
     updatedCache[state.searchType] = dataToSave;
-
-    // 2. CHUẨN BỊ DỮ LIỆU CHO TYPE MỚI
-    final newType = event.type;
-    final cachedData = updatedCache[newType]; // Lấy dữ liệu từ cache (nếu có)
-
-    // Kiểm tra xem cache có dùng được không?
-    // Cache dùng được khi: có tồn tại VÀ từ khoá tìm kiếm không đổi (nếu UI dùng chung 1 ô search)
-    // Nếu bạn muốn mỗi tab 1 từ khoá riêng biệt thì bỏ check state.currentQuery
-    bool useCache = cachedData != null;
-
-    if (useCache) {
-      _logger.i(
-        '[SearchBloc] Restore cache for $newType | '
-        'books=${cachedData.books.length}, page=${cachedData.page}',
-      );
-    } else {
-      _logger.i('[SearchBloc] No cache for $newType → trigger new search');
-    }
-
-    // Nếu dùng cache thì lấy data cũ, nếu không thì reset về initial
-    emit(
-      state.copyWith(
-        searchType: newType,
-        cache: updatedCache, // Cập nhật cache mới vào state
-        // Restore hoặc Reset
-        books: useCache ? cachedData.books : [],
-        page: useCache ? cachedData.page : 0,
-        hasReachedMax: useCache ? cachedData.hasReachedMax : false,
-        numberOfResults: useCache ? cachedData.numberOfResults : 0,
-        // Nếu có cache -> Success (để hiện list), nếu không -> Initial (để hiện empty hoặc loading)
-        status: useCache && cachedData.books.isNotEmpty
-            ? SearchStatus.success
-            : SearchStatus.initial,
-
-        // Tuỳ chọn logic Query:
-        // Nếu bạn muốn giữ query cũ khi switch tab thì giữ nguyên dòng này.
-        // Nếu query đổi thì bạn phải gọi event QueryChanged ở dưới.
-      ),
+    _logger.d(
+      '[SearchBloc] Cache updated. Current cache keys: ${updatedCache.keys}',
     );
 
-    // LOGIC KÍCH HOẠT TÌM KIẾM LẠI (Nếu chưa có trong cache)
-    // Nếu không có cache, VÀ đang có chữ trong ô search -> Gọi tìm kiếm mới
-    if (!useCache && state.currentQuery.isNotEmpty) {
-      add(SearchEvent.queryChanged(state.currentQuery));
+    // 2. CHUẨN BỊ CHUYỂN SANG TAB MỚI
+    final newType = event.type;
+    final cachedData = updatedCache[newType];
+    final currentQuery = state.currentQuery;
+    _logger.d(
+      '[SearchBloc] Switching to new type: $newType. '
+      'Current query: "$currentQuery"',
+    );
+
+    // Kiểm tra xem có cache hợp lệ không (Có cache và có dữ liệu sách)
+    // Cache hợp lệ khi:
+    // 1. Dữ liệu không null
+    // 2. VÀ (Có sách HOẶC Đã xác nhận không có sách từ lần tìm trước)
+    final bool hasValidCache =
+        cachedData != null &&
+        (cachedData.books.isNotEmpty || cachedData.hasNoResults);
+    _logger.d('[SearchBloc] Has valid cache for $newType: $hasValidCache');
+
+    if (hasValidCache) {
+      // TRƯỜNG HỢP A: ĐÃ CÓ CACHE -> HIỂN THỊ NGAY (SUCCESS)
+      // Không cần load lại, show list ngay lập tức
+      _logger.d(
+        '[SearchBloc] Using cached data for $newType: '
+        'books_count=${cachedData.books.length}, page=${cachedData.page}, '
+        'hasReachedMax=${cachedData.hasReachedMax}, '
+        'numberOfResults=${cachedData.numberOfResults}',
+      );
+      emit(
+        state.copyWith(
+          searchType: newType,
+          cache: updatedCache,
+          books: cachedData.books,
+          page: cachedData.page,
+          hasReachedMax: cachedData.hasReachedMax,
+          numberOfResults: cachedData.numberOfResults,
+          status: SearchStatus.success,
+        ),
+      );
+      _logger.d(
+        '[SearchBloc] Emitted state with SearchStatus.success (from cache)',
+      );
+    } else {
+      // TRƯỜNG HỢP B: CHƯA CÓ CACHE
+      _logger.d('[SearchBloc] No valid cache found for $newType.');
+
+      if (currentQuery.isNotEmpty) {
+        // B1: Có từ khoá -> Show LOADING ngay lập tức (Theo yêu cầu của bạn)
+        // Việc này giúp UI hiện vòng xoay thay vì màn hình trắng trong lúc chờ debounce
+        _logger.d(
+          '[SearchBloc] Current query is not empty, '
+          'emitting SearchStatus.loading for new type $newType.',
+        );
+        emit(
+          state.copyWith(
+            searchType: newType,
+            cache: updatedCache,
+            books: [],
+            page: 0,
+            numberOfResults: 0,
+            hasReachedMax: false,
+            status: SearchStatus.loading,
+          ),
+        );
+
+        // Kích hoạt tìm kiếm dữ liệu mới
+        _logger.d(
+          '[SearchBloc] Adding QueryChanged event for query: "$currentQuery"',
+        );
+        add(SearchEvent.queryChanged(currentQuery));
+      } else {
+        // B2: Không có từ khoá -> Về Initial
+        _logger.d(
+          '[SearchBloc] Current query is empty, '
+          'emitting SearchStatus.initial for new type $newType.',
+        );
+        emit(
+          state.copyWith(
+            searchType: newType,
+            cache: updatedCache,
+
+            books: [],
+            page: 0,
+            numberOfResults: 0,
+            hasReachedMax: false,
+            status: SearchStatus.initial,
+          ),
+        );
+        _logger.d(
+          '[SearchBloc] Emitted state with SearchStatus.initial (no query)',
+        );
+      }
     }
   }
 
@@ -110,7 +168,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   ) async {
     if (event.query.isEmpty) {
       _logger.i('[SearchBloc] Query cleared → reset state');
-      emit(state.copyWith(status: SearchStatus.initial, books: []));
+      emit(
+        state.copyWith(
+          status: SearchStatus.initial,
+          books: [],
+          currentQuery: '',
+        ),
+      );
       return;
     }
 
@@ -154,6 +218,9 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
         ),
       ),
       (data) {
+        // Tính toán hasNoResults
+        final bool isNoResults = data.docs.isEmpty;
+
         // Update state hiển thị
         var newState = state.copyWith(
           status: SearchStatus.success,
@@ -168,6 +235,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
           page: newState.page,
           hasReachedMax: newState.hasReachedMax,
           queryAtMoment: newState.currentQuery,
+          numberOfResults: data.numFound ?? 0,
+          hasNoResults: isNoResults,
         );
         final newCache = Map<OLSearchType, SearchTabData>.from(state.cache);
         newCache[state.searchType] = currentData;

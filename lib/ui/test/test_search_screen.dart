@@ -2,22 +2,19 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-
 // Core imports
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
-
+import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 // Domain/Data imports
 import 'package:leafy/logic/bloc/search/search_bloc.dart';
-
 // UI Widgets
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:leafy/ui/search_ol/widgets/book_card_ol.dart';
 import 'package:leafy/ui/search_ol/widgets/ol_search_radio.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class TestSearchOLScreen extends StatefulWidget {
   const TestSearchOLScreen({super.key});
@@ -219,7 +216,6 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
     );
   }
 
-  // BUG: clear text in search field do not modified state in bloc
   Padding _buildSearchField(BuildContext context, bool canSearch) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(0, 10, 10, 5),
@@ -234,6 +230,9 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
               textInputAction: TextInputAction.search,
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _startNewSearch(),
+              onClear: () {
+                context.read<SearchBloc>().add(SearchEvent.queryChanged(''));
+              },
               enable: canSearch,
             ),
           ),
