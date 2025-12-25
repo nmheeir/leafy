@@ -5,6 +5,7 @@ import 'package:leafy/core/constants/constants.dart';
 // Core imports
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/domain/entities/ol_search_result_doc.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 // Domain/Data imports
@@ -14,6 +15,7 @@ import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:leafy/ui/search_ol/widgets/book_card_ol.dart';
 import 'package:leafy/ui/search_ol/widgets/ol_search_radio.dart';
+import 'package:leafy/ui/search_ol_edition/search_ol_edition_screen.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class TestSearchOLScreen extends StatefulWidget {
@@ -62,6 +64,51 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
     final currentScroll = _scrollController.offset;
     // Trigger khi cuộn được 90% danh sách
     return currentScroll >= (maxScroll * 0.9);
+  }
+
+  void _startNewSearch() {
+    FocusScope.of(context).unfocus();
+    context.read<SearchBloc>().add(
+      SearchEvent.queryChanged(_searchController.text),
+    );
+  }
+
+  void _saveNoEdition({
+    required List<String> editions,
+    required String title,
+    String? subtitle,
+    required String author,
+    int? firstPublishYear,
+    int? pagesMedian,
+    int? cover,
+    List<String>? isbn,
+    String? olid,
+  }) {
+    // TODO: Create logic
+  }
+
+  void _onChooseEditionPressed(OLSearchResultDoc item) {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SearchOLEditionsScreen(
+          // TODO: change book status here
+          status: BookStatus.finished,
+          editions: item.editionKey!,
+          title: item.title!,
+          subtitle: item.subtitle,
+          author: (item.authorName != null && item.authorName!.isNotEmpty)
+              ? item.authorName![0]
+              : '',
+          pagesMedian: item.medianPages,
+          isbn: item.isbn,
+          olid: item.key,
+          firstPublishYear: item.firstPublishYear,
+        ),
+      ),
+    );
   }
 
   // --- BUILD UI ---
@@ -141,7 +188,7 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
         if (state.status == SearchStatus.loading && state.books.isEmpty) {
           return Center(
             child: LoadingAnimationWidget.fourRotatingDots(
-              color: Theme.of(context).primaryColor,
+              color: context.colorScheme.primary,
               size: 40,
             ),
           );
@@ -175,42 +222,30 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
         }
 
         // TRẠNG THÁI 5: Hiển thị danh sách
-        return ListView.builder(
-          controller: _scrollController,
-          itemCount: state.hasReachedMax
-              ? state.books.length
-              : state.books.length + 1,
-          itemBuilder: (context, index) {
-            // Render cái xoay xoay ở dưới cùng khi đang Load More
-            if (index >= state.books.length) {
-              return Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: LoadingAnimationWidget.staggeredDotsWave(
-                    color: Theme.of(context).primaryColor,
-                    size: 30,
-                  ),
-                ),
-              );
-            }
+        return Column(
+          children: [
+            _buildNumberOfResults(state.numberOfResults),
 
-            final item = state.books[index];
+            Expanded(
+              child: ListView.builder(
+                controller: _scrollController,
+                itemCount: state.hasReachedMax
+                    ? state.books.length
+                    : state.books.length + 1,
+                itemBuilder: (context, index) {
+                  // Render load more widget
+                  if (index >= state.books.length) {
+                    return _buildLoadMoreProgressIndicator();
+                  }
 
-            // Render Book Card
-            return BookCardOL(
-              title: item.title ?? '',
-              subtitle: item.subtitle,
-              author: (item.authorName?.isNotEmpty == true)
-                  ? item.authorName![0]
-                  : '',
-              coverKey: item.coverEditionKey,
-              editions: item.editionKey,
-              pagesMedian: item.medianPages,
-              firstPublishYear: item.firstPublishYear,
-              onChooseEditionPressed: () {},
-              onAddBookPressed: () {},
-            );
-          },
+                  final doc = state.books[index];
+
+                  // Render Book Card
+                  return _buildResultCard(doc);
+                },
+              ),
+            ),
+          ],
         );
       },
     );
@@ -260,16 +295,72 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
     );
   }
 
-  void _startNewSearch() {
-    context.read<SearchBloc>().add(
-      SearchEvent.queryChanged(_searchController.text),
-    );
-  }
-
   Padding _buildDivider() {
     return const Padding(
       padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
       child: Divider(height: 3),
+    );
+  }
+
+  Widget _buildNumberOfResults(int numberOfResults) {
+    return (numberOfResults > 0)
+        ? Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '$numberOfResults ${LocaleKeys.results_lowercase.tr()}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          )
+        : const SizedBox.shrink();
+  }
+
+  Widget _buildResultCard(OLSearchResultDoc doc) {
+    return BookCardOL(
+      title: doc.title ?? '',
+      subtitle: doc.subtitle,
+      author: (doc.authorName != null && doc.authorName!.isNotEmpty)
+          ? doc.authorName![0]
+          : '',
+      coverKey: doc.coverEditionKey,
+      editions: doc.editionKey,
+      pagesMedian: doc.medianPages,
+      firstPublishYear: doc.firstPublishYear,
+      onAddBookPressed: () => _saveNoEdition(
+        editions: doc.editionKey!,
+        title: doc.title ?? '',
+        subtitle: doc.subtitle,
+        author: (doc.authorName != null && doc.authorName!.isNotEmpty)
+            ? doc.authorName![0]
+            : '',
+        pagesMedian: doc.medianPages,
+        isbn: doc.isbn,
+        olid: doc.key,
+        firstPublishYear: doc.firstPublishYear,
+        cover: doc.coverI,
+      ),
+      onChooseEditionPressed: () => _onChooseEditionPressed(doc),
+    );
+  }
+
+  Widget _buildLoadMoreProgressIndicator() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: LoadingAnimationWidget.staggeredDotsWave(
+          color: context.colorScheme.primary,
+          size: 30,
+        ),
+      ),
     );
   }
 }
