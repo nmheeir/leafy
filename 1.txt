@@ -1,0 +1,67 @@
+lib/
+├── core/
+│   ├── constants/
+│   │   └── db_constants.dart
+│   ├── error/
+│   │   └── failures.dart
+│   └── usecase/
+│       └── usecase.dart
+│
+├── domain/
+│   ├── book/
+│   │   ├── entities/
+│   │   │   └── book.dart
+│   │   ├── repositories/
+│   │   │   └── book_repository.dart
+│   │   └── usecases/
+│   │       ├── get_books.dart
+│   │       └── save_book.dart
+│   │
+│   ├── epub_cache/
+│   │   ├── entities/
+│   │   │   └── epub_cache.dart
+│   │   ├── repositories/
+│   │   │   └── epub_cache_repository.dart
+│   │   └── usecases/
+│   │       └── cache_epub.dart
+│   │
+│   └── reading_time/
+│       ├── entities/
+│       │   └── reading_time.dart
+│       ├── repositories/
+│       │   └── reading_time_repository.dart
+│       └── usecases/
+│           ├── log_reading_time.dart
+│           └── get_reading_stats.dart
+│
+├── data/
+│   ├── book/
+│   │   ├── models/
+│   │   │   └── book_model.dart
+│   │   ├── datasources/
+│   │   │   └── book_local_datasource.dart
+│   │   └── repositories/
+│   │       └── book_repository_impl.dart
+│   │
+│   ├── epub_cache/
+│   │   ├── models/
+│   │   │   └── epub_cache_model.dart
+│   │   ├── datasources/
+│   │   │   └── epub_cache_local_datasource.dart
+│   │   └── repositories/
+│   │       └── epub_cache_repository_impl.dart
+│   │
+│   ├── reading_time/
+│   │   ├── models/
+│   │   │   └── reading_time_model.dart
+│   │   ├── datasources/
+│   │   │   └── reading_time_local_datasource.dart
+│   │   └── repositories/
+│   │       └── reading_time_repository_impl.dart
+│   │
+│   └── datasources/
+│       └── local/
+│           └── database_service.dart
+│
+└── presentation/
+    └── ...

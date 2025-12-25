@@ -5,6 +5,7 @@ import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/reading.dart';
 import 'package:leafy/main.dart';
 
+// TODO: use freezed and json serialization
 class Book {
   int? id;
   String title;
