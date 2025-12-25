@@ -1,16 +1,18 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/domain/entities/book.dart';
 import 'package:leafy/domain/repositories/book_repository.dart';
 
 @injectable
-class GetAllBooks {
+class GetAllBooksUseCase implements UseCase<List<Book>, NoParams> {
   final BookRepository bookRepository;
 
-  GetAllBooks(this.bookRepository);
+  GetAllBooksUseCase(this.bookRepository);
 
-  Future<Either<Failure, List<Book>>> call() async {
-    return await bookRepository.getAllBooks();
+  @override
+  Future<Either<Failure, List<Book>>> call(NoParams params) {
+    return bookRepository.getAllBooks();
   }
 }

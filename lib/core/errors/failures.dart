@@ -1,24 +1,18 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-abstract class Failure extends Equatable {
-  final String message;
-  const Failure(this.message);
+part 'failures.freezed.dart';
 
-  @override
-  List<Object> get props => [message];
-}
+@freezed
+abstract class Failure with _$Failure {
+  // Lỗi server (có thể kèm message debug hoặc code lỗi)
+  const factory Failure.server([String? message]) = _ServerFailure;
 
-// Lỗi do Server (API chết, 404, 500)
-class ServerFailure extends Failure {
-  const ServerFailure(super.message);
-}
+  // Lỗi mạng/kết nối
+  const factory Failure.connection([String? message]) = _ConnectionFailure;
 
-// Lỗi do mất mạng
-class ConnectionFailure extends Failure {
-  const ConnectionFailure(super.message);
-}
+  // Lỗi cache/database
+  const factory Failure.cache([String? message]) = _CacheFailure;
 
-// Lỗi do dữ liệu cache
-class CacheFailure extends Failure {
-  const CacheFailure(super.message);
+  // Lỗi không xác định
+  const factory Failure.unexpected([String? message]) = _UnexpectedFailure;
 }

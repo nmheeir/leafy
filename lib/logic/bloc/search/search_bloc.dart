@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/domain/entities/ol_search_result_doc.dart';
 import 'package:leafy/domain/usecases/open_lib_usecases/open_lib_search.dart';
+import 'package:leafy/domain/usecases/open_lib_usecases/open_lib_search_params.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:leafy/core/constants/enums/index.dart';
@@ -13,7 +14,7 @@ part 'search_bloc.freezed.dart';
 
 @injectable
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
-  final OpenLibSearch _openLibSearchUseCase;
+  final OpenLibSearchUseCase _openLibSearchUseCase;
   static const int _pageSize = 20;
 
   SearchBloc(this._openLibSearchUseCase) : super(const SearchState()) {
@@ -35,7 +36,6 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
   }
 
   void _onTypeChanged(_TypeChanged event, Emitter<SearchState> emit) {
-    // Freezed copyWith: Chỉ update field cần thiết, các field khác giữ nguyên (hoặc về default)
     emit(
       state.copyWith(
         searchType: event.type,
@@ -70,17 +70,20 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final offset = nextPage * _pageSize;
 
     final result = await _openLibSearchUseCase(
-      query: event.query,
-      limit: _pageSize,
-      offset: offset,
-      searchType: state.searchType,
+      OpenLibSearchParams(
+        query: event.query,
+        offset: offset,
+        limit: _pageSize,
+        searchType: state.searchType,
+      ),
     );
 
     result.fold(
       (failure) => emit(
         state.copyWith(
           status: SearchStatus.failure,
-          errorMessage: failure.message,
+          // TODO: Fix
+          errorMessage: failure.toString(),
         ),
       ),
       (data) => emit(
@@ -103,10 +106,12 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
     final offset = nextPage * _pageSize;
 
     final result = await _openLibSearchUseCase(
-      query: state.currentQuery,
-      searchType: state.searchType,
-      offset: offset,
-      limit: _pageSize,
+      OpenLibSearchParams(
+        query: state.currentQuery,
+        offset: offset,
+        limit: _pageSize,
+        searchType: state.searchType,
+      ),
     );
 
     result.fold(

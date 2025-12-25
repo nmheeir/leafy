@@ -20,10 +20,12 @@ import 'package:logger/web.dart' as _i120;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/database/database_controller.dart' as _i188;
 import '../data/database/database_provider.dart' as _i1014;
-import '../data/datasources/remote/ol_remote_data_source.dart' as _i893;
+import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
 import '../data/repositories/book_repository_impl.dart' as _i329;
+import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../domain/repositories/book_repository.dart' as _i168;
+import '../domain/repositories/gutendex_repository.dart' as _i569;
 import '../domain/repositories/open_lib_repository.dart' as _i996;
 import '../domain/repositories/repository.dart' as _i1001;
 import '../domain/services/connectivity_service.dart' as _i394;
@@ -32,6 +34,7 @@ import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/usecases/book_usecases/get_all_books.dart' as _i1048;
 import '../domain/usecases/book_usecases/search_books.dart' as _i1057;
+import '../domain/usecases/gutendex_usecases/gtd_get_books.dart' as _i209;
 import '../domain/usecases/open_lib_usecases/open_lib_search.dart' as _i503;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
@@ -102,8 +105,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i394.ConnectivityService>(
       () => _i394.ConnectivityService(),
     );
-    gh.lazySingleton<_i893.OlRemoteDataSource>(
-      () => _i893.OlRemoteDataSource(gh<_i361.Dio>()),
+    gh.lazySingleton<_i569.GutendexRepository>(
+      () => _i779.GutendexRepositoryImpl(),
+    );
+    gh.lazySingleton<_i715.OlRemoteDataSource>(
+      () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
@@ -121,30 +127,33 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i188.DatabaseController>(
       () => _i188.DatabaseController(gh<_i1014.DatabaseProvider>()),
     );
-    gh.lazySingleton<_i168.BookRepository>(
-      () => _i329.BookRepositoryImpl(gh<_i893.OlRemoteDataSource>()),
-    );
-    gh.factory<_i1048.GetAllBooks>(
-      () => _i1048.GetAllBooks(gh<_i168.BookRepository>()),
-    );
-    gh.factory<_i1057.SearchBooks>(
-      () => _i1057.SearchBooks(gh<_i168.BookRepository>()),
+    gh.factory<_i209.GtdGetBooksUseCase>(
+      () => _i209.GtdGetBooksUseCase(gh<_i569.GutendexRepository>()),
     );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i168.BookRepository>(
+      () => _i329.BookRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
+    );
     gh.lazySingleton<_i996.OpenLibRepository>(
-      () => _i946.OpenLibRepositoryImpl(gh<_i893.OlRemoteDataSource>()),
+      () => _i946.OpenLibRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
     );
     gh.lazySingleton<_i1001.Repository>(
       () => _i1001.Repository(gh<_i188.DatabaseController>()),
     );
     gh.factory<_i865.BookCubit>(() => _i865.BookCubit(gh<_i1001.Repository>()));
-    gh.factory<_i503.OpenLibSearch>(
-      () => _i503.OpenLibSearch(gh<_i996.OpenLibRepository>()),
+    gh.factory<_i503.OpenLibSearchUseCase>(
+      () => _i503.OpenLibSearchUseCase(gh<_i996.OpenLibRepository>()),
+    );
+    gh.factory<_i1048.GetAllBooksUseCase>(
+      () => _i1048.GetAllBooksUseCase(gh<_i168.BookRepository>()),
+    );
+    gh.factory<_i1057.SearchBooksUseCase>(
+      () => _i1057.SearchBooksUseCase(gh<_i168.BookRepository>()),
     );
     gh.factory<_i361.SearchBloc>(
-      () => _i361.SearchBloc(gh<_i503.OpenLibSearch>()),
+      () => _i361.SearchBloc(gh<_i503.OpenLibSearchUseCase>()),
     );
     return this;
   }

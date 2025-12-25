@@ -21,7 +21,6 @@ class OpenLibRepositoryImpl implements OpenLibRepository {
     required OLSearchType searchType,
   }) async {
     try {
-      // Logic chuyển đổi từ Enum sang tham số cụ thể của Retrofit
       final result = await remoteDataSource.getResults(
         query: searchType == OLSearchType.general ? query : null,
         author: searchType == OLSearchType.author ? query : null,
@@ -32,10 +31,11 @@ class OpenLibRepositoryImpl implements OpenLibRepository {
         offset: offset,
       );
 
-      return Left(ServerFailure("API Error"));
-      // return Right(result.toEntity());
+      return Right(result.toEntity());
     } on DioException catch (e) {
-      return Left(ServerFailure(e.message ?? "API Error"));
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
     }
   }
 }

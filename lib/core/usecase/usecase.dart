@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/errors/failures.dart';
 
@@ -16,4 +17,9 @@ abstract class UseCase<T, P> {
   /// Trả về [Either<Failure, T>] để biểu diễn kết quả thành công hoặc thất bại
   /// mà không ném exception ra ngoài.
   Future<Either<Failure, T>> call(P params);
+}
+
+class NoParams extends Equatable {
+  @override
+  List<Object> get props => [];
 }

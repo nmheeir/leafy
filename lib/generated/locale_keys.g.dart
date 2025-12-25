@@ -288,5 +288,10 @@ abstract class  LocaleKeys {
   static const no_internet_connection = 'no_internet_connection';
   static const retry = 'retry';
   static const search_in_gutendex = 'search_in_gutendex';
+  static const error_server_error = 'error.server_error';
+  static const error_no_internet = 'error.no_internet';
+  static const error_cache_error = 'error.cache_error';
+  static const error_unexpected = 'error.unexpected';
+  static const error = 'error';
 
 }
