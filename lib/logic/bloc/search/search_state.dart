@@ -8,9 +8,27 @@ abstract class SearchState with _$SearchState {
     @Default(SearchStatus.initial) SearchStatus status,
     @Default(OLSearchType.general) OLSearchType searchType,
     @Default([]) List<OLSearchResultDoc> books,
+    @Default(0) int numberOfResults,
     @Default(false) bool hasReachedMax,
     @Default(0) int page,
     @Default('') String errorMessage,
     @Default('') String currentQuery,
+    @Default({}) Map<OLSearchType, SearchTabData> cache,
   }) = _SearchState;
+}
+
+class SearchTabData {
+  final List<OLSearchResultDoc> books;
+  final int page;
+  final bool hasReachedMax;
+  final int numberOfResults;
+  final String queryAtMoment;
+
+  const SearchTabData({
+    this.books = const [],
+    this.page = 0,
+    this.hasReachedMax = false,
+    this.numberOfResults = 0,
+    this.queryAtMoment = '',
+  });
 }

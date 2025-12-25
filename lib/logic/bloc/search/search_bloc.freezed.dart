@@ -350,7 +350,7 @@ String toString() {
 /// @nodoc
 mixin _$SearchState {
 
- SearchStatus get status; OLSearchType get searchType; List<OLSearchResultDoc> get books; bool get hasReachedMax; int get page; String get errorMessage; String get currentQuery;
+ SearchStatus get status; OLSearchType get searchType; List<OLSearchResultDoc> get books; int get numberOfResults; bool get hasReachedMax; int get page; String get errorMessage; String get currentQuery; Map<OLSearchType, SearchTabData> get cache;
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -361,16 +361,16 @@ $SearchStateCopyWith<SearchState> get copyWith => _$SearchStateCopyWithImpl<Sear
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other.books, books)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other.books, books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other.cache, cache));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(books),hasReachedMax,page,errorMessage,currentQuery);
+int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(books),numberOfResults,hasReachedMax,page,errorMessage,currentQuery,const DeepCollectionEquality().hash(cache));
 
 @override
 String toString() {
-  return 'SearchState(status: $status, searchType: $searchType, books: $books, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery)';
+  return 'SearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
 }
 
 
@@ -381,7 +381,7 @@ abstract mixin class $SearchStateCopyWith<$Res>  {
   factory $SearchStateCopyWith(SearchState value, $Res Function(SearchState) _then) = _$SearchStateCopyWithImpl;
 @useResult
 $Res call({
- SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, bool hasReachedMax, int page, String errorMessage, String currentQuery
+ SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, int numberOfResults, bool hasReachedMax, int page, String errorMessage, String currentQuery, Map<OLSearchType, SearchTabData> cache
 });
 
 
@@ -398,16 +398,18 @@ class _$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,searchType: null == searchType ? _self.searchType : searchType // ignore: cast_nullable_to_non_nullable
 as OLSearchType,books: null == books ? _self.books : books // ignore: cast_nullable_to_non_nullable
-as List<OLSearchResultDoc>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+as List<OLSearchResultDoc>,numberOfResults: null == numberOfResults ? _self.numberOfResults : numberOfResults // ignore: cast_nullable_to_non_nullable
+as int,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,currentQuery: null == currentQuery ? _self.currentQuery : currentQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,cache: null == cache ? _self.cache : cache // ignore: cast_nullable_to_non_nullable
+as Map<OLSearchType, SearchTabData>,
   ));
 }
 
@@ -492,10 +494,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery);case _:
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
   return orElse();
 
 }
@@ -513,10 +515,10 @@ return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)  $default,) {final _that = this;
 switch (_that) {
 case _SearchState():
-return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery);case _:
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -533,10 +535,10 @@ return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)?  $default,) {final _that = this;
 switch (_that) {
 case _SearchState() when $default != null:
-return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery);case _:
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
   return null;
 
 }
@@ -548,7 +550,7 @@ return $default(_that.status,_that.searchType,_that.books,_that.hasReachedMax,_t
 
 
 class _SearchState implements SearchState {
-  const _SearchState({this.status = SearchStatus.initial, this.searchType = OLSearchType.general, final  List<OLSearchResultDoc> books = const [], this.hasReachedMax = false, this.page = 0, this.errorMessage = '', this.currentQuery = ''}): _books = books;
+  const _SearchState({this.status = SearchStatus.initial, this.searchType = OLSearchType.general, final  List<OLSearchResultDoc> books = const [], this.numberOfResults = 0, this.hasReachedMax = false, this.page = 0, this.errorMessage = '', this.currentQuery = '', final  Map<OLSearchType, SearchTabData> cache = const {}}): _books = books,_cache = cache;
   
 
 @override@JsonKey() final  SearchStatus status;
@@ -560,10 +562,18 @@ class _SearchState implements SearchState {
   return EqualUnmodifiableListView(_books);
 }
 
+@override@JsonKey() final  int numberOfResults;
 @override@JsonKey() final  bool hasReachedMax;
 @override@JsonKey() final  int page;
 @override@JsonKey() final  String errorMessage;
 @override@JsonKey() final  String currentQuery;
+ final  Map<OLSearchType, SearchTabData> _cache;
+@override@JsonKey() Map<OLSearchType, SearchTabData> get cache {
+  if (_cache is EqualUnmodifiableMapView) return _cache;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_cache);
+}
+
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
@@ -575,16 +585,16 @@ _$SearchStateCopyWith<_SearchState> get copyWith => __$SearchStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other._books, _books)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other._books, _books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other._cache, _cache));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(_books),hasReachedMax,page,errorMessage,currentQuery);
+int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(_books),numberOfResults,hasReachedMax,page,errorMessage,currentQuery,const DeepCollectionEquality().hash(_cache));
 
 @override
 String toString() {
-  return 'SearchState(status: $status, searchType: $searchType, books: $books, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery)';
+  return 'SearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
 }
 
 
@@ -595,7 +605,7 @@ abstract mixin class _$SearchStateCopyWith<$Res> implements $SearchStateCopyWith
   factory _$SearchStateCopyWith(_SearchState value, $Res Function(_SearchState) _then) = __$SearchStateCopyWithImpl;
 @override @useResult
 $Res call({
- SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, bool hasReachedMax, int page, String errorMessage, String currentQuery
+ SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, int numberOfResults, bool hasReachedMax, int page, String errorMessage, String currentQuery, Map<OLSearchType, SearchTabData> cache
 });
 
 
@@ -612,16 +622,18 @@ class __$SearchStateCopyWithImpl<$Res>
 
 /// Create a copy of SearchState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
   return _then(_SearchState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as SearchStatus,searchType: null == searchType ? _self.searchType : searchType // ignore: cast_nullable_to_non_nullable
 as OLSearchType,books: null == books ? _self._books : books // ignore: cast_nullable_to_non_nullable
-as List<OLSearchResultDoc>,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+as List<OLSearchResultDoc>,numberOfResults: null == numberOfResults ? _self.numberOfResults : numberOfResults // ignore: cast_nullable_to_non_nullable
+as int,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
 as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
 as int,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,currentQuery: null == currentQuery ? _self.currentQuery : currentQuery // ignore: cast_nullable_to_non_nullable
-as String,
+as String,cache: null == cache ? _self._cache : cache // ignore: cast_nullable_to_non_nullable
+as Map<OLSearchType, SearchTabData>,
   ));
 }
 

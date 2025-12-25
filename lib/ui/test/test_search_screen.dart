@@ -1,6 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 // Core imports
@@ -76,66 +79,53 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
             style: const TextStyle(fontSize: 18),
           ),
         ),
-        body: Column(
-          children: [
-            // 1. Ô nhập liệu (Input)
-            _buildSearchInput(),
+        body: BlocBuilder<OpenLibBloc, OpenLibState>(
+          builder: (context, state) {
+            final canSearch = state is OpenLibReadyState;
+            return Column(
+              children: [
+                _buildSearchField(context, canSearch),
 
-            // 2. Chọn loại tìm kiếm (Radio Buttons)
-            _buildSearchTypeSelector(),
+                _buildSearchTypesRadio(canSearch),
 
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Divider(height: 3),
-            ),
+                _buildDivider(),
 
-            // 3. Danh sách kết quả (List Result)
-            Expanded(child: _buildSearchResults()),
-          ],
+                // 3. Danh sách kết quả (List Result)
+                Expanded(child: _buildSearchResults()),
+              ],
+            );
+          },
         ),
       ),
     );
   }
 
-  Widget _buildSearchInput() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 5),
-      child: BookTextField(
-        controller: _searchController,
-        keyboardType: TextInputType.name,
-        autofocus: true,
-        textInputAction: TextInputAction.search,
-        // Khi nhấn Enter hoặc nút Search trên bàn phím -> Bắn Event
-        onSubmitted: (text) {
-          context.read<SearchBloc>().add(SearchEvent.queryChanged(text));
-        },
-      ),
-    );
-  }
-
-  Widget _buildSearchTypeSelector() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+  Align _buildSearchTypesRadio(bool canSearch) {
+    return Align(
+      alignment: Alignment.centerLeft,
       child: BlocBuilder<SearchBloc, SearchState>(
-        // Tối ưu: Chỉ rebuild widget này khi loại tìm kiếm thay đổi
         buildWhen: (prev, curr) => prev.searchType != curr.searchType,
         builder: (context, state) {
           return Wrap(
-            spacing: 5,
-            children: OLSearchType.values.map((type) {
-              return OLSearchRadio(
-                canSearch: true,
-                searchType: type,
-                activeSearchType: state.searchType,
-                onChanged: (val) {
-                  if (val != null) {
-                    context.read<SearchBloc>().add(
-                      SearchEvent.typeChanged(val),
-                    );
-                  }
-                },
-              );
-            }).toList(),
+            alignment: WrapAlignment.start,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              for (var i = 0; i < 4; i++) ...[
+                if (i != 0) const SizedBox(width: 5),
+                OLSearchRadio(
+                  canSearch: canSearch,
+                  searchType: OLSearchType.values[i],
+                  activeSearchType: state.searchType,
+                  onChanged: (val) {
+                    if (val != null) {
+                      context.read<SearchBloc>().add(
+                        SearchEvent.typeChanged(val),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ],
           );
         },
       ),
@@ -190,7 +180,6 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
         // TRẠNG THÁI 5: Hiển thị danh sách
         return ListView.builder(
           controller: _scrollController,
-          // Nếu chưa hết dữ liệu (hasReachedMax = false) -> +1 item cho Loader dưới đáy
           itemCount: state.hasReachedMax
               ? state.books.length
               : state.books.length + 1,
@@ -221,13 +210,67 @@ class _TestSearchOLScreenState extends State<TestSearchOLScreen> {
               editions: item.editionKey,
               pagesMedian: item.medianPages,
               firstPublishYear: item.firstPublishYear,
-              // Vì bạn yêu cầu bỏ logic save/edit nên để callback rỗng
               onChooseEditionPressed: () {},
               onAddBookPressed: () {},
             );
           },
         );
       },
+    );
+  }
+
+  // BUG: clear text in search field do not modified state in bloc
+  Padding _buildSearchField(BuildContext context, bool canSearch) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 10, 10, 5),
+      child: Row(
+        children: [
+          Expanded(
+            child: BookTextField(
+              controller: _searchController,
+              keyboardType: TextInputType.name,
+              maxLength: 99,
+              autofocus: true,
+              textInputAction: TextInputAction.search,
+              textCapitalization: TextCapitalization.sentences,
+              onSubmitted: (_) => _startNewSearch(),
+              enable: canSearch,
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            height: 48,
+            child: ElevatedButton(
+              onPressed: canSearch ? _startNewSearch : null,
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: context.colorScheme.primary,
+                foregroundColor: context.colorScheme.onPrimary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(cornerRadius),
+                ),
+              ),
+              child: Text(
+                LocaleKeys.search.tr(),
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startNewSearch() {
+    context.read<SearchBloc>().add(
+      SearchEvent.queryChanged(_searchController.text),
+    );
+  }
+
+  Padding _buildDivider() {
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+      child: Divider(height: 3),
     );
   }
 }

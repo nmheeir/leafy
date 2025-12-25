@@ -62,6 +62,7 @@ dependencies:
   get_it: ^9.2.0
   fpdart: ^1.2.0
   retrofit: ^4.9.1
+  pretty_dio_logger: ^1.4.0
 
 dev_dependencies:
   flutter_test:

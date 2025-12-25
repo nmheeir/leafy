@@ -16,6 +16,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:logger/logger.dart' as _i974;
 import 'package:logger/web.dart' as _i120;
+import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
 
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/database/database_controller.dart' as _i188;
@@ -101,9 +102,12 @@ extension GetItInjectableX on _i174.GetIt {
       preResolve: true,
     );
     gh.lazySingleton<_i120.Logger>(() => loggerModule.logger);
-    gh.lazySingleton<_i361.Dio>(() => networkModule.dio);
+    gh.lazySingleton<_i528.PrettyDioLogger>(() => networkModule.logger);
     gh.lazySingleton<_i394.ConnectivityService>(
       () => _i394.ConnectivityService(),
+    );
+    gh.lazySingleton<_i361.Dio>(
+      () => networkModule.dio(gh<_i528.PrettyDioLogger>()),
     );
     gh.lazySingleton<_i569.GutendexRepository>(
       () => _i779.GutendexRepositoryImpl(),
@@ -153,7 +157,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1057.SearchBooksUseCase(gh<_i168.BookRepository>()),
     );
     gh.factory<_i361.SearchBloc>(
-      () => _i361.SearchBloc(gh<_i503.OpenLibSearchUseCase>()),
+      () => _i361.SearchBloc(
+        gh<_i503.OpenLibSearchUseCase>(),
+        gh<_i974.Logger>(),
+      ),
     );
     return this;
   }
