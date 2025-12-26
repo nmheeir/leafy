@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 
 @injectable
 class CurrentBookCubit extends Cubit<Book> {

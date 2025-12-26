@@ -163,14 +163,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
-    gh.lazySingleton<_i29.BookRepository>(
-      () => _i329.BookRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
-    );
     gh.lazySingleton<_i751.OpenLibRepository>(
       () => _i946.OpenLibRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
     );
     gh.lazySingleton<_i1055.Repository>(
       () => _i1055.Repository(gh<_i188.DatabaseController>()),
+    );
+    gh.lazySingleton<_i29.BookRepository>(
+      () => _i329.BookRepositoryImpl(gh<_i758.BookLocalDataSource>()),
     );
     gh.factory<_i38.GetAllBooksUseCase>(
       () => _i38.GetAllBooksUseCase(gh<_i29.BookRepository>()),

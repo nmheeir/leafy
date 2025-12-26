@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 
 class BookCardGridDetailed extends StatelessWidget {

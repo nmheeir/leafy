@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';

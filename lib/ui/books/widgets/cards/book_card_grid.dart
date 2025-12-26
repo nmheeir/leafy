@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 
 class BookCardGrid extends StatelessWidget {
   const BookCardGrid({

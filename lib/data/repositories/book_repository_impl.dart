@@ -2,16 +2,16 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/errors/failures.dart';
-import 'package:leafy/data/datasources/remote/ol_remote_data_source.dart';
+import 'package:leafy/data/datasources/local/book_local_datasource.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
 
 @LazySingleton(as: BookRepository)
 class BookRepositoryImpl implements BookRepository {
-  final OlRemoteDataSource olRemoteDataSource;
+  final BookLocalDataSource _bookLocalDataSource;
 
-  BookRepositoryImpl(this.olRemoteDataSource);
-  
+  BookRepositoryImpl(this._bookLocalDataSource);
+
   @override
   Future<Either<Failure, List<Book>>> getAllBooks() {
     // TODO: implement getAllBooks
@@ -43,19 +43,30 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<Either<Failure, int>> addBook(Book book) {
-    // TODO: implement addBook
-    throw UnimplementedError();
+  Future<Either<Failure, int>> addBook(Book book) async {
+    try {
+      // TODO: add book -> save cover to storage
+      // final bookId = await _bookLocalDataSource.create();
+      return Left(Failure.unexpected('Not Implement'));
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
+    }
   }
 
   @override
-  Future<Either<Failure, void>> bulkUpdateBookAuthor(Set<int> ids, String author) {
+  Future<Either<Failure, void>> bulkUpdateBookAuthor(
+    Set<int> ids,
+    String author,
+  ) {
     // TODO: implement bulkUpdateBookAuthor
     throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, void>> bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) {
+  Future<Either<Failure, void>> bulkUpdateBookFormat(
+    Set<int> ids,
+    BookFormat bookFormat,
+  ) {
     // TODO: implement bulkUpdateBookFormat
     throw UnimplementedError();
   }

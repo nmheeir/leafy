@@ -4,9 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/data/models/book.dart';
-import 'package:leafy/data/models/reading.dart';
-import 'package:leafy/data/models/reading_time.dart';
+import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/data/models/book/reading/reading.dart';
+import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 import 'package:leafy/main.dart';
 
 @injectable

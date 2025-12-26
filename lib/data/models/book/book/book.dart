@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/data/models/book/reading/reading.dart';
 import 'package:leafy/main.dart';
 
+// DEPRECATED
 // TODO: use freezed and json serialization
 class Book {
   int? id;
@@ -236,6 +237,7 @@ class Book {
     };
   }
 
+  // TODO: tách thành extension
   File? getCoverFile() {
     final fileExists = File(
       '${appDocumentsDirectory.path}/$id.jpg',
@@ -248,6 +250,7 @@ class Book {
     }
   }
 
+  // TODO: tách thành extension
   Uint8List? getCoverBytes() {
     final fileExists = File(
       '${appDocumentsDirectory.path}/$id.jpg',
@@ -260,6 +263,7 @@ class Book {
     }
   }
 
+  // TODO: tách thành extension
   static List<Reading> _parseReadingsFromJson(Map<String, dynamic> json) {
     if (json['readings'] != null) {
       final splittedReadings = json['readings'].split(';');
@@ -302,6 +306,7 @@ class Book {
   // order readings
   // first order the ones with only start date - first newest
   // after them order ones with finish date - first newest
+  // TODO: logic này cần được viết trong blog/cubit
   static List<Reading> _sortReadings(List<Reading> readings) {
     final sortedReadings = readings;
 

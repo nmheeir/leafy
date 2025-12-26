@@ -1,5 +1,5 @@
 
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 
 class BookYearlyStat {
   Book? book;

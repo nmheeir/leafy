@@ -1,5 +1,6 @@
-import 'package:leafy/data/models/reading_time.dart';
+import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 
+// DEPRECATED: cần thêm freezed và json
 class Reading {
   DateTime? startDate;
   DateTime? finishDate;

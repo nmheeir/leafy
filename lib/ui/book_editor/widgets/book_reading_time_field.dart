@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/reading_time.dart';
+import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 
 class BookReadingTimeField extends StatefulWidget {

@@ -1,7 +1,11 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/datasources/local/database_service.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book_model.dart';
+import 'package:leafy/main.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'book_local_datasource.dart';
@@ -15,31 +19,31 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   static const _table = 'booksTable';
 
   @override
-  Future<int> create(Book book) async {
+  Future<int> create(BookModel book) async {
     final db = await _db.database;
-    return db.insert(_table, book.toJSON());
+    return db.insert(_table, book.toJson());
   }
 
   @override
-  Future<List<Book>> getAll({List<String>? columns}) async {
+  Future<List<BookModel>> getAll({List<String>? columns}) async {
     final db = await _db.database;
     final result = await db.query(_table, columns: columns);
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
-  Future<List<Book>> getAllNotDeleted({List<String>? columns}) async {
+  Future<List<BookModel>> getAllNotDeleted({List<String>? columns}) async {
     final db = await _db.database;
     final result = await db.query(
       _table,
       columns: columns,
       where: 'deleted = 0',
     );
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
-  Future<List<Book>> getByStatus({
+  Future<List<BookModel>> getByStatus({
     required int status,
     List<String>? columns,
   }) async {
@@ -50,11 +54,11 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       where: 'status = ? AND deleted = 0',
       whereArgs: [status],
     );
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
-  Future<List<Book>> search({
+  Future<List<BookModel>> search({
     required String query,
     List<String>? columns,
   }) async {
@@ -66,7 +70,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
           '(title LIKE ? OR subtitle LIKE ? OR author LIKE ?) AND deleted = 0',
       whereArgs: ['%$query%', '%$query%', '%$query%'],
     );
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
@@ -82,7 +86,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<Book?> getById(int id) async {
+  Future<BookModel?> getById(int id) async {
     final db = await _db.database;
     final result = await db.query(
       _table,
@@ -90,22 +94,22 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       where: 'id = ?',
       whereArgs: [id],
     );
-    return result.isNotEmpty ? Book.fromJSON(result.first) : null;
+    return result.isNotEmpty ? BookModel.fromJson(result.first) : null;
   }
 
   @override
-  Future<List<Book>> getDeleted() async {
+  Future<List<BookModel>> getDeleted() async {
     final db = await _db.database;
     final result = await db.query(_table, where: 'deleted = 1');
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
-  Future<int> update(Book book) async {
+  Future<int> update(BookModel book) async {
     final db = await _db.database;
     return db.update(
       _table,
-      book.toJSON(),
+      book.toJson(),
       where: 'id = ?',
       whereArgs: [book.id],
     );
@@ -151,10 +155,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<List<Object?>> bulkUpdateAuthor(
-    Set<int> ids,
-    String author,
-  ) async {
+  Future<List<Object?>> bulkUpdateAuthor(Set<int> ids, String author) async {
     final db = await _db.database;
     final batch = db.batch();
 
@@ -171,7 +172,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<List<Book>> getByTag(String tag) async {
+  Future<List<BookModel>> getByTag(String tag) async {
     final db = await _db.database;
     final result = await db.query(
       _table,
@@ -179,7 +180,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       orderBy: 'publication_year ASC',
     );
 
-    final books = result.map(Book.fromJSON);
+    final books = result.map(BookModel.fromJson);
 
     return books.where((book) {
       final tags = book.tags?.split('|||||') ?? [];
@@ -188,7 +189,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<List<Book>> getByAuthor(String author) async {
+  Future<List<BookModel>> getByAuthor(String author) async {
     final db = await _db.database;
     final result = await db.query(
       _table,
@@ -196,6 +197,40 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
       whereArgs: [author],
       orderBy: 'publication_year ASC',
     );
-    return result.map(Book.fromJSON).toList();
+    return result.map(BookModel.fromJson).toList();
+  }
+
+  @override
+  Future<File?> getCover(int bookId) async {
+    final fileExists = File(
+      '${appDocumentsDirectory.path}/$bookId.jpg',
+    ).existsSync();
+
+    if (fileExists) {
+      return File('${appDocumentsDirectory.path}/$bookId.jpg');
+    } else {
+      return null;
+    }
+  }
+
+  @override
+  Future<void> saveCoverToStorage(int bookId, Uint8List cover) async {
+    final file = File('${appDocumentsDirectory.path}/$bookId.jpg');
+    await file.writeAsBytes(cover);
+  }
+
+  @override
+  Future<Uint8List?> getCoverByte(int bookId) async {
+    final fileExists = File(
+      '${appDocumentsDirectory.path}/$bookId.jpg',
+    ).existsSync();
+
+    if (fileExists) {
+      return File(
+        '${appDocumentsDirectory.path}/$bookId.jpg',
+      ).readAsBytesSync();
+    } else {
+      return null;
+    }
   }
 }

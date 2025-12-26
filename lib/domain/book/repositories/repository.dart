@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart' show BookFormat;
 import 'package:leafy/data/database/database_controller.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 
 // TODO: migrate to book repository
 @lazySingleton

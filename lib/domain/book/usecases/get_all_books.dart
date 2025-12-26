@@ -13,6 +13,6 @@ class GetAllBooksUseCase implements UseCase<List<Book>, NoParams> {
 
   @override
   Future<Either<Failure, List<Book>>> call(NoParams params) {
-    return bookRepository.getAllBooks();
+    return bookRepository.getAllNotDeletedBooks();
   }
 }

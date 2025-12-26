@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:leafy/data/database/database_provider.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:leafy/core/constants/enums/index.dart';

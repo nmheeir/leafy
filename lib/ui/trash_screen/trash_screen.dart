@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/book/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
