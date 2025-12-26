@@ -4,8 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
-import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result.dart';
-import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result_model.dart';
+import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result_model.dart';
 import 'package:logger/logger.dart'; // Import for Logger
 
 @lazySingleton
@@ -17,7 +17,7 @@ class GutendexService {
 
   GutendexService(this._logger, this._dio);
 
-  Future<GtdBooksResult> getBooks({
+  Future<GtdBooksResultModel> getBooks({
     int? page,
     int? authorYearStart,
     int? authorYearEnd,
@@ -103,7 +103,7 @@ class GutendexService {
 
       final json = response.data as Map<String, dynamic>;
       _logger.i('GutendexService: Successfully decoded JSON for books: $json.');
-      return GtdBooksResult.fromJson(json);
+      return GtdBooksResultModel.fromJson(json);
     } catch (e, st) {
       _logger.e(
         'GutendexService: Error getting books: $e',
@@ -114,7 +114,7 @@ class GutendexService {
     }
   }
 
-  Future<GtdBookResult> getBookDetail(int id) async {
+  Future<GtdBookResultModel> getBookDetail(int id) async {
     final uri = '$gutendexUrl/$id';
     _logger.d('GutendexService: Fetching book detail from URI: $uri');
 
@@ -150,7 +150,7 @@ class GutendexService {
       _logger.i(
         'GutendexService: Successfully decoded JSON for book detail ($id).',
       );
-      return GtdBookResult.fromJson(json);
+      return GtdBookResultModel.fromJson(json);
     } catch (e, st) {
       _logger.e(
         'GutendexService: Error getting book detail for ID $id: $e',

@@ -2,18 +2,18 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
-import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result_model.dart';
 import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
 import 'package:leafy/domain/gutendex/usecases/gtd_get_books_params.dart';
 
 @injectable
-class GtdGetBooksUseCase implements UseCase<GtdBooksResult, GtdGetBooksParams> {
+class GtdGetBooksUseCase implements UseCase<GtdBooksResultModel, GtdGetBooksParams> {
   final GutendexRepository gutendexRepository;
 
   GtdGetBooksUseCase(this.gutendexRepository);
 
   @override
-  Future<Either<Failure, GtdBooksResult>> call(GtdGetBooksParams params) {
+  Future<Either<Failure, GtdBooksResultModel>> call(GtdGetBooksParams params) {
     return gutendexRepository.getBooks(
       page: params.page,
       authorYearStart: params.authorYearStart,

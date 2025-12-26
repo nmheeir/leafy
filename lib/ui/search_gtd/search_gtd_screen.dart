@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result.dart';
+import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result_model.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/gutendex_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
@@ -21,7 +21,7 @@ class SearchGtdScreen extends StatefulWidget {
 class _SearchGtdScreenState extends State<SearchGtdScreen> {
   int? _numberOfResults;
 
-  late final _pagingController = PagingController<int, GtdBookResult>(
+  late final _pagingController = PagingController<int, GtdBookResultModel>(
     getNextPageKey: (state) =>
         state.lastPageIsEmpty ? null : state.nextIntPageKey,
     fetchPage: (pageKey) => _fetchPage(pageKey),
@@ -68,7 +68,7 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
         return PagedListView(
           state: state,
           fetchNextPage: fetchNextPage,
-          builderDelegate: PagedChildBuilderDelegate<GtdBookResult>(
+          builderDelegate: PagedChildBuilderDelegate<GtdBookResultModel>(
             firstPageProgressIndicatorBuilder: (_) =>
                 _buildFirstPageProgressIndicator(context),
             newPageProgressIndicatorBuilder: (_) =>
@@ -97,7 +97,7 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
     );
   }
 
-  Future<List<GtdBookResult>> _fetchPage(int pageKey) async {
+  Future<List<GtdBookResultModel>> _fetchPage(int pageKey) async {
     try {
       final newItems = await getIt<GutendexService>().getBooks(page: pageKey);
 

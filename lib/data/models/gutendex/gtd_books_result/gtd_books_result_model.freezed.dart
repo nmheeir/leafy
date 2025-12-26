@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'gtd_books_result.dart';
+part of 'gtd_books_result_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -13,22 +13,22 @@ part of 'gtd_books_result.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$GtdBooksResult {
+mixin _$GtdBooksResultModel {
 
- int? get count; String? get next; String? get previous; List<GtdBookResult> get results;
-/// Create a copy of GtdBooksResult
+ int? get count; String? get next; String? get previous; List<GtdBookResultModel> get results;
+/// Create a copy of GtdBooksResultModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$GtdBooksResultCopyWith<GtdBooksResult> get copyWith => _$GtdBooksResultCopyWithImpl<GtdBooksResult>(this as GtdBooksResult, _$identity);
+$GtdBooksResultModelCopyWith<GtdBooksResultModel> get copyWith => _$GtdBooksResultModelCopyWithImpl<GtdBooksResultModel>(this as GtdBooksResultModel, _$identity);
 
-  /// Serializes this GtdBooksResult to a JSON map.
+  /// Serializes this GtdBooksResultModel to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GtdBooksResult&&(identical(other.count, count) || other.count == count)&&(identical(other.next, next) || other.next == next)&&(identical(other.previous, previous) || other.previous == previous)&&const DeepCollectionEquality().equals(other.results, results));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GtdBooksResultModel&&(identical(other.count, count) || other.count == count)&&(identical(other.next, next) || other.next == next)&&(identical(other.previous, previous) || other.previous == previous)&&const DeepCollectionEquality().equals(other.results, results));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,18 +37,18 @@ int get hashCode => Object.hash(runtimeType,count,next,previous,const DeepCollec
 
 @override
 String toString() {
-  return 'GtdBooksResult(count: $count, next: $next, previous: $previous, results: $results)';
+  return 'GtdBooksResultModel(count: $count, next: $next, previous: $previous, results: $results)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $GtdBooksResultCopyWith<$Res>  {
-  factory $GtdBooksResultCopyWith(GtdBooksResult value, $Res Function(GtdBooksResult) _then) = _$GtdBooksResultCopyWithImpl;
+abstract mixin class $GtdBooksResultModelCopyWith<$Res>  {
+  factory $GtdBooksResultModelCopyWith(GtdBooksResultModel value, $Res Function(GtdBooksResultModel) _then) = _$GtdBooksResultModelCopyWithImpl;
 @useResult
 $Res call({
- int? count, String? next, String? previous, List<GtdBookResult> results
+ int? count, String? next, String? previous, List<GtdBookResultModel> results
 });
 
 
@@ -56,14 +56,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$GtdBooksResultCopyWithImpl<$Res>
-    implements $GtdBooksResultCopyWith<$Res> {
-  _$GtdBooksResultCopyWithImpl(this._self, this._then);
+class _$GtdBooksResultModelCopyWithImpl<$Res>
+    implements $GtdBooksResultModelCopyWith<$Res> {
+  _$GtdBooksResultModelCopyWithImpl(this._self, this._then);
 
-  final GtdBooksResult _self;
-  final $Res Function(GtdBooksResult) _then;
+  final GtdBooksResultModel _self;
+  final $Res Function(GtdBooksResultModel) _then;
 
-/// Create a copy of GtdBooksResult
+/// Create a copy of GtdBooksResultModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? count = freezed,Object? next = freezed,Object? previous = freezed,Object? results = null,}) {
   return _then(_self.copyWith(
@@ -71,15 +71,15 @@ count: freezed == count ? _self.count : count // ignore: cast_nullable_to_non_nu
 as int?,next: freezed == next ? _self.next : next // ignore: cast_nullable_to_non_nullable
 as String?,previous: freezed == previous ? _self.previous : previous // ignore: cast_nullable_to_non_nullable
 as String?,results: null == results ? _self.results : results // ignore: cast_nullable_to_non_nullable
-as List<GtdBookResult>,
+as List<GtdBookResultModel>,
   ));
 }
 
 }
 
 
-/// Adds pattern-matching-related methods to [GtdBooksResult].
-extension GtdBooksResultPatterns on GtdBooksResult {
+/// Adds pattern-matching-related methods to [GtdBooksResultModel].
+extension GtdBooksResultModelPatterns on GtdBooksResultModel {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -92,10 +92,10 @@ extension GtdBooksResultPatterns on GtdBooksResult {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GtdBooksResult value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GtdBooksResultModel value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _GtdBooksResult() when $default != null:
+case _GtdBooksResultModel() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -114,10 +114,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GtdBooksResult value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GtdBooksResultModel value)  $default,){
 final _that = this;
 switch (_that) {
-case _GtdBooksResult():
+case _GtdBooksResultModel():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -135,10 +135,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GtdBooksResult value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GtdBooksResultModel value)?  $default,){
 final _that = this;
 switch (_that) {
-case _GtdBooksResult() when $default != null:
+case _GtdBooksResultModel() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -156,9 +156,9 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? count,  String? next,  String? previous,  List<GtdBookResult> results)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? count,  String? next,  String? previous,  List<GtdBookResultModel> results)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _GtdBooksResult() when $default != null:
+case _GtdBooksResultModel() when $default != null:
 return $default(_that.count,_that.next,_that.previous,_that.results);case _:
   return orElse();
 
@@ -177,9 +177,9 @@ return $default(_that.count,_that.next,_that.previous,_that.results);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? count,  String? next,  String? previous,  List<GtdBookResult> results)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? count,  String? next,  String? previous,  List<GtdBookResultModel> results)  $default,) {final _that = this;
 switch (_that) {
-case _GtdBooksResult():
+case _GtdBooksResultModel():
 return $default(_that.count,_that.next,_that.previous,_that.results);case _:
   throw StateError('Unexpected subclass');
 
@@ -197,9 +197,9 @@ return $default(_that.count,_that.next,_that.previous,_that.results);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? count,  String? next,  String? previous,  List<GtdBookResult> results)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? count,  String? next,  String? previous,  List<GtdBookResultModel> results)?  $default,) {final _that = this;
 switch (_that) {
-case _GtdBooksResult() when $default != null:
+case _GtdBooksResultModel() when $default != null:
 return $default(_that.count,_that.next,_that.previous,_that.results);case _:
   return null;
 
@@ -211,35 +211,35 @@ return $default(_that.count,_that.next,_that.previous,_that.results);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _GtdBooksResult implements GtdBooksResult {
-   _GtdBooksResult({required this.count, required this.next, required this.previous, required final  List<GtdBookResult> results}): _results = results;
-  factory _GtdBooksResult.fromJson(Map<String, dynamic> json) => _$GtdBooksResultFromJson(json);
+class _GtdBooksResultModel implements GtdBooksResultModel {
+   _GtdBooksResultModel({required this.count, required this.next, required this.previous, required final  List<GtdBookResultModel> results}): _results = results;
+  factory _GtdBooksResultModel.fromJson(Map<String, dynamic> json) => _$GtdBooksResultModelFromJson(json);
 
 @override final  int? count;
 @override final  String? next;
 @override final  String? previous;
- final  List<GtdBookResult> _results;
-@override List<GtdBookResult> get results {
+ final  List<GtdBookResultModel> _results;
+@override List<GtdBookResultModel> get results {
   if (_results is EqualUnmodifiableListView) return _results;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_results);
 }
 
 
-/// Create a copy of GtdBooksResult
+/// Create a copy of GtdBooksResultModel
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$GtdBooksResultCopyWith<_GtdBooksResult> get copyWith => __$GtdBooksResultCopyWithImpl<_GtdBooksResult>(this, _$identity);
+_$GtdBooksResultModelCopyWith<_GtdBooksResultModel> get copyWith => __$GtdBooksResultModelCopyWithImpl<_GtdBooksResultModel>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$GtdBooksResultToJson(this, );
+  return _$GtdBooksResultModelToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GtdBooksResult&&(identical(other.count, count) || other.count == count)&&(identical(other.next, next) || other.next == next)&&(identical(other.previous, previous) || other.previous == previous)&&const DeepCollectionEquality().equals(other._results, _results));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GtdBooksResultModel&&(identical(other.count, count) || other.count == count)&&(identical(other.next, next) || other.next == next)&&(identical(other.previous, previous) || other.previous == previous)&&const DeepCollectionEquality().equals(other._results, _results));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -248,18 +248,18 @@ int get hashCode => Object.hash(runtimeType,count,next,previous,const DeepCollec
 
 @override
 String toString() {
-  return 'GtdBooksResult(count: $count, next: $next, previous: $previous, results: $results)';
+  return 'GtdBooksResultModel(count: $count, next: $next, previous: $previous, results: $results)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$GtdBooksResultCopyWith<$Res> implements $GtdBooksResultCopyWith<$Res> {
-  factory _$GtdBooksResultCopyWith(_GtdBooksResult value, $Res Function(_GtdBooksResult) _then) = __$GtdBooksResultCopyWithImpl;
+abstract mixin class _$GtdBooksResultModelCopyWith<$Res> implements $GtdBooksResultModelCopyWith<$Res> {
+  factory _$GtdBooksResultModelCopyWith(_GtdBooksResultModel value, $Res Function(_GtdBooksResultModel) _then) = __$GtdBooksResultModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? count, String? next, String? previous, List<GtdBookResult> results
+ int? count, String? next, String? previous, List<GtdBookResultModel> results
 });
 
 
@@ -267,22 +267,22 @@ $Res call({
 
 }
 /// @nodoc
-class __$GtdBooksResultCopyWithImpl<$Res>
-    implements _$GtdBooksResultCopyWith<$Res> {
-  __$GtdBooksResultCopyWithImpl(this._self, this._then);
+class __$GtdBooksResultModelCopyWithImpl<$Res>
+    implements _$GtdBooksResultModelCopyWith<$Res> {
+  __$GtdBooksResultModelCopyWithImpl(this._self, this._then);
 
-  final _GtdBooksResult _self;
-  final $Res Function(_GtdBooksResult) _then;
+  final _GtdBooksResultModel _self;
+  final $Res Function(_GtdBooksResultModel) _then;
 
-/// Create a copy of GtdBooksResult
+/// Create a copy of GtdBooksResultModel
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? count = freezed,Object? next = freezed,Object? previous = freezed,Object? results = null,}) {
-  return _then(_GtdBooksResult(
+  return _then(_GtdBooksResultModel(
 count: freezed == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
 as int?,next: freezed == next ? _self.next : next // ignore: cast_nullable_to_non_nullable
 as String?,previous: freezed == previous ? _self.previous : previous // ignore: cast_nullable_to_non_nullable
 as String?,results: null == results ? _self._results : results // ignore: cast_nullable_to_non_nullable
-as List<GtdBookResult>,
+as List<GtdBookResultModel>,
   ));
 }
 

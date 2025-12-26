@@ -65,3 +65,7 @@ lib/
 │
 └── presentation/
     └── ...
+
+
+DataSource trả về Model (dữ liệu trong DB hoặc API)
+Sau đó Repository có trách nhiệm mapping dữ liệu model -> entity (domain) để sử dụng trong lớp presentation

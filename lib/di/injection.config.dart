@@ -25,14 +25,21 @@ import '../data/database/database_provider.dart' as _i1014;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
 import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
 import '../data/datasources/local/database_service.dart' as _i328;
+import '../data/datasources/local/epub_file_local_datasource.dart' as _i620;
+import '../data/datasources/local/epub_file_local_datasource_impl.dart'
+    as _i536;
+import '../data/datasources/remote/epub_remote_datasource.dart' as _i1055;
+import '../data/datasources/remote/epub_remote_datasource_impl.dart' as _i350;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
 import '../data/repositories/book_repository_impl.dart' as _i329;
+import '../data/repositories/epub_cache_repository_impl.dart' as _i827;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../domain/book/repositories/book_repository.dart' as _i29;
 import '../domain/book/repositories/repository.dart' as _i1055;
 import '../domain/book/usecases/get_all_books.dart' as _i38;
 import '../domain/book/usecases/search_books.dart' as _i755;
+import '../domain/epub_cache/repositories/epub_cache_repository.dart' as _i57;
 import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
 import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
 import '../domain/open_lib/repositories/open_lib_repository.dart' as _i751;
@@ -113,6 +120,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(gh<_i528.PrettyDioLogger>()),
     );
+    gh.lazySingleton<_i1055.EpubRemoteDataSource>(
+      () => _i350.EpubRemoteDataSourceImpl(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i620.EpubFileLocalDataSource>(
+      () => _i536.EpubFileLocalDataSourceImpl(gh<_i497.Directory>()),
+    );
     gh.lazySingleton<_i715.OlRemoteDataSource>(
       () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
     );
@@ -140,6 +153,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i57.EpubCacheRepository>(
+      () => _i827.EpubCacheRepositoryImpl(
+        gh<_i1055.EpubRemoteDataSource>(),
+        gh<_i620.EpubFileLocalDataSource>(),
+      ),
     );
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),

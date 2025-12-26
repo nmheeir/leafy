@@ -5,7 +5,7 @@ import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
-import 'package:leafy/data/models/epub_cache/epub_cache.dart';
+import 'package:leafy/data/models/epub_cache/epub_cache_model.dart';
 
 @lazySingleton
 class EpubCachedService {
@@ -122,7 +122,7 @@ class EpubCachedService {
   // ===============================
   // METADATA
   // ===============================
-  Future<void> saveMeta(EpubCache epubCache) async {
+  Future<void> saveMeta(EpubCacheModel epubCache) async {
     try {
       final file = _metaFile(epubCache.url);
       await file.writeAsString(jsonEncode(epubCache.toJson()));
@@ -132,7 +132,7 @@ class EpubCachedService {
     }
   }
 
-  Future<EpubCache?> loadMeta(String url) async {
+  Future<EpubCacheModel?> loadMeta(String url) async {
     try {
       final file = _metaFile(url);
       if (!await file.exists()) return null;
@@ -141,7 +141,7 @@ class EpubCachedService {
       if (content.isEmpty) return null;
 
       final json = jsonDecode(content);
-      return EpubCache.fromJson(json);
+      return EpubCacheModel.fromJson(json);
     } catch (e, st) {
       _logger.w(
         'Error loading meta (might be corrupt json)',

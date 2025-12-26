@@ -1,13 +1,13 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'gtd_book_result.dart';
+part of 'gtd_book_result_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-_GtdBookResult _$GtdBookResultFromJson(Map<String, dynamic> json) =>
-    _GtdBookResult(
+_GtdBookResultModel _$GtdBookResultModelFromJson(Map<String, dynamic> json) =>
+    _GtdBookResultModel(
       id: (json['id'] as num?)?.toInt(),
       title: json['title'] as String?,
       authors: (json['authors'] as List<dynamic>)
@@ -39,7 +39,7 @@ _GtdBookResult _$GtdBookResultFromJson(Map<String, dynamic> json) =>
       downloadCount: (json['download_count'] as num?)?.toInt(),
     );
 
-Map<String, dynamic> _$GtdBookResultToJson(_GtdBookResult instance) =>
+Map<String, dynamic> _$GtdBookResultModelToJson(_GtdBookResultModel instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
