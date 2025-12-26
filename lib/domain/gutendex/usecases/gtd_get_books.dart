@@ -3,8 +3,8 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result.dart';
-import 'package:leafy/domain/repositories/gutendex_repository.dart';
-import 'package:leafy/domain/usecases/gutendex_usecases/gtd_get_books_params.dart';
+import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
+import 'package:leafy/domain/gutendex/usecases/gtd_get_books_params.dart';
 
 @injectable
 class GtdGetBooksUseCase implements UseCase<GtdBooksResult, GtdGetBooksParams> {

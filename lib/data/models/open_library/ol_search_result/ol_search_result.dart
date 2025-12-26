@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:leafy/data/models/open_library/ol_search_result_doc/ol_search_result_doc.dart';
-import 'package:leafy/domain/entities/ol_search_result.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result.dart';
 
 part 'ol_search_result.freezed.dart';
 part 'ol_search_result.g.dart';

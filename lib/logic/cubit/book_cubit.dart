@@ -11,7 +11,7 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book.dart';
 import 'package:leafy/di/injection.dart';
-import 'package:leafy/domain/repositories/repository.dart';
+import 'package:leafy/domain/book/repositories/repository.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/main.dart';

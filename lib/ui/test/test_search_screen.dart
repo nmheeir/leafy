@@ -5,7 +5,7 @@ import 'package:leafy/core/constants/constants.dart';
 // Core imports
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/domain/entities/ol_search_result_doc.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 // Domain/Data imports

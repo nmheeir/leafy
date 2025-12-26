@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/domain/entities/reading.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
 
 class Book extends Equatable {
   final int? id;

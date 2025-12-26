@@ -2,9 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/domain/entities/ol_search_result_doc.dart';
-import 'package:leafy/domain/usecases/open_lib_usecases/open_lib_search.dart';
-import 'package:leafy/domain/usecases/open_lib_usecases/open_lib_search_params.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
+import 'package:leafy/domain/open_lib/usecases/open_lib_search.dart';
+import 'package:leafy/domain/open_lib/usecases/open_lib_search_params.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 

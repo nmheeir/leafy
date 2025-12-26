@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:leafy/domain/entities/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 
 class BookYearlyStat extends Equatable {
   final Book? book;

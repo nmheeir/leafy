@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:leafy/domain/entities/ol_search_result_doc.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 
 class OLSearchResult extends Equatable {
   const OLSearchResult({

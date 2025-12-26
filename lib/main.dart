@@ -10,7 +10,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/di/injection.dart';
-import 'package:leafy/domain/services/connectivity_service.dart';
+import 'package:leafy/core/services/connectivity_service.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';

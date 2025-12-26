@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:leafy/domain/entities/reading_time.dart';
+import 'package:leafy/domain/book/entities/reading_time.dart';
 
 class Reading extends Equatable {
   final DateTime? startDate;

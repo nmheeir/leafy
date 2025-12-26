@@ -4,8 +4,8 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/ol_search_type.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/remote/ol_remote_data_source.dart';
-import 'package:leafy/domain/entities/ol_search_result.dart';
-import 'package:leafy/domain/repositories/open_lib_repository.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result.dart';
+import 'package:leafy/domain/open_lib/repositories/open_lib_repository.dart';
 
 @LazySingleton(as: OpenLibRepository)
 class OpenLibRepositoryImpl implements OpenLibRepository {

@@ -4,7 +4,7 @@ import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result.dart';
-import 'package:leafy/domain/repositories/gutendex_repository.dart';
+import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
 
 @LazySingleton(as: GutendexRepository)
 class GutendexRepositoryImpl implements GutendexRepository {

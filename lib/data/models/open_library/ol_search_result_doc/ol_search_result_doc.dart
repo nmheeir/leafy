@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:leafy/core/constants/enums/ebook_access.dart';
-import 'package:leafy/domain/entities/ol_search_result_doc.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 
 part 'ol_search_result_doc.freezed.dart';
 part 'ol_search_result_doc.g.dart';

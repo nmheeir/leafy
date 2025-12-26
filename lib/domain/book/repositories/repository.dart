@@ -3,6 +3,7 @@ import 'package:leafy/core/constants/enums/index.dart' show BookFormat;
 import 'package:leafy/data/database/database_controller.dart';
 import 'package:leafy/data/models/book.dart';
 
+// TODO: migrate to book repository
 @lazySingleton
 class Repository {
   final DatabaseController _dbController;

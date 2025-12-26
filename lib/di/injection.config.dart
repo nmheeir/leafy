@@ -18,25 +18,28 @@ import 'package:logger/logger.dart' as _i974;
 import 'package:logger/web.dart' as _i120;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
 
+import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/database/database_controller.dart' as _i188;
 import '../data/database/database_provider.dart' as _i1014;
+import '../data/datasources/local/book_local_datasource.dart' as _i758;
+import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
+import '../data/datasources/local/database_service.dart' as _i328;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
-import '../domain/repositories/book_repository.dart' as _i168;
-import '../domain/repositories/gutendex_repository.dart' as _i569;
-import '../domain/repositories/open_lib_repository.dart' as _i996;
-import '../domain/repositories/repository.dart' as _i1001;
-import '../domain/services/connectivity_service.dart' as _i394;
+import '../domain/book/repositories/book_repository.dart' as _i29;
+import '../domain/book/repositories/repository.dart' as _i1055;
+import '../domain/book/usecases/get_all_books.dart' as _i38;
+import '../domain/book/usecases/search_books.dart' as _i755;
+import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
+import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
+import '../domain/open_lib/repositories/open_lib_repository.dart' as _i751;
+import '../domain/open_lib/usecases/open_lib_search.dart' as _i14;
 import '../domain/services/epub_cached_service.dart' as _i374;
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
-import '../domain/usecases/book_usecases/get_all_books.dart' as _i1048;
-import '../domain/usecases/book_usecases/search_books.dart' as _i1057;
-import '../domain/usecases/gutendex_usecases/gtd_get_books.dart' as _i209;
-import '../domain/usecases/open_lib_usecases/open_lib_search.dart' as _i503;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
 import '../logic/bloc/rating_type/rating_type_bloc.dart' as _i280;
@@ -101,19 +104,20 @@ extension GetItInjectableX on _i174.GetIt {
       () => storageModule.documentsDir,
       preResolve: true,
     );
+    gh.lazySingleton<_i786.ConnectivityService>(
+      () => _i786.ConnectivityService(),
+    );
+    gh.lazySingleton<_i328.DatabaseService>(() => _i328.DatabaseService());
     gh.lazySingleton<_i120.Logger>(() => loggerModule.logger);
     gh.lazySingleton<_i528.PrettyDioLogger>(() => networkModule.logger);
-    gh.lazySingleton<_i394.ConnectivityService>(
-      () => _i394.ConnectivityService(),
-    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(gh<_i528.PrettyDioLogger>()),
     );
-    gh.lazySingleton<_i569.GutendexRepository>(
-      () => _i779.GutendexRepositoryImpl(),
-    );
     gh.lazySingleton<_i715.OlRemoteDataSource>(
       () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.lazySingleton<_i844.GutendexRepository>(
+      () => _i779.GutendexRepositoryImpl(),
     );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
@@ -125,42 +129,43 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i497.Directory>(),
       ),
     );
+    gh.factory<_i750.GtdGetBooksUseCase>(
+      () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
+    );
     gh.lazySingleton<_i625.OpenLibraryService>(
       () => _i625.OpenLibraryService(gh<_i361.Dio>(), gh<_i974.Logger>()),
     );
     gh.lazySingleton<_i188.DatabaseController>(
       () => _i188.DatabaseController(gh<_i1014.DatabaseProvider>()),
     );
-    gh.factory<_i209.GtdGetBooksUseCase>(
-      () => _i209.GtdGetBooksUseCase(gh<_i569.GutendexRepository>()),
-    );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i168.BookRepository>(
+    gh.lazySingleton<_i758.BookLocalDataSource>(
+      () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i29.BookRepository>(
       () => _i329.BookRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
     );
-    gh.lazySingleton<_i996.OpenLibRepository>(
+    gh.lazySingleton<_i751.OpenLibRepository>(
       () => _i946.OpenLibRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
     );
-    gh.lazySingleton<_i1001.Repository>(
-      () => _i1001.Repository(gh<_i188.DatabaseController>()),
+    gh.lazySingleton<_i1055.Repository>(
+      () => _i1055.Repository(gh<_i188.DatabaseController>()),
     );
-    gh.factory<_i865.BookCubit>(() => _i865.BookCubit(gh<_i1001.Repository>()));
-    gh.factory<_i503.OpenLibSearchUseCase>(
-      () => _i503.OpenLibSearchUseCase(gh<_i996.OpenLibRepository>()),
+    gh.factory<_i38.GetAllBooksUseCase>(
+      () => _i38.GetAllBooksUseCase(gh<_i29.BookRepository>()),
     );
-    gh.factory<_i1048.GetAllBooksUseCase>(
-      () => _i1048.GetAllBooksUseCase(gh<_i168.BookRepository>()),
+    gh.factory<_i755.SearchBooksUseCase>(
+      () => _i755.SearchBooksUseCase(gh<_i29.BookRepository>()),
     );
-    gh.factory<_i1057.SearchBooksUseCase>(
-      () => _i1057.SearchBooksUseCase(gh<_i168.BookRepository>()),
+    gh.factory<_i14.OpenLibSearchUseCase>(
+      () => _i14.OpenLibSearchUseCase(gh<_i751.OpenLibRepository>()),
     );
+    gh.factory<_i865.BookCubit>(() => _i865.BookCubit(gh<_i1055.Repository>()));
     gh.factory<_i361.SearchBloc>(
-      () => _i361.SearchBloc(
-        gh<_i503.OpenLibSearchUseCase>(),
-        gh<_i974.Logger>(),
-      ),
+      () =>
+          _i361.SearchBloc(gh<_i14.OpenLibSearchUseCase>(), gh<_i974.Logger>()),
     );
     return this;
   }
