@@ -82,6 +82,7 @@ class BookCubit extends Cubit {
     getAllBooks();
   }
 
+  // NOTE: chưa thấy getTag và getAuthor được sử dụng
   Future<void> getAllBooks({
     bool getTags = true,
     bool getAuthors = true,
@@ -139,6 +140,7 @@ class BookCubit extends Cubit {
     _unfinishedBooksFetcher.sink.add(books);
   }
 
+  // NOTE: đây là use case search book local
   Future<void> getSearchBooks(String query) async {
     if (query.isEmpty) {
       final books = await _repository.getAllNotDeletedBooks();
@@ -149,6 +151,7 @@ class BookCubit extends Cubit {
     }
   }
 
+  // NOTE: use case add book
   Future<int> addBook(
     Book book, {
     bool refreshBooks = true,
@@ -185,6 +188,7 @@ class BookCubit extends Cubit {
     return importedBookIDs;
   }
 
+  // NOTE: use case saveCoverToStorage
   Future _saveCoverToStorage(int? bookID, Uint8List? cover) async {
     if (bookID == null || cover == null) return;
 
@@ -192,6 +196,7 @@ class BookCubit extends Cubit {
     await file.writeAsBytes(cover);
   }
 
+  // NOTE: use case updateBook
   Future<void> updateBook(
     Book book, {
     Uint8List? cover,
@@ -213,18 +218,21 @@ class BookCubit extends Cubit {
     getAllBooks();
   }
 
+  // NOTE: dùng khi ngừoi dùng nhấn giữ một cuốn sách trong BooksScreen
   Future<void> bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) async {
     _repository.bulkUpdateBookFormat(ids, bookFormat);
     getAllBooksByStatus();
     getAllBooks();
   }
 
+  // NOTE: dùng khi ngừoi dùng nhấn giữ một cuốn sách trong BooksScreen
   Future<void> bulkUpdateBookAuthor(Set<int> ids, String author) async {
     _repository.bulkUpdateBookAuthor(ids, author);
     getAllBooksByStatus();
     getAllBooks();
   }
 
+  // NOTE: use case delete book
   Future<void> deleteBook(int id) async {
     _repository.deleteBook(id);
     getAllBooksByStatus();
@@ -319,6 +327,7 @@ class BookCubit extends Cubit {
     prefs.setBool(SharedPreferencesKeys.coverMigrationDone, true);
   }
 
+  // NOTE: hàm này chưa được sử dụng
   Future<void> getBooksWithSameTag(String tag) async {
     _booksWithSameTagFetcher.sink.add(null);
 
@@ -335,6 +344,7 @@ class BookCubit extends Cubit {
     _booksWithSameAuthorFetcher.sink.add(books);
   }
 
+  // NOTE: sử dụng khi có book chưa có cover (nhưng đã có mã isbn) - book_editor_screen
   Future<bool> downloadCoverByISBN(Book book) async {
     if (book.isbn == null) return false;
     if (book.isbn!.isEmpty) return false;

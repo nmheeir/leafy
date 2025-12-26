@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+// NOTE: Cubit này dùng khi chọn nhiều sách trong màn hình chính
 @injectable
 class SelectedBooksCubit extends Cubit<List<int>> {
   SelectedBooksCubit() : super([]);
