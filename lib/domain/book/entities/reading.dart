@@ -1,25 +1,24 @@
 import 'package:equatable/equatable.dart';
-import 'package:leafy/domain/book/entities/reading_time.dart';
 
 class Reading extends Equatable {
   final DateTime? startDate;
   final DateTime? finishDate;
-  final ReadingTime? customReadingTime;
+  final int? readingTimeMs;
 
-  const Reading({this.startDate, this.finishDate, this.customReadingTime});
+  const Reading({this.startDate, this.finishDate, this.readingTimeMs});
 
   Reading copyWith({
     DateTime? startDate,
     DateTime? finishDate,
-    ReadingTime? customReadingTime,
+    int? readingTimeMs,
   }) {
     return Reading(
       startDate: startDate ?? this.startDate,
       finishDate: finishDate ?? this.finishDate,
-      customReadingTime: customReadingTime ?? this.customReadingTime,
+      readingTimeMs: readingTimeMs ?? this.readingTimeMs,
     );
   }
 
   @override
-  List<Object?> get props => [startDate, finishDate, customReadingTime];
+  List<Object?> get props => [startDate, finishDate, readingTimeMs];
 }

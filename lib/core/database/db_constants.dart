@@ -42,6 +42,8 @@ class DbConstants {
     )
   ''';
 
+  // TODO: tạo thêm bảng reading, do tách reading trong bảng book ra cho gọn gàng hơn
+
   static const migrationV1toV2 = [
     createEpubCacheTable,
   ];
