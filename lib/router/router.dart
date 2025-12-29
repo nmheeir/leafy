@@ -15,7 +15,6 @@ import 'package:leafy/ui/settings/screens/setting_default_book_tag_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
 import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
-import 'package:leafy/ui/test/test_search_screen.dart';
 import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
 
@@ -62,8 +61,7 @@ GoRouter router() => GoRouter(
       path: Routes.searchOl,
       builder: (context, state) {
         // final status = state.extra as BookStatus? ?? BookStatus.finished;
-        return TestSearchOLScreen();
-        // return SearchOLScreen(status: status);
+        return SearchOLScreen();
       },
     ),
     GoRoute(
