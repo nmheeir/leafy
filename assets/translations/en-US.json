@@ -297,6 +297,7 @@
     "server_error": "Server error. Please try again later.",
     "no_internet": "No internet connection. Check your network.",
     "cache_error": "Local data error. Please refresh.",
-    "unexpected": "Something went wrong. Please try again."
+    "unexpected": "Something went wrong. Please try again.",
+    "no_error_return": "No error return"
   }
 }

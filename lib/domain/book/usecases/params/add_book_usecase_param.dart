@@ -2,9 +2,9 @@ import 'dart:typed_data';
 
 import 'package:leafy/domain/book/entities/book.dart';
 
-class AddBookUsecaseParam {
+class AddBookParams {
   final Book book;
   final Uint8List? cover;
 
-  const AddBookUsecaseParam({required this.book, this.cover});
+  const AddBookParams({required this.book, this.cover});
 }

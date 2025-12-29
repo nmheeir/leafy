@@ -11,10 +11,11 @@ import 'package:http/http.dart' as http;
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/data/models/book/book/book.dart';
-import 'package:leafy/data/models/book/reading/reading.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -82,7 +83,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     LocaleKeys.book_format_audiobook.tr(),
   ];
 
-  void _prefillBookDetails(Book book) {
+  void _prefillBookDetails(Book book) async {
     _titleCtrl.text = book.title;
     _subtitleCtrl.text = book.subtitle ?? '';
     _authorCtrl.text = book.author;
@@ -96,7 +97,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (!widget.fromOpenLibrary && !widget.fromOpenLibraryEdition) {
       if (!widget.duplicatingBook) {
-        context.read<EditBookCoverCubit>().setCover(book.getCoverBytes());
+        context.read<EditBookCoverCubit>().setCover(
+          await getCoverBytes(book.id),
+        );
       }
     }
   }
@@ -173,11 +176,10 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (book.hasCover == false) {
       context.read<EditBookCoverCubit>().deleteCover(book.id);
-      context.read<EditBookCubit>().updateBook(null, context);
+      context.read<EditBookCubit>().updateBook(null);
     } else {
       context.read<EditBookCubit>().updateBook(
         context.read<EditBookCoverCubit>().state,
-        context,
       );
     }
 
@@ -266,7 +268,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       if (!mounted) return;
 
       if (!mounted) return;
-      await generateBlurHash(response.bodyBytes, context);
+      await generateBlurHash(response.bodyBytes);
 
       if (!mounted) return;
       context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
@@ -280,7 +282,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   void _downloadWork() async {
     if (widget.work != null) {
-      final openLibraryWork = await getIt<OpenLibraryService>().getWork(widget.work!);
+      final openLibraryWork = await getIt<OpenLibraryService>().getWork(
+        widget.work!,
+      );
 
       if (!mounted) return;
 
@@ -314,7 +318,8 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       return;
     }
 
-    context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
+    // TODO: uncomment this
+    // context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
 
     _tagsCtrl.clear();
   }

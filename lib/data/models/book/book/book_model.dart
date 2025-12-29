@@ -59,6 +59,33 @@ abstract class BookModel with _$BookModel {
   factory BookModel.fromJson(Map<String, dynamic> json) =>
       _$BookModelFromJson(json);
 
+  factory BookModel.fromEntity(Book entity) {
+    return BookModel(
+      title: entity.title,
+      author: entity.author,
+      dateAdded: entity.dateAdded,
+      dateModified: entity.dateModified,
+      blurHash: entity.blurHash,
+      bookFormat: entity.bookFormat,
+      deleted: entity.deleted,
+      description: entity.description,
+      favorite: entity.favorite,
+      hasCover: entity.hasCover,
+      id: entity.id,
+      isbn: entity.isbn,
+      myReview: entity.myReview,
+      notes: entity.notes,
+      olid: entity.olid,
+      pages: entity.pages,
+      publicationYear: entity.publicationYear,
+      rating: entity.rating,
+      status: entity.status,
+      subtitle: entity.subtitle,
+      tags: entity.tags,
+      // TODO: còn start date và finished date
+    );
+  }
+
   Book toEntity() {
     return Book(
       id: id,

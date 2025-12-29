@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image/image.dart' as img;
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 
 class CoverBackground extends StatelessWidget {

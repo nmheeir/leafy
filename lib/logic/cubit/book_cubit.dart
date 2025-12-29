@@ -2,15 +2,15 @@
 
 import 'dart:io';
 
-import 'package:blurhash_dart/blurhash_dart.dart' as blurhash_dart;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/repositories/repository.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -18,7 +18,6 @@ import 'package:leafy/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:image/image.dart' as img;
 
 @injectable
 class BookCubit extends Cubit {
@@ -140,7 +139,7 @@ class BookCubit extends Cubit {
     _unfinishedBooksFetcher.sink.add(books);
   }
 
-  // NOTE: đây là use case search book local
+  // NOTE: đã move qua search book use case
   Future<void> getSearchBooks(String query) async {
     if (query.isEmpty) {
       final books = await _repository.getAllNotDeletedBooks();
@@ -151,7 +150,7 @@ class BookCubit extends Cubit {
     }
   }
 
-  // NOTE: use case add book
+  // NOTE: đã move qua book actor cubit
   Future<int> addBook(
     Book book, {
     bool refreshBooks = true,
@@ -174,6 +173,7 @@ class BookCubit extends Cubit {
     return bookID;
   }
 
+  // NOTE: Chưa được sử dụng
   Future<List<int>> importAdditionalBooks(List<Book> books) async {
     final importedBookIDs = List<int>.empty(growable: true);
 
@@ -188,7 +188,7 @@ class BookCubit extends Cubit {
     return importedBookIDs;
   }
 
-  // NOTE: use case saveCoverToStorage
+  // NOTE: đã move qua book actor cubit
   Future _saveCoverToStorage(int? bookID, Uint8List? cover) async {
     if (bookID == null || cover == null) return;
 
@@ -196,7 +196,7 @@ class BookCubit extends Cubit {
     await file.writeAsBytes(cover);
   }
 
-  // NOTE: use case updateBook
+  // NOTE: đã move qua book actor cubit
   Future<void> updateBook(
     Book book, {
     Uint8List? cover,
@@ -218,27 +218,28 @@ class BookCubit extends Cubit {
     getAllBooks();
   }
 
-  // NOTE: dùng khi ngừoi dùng nhấn giữ một cuốn sách trong BooksScreen
+  // NOTE: đã move qua book actor cubit
   Future<void> bulkUpdateBookFormat(Set<int> ids, BookFormat bookFormat) async {
     _repository.bulkUpdateBookFormat(ids, bookFormat);
     getAllBooksByStatus();
     getAllBooks();
   }
 
-  // NOTE: dùng khi ngừoi dùng nhấn giữ một cuốn sách trong BooksScreen
+  // NOTE: đã move qua book actor cubit
   Future<void> bulkUpdateBookAuthor(Set<int> ids, String author) async {
     _repository.bulkUpdateBookAuthor(ids, author);
     getAllBooksByStatus();
     getAllBooks();
   }
 
-  // NOTE: use case delete book
+  // NOTE: đã move qua library cubit
   Future<void> deleteBook(int id) async {
     _repository.deleteBook(id);
     getAllBooksByStatus();
     getAllBooks();
   }
 
+  // NOTE: đã move qua library cubit
   Future<Book?> getBook(int id) async {
     Book? book = await _repository.getBook(id);
     _bookFetcher.sink.add(book);
@@ -246,6 +247,7 @@ class BookCubit extends Cubit {
     return book;
   }
 
+  // NOTE: đã move qua library cubit
   List<int> _getFinishedYears(List<Book> books) {
     final yearsSet = <int>{};
 
@@ -263,6 +265,7 @@ class BookCubit extends Cubit {
     return yearsList;
   }
 
+  // NOTE: đã move qua library cubit
   List<String> _getTags(List<Book> books) {
     final tags = List<String>.empty(growable: true);
 
@@ -281,6 +284,7 @@ class BookCubit extends Cubit {
     return tags;
   }
 
+  // NOTE: đã move qua library cubit
   List<String> _getAuthors(List<Book> books) {
     final authors = List<String>.empty(growable: true);
 
@@ -355,22 +359,12 @@ class BookCubit extends Cubit {
     final file = File('${appDocumentsDirectory.path}/${book.id}.jpg');
     await file.writeAsBytes(cover);
 
-    final blurHash = _generateBlurHash(cover);
+    final blurHash = await generateBlurHash(cover);
 
     await bookCubit.updateBook(
       book.copyWith(hasCover: true, blurHash: blurHash),
     );
 
     return true;
-  }
-
-  static String? _generateBlurHash(Uint8List? cover) {
-    if (cover == null) return null;
-
-    return blurhash_dart.BlurHash.encode(
-      img.decodeImage(cover)!,
-      numCompX: Constants.blurHashX,
-      numCompY: Constants.blurHashY,
-    ).hash;
   }
 }

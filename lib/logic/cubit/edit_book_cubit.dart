@@ -1,208 +1,122 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/data/models/book/book/book.dart';
-import 'package:leafy/data/models/book/reading/reading.dart';
 import 'package:leafy/data/models/book/reading_time/reading_time.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
+import 'package:leafy/domain/book/usecases/add_book.dart';
+import 'package:leafy/domain/book/usecases/update_book.dart';
 
 @injectable
 class EditBookCubit extends Cubit<Book> {
-  EditBookCubit() : super(Book.empty());
+  final AddBookUseCase _addBook;
+  final UpdateBookUseCase _updateBook;
+  EditBookCubit(this._addBook, this._updateBook) : super(Book.empty());
+
+  // TODO: fix this
+  Future<int> addNewBook(Uint8List? cover) async {
+    // return _addBook(book: state, cover: cover);
+    return 1;
+  }
+
+  // TODO: fix this
+  Future<void> updateBook(Uint8List? cover) async {
+    // if (state.id == null) return;
+    // await _updateBook(book: state, cover: cover);
+  }
 
   void setBook(Book book) => emit(book);
 
-  void updateBook(Uint8List? cover, BuildContext context) {
-    if (state.id == null) return;
+  void setStatus(BookStatus status) => emit(state.copyWith(status: status));
 
-    bookCubit.updateBook(state, cover: cover, context: context);
-  }
+  void setRating(double rating) =>
+      emit(state.copyWith(rating: (rating * 10).toInt()));
 
-  Future<int> addNewBook(Uint8List? cover) async {
-    debugPrint('[EditBookCubit] Attempting to add new book: ${state.title}');
-    final bookID = await bookCubit.addBook(state, cover: cover);
+  void setBookFormat(BookFormat format) =>
+      emit(state.copyWith(bookFormat: format));
 
-    debugPrint('[EditBookCubit] Book added successfully with ID: $bookID');
+  void setTitle(String title) => emit(state.copyWith(title: title));
 
-    return bookID;
-  }
+  void setSubtitle(String subtitle) =>
+      emit(state.copyWith(subtitle: subtitle.isEmpty ? null : subtitle));
 
-  void setStatus(BookStatus status) {
-    final book = state.copyWith();
+  void setAuthor(String author) => emit(state.copyWith(author: author));
 
-    emit(book.copyWith(status: status));
-  }
+  void setPages(String pages) =>
+      emit(state.copyWith(pages: pages.isEmpty ? null : int.parse(pages)));
 
-  void setRating(double rating) {
-    emit(state.copyWith(rating: (rating * 10).toInt()));
-  }
+  void setDescription(String description) => emit(
+    state.copyWith(description: description.isEmpty ? null : description),
+  );
 
-  void setBookFormat(BookFormat bookFormat) {
-    emit(state.copyWith(bookFormat: bookFormat));
-  }
+  void setISBN(String isbn) =>
+      emit(state.copyWith(isbn: isbn.isEmpty ? null : isbn));
 
-  void setTitle(String title) {
-    emit(state.copyWith(title: title));
-  }
+  void setOLID(String olid) =>
+      emit(state.copyWith(olid: olid.isEmpty ? null : olid));
 
-  void setSubtitle(String subtitle) {
-    final book = state.copyWith();
-    book.subtitle = subtitle.isNotEmpty ? subtitle : null;
-    emit(book);
-  }
+  void setPublicationYear(String year) => emit(
+    state.copyWith(publicationYear: year.isEmpty ? null : int.parse(year)),
+  );
 
-  void setAuthor(String author) {
-    emit(state.copyWith(author: author));
-  }
+  void setMyReview(String review) =>
+      emit(state.copyWith(myReview: review.isEmpty ? null : review));
 
-  void setPages(String pages) {
-    final book = state.copyWith();
-    book.pages = pages.isEmpty ? null : int.parse(pages);
-    emit(book);
-  }
+  void setNotes(String notes) =>
+      emit(state.copyWith(notes: notes.isEmpty ? null : notes));
 
-  void setDescription(String description) {
-    final book = state.copyWith();
-    book.description = description.isNotEmpty ? description : null;
-    emit(book);
-  }
+  void setBlurHash(String? blurHash) =>
+      emit(state.copyWith(blurHash: blurHash));
 
-  void setISBN(String isbn) {
-    final book = state.copyWith();
-    book.isbn = isbn.isNotEmpty ? isbn : null;
-    emit(book);
-  }
-
-  void setOLID(String olid) {
-    final book = state.copyWith();
-    book.olid = olid.isNotEmpty ? olid : null;
-    emit(book);
-  }
-
-  void setPublicationYear(String publicationYear) {
-    final book = state.copyWith();
-    book.publicationYear = publicationYear.isEmpty
-        ? null
-        : int.parse(publicationYear);
-
-    emit(book);
-  }
-
-  void setMyReview(String myReview) {
-    final book = state.copyWith();
-    book.myReview = myReview.isNotEmpty ? myReview : null;
-
-    emit(book);
-  }
-
-  void setNotes(String notes) {
-    final book = state.copyWith();
-    book.notes = notes.isNotEmpty ? notes : null;
-
-    emit(book);
-  }
-
-  void setBlurHash(String? blurHash) {
-    final book = state.copyWith();
-    book.blurHash = blurHash;
-
-    emit(book);
-  }
-
-  void setHasCover(bool hasCover) {
-    final book = state.copyWith();
-    book.hasCover = hasCover;
-
-    emit(book);
-  }
-
-  void addNewTag(String tag) {
-    // Remove space at the end of the string if exists
-    if (tag.substring(tag.length - 1) == ' ') {
-      tag = tag.substring(0, tag.length - 1);
-    }
-
-    // Remove illegal characte
-    tag = tag.replaceAll('@', '').replaceAll('|', '');
-
-    List<String> tags = state.tags == null ? [] : state.tags!.split('|||||');
-
-    if (tags.contains(tag)) return;
-    tags.add(tag);
-
-    final book = state.copyWith();
-    book.tags = tags.join('|||||');
-
-    emit(book);
-  }
-
-  void removeTag(String tag) {
-    List<String> tags = state.tags == null ? [] : state.tags!.split('|||||');
-
-    if (!tags.contains(tag)) return;
-    tags.remove(tag);
-
-    final book = state.copyWith();
-    book.tags = tags.isEmpty ? null : tags.join('|||||');
-
-    emit(book);
-  }
+  void setHasCover(bool hasCover) => emit(state.copyWith(hasCover: hasCover));
 
   void addNewReading(Reading reading) {
-    List<Reading> readings = state.readings;
-
-    readings.add(reading);
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    emit(state.copyWith(readings: [...state.readings, reading]));
   }
 
   void removeReading(int index) {
-    List<Reading> readings = state.readings;
-
-    readings.removeAt(index);
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    final readings = List<Reading>.from(state.readings)..removeAt(index);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setReadingStartDate(DateTime? startDate, int index) {
-    List<Reading> readings = state.readings;
+  void setReadingStartDate(DateTime? date, int index) {
+    final readings = List<Reading>.from(state.readings);
+    readings[index] = readings[index].copyWith(startDate: date);
 
-    readings[index].startDate = startDate;
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setReadingFinishDate(DateTime? finishDate, int index) {
-    List<Reading> readings = state.readings;
+  void setReadingFinishDate(DateTime? date, int index) {
+    final readings = List<Reading>.from(state.readings);
+    readings[index] = readings[index].copyWith(finishDate: date);
 
-    readings[index].finishDate = finishDate;
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setCustomReadingTime(ReadingTime? readingTime, int index) {
-    List<Reading> readings = state.readings;
+  void setCustomReadingTime(ReadingTime? time, int index) {
+    final readings = List<Reading>.from(state.readings);
+    // TODO: fix
+    // readings[index] = readings[index].copyWith(customReadingTime: time);
 
-    readings[index].customReadingTime = readingTime;
+    emit(state.copyWith(readings: readings));
+  }
 
-    final book = state.copyWith();
-    book.readings = readings;
+  void addNewTag(String tag) {
+    tag = tag.trim().replaceAll('@', '').replaceAll('|', '');
+    if (tag.isEmpty) return;
 
-    emit(book);
+    final tags = state.tags?.split('|||||') ?? [];
+    if (tags.contains(tag)) return;
+
+    emit(state.copyWith(tags: [...tags, tag].join('|||||')));
+  }
+
+  void removeTag(String tag) {
+    final tags = state.tags?.split('|||||') ?? [];
+    tags.remove(tag);
+
+    emit(state.copyWith(tags: tags.isEmpty ? null : tags.join('|||||')));
   }
 }

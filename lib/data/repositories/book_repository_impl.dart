@@ -1,16 +1,38 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:fpdart/fpdart.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/local/book_local_datasource.dart';
+import 'package:leafy/data/models/book/book/book_model.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
+import 'package:leafy/domain/book/usecases/params/add_book_usecase_param.dart';
+import 'package:leafy/domain/book/usecases/params/bulk_update_params.dart';
+import 'package:leafy/domain/book/usecases/params/update_book_param.dart';
+import 'package:leafy/main.dart';
+import 'package:rxdart/rxdart.dart';
 
 @LazySingleton(as: BookRepository)
 class BookRepositoryImpl implements BookRepository {
   final BookLocalDataSource _bookLocalDataSource;
+  final _booksStreamController = BehaviorSubject<List<Book>>();
 
-  BookRepositoryImpl(this._bookLocalDataSource);
+  BookRepositoryImpl(this._bookLocalDataSource) {
+    _refreshBooks();
+  }
+
+  Future<void> _refreshBooks() async {
+    try {
+      final books = await _bookLocalDataSource.getAllNotDeleted();
+      _booksStreamController.add(books.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      _booksStreamController.addError(e);
+    }
+  }
 
   @override
   Future<Either<Failure, List<Book>>> getAllBooks() {
@@ -18,10 +40,16 @@ class BookRepositoryImpl implements BookRepository {
     throw UnimplementedError();
   }
 
+  // NOTE: not use
   @override
-  Future<Either<Failure, List<Book>>> getAllNotDeletedBooks() {
-    // TODO: implement getAllNotDeletedBooks
-    throw UnimplementedError();
+  Future<Either<Failure, List<Book>>> getAllNotDeletedBooks() async {
+    try {
+      final books = await _bookLocalDataSource.getAllNotDeleted();
+
+      return Right(books.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return Left(Failure.database());
+    }
   }
 
   @override
@@ -31,30 +59,55 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<Either<Failure, List<Book>>> getDeletedBooks() {
-    // TODO: implement getDeletedBooks
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, List<Book>>> searchBooks(String query) {
-    // TODO: implement searchBooks
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, int>> addBook(Book book) async {
+  Future<Either<Failure, List<Book>>> getDeletedBooks() async {
     try {
-      // TODO: add book -> save cover to storage
-      // final bookId = await _bookLocalDataSource.create();
-      return Left(Failure.unexpected('Not Implement'));
+      final book = await _bookLocalDataSource.getDeleted();
+
+      return Right(book.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return Left(Failure.database());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Book>>> searchBooks(String query) async {
+    try {
+      late final List<BookModel> books;
+      if (query.isEmpty) {
+        books = await _bookLocalDataSource.getAll();
+      } else {
+        books = await _bookLocalDataSource.search(query: query);
+      }
+
+      return Right(books.map((e) => e.toEntity()).toList());
+    } catch (e) {
+      return Left(Failure.database());
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> addBook(AddBookParams params) async {
+    try {
+      final bookId = await _bookLocalDataSource.create(
+        BookModel.fromEntity(params.book),
+      );
+
+      if (params.cover == null) {
+        return Left(Failure.unexpected('Cover cannot be null'));
+      }
+
+      _saveCoverToStorage(bookId, params.cover);
+
+      _refreshBooks();
+
+      return Right(bookId);
     } catch (e) {
       return Left(Failure.unexpected(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> bulkUpdateBookAuthor(
+  Future<Either<Failure, Unit>> bulkUpdateBookAuthor(
     Set<int> ids,
     String author,
   ) {
@@ -63,7 +116,7 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<Either<Failure, void>> bulkUpdateBookFormat(
+  Future<Either<Failure, Unit>> bulkUpdateBookFormat(
     Set<int> ids,
     BookFormat bookFormat,
   ) {
@@ -78,15 +131,22 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteBook(int id) {
+  Future<Either<Failure, Unit>> deleteBook(int id) {
     // TODO: implement deleteBook
     throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, Book?>> getBookById(int id) {
-    // TODO: implement getBookById
-    throw UnimplementedError();
+  Future<Either<Failure, Book>> getBookById(int id) async {
+    try {
+      final book = await _bookLocalDataSource.getById(id);
+      if (book == null) {
+        return Left(Failure.notFound());
+      }
+      return Right(book.toEntity());
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
+    }
   }
 
   @override
@@ -102,14 +162,62 @@ class BookRepositoryImpl implements BookRepository {
   }
 
   @override
-  Future<Either<Failure, void>> removeAllBooks() {
+  Future<Either<Failure, Unit>> removeAllBooks() {
     // TODO: implement removeAllBooks
     throw UnimplementedError();
   }
 
   @override
-  Future<Either<Failure, void>> updateBook(Book book) {
-    // TODO: implement updateBook
-    throw UnimplementedError();
+  Future<Either<Failure, Unit>> updateBook(UpdateBookParams params) async {
+    try {
+      final bookId = await _bookLocalDataSource.update(
+        BookModel.fromEntity(params.book),
+      );
+
+      if (params.cover == null) {
+        return Left(Failure.unexpected('Cover cannot be null'));
+      }
+
+      _saveCoverToStorage(bookId, params.cover);
+
+      _refreshBooks();
+
+      return right(unit);
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
+    }
+  }
+
+  @override
+  Stream<List<Book>> watchAllNotDeletedBooks() {
+    return _booksStreamController;
+  }
+
+  @override
+  Future<Either<Failure, Unit>> bulkUpdateBooks(
+    BulkUpdateBooksParams params,
+  ) async {
+    try {
+      if (params.format != null) {
+        await _bookLocalDataSource.bulkUpdateFormat(params.ids, params.format!);
+      }
+
+      if (params.author != null) {
+        await _bookLocalDataSource.bulkUpdateAuthor(params.ids, params.author!);
+      }
+
+      _refreshBooks();
+
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure.server());
+    }
+  }
+
+  Future _saveCoverToStorage(int? bookID, Uint8List? cover) async {
+    if (bookID == null || cover == null) return;
+
+    final file = File('${appDocumentsDirectory.path}/$bookID.jpg');
+    await file.writeAsBytes(cover);
   }
 }

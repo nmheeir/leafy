@@ -19,6 +19,7 @@ import 'package:leafy/logic/bloc/search/search_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
+import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
@@ -28,6 +29,7 @@ import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
@@ -85,6 +87,8 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<DefaultBookFormatCubit>()),
       BlocProvider(create: (context) => getIt<DefaultBookTagCubit>()),
       BlocProvider(create: (context) => getIt<BookTabIndexCubit>()),
+      BlocProvider(create: (context) => getIt<LibraryCubit>()),
+      BlocProvider(create: (context) => getIt<BookActorCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

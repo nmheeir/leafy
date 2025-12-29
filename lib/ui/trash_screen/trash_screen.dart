@@ -1,6 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
@@ -31,10 +31,7 @@ class TrashScreen extends StatelessWidget {
                   child: Text(
                     LocaleKeys.no_deleted_books.tr(),
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      letterSpacing: 1.5,
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(letterSpacing: 1.5, fontSize: 16),
                   ),
                 ),
               );
@@ -45,9 +42,7 @@ class TrashScreen extends StatelessWidget {
               allBooksCount: null,
             );
           } else if (snapshot.hasError) {
-            return Text(
-              snapshot.error.toString(),
-            );
+            return Text(snapshot.error.toString());
           } else {
             return const SizedBox();
           }

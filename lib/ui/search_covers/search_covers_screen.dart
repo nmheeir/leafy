@@ -5,16 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/search_covers/widgets/search_covers_grid.dart';
 
 class SearchCoversScreen extends StatefulWidget {
-  const SearchCoversScreen({
-    super.key,
-    required this.book,
-  });
+  const SearchCoversScreen({super.key, required this.book});
 
   final Book book;
 
@@ -66,9 +63,7 @@ class _SearchCoversScreenState extends State<SearchCoversScreen> {
     final url = Uri.parse(Constants.duckDuckGoURL);
     final tokenResponse = await http.post(url, body: {'q': searchQuery});
 
-    final tokenMatch = RegExp(r'vqd=([\d-]+)\&').firstMatch(
-      tokenResponse.body,
-    );
+    final tokenMatch = RegExp(r'vqd=([\d-]+)\&').firstMatch(tokenResponse.body);
 
     if (tokenMatch == null) {
       throw Exception('Token Parsing Failed !');

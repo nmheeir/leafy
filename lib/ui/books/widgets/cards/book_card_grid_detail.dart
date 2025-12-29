@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 
 class BookCardGridDetailed extends StatelessWidget {
@@ -23,12 +24,10 @@ class BookCardGridDetailed extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverFile = book.getCoverFile();
+    final coverFile = getCoverFile(book.id);
 
     return Card.filled(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
@@ -65,22 +64,23 @@ class BookCardGridDetailed extends StatelessWidget {
             child: Image.file(
               file,
               fit: BoxFit.cover,
-              frameBuilder: (
-                BuildContext context,
-                Widget child,
-                int? frame,
-                bool wasSynchronouslyLoaded,
-              ) {
-                if (wasSynchronouslyLoaded) {
-                  return child;
-                }
-                return AnimatedOpacity(
-                  opacity: frame == null ? 0 : 1,
-                  duration: const Duration(milliseconds: 250),
-                  curve: Curves.easeOut,
-                  child: child,
-                );
-              },
+              frameBuilder:
+                  (
+                    BuildContext context,
+                    Widget child,
+                    int? frame,
+                    bool wasSynchronouslyLoaded,
+                  ) {
+                    if (wasSynchronouslyLoaded) {
+                      return child;
+                    }
+                    return AnimatedOpacity(
+                      opacity: frame == null ? 0 : 1,
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                      child: child,
+                    );
+                  },
             ),
           ),
           _buildTitleOverlay(),
@@ -90,50 +90,54 @@ class BookCardGridDetailed extends StatelessWidget {
   }
 
   Widget _buildBottomTitle() {
-    return BlocBuilder<DisplayCubit, DisplayState>(builder: (context, state) {
-      if (state.showTitleOverCover) return const SizedBox.shrink();
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (context, state) {
+        if (state.showTitleOverCover) return const SizedBox.shrink();
 
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                book.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(5, 5, 5, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  book.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      );
-    });
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildBottomAuthor() {
-    return BlocBuilder<DisplayCubit, DisplayState>(builder: (context, state) {
-      if (state.showTitleOverCover) return const SizedBox.shrink();
+    return BlocBuilder<DisplayCubit, DisplayState>(
+      builder: (context, state) {
+        if (state.showTitleOverCover) return const SizedBox.shrink();
 
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                book.author,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 12),
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(5, 0, 5, 5),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  book.author,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    });
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTitleOverlay() {

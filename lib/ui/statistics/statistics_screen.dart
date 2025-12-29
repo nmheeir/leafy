@@ -43,7 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
           if (asyncSnapshot.hasData) {
             return BlocProvider(
               create: (context) =>
-                 getIt<StatsBloc>()..add(StatsLoad(asyncSnapshot.data!)),
+                  getIt<StatsBloc>()..add(StatsLoad(asyncSnapshot.data!)),
               child: SelectableRegion(
                 selectionControls: materialTextSelectionControls,
                 focusNode: _focusNode,
@@ -60,7 +60,13 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                         state: state,
                         setChallenge: _setChallenge,
                       ),
-                      StatsError() => Center(child: Text(state.msg)),
+                      StatsEmpty() => Center(child: Text('Empty')),
+                      StatsFailure() => Center(
+                        child: Text(switch (state.type) {
+                          StatsFailureType.emptyData => 'Empty Data',
+                          StatsFailureType.unknown => 'Unknow Error',
+                        }),
+                      ),
                     };
                   },
                 ),

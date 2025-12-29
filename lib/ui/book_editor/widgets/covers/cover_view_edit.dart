@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
@@ -76,7 +77,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       return;
     }
 
-    await generateBlurHash(croppedPhotoBytes, context);
+    await generateBlurHash(croppedPhotoBytes);
     if (!context.mounted) {
       _setCoverLoading(false);
       return;
@@ -113,7 +114,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       return;
     }
 
-    await generateBlurHash(croppedPhotoBytes, context);
+    await generateBlurHash(croppedPhotoBytes);
 
     if (!context.mounted) {
       _setCoverLoading(false);
@@ -160,7 +161,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       _setCoverLoading(false);
       return;
     }
-    await generateBlurHash(cover, context);
+    await generateBlurHash(cover);
 
     if (!context.mounted) {
       _setCoverLoading(false);
@@ -190,7 +191,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     final bool? showDuckDuckGoWarning = prefs.getBool(
       SharedPreferencesKeys.duckDuckGoWarning,
     );
-
 
     if (showDuckDuckGoWarning == false) {
       _openDuckDuckGoSearchScreen(context);

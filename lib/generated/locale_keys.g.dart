@@ -292,6 +292,7 @@ abstract class  LocaleKeys {
   static const error_no_internet = 'error.no_internet';
   static const error_cache_error = 'error.cache_error';
   static const error_unexpected = 'error.unexpected';
+  static const error_no_error_return = 'error.no_error_return';
   static const error = 'error';
 
 }

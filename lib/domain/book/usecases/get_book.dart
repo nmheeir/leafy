@@ -1,4 +1,4 @@
-import 'package:fpdart/fpdart.dart';
+import 'package:fpdart/src/either.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
@@ -6,13 +6,13 @@ import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
 
 @injectable
-class GetAllBooksUseCase implements UseCase<List<Book>, NoParams> {
+class GetBookUseCase implements UseCase<Book, int> {
   final BookRepository bookRepository;
 
-  GetAllBooksUseCase(this.bookRepository);
+  GetBookUseCase(this.bookRepository);
 
   @override
-  Future<Either<Failure, List<Book>>> call(NoParams params) {
-    return bookRepository.getAllNotDeletedBooks();
+  Future<Either<Failure, Book>> call(int params) async {
+    return bookRepository.getBookById(params);
   }
 }

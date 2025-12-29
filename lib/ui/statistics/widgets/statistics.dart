@@ -25,8 +25,9 @@ class Statistics extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final result = state.result;
     return DefaultTabController(
-      length: state.years.length + 1,
+      length: result.years.length + 1,
       child: Column(
         children: [
           Row(
@@ -35,7 +36,7 @@ class Statistics extends StatelessWidget {
                 child: TabBar(
                   tabAlignment: TabAlignment.start,
                   isScrollable: true,
-                  tabs: _buildYearsTabBars(context, state.years),
+                  tabs: _buildYearsTabBars(context, result.years),
                 ),
               ),
             ],
@@ -92,7 +93,7 @@ class Statistics extends StatelessWidget {
       ),
     );
 
-    for (var year in state.years) {
+    for (var year in state.result.years) {
       tabs.add(
         Tab(
           child: Column(
@@ -154,13 +155,13 @@ class Statistics extends StatelessWidget {
                 : element.year == year;
           });
 
-          final selectedValue = state.finishedBooksByMonthAllTypes.where((
-            element,
-          ) {
-            return (year == null)
-                ? element.year == DateTime.now().year
-                : element.year == year;
-          });
+          final selectedValue = state.result.finishedBooksByMonthAllTypes.where(
+            (element) {
+              return (year == null)
+                  ? element.year == DateTime.now().year
+                  : element.year == year;
+            },
+          );
 
           final value = selectedValue.isNotEmpty
               ? selectedValue.first.values.reduce((a, b) => a + b)
@@ -200,10 +201,10 @@ class Statistics extends StatelessWidget {
     return BooksByStatus(
       title: LocaleKeys.all_books_by_status.tr(),
       list: [
-        state.finishedBooks.length,
-        state.inProgressBooks.length,
-        state.forLaterBooks.length,
-        state.unfinishedBooks.length,
+        state.result.finishedBooks.length,
+        state.result.inProgressBooks.length,
+        state.result.forLaterBooks.length,
+        state.result.unfinishedBooks.length,
       ],
     );
   }
@@ -220,31 +221,31 @@ class Statistics extends StatelessWidget {
     List<int> finishedBooksByMonthEbooks = emptyList;
     List<int> finishedBooksByMonthAudiobooks = emptyList;
 
-    for (var bookReadStat in state.finishedBooksByMonthPaperbackBooks) {
+    for (var bookReadStat in state.result.finishedBooksByMonthPaperbackBooks) {
       if (bookReadStat.year == year) {
         finishedBooksByMonthPaperbackBooks = bookReadStat.values;
       }
     }
 
-    for (var bookReadStat in state.finishedBooksByMonthHardcoverBooks) {
+    for (var bookReadStat in state.result.finishedBooksByMonthHardcoverBooks) {
       if (bookReadStat.year == year) {
         finishedBooksByMonthHardcoverBooks = bookReadStat.values;
       }
     }
 
-    for (var bookReadStat in state.finishedBooksByMonthEbooks) {
+    for (var bookReadStat in state.result.finishedBooksByMonthEbooks) {
       if (bookReadStat.year == year) {
         finishedBooksByMonthEbooks = bookReadStat.values;
       }
     }
 
-    for (var bookReadStat in state.finishedBooksByMonthAudiobooks) {
+    for (var bookReadStat in state.result.finishedBooksByMonthAudiobooks) {
       if (bookReadStat.year == year) {
         finishedBooksByMonthAudiobooks = bookReadStat.values;
       }
     }
 
-    if (state.finishedBooksByMonthAllTypes.isEmpty) {
+    if (state.result.finishedBooksByMonthAllTypes.isEmpty) {
       return const SizedBox();
     }
 
@@ -270,28 +271,28 @@ class Statistics extends StatelessWidget {
     List<int> finishedPagesByMonthEbooks = emptyList;
     List<int> finishedPagesByMonthAudiobooks = emptyList;
 
-    for (var bookReadStat in state.finishedPagesByMonthPaperbackBooks) {
+    for (var bookReadStat in state.result.finishedPagesByMonthPaperbackBooks) {
       if (bookReadStat.year == year) {
         finishedPagesByMonthPaperbackBooks = bookReadStat.values;
       }
     }
-    for (var bookReadStat in state.finishedPagesByMonthHardcoverBooks) {
+    for (var bookReadStat in state.result.finishedPagesByMonthHardcoverBooks) {
       if (bookReadStat.year == year) {
         finishedPagesByMonthHardcoverBooks = bookReadStat.values;
       }
     }
-    for (var bookReadStat in state.finishedPagesByMonthEbooks) {
+    for (var bookReadStat in state.result.finishedPagesByMonthEbooks) {
       if (bookReadStat.year == year) {
         finishedPagesByMonthEbooks = bookReadStat.values;
       }
     }
-    for (var bookReadStat in state.finishedPagesByMonthAudiobooks) {
+    for (var bookReadStat in state.result.finishedPagesByMonthAudiobooks) {
       if (bookReadStat.year == year) {
         finishedPagesByMonthAudiobooks = bookReadStat.values;
       }
     }
 
-    if (state.finishedPagesByMonthAllTypes.isEmpty) {
+    if (state.result.finishedPagesByMonthAllTypes.isEmpty) {
       return const SizedBox();
     }
 
@@ -313,11 +314,11 @@ class Statistics extends StatelessWidget {
     if (year == null) {
       return ReadStats(
         title: LocaleKeys.finished_books.tr(),
-        value: state.finishedBooksAll.toString(),
+        value: state.result.finishedBooksAll.toString(),
       );
     }
 
-    for (var bookReadStat in state.finishedBooksByMonthAllTypes) {
+    for (var bookReadStat in state.result.finishedBooksByMonthAllTypes) {
       if (bookReadStat.year == year) {
         return ReadStats(
           title: LocaleKeys.finished_books.tr(),
@@ -337,11 +338,11 @@ class Statistics extends StatelessWidget {
     if (year == null) {
       return ReadStats(
         title: LocaleKeys.finished_pages.tr(),
-        value: state.finishedPagesAll.toString(),
+        value: state.result.finishedPagesAll.toString(),
       );
     }
 
-    for (var bookReadStat in state.finishedPagesByMonthAllTypes) {
+    for (var bookReadStat in state.result.finishedPagesByMonthAllTypes) {
       if (bookReadStat.year == year) {
         return ReadStats(
           title: LocaleKeys.finished_pages.tr(),
@@ -358,7 +359,7 @@ class Statistics extends StatelessWidget {
     StatsLoaded state,
     int? year,
   ) {
-    for (var bookYearlyStat in state.averageRating) {
+    for (var bookYearlyStat in state.result.averageRating) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.average_rating.tr(),
@@ -376,7 +377,7 @@ class Statistics extends StatelessWidget {
     StatsLoaded state,
     int? year,
   ) {
-    for (var bookYearlyStat in state.averagePages) {
+    for (var bookYearlyStat in state.result.averagePages) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.average_pages.tr(),
@@ -395,7 +396,7 @@ class Statistics extends StatelessWidget {
     StatsLoaded state,
     int? year,
   ) {
-    for (var bookYearlyStat in state.averageReadingTime) {
+    for (var bookYearlyStat in state.result.averageReadingTime) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.average_reading_time.tr(),
@@ -408,7 +409,7 @@ class Statistics extends StatelessWidget {
   }
 
   Widget _buildLongestBook(BuildContext context, StatsLoaded state, int? year) {
-    for (var bookYearlyStat in state.longestBook) {
+    for (var bookYearlyStat in state.result.longestBook) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.longest_book.tr(),
@@ -428,7 +429,7 @@ class Statistics extends StatelessWidget {
     StatsLoaded state,
     int? year,
   ) {
-    for (var bookYearlyStat in state.shortestBook) {
+    for (var bookYearlyStat in state.result.shortestBook) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.shortest_book.tr(),
@@ -445,7 +446,7 @@ class Statistics extends StatelessWidget {
   }
 
   Widget _buildFastestRead(BuildContext context, StatsLoaded state, int? year) {
-    for (var bookYearlyStat in state.fastestBook) {
+    for (var bookYearlyStat in state.result.fastestBook) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.fastest_book.tr(),
@@ -460,7 +461,7 @@ class Statistics extends StatelessWidget {
   }
 
   Widget _buildSlowestRead(BuildContext context, StatsLoaded state, int? year) {
-    for (var bookYearlyStat in state.slowestBook) {
+    for (var bookYearlyStat in state.result.slowestBook) {
       if (bookYearlyStat.year == year) {
         return ReadStats(
           title: LocaleKeys.slowest_book.tr(),

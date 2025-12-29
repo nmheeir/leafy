@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/book/reading/reading.dart';
-import 'package:leafy/main.dart';
 
 // DEPRECATED
 // TODO: use freezed and json serialization
@@ -235,32 +232,6 @@ class Book {
       'date_added': dateAdded.toIso8601String(),
       'date_modified': dateModified.toIso8601String(),
     };
-  }
-
-  // TODO: tách thành extension
-  File? getCoverFile() {
-    final fileExists = File(
-      '${appDocumentsDirectory.path}/$id.jpg',
-    ).existsSync();
-
-    if (fileExists) {
-      return File('${appDocumentsDirectory.path}/$id.jpg');
-    } else {
-      return null;
-    }
-  }
-
-  // TODO: tách thành extension
-  Uint8List? getCoverBytes() {
-    final fileExists = File(
-      '${appDocumentsDirectory.path}/$id.jpg',
-    ).existsSync();
-
-    if (fileExists) {
-      return File('${appDocumentsDirectory.path}/$id.jpg').readAsBytesSync();
-    } else {
-      return null;
-    }
   }
 
   // TODO: tách thành extension

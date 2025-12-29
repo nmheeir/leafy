@@ -9,7 +9,7 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/bulk_edit_option.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/main.dart';

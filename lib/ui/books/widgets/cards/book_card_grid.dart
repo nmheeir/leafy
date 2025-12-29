@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/data/models/book/book/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 
 class BookCardGrid extends StatelessWidget {
   const BookCardGrid({
@@ -22,7 +23,7 @@ class BookCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverFile = book.getCoverFile();
+    final coverFile = getCoverFile(book.id);
 
     return Card.filled(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

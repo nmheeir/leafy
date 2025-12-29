@@ -86,14 +86,16 @@ extension FailurePatterns on Failure {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerFailure value)?  server,TResult Function( _ConnectionFailure value)?  connection,TResult Function( _CacheFailure value)?  cache,TResult Function( _UnexpectedFailure value)?  unexpected,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerFailure value)?  server,TResult Function( _ConnectionFailure value)?  connection,TResult Function( _CacheFailure value)?  cache,TResult Function( _DatabaseFailure value)?  database,TResult Function( _UnexpectedFailure value)?  unexpected,TResult Function( _NotFoundFailure value)?  notFound,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that);case _ConnectionFailure() when connection != null:
 return connection(_that);case _CacheFailure() when cache != null:
-return cache(_that);case _UnexpectedFailure() when unexpected != null:
-return unexpected(_that);case _:
+return cache(_that);case _DatabaseFailure() when database != null:
+return database(_that);case _UnexpectedFailure() when unexpected != null:
+return unexpected(_that);case _NotFoundFailure() when notFound != null:
+return notFound(_that);case _:
   return orElse();
 
 }
@@ -111,14 +113,16 @@ return unexpected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerFailure value)  server,required TResult Function( _ConnectionFailure value)  connection,required TResult Function( _CacheFailure value)  cache,required TResult Function( _UnexpectedFailure value)  unexpected,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerFailure value)  server,required TResult Function( _ConnectionFailure value)  connection,required TResult Function( _CacheFailure value)  cache,required TResult Function( _DatabaseFailure value)  database,required TResult Function( _UnexpectedFailure value)  unexpected,required TResult Function( _NotFoundFailure value)  notFound,}){
 final _that = this;
 switch (_that) {
 case _ServerFailure():
 return server(_that);case _ConnectionFailure():
 return connection(_that);case _CacheFailure():
-return cache(_that);case _UnexpectedFailure():
-return unexpected(_that);case _:
+return cache(_that);case _DatabaseFailure():
+return database(_that);case _UnexpectedFailure():
+return unexpected(_that);case _NotFoundFailure():
+return notFound(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -135,14 +139,16 @@ return unexpected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerFailure value)?  server,TResult? Function( _ConnectionFailure value)?  connection,TResult? Function( _CacheFailure value)?  cache,TResult? Function( _UnexpectedFailure value)?  unexpected,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerFailure value)?  server,TResult? Function( _ConnectionFailure value)?  connection,TResult? Function( _CacheFailure value)?  cache,TResult? Function( _DatabaseFailure value)?  database,TResult? Function( _UnexpectedFailure value)?  unexpected,TResult? Function( _NotFoundFailure value)?  notFound,}){
 final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that);case _ConnectionFailure() when connection != null:
 return connection(_that);case _CacheFailure() when cache != null:
-return cache(_that);case _UnexpectedFailure() when unexpected != null:
-return unexpected(_that);case _:
+return cache(_that);case _DatabaseFailure() when database != null:
+return database(_that);case _UnexpectedFailure() when unexpected != null:
+return unexpected(_that);case _NotFoundFailure() when notFound != null:
+return notFound(_that);case _:
   return null;
 
 }
@@ -159,13 +165,15 @@ return unexpected(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? message)?  server,TResult Function( String? message)?  connection,TResult Function( String? message)?  cache,TResult Function( String? message)?  unexpected,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? message)?  server,TResult Function( String? message)?  connection,TResult Function( String? message)?  cache,TResult Function( String? message)?  database,TResult Function( String? message)?  unexpected,TResult Function( String? message)?  notFound,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that.message);case _ConnectionFailure() when connection != null:
 return connection(_that.message);case _CacheFailure() when cache != null:
-return cache(_that.message);case _UnexpectedFailure() when unexpected != null:
-return unexpected(_that.message);case _:
+return cache(_that.message);case _DatabaseFailure() when database != null:
+return database(_that.message);case _UnexpectedFailure() when unexpected != null:
+return unexpected(_that.message);case _NotFoundFailure() when notFound != null:
+return notFound(_that.message);case _:
   return orElse();
 
 }
@@ -183,13 +191,15 @@ return unexpected(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? message)  server,required TResult Function( String? message)  connection,required TResult Function( String? message)  cache,required TResult Function( String? message)  unexpected,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? message)  server,required TResult Function( String? message)  connection,required TResult Function( String? message)  cache,required TResult Function( String? message)  database,required TResult Function( String? message)  unexpected,required TResult Function( String? message)  notFound,}) {final _that = this;
 switch (_that) {
 case _ServerFailure():
 return server(_that.message);case _ConnectionFailure():
 return connection(_that.message);case _CacheFailure():
-return cache(_that.message);case _UnexpectedFailure():
-return unexpected(_that.message);case _:
+return cache(_that.message);case _DatabaseFailure():
+return database(_that.message);case _UnexpectedFailure():
+return unexpected(_that.message);case _NotFoundFailure():
+return notFound(_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,13 +216,15 @@ return unexpected(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? message)?  server,TResult? Function( String? message)?  connection,TResult? Function( String? message)?  cache,TResult? Function( String? message)?  unexpected,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? message)?  server,TResult? Function( String? message)?  connection,TResult? Function( String? message)?  cache,TResult? Function( String? message)?  database,TResult? Function( String? message)?  unexpected,TResult? Function( String? message)?  notFound,}) {final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that.message);case _ConnectionFailure() when connection != null:
 return connection(_that.message);case _CacheFailure() when cache != null:
-return cache(_that.message);case _UnexpectedFailure() when unexpected != null:
-return unexpected(_that.message);case _:
+return cache(_that.message);case _DatabaseFailure() when database != null:
+return database(_that.message);case _UnexpectedFailure() when unexpected != null:
+return unexpected(_that.message);case _NotFoundFailure() when notFound != null:
+return notFound(_that.message);case _:
   return null;
 
 }
@@ -421,6 +433,72 @@ as String?,
 /// @nodoc
 
 
+class _DatabaseFailure implements Failure {
+  const _DatabaseFailure([this.message]);
+  
+
+@override final  String? message;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DatabaseFailureCopyWith<_DatabaseFailure> get copyWith => __$DatabaseFailureCopyWithImpl<_DatabaseFailure>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DatabaseFailure&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'Failure.database(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DatabaseFailureCopyWith<$Res> implements $FailureCopyWith<$Res> {
+  factory _$DatabaseFailureCopyWith(_DatabaseFailure value, $Res Function(_DatabaseFailure) _then) = __$DatabaseFailureCopyWithImpl;
+@override @useResult
+$Res call({
+ String? message
+});
+
+
+
+
+}
+/// @nodoc
+class __$DatabaseFailureCopyWithImpl<$Res>
+    implements _$DatabaseFailureCopyWith<$Res> {
+  __$DatabaseFailureCopyWithImpl(this._self, this._then);
+
+  final _DatabaseFailure _self;
+  final $Res Function(_DatabaseFailure) _then;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
+  return _then(_DatabaseFailure(
+freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class _UnexpectedFailure implements Failure {
   const _UnexpectedFailure([this.message]);
   
@@ -476,6 +554,72 @@ class __$UnexpectedFailureCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
   return _then(_UnexpectedFailure(
+freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _NotFoundFailure implements Failure {
+  const _NotFoundFailure([this.message]);
+  
+
+@override final  String? message;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$NotFoundFailureCopyWith<_NotFoundFailure> get copyWith => __$NotFoundFailureCopyWithImpl<_NotFoundFailure>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _NotFoundFailure&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'Failure.notFound(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$NotFoundFailureCopyWith<$Res> implements $FailureCopyWith<$Res> {
+  factory _$NotFoundFailureCopyWith(_NotFoundFailure value, $Res Function(_NotFoundFailure) _then) = __$NotFoundFailureCopyWithImpl;
+@override @useResult
+$Res call({
+ String? message
+});
+
+
+
+
+}
+/// @nodoc
+class __$NotFoundFailureCopyWithImpl<$Res>
+    implements _$NotFoundFailureCopyWith<$Res> {
+  __$NotFoundFailureCopyWithImpl(this._self, this._then);
+
+  final _NotFoundFailure _self;
+  final $Res Function(_NotFoundFailure) _then;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
+  return _then(_NotFoundFailure(
 freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
