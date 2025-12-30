@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'search_bloc.dart';
+part of 'open_lib_search_bloc.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,7 +12,7 @@ part of 'search_bloc.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$SearchEvent {
+mixin _$OpenLibSearchEvent {
 
 
 
@@ -20,7 +20,7 @@ mixin _$SearchEvent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchEvent);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OpenLibSearchEvent);
 }
 
 
@@ -29,20 +29,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'SearchEvent()';
+  return 'OpenLibSearchEvent()';
 }
 
 
 }
 
 /// @nodoc
-class $SearchEventCopyWith<$Res>  {
-$SearchEventCopyWith(SearchEvent _, $Res Function(SearchEvent) __);
+class $OpenLibSearchEventCopyWith<$Res>  {
+$OpenLibSearchEventCopyWith(OpenLibSearchEvent _, $Res Function(OpenLibSearchEvent) __);
 }
 
 
-/// Adds pattern-matching-related methods to [SearchEvent].
-extension SearchEventPatterns on SearchEvent {
+/// Adds pattern-matching-related methods to [OpenLibSearchEvent].
+extension OpenLibSearchEventPatterns on OpenLibSearchEvent {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -186,13 +186,13 @@ return loadMore();case _:
 /// @nodoc
 
 
-class _QueryChanged implements SearchEvent {
+class _QueryChanged implements OpenLibSearchEvent {
   const _QueryChanged(this.query);
   
 
  final  String query;
 
-/// Create a copy of SearchEvent
+/// Create a copy of OpenLibSearchEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -211,14 +211,14 @@ int get hashCode => Object.hash(runtimeType,query);
 
 @override
 String toString() {
-  return 'SearchEvent.queryChanged(query: $query)';
+  return 'OpenLibSearchEvent.queryChanged(query: $query)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$QueryChangedCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
+abstract mixin class _$QueryChangedCopyWith<$Res> implements $OpenLibSearchEventCopyWith<$Res> {
   factory _$QueryChangedCopyWith(_QueryChanged value, $Res Function(_QueryChanged) _then) = __$QueryChangedCopyWithImpl;
 @useResult
 $Res call({
@@ -237,7 +237,7 @@ class __$QueryChangedCopyWithImpl<$Res>
   final _QueryChanged _self;
   final $Res Function(_QueryChanged) _then;
 
-/// Create a copy of SearchEvent
+/// Create a copy of OpenLibSearchEvent
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? query = null,}) {
   return _then(_QueryChanged(
@@ -252,13 +252,13 @@ as String,
 /// @nodoc
 
 
-class _TypeChanged implements SearchEvent {
+class _TypeChanged implements OpenLibSearchEvent {
   const _TypeChanged(this.type);
   
 
  final  OLSearchType type;
 
-/// Create a copy of SearchEvent
+/// Create a copy of OpenLibSearchEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -277,14 +277,14 @@ int get hashCode => Object.hash(runtimeType,type);
 
 @override
 String toString() {
-  return 'SearchEvent.typeChanged(type: $type)';
+  return 'OpenLibSearchEvent.typeChanged(type: $type)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$TypeChangedCopyWith<$Res> implements $SearchEventCopyWith<$Res> {
+abstract mixin class _$TypeChangedCopyWith<$Res> implements $OpenLibSearchEventCopyWith<$Res> {
   factory _$TypeChangedCopyWith(_TypeChanged value, $Res Function(_TypeChanged) _then) = __$TypeChangedCopyWithImpl;
 @useResult
 $Res call({
@@ -303,7 +303,7 @@ class __$TypeChangedCopyWithImpl<$Res>
   final _TypeChanged _self;
   final $Res Function(_TypeChanged) _then;
 
-/// Create a copy of SearchEvent
+/// Create a copy of OpenLibSearchEvent
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? type = null,}) {
   return _then(_TypeChanged(
@@ -318,7 +318,7 @@ as OLSearchType,
 /// @nodoc
 
 
-class _LoadMore implements SearchEvent {
+class _LoadMore implements OpenLibSearchEvent {
   const _LoadMore();
   
 
@@ -338,7 +338,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'SearchEvent.loadMore()';
+  return 'OpenLibSearchEvent.loadMore()';
 }
 
 
@@ -348,20 +348,20 @@ String toString() {
 
 
 /// @nodoc
-mixin _$SearchState {
+mixin _$OpenLibSearchState {
 
  SearchStatus get status; OLSearchType get searchType; List<OLSearchResultDoc> get books; int get numberOfResults; bool get hasReachedMax; int get page; String get errorMessage; String get currentQuery; Map<OLSearchType, SearchTabData> get cache;
-/// Create a copy of SearchState
+/// Create a copy of OpenLibSearchState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$SearchStateCopyWith<SearchState> get copyWith => _$SearchStateCopyWithImpl<SearchState>(this as SearchState, _$identity);
+$OpenLibSearchStateCopyWith<OpenLibSearchState> get copyWith => _$OpenLibSearchStateCopyWithImpl<OpenLibSearchState>(this as OpenLibSearchState, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other.books, books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other.cache, cache));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OpenLibSearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other.books, books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other.cache, cache));
 }
 
 
@@ -370,15 +370,15 @@ int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollecti
 
 @override
 String toString() {
-  return 'SearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
+  return 'OpenLibSearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $SearchStateCopyWith<$Res>  {
-  factory $SearchStateCopyWith(SearchState value, $Res Function(SearchState) _then) = _$SearchStateCopyWithImpl;
+abstract mixin class $OpenLibSearchStateCopyWith<$Res>  {
+  factory $OpenLibSearchStateCopyWith(OpenLibSearchState value, $Res Function(OpenLibSearchState) _then) = _$OpenLibSearchStateCopyWithImpl;
 @useResult
 $Res call({
  SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, int numberOfResults, bool hasReachedMax, int page, String errorMessage, String currentQuery, Map<OLSearchType, SearchTabData> cache
@@ -389,14 +389,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$SearchStateCopyWithImpl<$Res>
-    implements $SearchStateCopyWith<$Res> {
-  _$SearchStateCopyWithImpl(this._self, this._then);
+class _$OpenLibSearchStateCopyWithImpl<$Res>
+    implements $OpenLibSearchStateCopyWith<$Res> {
+  _$OpenLibSearchStateCopyWithImpl(this._self, this._then);
 
-  final SearchState _self;
-  final $Res Function(SearchState) _then;
+  final OpenLibSearchState _self;
+  final $Res Function(OpenLibSearchState) _then;
 
-/// Create a copy of SearchState
+/// Create a copy of OpenLibSearchState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
   return _then(_self.copyWith(
@@ -416,8 +416,8 @@ as Map<OLSearchType, SearchTabData>,
 }
 
 
-/// Adds pattern-matching-related methods to [SearchState].
-extension SearchStatePatterns on SearchState {
+/// Adds pattern-matching-related methods to [OpenLibSearchState].
+extension OpenLibSearchStatePatterns on OpenLibSearchState {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -549,7 +549,7 @@ return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,
 /// @nodoc
 
 
-class _SearchState implements SearchState {
+class _SearchState implements OpenLibSearchState {
   const _SearchState({this.status = SearchStatus.initial, this.searchType = OLSearchType.general, final  List<OLSearchResultDoc> books = const [], this.numberOfResults = 0, this.hasReachedMax = false, this.page = 0, this.errorMessage = '', this.currentQuery = '', final  Map<OLSearchType, SearchTabData> cache = const {}}): _books = books,_cache = cache;
   
 
@@ -575,7 +575,7 @@ class _SearchState implements SearchState {
 }
 
 
-/// Create a copy of SearchState
+/// Create a copy of OpenLibSearchState
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -594,14 +594,14 @@ int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollecti
 
 @override
 String toString() {
-  return 'SearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
+  return 'OpenLibSearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$SearchStateCopyWith<$Res> implements $SearchStateCopyWith<$Res> {
+abstract mixin class _$SearchStateCopyWith<$Res> implements $OpenLibSearchStateCopyWith<$Res> {
   factory _$SearchStateCopyWith(_SearchState value, $Res Function(_SearchState) _then) = __$SearchStateCopyWithImpl;
 @override @useResult
 $Res call({
@@ -620,7 +620,7 @@ class __$SearchStateCopyWithImpl<$Res>
   final _SearchState _self;
   final $Res Function(_SearchState) _then;
 
-/// Create a copy of SearchState
+/// Create a copy of OpenLibSearchState
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
   return _then(_SearchState(

@@ -9,6 +9,7 @@ import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/data/models/ol_work_result.dart';
 import 'package:logger/logger.dart';
 
+// DEPRECATED: thay đổi những chỗ sử dụng service này thành use case
 @lazySingleton
 class OpenLibraryService {
   static const baseUrl = 'https://openlibrary.org';

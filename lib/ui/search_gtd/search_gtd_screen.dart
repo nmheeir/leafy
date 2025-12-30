@@ -83,7 +83,6 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => EpubViewScreen(
-                        // BUG: Null check operator used on a null value
                         epubUrl: item.formats!.applicationEpubZip!,
                       ),
                     ),

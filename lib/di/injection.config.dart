@@ -20,8 +20,6 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
 
 import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
-import '../data/database/database_controller.dart' as _i188;
-import '../data/database/database_provider.dart' as _i1014;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
 import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
 import '../data/datasources/local/database_service.dart' as _i328;
@@ -36,7 +34,6 @@ import '../data/repositories/epub_cache_repository_impl.dart' as _i827;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../domain/book/repositories/book_repository.dart' as _i29;
-import '../domain/book/repositories/repository.dart' as _i1055;
 import '../domain/book/usecases/add_book.dart' as _i660;
 import '../domain/book/usecases/bulk_delete.dart' as _i909;
 import '../domain/book/usecases/bulk_update.dart' as _i429;
@@ -60,7 +57,6 @@ import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
 import '../logic/bloc/rating_type/rating_type_bloc.dart' as _i280;
-import '../logic/bloc/search/search_bloc.dart' as _i361;
 import '../logic/bloc/sort_bloc/sort_bloc.dart' as _i713;
 import '../logic/bloc/stats_bloc/stats_bloc.dart' as _i780;
 import '../logic/bloc/theme/theme_bloc.dart' as _i774;
@@ -93,7 +89,6 @@ extension GetItInjectableX on _i174.GetIt {
     final networkModule = _$NetworkModule();
     gh.factory<_i800.StatsCalculator>(() => _i800.StatsCalculator());
     gh.factory<_i854.ChallengeBloc>(() => _i854.ChallengeBloc());
-    gh.factory<_i52.OpenLibSearchBloc>(() => _i52.OpenLibSearchBloc());
     gh.factory<_i280.RatingTypeBloc>(() => _i280.RatingTypeBloc());
     gh.factory<_i713.SortFinishedBooksBloc>(
       () => _i713.SortFinishedBooksBloc(),
@@ -119,7 +114,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i67.EditBookCoverCubit>(() => _i67.EditBookCoverCubit());
     gh.factory<_i232.EditBookCubit>(() => _i232.EditBookCubit());
     gh.factory<_i772.SelectedBooksCubit>(() => _i772.SelectedBooksCubit());
-    gh.singleton<_i1014.DatabaseProvider>(() => _i1014.DatabaseProvider());
     await gh.singletonAsync<_i497.Directory>(
       () => storageModule.documentsDir,
       preResolve: true,
@@ -164,9 +158,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i625.OpenLibraryService>(
       () => _i625.OpenLibraryService(gh<_i361.Dio>(), gh<_i974.Logger>()),
     );
-    gh.lazySingleton<_i188.DatabaseController>(
-      () => _i188.DatabaseController(gh<_i1014.DatabaseProvider>()),
-    );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
@@ -187,9 +178,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i758.BookLocalDataSource>(),
         gh<_i974.Logger>(),
       ),
-    );
-    gh.lazySingleton<_i1055.Repository>(
-      () => _i1055.Repository(gh<_i188.DatabaseController>()),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),
@@ -239,9 +227,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i365.LocalSearchBloc>(
       () => _i365.LocalSearchBloc(gh<_i755.SearchBooksUseCase>()),
     );
-    gh.factory<_i361.SearchBloc>(
-      () =>
-          _i361.SearchBloc(gh<_i14.OpenLibSearchUseCase>(), gh<_i974.Logger>()),
+    gh.factory<_i52.OpenLibSearchBloc>(
+      () => _i52.OpenLibSearchBloc(
+        gh<_i14.OpenLibSearchUseCase>(),
+        gh<_i974.Logger>(),
+      ),
     );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(

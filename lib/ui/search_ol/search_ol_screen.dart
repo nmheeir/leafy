@@ -9,7 +9,7 @@ import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 // Domain/Data imports
-import 'package:leafy/logic/bloc/search/search_bloc.dart';
+import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 // UI Widgets
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
@@ -36,7 +36,7 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
     _scrollController.addListener(_onScroll);
 
     // 2. Khôi phục text tìm kiếm nếu Bloc vẫn giữ state cũ (khi back lại màn hình)
-    final currentState = context.read<SearchBloc>().state;
+    final currentState = context.read<OpenLibSearchBloc>().state;
     if (currentState.currentQuery.isNotEmpty) {
       _searchController.text = currentState.currentQuery;
     }
@@ -54,7 +54,7 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
   void _onScroll() {
     if (_isBottom) {
       // Bắn event LoadMore khi cuộn xuống đáy
-      context.read<SearchBloc>().add(const SearchEvent.loadMore());
+      context.read<OpenLibSearchBloc>().add(const OpenLibSearchEvent.loadMore());
     }
   }
 
@@ -68,8 +68,8 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
 
   void _startNewSearch() {
     FocusScope.of(context).unfocus();
-    context.read<SearchBloc>().add(
-      SearchEvent.queryChanged(_searchController.text),
+    context.read<OpenLibSearchBloc>().add(
+      OpenLibSearchEvent.queryChanged(_searchController.text),
     );
   }
 
@@ -147,7 +147,7 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
   Align _buildSearchTypesRadio(bool canSearch) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: BlocBuilder<SearchBloc, SearchState>(
+      child: BlocBuilder<OpenLibSearchBloc, OpenLibSearchState>(
         buildWhen: (prev, curr) => prev.searchType != curr.searchType,
         builder: (context, state) {
           return Wrap(
@@ -162,8 +162,8 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
                   activeSearchType: state.searchType,
                   onChanged: (val) {
                     if (val != null) {
-                      context.read<SearchBloc>().add(
-                        SearchEvent.typeChanged(val),
+                      context.read<OpenLibSearchBloc>().add(
+                        OpenLibSearchEvent.typeChanged(val),
                       );
                     }
                   },
@@ -177,7 +177,7 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
   }
 
   Widget _buildSearchResults() {
-    return BlocBuilder<SearchBloc, SearchState>(
+    return BlocBuilder<OpenLibSearchBloc, OpenLibSearchState>(
       builder: (context, state) {
         // TRẠNG THÁI 1: Màn hình chờ ban đầu
         if (state.status == SearchStatus.initial) {
@@ -205,8 +205,8 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
                 ElevatedButton(
                   onPressed: () {
                     // Retry: Gửi lại query hiện tại
-                    context.read<SearchBloc>().add(
-                      SearchEvent.queryChanged(_searchController.text),
+                    context.read<OpenLibSearchBloc>().add(
+                      OpenLibSearchEvent.queryChanged(_searchController.text),
                     );
                   },
                   child: Text(LocaleKeys.retry.tr()),
@@ -266,7 +266,7 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _startNewSearch(),
               onClear: () {
-                context.read<SearchBloc>().add(SearchEvent.queryChanged(''));
+                context.read<OpenLibSearchBloc>().add(OpenLibSearchEvent.queryChanged(''));
               },
               enable: canSearch,
             ),

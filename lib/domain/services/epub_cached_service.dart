@@ -7,6 +7,7 @@ import 'package:injectable/injectable.dart';
 import 'package:logger/logger.dart';
 import 'package:leafy/data/models/epub_cache/epub_cache_model.dart';
 
+// DEPRECATED: 
 @lazySingleton
 class EpubCachedService {
   final Dio _dio;

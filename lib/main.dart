@@ -14,9 +14,8 @@ import 'package:leafy/di/injection.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
-import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
-import 'package:leafy/logic/bloc/search/search_bloc.dart';
+import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
@@ -99,10 +98,9 @@ class App extends StatelessWidget {
       BlocProvider(create: (_) => getIt<SortUnfinishedBooksBloc>()),
       BlocProvider(create: (_) => getIt<RatingTypeBloc>()),
       BlocProvider(create: (_) => getIt<ThemeBloc>()),
-      BlocProvider(create: (_) => getIt<OpenLibSearchBloc>()),
       BlocProvider(create: (_) => getIt<ChallengeBloc>()),
       BlocProvider(create: (_) => getIt<StatsBloc>()),
-      BlocProvider(create: (_) => getIt<SearchBloc>()),
+      BlocProvider(create: (_) => getIt<OpenLibSearchBloc>()),
       BlocProvider(create: (_) => getIt<LocalSearchBloc>()),
     ];
 

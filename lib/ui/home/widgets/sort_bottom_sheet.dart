@@ -15,7 +15,6 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
-import 'package:leafy/main.dart';
 import 'package:leafy/ui/home/widgets/tag_filter_chip.dart';
 import 'package:leafy/ui/home/widgets/year_filter_chip.dart';
 

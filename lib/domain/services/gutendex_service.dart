@@ -8,6 +8,7 @@ import 'package:leafy/data/models/gutendex/gtd_book_result/gtd_book_result_model
 import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result_model.dart';
 import 'package:logger/logger.dart'; // Import for Logger
 
+// DEPRECATED: thay đổi những chỗ sử dụng service này thành use case thích hợp
 @lazySingleton
 class GutendexService {
   static const gutendexUrl = 'https://gutendex.com/books';

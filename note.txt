@@ -36,5 +36,6 @@
 
         - Right(Some(Book)): Truy vấn thành công, có dữ liệu.
 
+* Validate cần được xử lý trong use case
 
     
