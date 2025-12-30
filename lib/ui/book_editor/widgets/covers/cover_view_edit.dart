@@ -18,6 +18,7 @@ import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_placeholder.dart';
 import 'package:leafy/ui/book_editor/widgets/duck_duck_go_alert.dart';
@@ -293,7 +294,8 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                       builder: (context, state) {
                         return _buildBlurHash(
                           context,
-                          context.read<EditBookCubit>().state.blurHash,
+                          // BUG: chỗ này là nguyên nhân gây ra bug, do lấy blurhash từ editbook, mà blurhash chưa được gán giá trị
+                          context.editBook.state.blurHash,
                           boxConstraints,
                         );
                       },

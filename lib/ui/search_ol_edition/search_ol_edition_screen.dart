@@ -13,6 +13,7 @@ import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/search_ol_edition/widgets/ol_editions_grid.dart';
 
+// NOTE: Khi thoát ra ngoài không cancel request tới API
 class SearchOLEditionsScreen extends StatefulWidget {
   const SearchOLEditionsScreen({
     super.key,

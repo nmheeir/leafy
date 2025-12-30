@@ -44,7 +44,7 @@ class _CoverViewState extends State<CoverView> {
         SizedBox(
           width: mediaQuery.size.width,
           height: (mediaQuery.size.height / 2.5) + mediaQuery.padding.top + 20,
-          child: const Stack(children: [CoverBackground()]),
+          child: Stack(children: [CoverBackground()]),
         ),
         Column(
           children: [

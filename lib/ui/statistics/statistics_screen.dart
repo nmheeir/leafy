@@ -43,6 +43,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
             loaded: (allBooks) {
               return BlocProvider(
                 create: (context) {
+                  // BUG: Nếu ngừoi dùng mở statistic screen lần thứ 2 sẽ bị lỗi 'Cannot add new event after call close'
                   return context.statsBloc..add(StatsLoad(allBooks));
                 },
                 child: SelectableRegion(

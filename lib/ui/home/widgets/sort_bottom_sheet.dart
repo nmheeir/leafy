@@ -423,69 +423,6 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       },
     );
   }
-  // DEPRECATED:
-  // StreamBuilder<List<int>> _buildFilterByFinishYears(
-  //   BookStatus bookStatus,
-  //   String? years,
-  // ) {
-  //   return StreamBuilder<List<int>>(
-  //     stream: bookCubit.finishedYears,
-  //     builder: (context, AsyncSnapshot<List<int>> snapshot) {
-  //       if (snapshot.hasData) {
-  //         if (snapshot.data!.isEmpty && years == null) {
-  //           return const SizedBox();
-  //         }
-
-  //         return Column(
-  //           crossAxisAlignment: CrossAxisAlignment.start,
-  //           children: [
-  //             const SizedBox(height: 5),
-  //             Text(
-  //               LocaleKeys.filter_by_finish_year.tr(),
-  //               style: const TextStyle(fontSize: 16),
-  //             ),
-  //             const SizedBox(height: 5),
-  //             Row(
-  //               children: [
-  //                 Expanded(
-  //                   child: Container(
-  //                     decoration: BoxDecoration(
-  //                       color: context.colorScheme.surfaceContainerHighest,
-  //                       borderRadius: BorderRadius.circular(cornerRadius),
-  //                       // border: Border.all(color: dividerColor),
-  //                     ),
-  //                     child: SingleChildScrollView(
-  //                       scrollDirection: Axis.horizontal,
-  //                       child: Padding(
-  //                         padding: const EdgeInsets.symmetric(
-  //                           vertical: 5,
-  //                           horizontal: 2.5,
-  //                         ),
-  //                         child: Row(
-  //                           children: _buildYearChips(
-  //                             bookStatus,
-  //                             snapshot.data!,
-  //                             years,
-  //                           ),
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ],
-  //         );
-  //       } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-  //         return const SizedBox();
-  //       } else if (snapshot.hasError) {
-  //         return Text(snapshot.error.toString());
-  //       } else {
-  //         return const Center(child: CircularProgressIndicator());
-  //       }
-  //     },
-  //   );
-  // }
 
   Widget _buildFilterByFinishYears(BookStatus bookStatus, String? years) {
     return BlocSelector<LibraryCubit, LibraryState, List<int>>(
@@ -660,52 +597,6 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       ),
     );
   }
-  // DEPRECATED:
-  // Widget _buildOnlyBooksWithAllTags(
-  //   BookStatus bookStatus,
-  //   bool filterTagsAsAnd,
-  // ) {
-  //   return StreamBuilder<List<String>>(
-  //     stream: bookCubit.tags,
-  //     builder: (context, AsyncSnapshot<List<String>> snapshot) {
-  //       if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-  //         return Padding(
-  //           padding: const EdgeInsets.only(top: 10),
-  //           child: Container(
-  //             decoration: BoxDecoration(
-  //               color: context.colorScheme.surfaceContainerHighest,
-  //               borderRadius: BorderRadius.circular(cornerRadius),
-  //               // border: Border.all(color: dividerColor),
-  //             ),
-  //             child: Row(
-  //               children: [
-  //                 Switch.adaptive(
-  //                   value: filterTagsAsAnd,
-  //                   onChanged: (value) => _getBlocProvider(
-  //                     bookStatus,
-  //                   ).add(ChangeFilterTagsAsAnd(value)),
-  //                 ),
-  //                 const SizedBox(width: 10),
-  //                 Expanded(
-  //                   child: Text(
-  //                     LocaleKeys.only_books_with_all_tags.tr(),
-  //                     style: const TextStyle(fontSize: 16),
-  //                   ),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-  //         return const SizedBox();
-  //       } else if (snapshot.hasError) {
-  //         return Text(snapshot.error.toString());
-  //       } else {
-  //         return const Center(child: CircularProgressIndicator());
-  //       }
-  //     },
-  //   );
-  // }
 
   Widget _buildOnlyBooksWithAllTags(
     BookStatus bookStatus,
