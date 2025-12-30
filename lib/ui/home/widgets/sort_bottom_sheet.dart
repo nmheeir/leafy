@@ -14,6 +14,7 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
+import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/home/widgets/tag_filter_chip.dart';
 import 'package:leafy/ui/home/widgets/year_filter_chip.dart';
@@ -370,127 +371,171 @@ class SortBottomSheetState extends State<SortBottomSheet> {
     );
   }
 
-  StreamBuilder<List<String>> _buildFilterByTags(
+  Widget _buildFilterByTags(
     BookStatus bookStatus,
-    String? tags,
+    String? currentSelectedTags,
   ) {
-    return StreamBuilder<List<String>>(
-      stream: bookCubit.tags,
-      builder: (context, AsyncSnapshot<List<String>> snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data!.isEmpty && tags == null) {
-            return const SizedBox();
-          }
+    return BlocSelector<LibraryCubit, LibraryState, List<String>>(
+      selector: (state) => state.allTags,
+      builder: (context, allTagsInLibrary) {
+        if (allTagsInLibrary.isEmpty && currentSelectedTags == null) {
+          return const SizedBox.shrink();
+        }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 5),
-              Text(
-                LocaleKeys.filter_by_tags.tr(),
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(cornerRadius),
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 5,
-                            horizontal: 2.5,
-                          ),
-                          child: Row(
-                            children: _buildTagChips(
-                              bookStatus,
-                              snapshot.data!,
-                              tags,
-                            ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 5),
+            Text(
+              LocaleKeys.filter_by_tags.tr(),
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(cornerRadius),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 5,
+                          horizontal: 2.5,
+                        ),
+                        child: Row(
+                          children: _buildTagChips(
+                            bookStatus,
+                            allTagsInLibrary,
+                            currentSelectedTags,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-          );
-        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return const SizedBox();
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
+                ),
+              ],
+            ),
+          ],
+        );
       },
     );
   }
+  // DEPRECATED:
+  // StreamBuilder<List<int>> _buildFilterByFinishYears(
+  //   BookStatus bookStatus,
+  //   String? years,
+  // ) {
+  //   return StreamBuilder<List<int>>(
+  //     stream: bookCubit.finishedYears,
+  //     builder: (context, AsyncSnapshot<List<int>> snapshot) {
+  //       if (snapshot.hasData) {
+  //         if (snapshot.data!.isEmpty && years == null) {
+  //           return const SizedBox();
+  //         }
 
-  StreamBuilder<List<int>> _buildFilterByFinishYears(
-    BookStatus bookStatus,
-    String? years,
-  ) {
-    return StreamBuilder<List<int>>(
-      stream: bookCubit.finishedYears,
-      builder: (context, AsyncSnapshot<List<int>> snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data!.isEmpty && years == null) {
-            return const SizedBox();
-          }
+  //         return Column(
+  //           crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             const SizedBox(height: 5),
+  //             Text(
+  //               LocaleKeys.filter_by_finish_year.tr(),
+  //               style: const TextStyle(fontSize: 16),
+  //             ),
+  //             const SizedBox(height: 5),
+  //             Row(
+  //               children: [
+  //                 Expanded(
+  //                   child: Container(
+  //                     decoration: BoxDecoration(
+  //                       color: context.colorScheme.surfaceContainerHighest,
+  //                       borderRadius: BorderRadius.circular(cornerRadius),
+  //                       // border: Border.all(color: dividerColor),
+  //                     ),
+  //                     child: SingleChildScrollView(
+  //                       scrollDirection: Axis.horizontal,
+  //                       child: Padding(
+  //                         padding: const EdgeInsets.symmetric(
+  //                           vertical: 5,
+  //                           horizontal: 2.5,
+  //                         ),
+  //                         child: Row(
+  //                           children: _buildYearChips(
+  //                             bookStatus,
+  //                             snapshot.data!,
+  //                             years,
+  //                           ),
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ],
+  //         );
+  //       } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+  //         return const SizedBox();
+  //       } else if (snapshot.hasError) {
+  //         return Text(snapshot.error.toString());
+  //       } else {
+  //         return const Center(child: CircularProgressIndicator());
+  //       }
+  //     },
+  //   );
+  // }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 5),
-              Text(
-                LocaleKeys.filter_by_finish_year.tr(),
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: context.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(cornerRadius),
-                        // border: Border.all(color: dividerColor),
-                      ),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 5,
-                            horizontal: 2.5,
-                          ),
-                          child: Row(
-                            children: _buildYearChips(
-                              bookStatus,
-                              snapshot.data!,
-                              years,
-                            ),
+  Widget _buildFilterByFinishYears(BookStatus bookStatus, String? years) {
+    return BlocSelector<LibraryCubit, LibraryState, List<int>>(
+      selector: (state) => state.finishedYears,
+      builder: (context, finishedYears) {
+        if (finishedYears.isEmpty && years == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 5),
+            Text(
+              LocaleKeys.filter_by_finish_year.tr(),
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: context.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(cornerRadius),
+                      // border: Border.all(color: dividerColor),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 5,
+                          horizontal: 2.5,
+                        ),
+                        child: Row(
+                          children: _buildYearChips(
+                            bookStatus,
+                            finishedYears,
+                            years,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
-              ),
-            ],
-          );
-        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return const SizedBox();
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
+                ),
+              ],
+            ),
+          ],
+        );
       },
     );
   }
@@ -616,92 +661,129 @@ class SortBottomSheetState extends State<SortBottomSheet> {
       ),
     );
   }
+  // DEPRECATED:
+  // Widget _buildOnlyBooksWithAllTags(
+  //   BookStatus bookStatus,
+  //   bool filterTagsAsAnd,
+  // ) {
+  //   return StreamBuilder<List<String>>(
+  //     stream: bookCubit.tags,
+  //     builder: (context, AsyncSnapshot<List<String>> snapshot) {
+  //       if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+  //         return Padding(
+  //           padding: const EdgeInsets.only(top: 10),
+  //           child: Container(
+  //             decoration: BoxDecoration(
+  //               color: context.colorScheme.surfaceContainerHighest,
+  //               borderRadius: BorderRadius.circular(cornerRadius),
+  //               // border: Border.all(color: dividerColor),
+  //             ),
+  //             child: Row(
+  //               children: [
+  //                 Switch.adaptive(
+  //                   value: filterTagsAsAnd,
+  //                   onChanged: (value) => _getBlocProvider(
+  //                     bookStatus,
+  //                   ).add(ChangeFilterTagsAsAnd(value)),
+  //                 ),
+  //                 const SizedBox(width: 10),
+  //                 Expanded(
+  //                   child: Text(
+  //                     LocaleKeys.only_books_with_all_tags.tr(),
+  //                     style: const TextStyle(fontSize: 16),
+  //                   ),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       } else if (snapshot.hasData && snapshot.data!.isEmpty) {
+  //         return const SizedBox();
+  //       } else if (snapshot.hasError) {
+  //         return Text(snapshot.error.toString());
+  //       } else {
+  //         return const Center(child: CircularProgressIndicator());
+  //       }
+  //     },
+  //   );
+  // }
 
   Widget _buildOnlyBooksWithAllTags(
     BookStatus bookStatus,
     bool filterTagsAsAnd,
   ) {
-    return StreamBuilder<List<String>>(
-      stream: bookCubit.tags,
-      builder: (context, AsyncSnapshot<List<String>> snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(cornerRadius),
-                // border: Border.all(color: dividerColor),
-              ),
-              child: Row(
-                children: [
-                  Switch.adaptive(
-                    value: filterTagsAsAnd,
-                    onChanged: (value) => _getBlocProvider(
-                      bookStatus,
-                    ).add(ChangeFilterTagsAsAnd(value)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      LocaleKeys.only_books_with_all_tags.tr(),
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return const SizedBox();
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return const Center(child: CircularProgressIndicator());
+    return BlocSelector<LibraryCubit, LibraryState, List<String>>(
+      selector: (state) => state.allTags,
+      builder: (context, state) {
+        if (state.isEmpty) {
+          return const SizedBox.shrink();
         }
+
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(cornerRadius),
+              // border: Border.all(color: dividerColor),
+            ),
+            child: Row(
+              children: [
+                Switch.adaptive(
+                  value: filterTagsAsAnd,
+                  onChanged: (value) => _getBlocProvider(
+                    bookStatus,
+                  ).add(ChangeFilterTagsAsAnd(value)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    LocaleKeys.only_books_with_all_tags.tr(),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }
 
   Widget _buildBooksExceptTags(BookStatus bookStatus, bool filterOutTags) {
-    return StreamBuilder<List<String>>(
-      stream: bookCubit.tags,
-      builder: (context, AsyncSnapshot<List<String>> snapshot) {
-        if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-          return Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Container(
-              decoration: BoxDecoration(
-                color: context.colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(cornerRadius),
-                // border: Border.all(color: dividerColor),
-              ),
-              child: Row(
-                children: [
-                  Switch.adaptive(
-                    value: filterOutTags,
-                    onChanged: (value) => _getBlocProvider(
-                      bookStatus,
-                    ).add(ChangeFilterOutTags(value)),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      LocaleKeys.filter_out_selected_tags.tr(),
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        } else if (snapshot.hasData && snapshot.data!.isEmpty) {
-          return const SizedBox();
-        } else if (snapshot.hasError) {
-          return Text(snapshot.error.toString());
-        } else {
-          return const Center(child: CircularProgressIndicator());
+    return BlocSelector<LibraryCubit, LibraryState, List<String>>(
+      selector: (state) => state.allTags,
+      builder: (context, allTags) {
+        if (allTags.isEmpty) {
+          return const SizedBox.shrink();
         }
+        return Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(cornerRadius),
+              // border: Border.all(color: dividerColor),
+            ),
+            child: Row(
+              children: [
+                Switch.adaptive(
+                  value: filterOutTags,
+                  onChanged: (value) => _getBlocProvider(
+                    bookStatus,
+                  ).add(ChangeFilterOutTags(value)),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    LocaleKeys.filter_out_selected_tags.tr(),
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
       },
     );
   }

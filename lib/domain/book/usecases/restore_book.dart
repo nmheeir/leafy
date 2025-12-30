@@ -12,8 +12,7 @@ class RestoreBookUseCase implements UseCase<Book, int> {
   RestoreBookUseCase(this.bookRepository);
 
   @override
-  Future<Either<Failure, Book>> call(int params) {
-    // TODO: Implement
-    throw UnimplementedError();
+  Future<Either<Failure, Book>> call(int params) async {
+    return await bookRepository.restoreBook(params);
   }
 }

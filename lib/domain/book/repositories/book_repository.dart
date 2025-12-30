@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/usecases/params/add_book_usecase_param.dart';
@@ -26,17 +25,10 @@ abstract class BookRepository {
 
   Future<Either<Failure, Unit>> deleteBook(int id);
   Future<Either<Failure, Unit>> removeAllBooks();
-
-  Future<Either<Failure, Unit>> bulkUpdateBookFormat(
-    Set<int> ids,
-    BookFormat bookFormat,
-  );
-
-  Future<Either<Failure, Unit>> bulkUpdateBookAuthor(
-    Set<int> ids,
-    String author,
-  );
+  Future<Either<Failure, Unit>> bulkDeleteBooks(Set<int> params);
 
   Future<Either<Failure, List<Book>>> getBooksWithSameTag(String tag);
   Future<Either<Failure, List<Book>>> getBooksWithSameAuthor(String author);
+
+  Future<Either<Failure, Book>> restoreBook(int id);
 }

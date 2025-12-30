@@ -10,7 +10,7 @@ import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -90,7 +90,7 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     required bool deleted,
   }) {
     if (deletePermanently == true) {
-      _deleteBookPermanently(book);
+      _deleteBookPermanently(context, book);
     } else {
       _changeDeleteStatus(context, deleted, book);
     }
@@ -106,16 +106,16 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   ) async {
     book = book.copyWith(deleted: deleted);
 
-    await bookCubit.updateBook(book);
-    bookCubit.getDeletedBooks();
+    await context.bookActor.updateBook(book, null);
+    // bookCubit.getDeletedBooks();
   }
 
-  Future<void> _deleteBookPermanently(Book book) async {
+  Future<void> _deleteBookPermanently(BuildContext context, Book book) async {
     if (book.id != null) {
-      await bookCubit.deleteBook(book.id!);
+      await context.bookActor.deleteBook(book.id!);
     }
 
-    bookCubit.getDeletedBooks();
+    // bookCubit.getDeletedBooks();
   }
 
   @override

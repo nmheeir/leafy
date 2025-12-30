@@ -1,4 +1,4 @@
-import 'package:fpdart/src/either.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';

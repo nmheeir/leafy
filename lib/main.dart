@@ -9,9 +9,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
-import 'package:leafy/di/injection.dart';
 import 'package:leafy/core/services/connectivity_service.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
+import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
@@ -20,7 +21,6 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
-import 'package:leafy/logic/cubit/book_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
@@ -31,12 +31,12 @@ import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
+import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 import 'package:leafy/router/router.dart';
 import 'package:path_provider/path_provider.dart';
 
 late Directory appDocumentsDirectory;
 late Directory appTempDirectory;
-late BookCubit bookCubit;
 late DateFormat dateFormat;
 late GlobalKey<ScaffoldMessengerState> snackbarKey;
 final _router = router();
@@ -54,7 +54,7 @@ void main() async {
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
-  bookCubit = getIt<BookCubit>();
+  // bookCubit = getIt<BookCubit>();
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: HydratedStorageDirectory(
@@ -78,7 +78,6 @@ class App extends StatelessWidget {
   dynamic _listOfBlocProviders(BuildContext context) {
     final bookProviders = [
       BlocProvider(create: (context) => getIt<EditBookCubit>()),
-      BlocProvider(create: (context) => getIt<BookCubit>()),
       BlocProvider(create: (context) => getIt<CurrentBookCubit>()),
       BlocProvider(create: (context) => getIt<EditBookCoverCubit>()),
       BlocProvider(create: (context) => getIt<BookListsOrderCubit>()),
@@ -89,6 +88,9 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<BookTabIndexCubit>()),
       BlocProvider(create: (context) => getIt<LibraryCubit>()),
       BlocProvider(create: (context) => getIt<BookActorCubit>()),
+      BlocProvider(
+        create: (context) => getIt<TrashBinCubit>()..loadDeletedBooks(),
+      ),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),
@@ -101,6 +103,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (_) => getIt<ChallengeBloc>()),
       BlocProvider(create: (_) => getIt<StatsBloc>()),
       BlocProvider(create: (_) => getIt<SearchBloc>()),
+      BlocProvider(create: (_) => getIt<LocalSearchBloc>()),
     ];
 
     final openLibraryProvider = [

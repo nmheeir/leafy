@@ -38,8 +38,12 @@ import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../domain/book/repositories/book_repository.dart' as _i29;
 import '../domain/book/repositories/repository.dart' as _i1055;
 import '../domain/book/usecases/add_book.dart' as _i660;
+import '../domain/book/usecases/bulk_delete.dart' as _i909;
+import '../domain/book/usecases/bulk_update.dart' as _i429;
 import '../domain/book/usecases/delete_book.dart' as _i565;
 import '../domain/book/usecases/get_book.dart' as _i137;
+import '../domain/book/usecases/get_deleted_book.dart' as _i679;
+import '../domain/book/usecases/restore_book.dart' as _i675;
 import '../domain/book/usecases/search_books.dart' as _i755;
 import '../domain/book/usecases/stat_calculator.dart' as _i800;
 import '../domain/book/usecases/update_book.dart' as _i552;
@@ -53,6 +57,7 @@ import '../domain/services/epub_cached_service.dart' as _i374;
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
+import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
 import '../logic/bloc/rating_type/rating_type_bloc.dart' as _i280;
 import '../logic/bloc/search/search_bloc.dart' as _i361;
@@ -60,7 +65,7 @@ import '../logic/bloc/sort_bloc/sort_bloc.dart' as _i713;
 import '../logic/bloc/stats_bloc/stats_bloc.dart' as _i780;
 import '../logic/bloc/theme/theme_bloc.dart' as _i774;
 import '../logic/cubit/book_actor/book_actor_cubit.dart' as _i607;
-import '../logic/cubit/book_cubit.dart' as _i865;
+import '../logic/cubit/book_detail/book_detail_cubit.dart' as _i23;
 import '../logic/cubit/book_list_order_cubit.dart' as _i66;
 import '../logic/cubit/book_tab_index_cubit.dart' as _i744;
 import '../logic/cubit/current_book_cubit.dart' as _i754;
@@ -71,6 +76,7 @@ import '../logic/cubit/edit_book_cover_cubit.dart' as _i67;
 import '../logic/cubit/edit_book_cubit.dart' as _i232;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
+import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
 import 'module/logger_module.dart' as _i454;
 import 'module/network_module.dart' as _i881;
 import 'module/storage_module.dart' as _i847;
@@ -111,6 +117,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i260.DefaultBookTagCubit>(() => _i260.DefaultBookTagCubit());
     gh.factory<_i985.DisplayCubit>(() => _i985.DisplayCubit());
     gh.factory<_i67.EditBookCoverCubit>(() => _i67.EditBookCoverCubit());
+    gh.factory<_i232.EditBookCubit>(() => _i232.EditBookCubit());
     gh.factory<_i772.SelectedBooksCubit>(() => _i772.SelectedBooksCubit());
     gh.singleton<_i1014.DatabaseProvider>(() => _i1014.DatabaseProvider());
     await gh.singletonAsync<_i497.Directory>(
@@ -175,17 +182,32 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i751.OpenLibRepository>(
       () => _i946.OpenLibRepositoryImpl(gh<_i715.OlRemoteDataSource>()),
     );
+    gh.lazySingleton<_i29.BookRepository>(
+      () => _i329.BookRepositoryImpl(
+        gh<_i758.BookLocalDataSource>(),
+        gh<_i974.Logger>(),
+      ),
+    );
     gh.lazySingleton<_i1055.Repository>(
       () => _i1055.Repository(gh<_i188.DatabaseController>()),
     );
-    gh.lazySingleton<_i29.BookRepository>(
-      () => _i329.BookRepositoryImpl(gh<_i758.BookLocalDataSource>()),
+    gh.factory<_i909.BulkDeleteUseCase>(
+      () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),
+    );
+    gh.factory<_i429.BulkUpdateUseCase>(
+      () => _i429.BulkUpdateUseCase(gh<_i29.BookRepository>()),
     );
     gh.factory<_i565.DeleteBookUseCase>(
       () => _i565.DeleteBookUseCase(gh<_i29.BookRepository>()),
     );
     gh.factory<_i137.GetBookUseCase>(
       () => _i137.GetBookUseCase(gh<_i29.BookRepository>()),
+    );
+    gh.factory<_i679.GetDeletedBooksUseCase>(
+      () => _i679.GetDeletedBooksUseCase(gh<_i29.BookRepository>()),
+    );
+    gh.factory<_i675.RestoreBookUseCase>(
+      () => _i675.RestoreBookUseCase(gh<_i29.BookRepository>()),
     );
     gh.factory<_i755.SearchBooksUseCase>(
       () => _i755.SearchBooksUseCase(gh<_i29.BookRepository>()),
@@ -199,29 +221,36 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i14.OpenLibSearchUseCase>(
       () => _i14.OpenLibSearchUseCase(gh<_i751.OpenLibRepository>()),
     );
+    gh.factory<_i23.BookDetailCubit>(
+      () => _i23.BookDetailCubit(gh<_i137.GetBookUseCase>()),
+    );
     gh.factory<_i660.AddBookUseCase>(
       () => _i660.AddBookUseCase(gh<_i29.BookRepository>()),
     );
-    gh.factory<_i939.LibraryCubit>(
-      () => _i939.LibraryCubit(gh<_i864.WatchAllBooksUseCase>()),
+    gh.factory<_i821.TrashBinCubit>(
+      () => _i821.TrashBinCubit(gh<_i679.GetDeletedBooksUseCase>()),
     );
-    gh.factory<_i865.BookCubit>(() => _i865.BookCubit(gh<_i1055.Repository>()));
+    gh.factory<_i939.LibraryCubit>(
+      () => _i939.LibraryCubit(
+        gh<_i864.WatchAllBooksUseCase>(),
+        gh<_i120.Logger>(),
+      ),
+    );
+    gh.factory<_i365.LocalSearchBloc>(
+      () => _i365.LocalSearchBloc(gh<_i755.SearchBooksUseCase>()),
+    );
+    gh.factory<_i361.SearchBloc>(
+      () =>
+          _i361.SearchBloc(gh<_i14.OpenLibSearchUseCase>(), gh<_i974.Logger>()),
+    );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(
         gh<_i660.AddBookUseCase>(),
         gh<_i552.UpdateBookUseCase>(),
         gh<_i565.DeleteBookUseCase>(),
+        gh<_i429.BulkUpdateUseCase>(),
+        gh<_i909.BulkDeleteUseCase>(),
       ),
-    );
-    gh.factory<_i232.EditBookCubit>(
-      () => _i232.EditBookCubit(
-        gh<_i660.AddBookUseCase>(),
-        gh<_i552.UpdateBookUseCase>(),
-      ),
-    );
-    gh.factory<_i361.SearchBloc>(
-      () =>
-          _i361.SearchBloc(gh<_i14.OpenLibSearchUseCase>(), gh<_i974.Logger>()),
     );
     return this;
   }

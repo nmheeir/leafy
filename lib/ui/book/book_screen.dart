@@ -6,7 +6,7 @@ import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
 import 'package:leafy/ui/book/widgets/book_detail_long.dart';
 import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
@@ -24,8 +24,8 @@ class BookScreen extends StatelessWidget {
   void _onLikeTap(BuildContext context, Book book) {
     book = book.copyWith(favorite: !book.favorite == true);
 
-    bookCubit.updateBook(book);
-    context.read<CurrentBookCubit>().setBook(book);
+    context.bookActor.updateBook(book, null);
+    context.currentBook.setBook(book);
   }
 
   IconData? _decideStatusIcon(BookStatus? status) {
@@ -112,7 +112,9 @@ class BookScreen extends StatelessWidget {
       );
     }
 
-    bookCubit.updateBook(book);
+    if (context.mounted) {
+      context.bookActor.updateBook(book, null);
+    }
 
     if (!context.mounted) return;
     context.read<CurrentBookCubit>().setBook(book);

@@ -9,6 +9,8 @@ class ErrorMessageMapper {
       connection: (_) => LocaleKeys.error_no_internet.tr(),
       cache: (_) => LocaleKeys.error_cache_error.tr(),
       unexpected: (_) => LocaleKeys.error_unexpected.tr(),
+      database: (message) => LocaleKeys.error_database.tr(),
+      notFound: (message) => LocaleKeys.error_not_found.tr(),
     );
   }
 }

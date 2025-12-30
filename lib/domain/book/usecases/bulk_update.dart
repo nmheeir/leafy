@@ -1,13 +1,15 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
 import 'package:leafy/domain/book/usecases/params/bulk_update_params.dart';
 
-class BulkUpdate implements UseCase<Unit, BulkUpdateBooksParams> {
+@injectable
+class BulkUpdateUseCase implements UseCase<Unit, BulkUpdateBooksParams> {
   final BookRepository bookRepository;
 
-  BulkUpdate(this.bookRepository);
+  BulkUpdateUseCase(this.bookRepository);
 
   @override
   Future<Either<Failure, Unit>> call(BulkUpdateBooksParams params) async {

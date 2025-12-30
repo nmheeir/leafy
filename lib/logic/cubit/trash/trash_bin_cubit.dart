@@ -1,13 +1,12 @@
-import 'package:bloc/bloc.dart';
-import 'package:fpdart/fpdart.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/usecases/get_deleted_book.dart';
 
-part 'trash_state.dart';
-part 'trash_cubit.freezed.dart';
+part 'trash_bin_cubit.freezed.dart';
+part 'trash_bin_state.dart';
 
 @injectable
 class TrashBinCubit extends Cubit<TrashBinState> {
@@ -94,5 +93,9 @@ class TrashBinCubit extends Cubit<TrashBinState> {
     //     }
     //   },
     // );
+  }
+
+  Future<void> emptyTrash() async {
+    // TODO: implement
   }
 }

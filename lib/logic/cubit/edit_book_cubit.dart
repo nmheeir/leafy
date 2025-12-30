@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
@@ -6,28 +5,16 @@ import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
-import 'package:leafy/domain/book/usecases/add_book.dart';
-import 'package:leafy/domain/book/usecases/update_book.dart';
 
 @injectable
 class EditBookCubit extends Cubit<Book> {
-  final AddBookUseCase _addBook;
-  final UpdateBookUseCase _updateBook;
-  EditBookCubit(this._addBook, this._updateBook) : super(Book.empty());
+  // KHÔNG CẦN Inject UseCase nữa
+  EditBookCubit() : super(Book.empty());
 
-  // TODO: fix this
-  Future<int> addNewBook(Uint8List? cover) async {
-    // return _addBook(book: state, cover: cover);
-    return 1;
-  }
-
-  // TODO: fix this
-  Future<void> updateBook(Uint8List? cover) async {
-    // if (state.id == null) return;
-    // await _updateBook(book: state, cover: cover);
-  }
-
+  // Hàm này dùng để khởi tạo dữ liệu khi vào màn hình sửa
   void setBook(Book book) => emit(book);
+
+  // --- CÁC HÀM CẬP NHẬT TRƯỜNG DỮ LIỆU ---
 
   void setStatus(BookStatus status) => emit(state.copyWith(status: status));
 
@@ -72,16 +59,23 @@ class EditBookCubit extends Cubit<Book> {
 
   void setHasCover(bool hasCover) => emit(state.copyWith(hasCover: hasCover));
 
+  // --- LOGIC XỬ LÝ DANH SÁCH ĐỌC (READINGS) ---
+
   void addNewReading(Reading reading) {
+    // Luôn tạo list mới để đảm bảo tính immutability
     emit(state.copyWith(readings: [...state.readings, reading]));
   }
 
   void removeReading(int index) {
+    if (index < 0 || index >= state.readings.length) return;
+
     final readings = List<Reading>.from(state.readings)..removeAt(index);
     emit(state.copyWith(readings: readings));
   }
 
   void setReadingStartDate(DateTime? date, int index) {
+    if (index < 0 || index >= state.readings.length) return;
+
     final readings = List<Reading>.from(state.readings);
     readings[index] = readings[index].copyWith(startDate: date);
 
@@ -89,34 +83,55 @@ class EditBookCubit extends Cubit<Book> {
   }
 
   void setReadingFinishDate(DateTime? date, int index) {
+    if (index < 0 || index >= state.readings.length) return;
+
     final readings = List<Reading>.from(state.readings);
     readings[index] = readings[index].copyWith(finishDate: date);
 
     emit(state.copyWith(readings: readings));
   }
 
+  // ĐÃ FIX: Logic cập nhật CustomReadingTime
   void setCustomReadingTime(ReadingTime? time, int index) {
+    if (index < 0 || index >= state.readings.length) return;
+
     final readings = List<Reading>.from(state.readings);
-    // TODO: fix
-    // readings[index] = readings[index].copyWith(customReadingTime: time);
+    readings[index] = readings[index].copyWith(
+      readingTimeMs: time!.milliSeconds,
+    );
 
     emit(state.copyWith(readings: readings));
   }
 
+  // --- LOGIC XỬ LÝ TAGS ---
+
   void addNewTag(String tag) {
+    // Clean tag input
     tag = tag.trim().replaceAll('@', '').replaceAll('|', '');
     if (tag.isEmpty) return;
 
-    final tags = state.tags?.split('|||||') ?? [];
-    if (tags.contains(tag)) return;
+    final currentTags = state.tags?.split('|||||') ?? [];
+    if (currentTags.contains(tag)) return; // Tránh trùng lặp
 
-    emit(state.copyWith(tags: [...tags, tag].join('|||||')));
+    final newTagsList = [...currentTags, tag];
+
+    // Sort tag cho đẹp nếu muốn
+    newTagsList.sort();
+
+    emit(state.copyWith(tags: newTagsList.join('|||||')));
   }
 
   void removeTag(String tag) {
-    final tags = state.tags?.split('|||||') ?? [];
-    tags.remove(tag);
+    final currentTags = state.tags?.split('|||||') ?? [];
 
-    emit(state.copyWith(tags: tags.isEmpty ? null : tags.join('|||||')));
+    if (!currentTags.contains(tag)) return;
+
+    currentTags.remove(tag);
+
+    emit(
+      state.copyWith(
+        tags: currentTags.isEmpty ? null : currentTags.join('|||||'),
+      ),
+    );
   }
 }

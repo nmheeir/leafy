@@ -13,6 +13,9 @@ class SearchBooksUseCase implements UseCase<List<Book>, String> {
 
   @override
   Future<Either<Failure, List<Book>>> call(String query) async {
+    if (query.trim().isEmpty) {
+      return const Right([]);
+    }
     return await bookRepository.searchBooks(query);
   }
 }

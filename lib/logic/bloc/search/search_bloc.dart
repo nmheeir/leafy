@@ -12,6 +12,7 @@ part 'search_bloc.freezed.dart';
 part 'search_event.dart';
 part 'search_state.dart';
 
+// TODO: đổi tên thành OpenLibSearchBloc
 @injectable
 class SearchBloc extends Bloc<SearchEvent, SearchState> {
   final OpenLibSearchUseCase _openLibSearchUseCase;

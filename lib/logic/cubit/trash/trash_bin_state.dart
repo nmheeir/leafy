@@ -1,4 +1,4 @@
-part of 'trash_cubit.dart';
+part of 'trash_bin_cubit.dart';
 
 @freezed
 class TrashBinState with _$TrashBinState {

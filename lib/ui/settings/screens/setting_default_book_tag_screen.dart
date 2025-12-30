@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
+import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
@@ -45,23 +46,18 @@ class SettingDefaultBookTagScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              StreamBuilder<List<String>>(
-                stream: bookCubit.tags,
-                builder:
-                    (context, AsyncSnapshot<List<String>?> allTagsSnapshot) {
-                      return BlocBuilder<DefaultBookTagCubit, List<String>>(
-                        buildWhen: (previous, current) => previous != current,
-                        builder: (_, defaultTags) {
-                          return Wrap(
-                            children: _buildTagChips(
-                              context,
-                              allTagsSnapshot.data ?? [],
-                              defaultTags,
-                            ),
-                          );
-                        },
+              BlocSelector<LibraryCubit, LibraryState, List<String>>(
+                selector: (state) => state.allTags,
+                builder: (context, allTags) {
+                  return BlocBuilder<DefaultBookTagCubit, List<String>>(
+                    buildWhen: (previous, current) => previous != current,
+                    builder: (_, defaultTags) {
+                      return Wrap(
+                        children: _buildTagChips(context, allTags, defaultTags),
                       );
                     },
+                  );
+                },
               ),
               const SizedBox(height: 30),
               Padding(

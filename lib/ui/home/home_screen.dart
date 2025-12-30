@@ -15,12 +15,12 @@ import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/routes.dart';
-import 'package:leafy/ui/books/books_screen.dart';
 import 'package:leafy/ui/home/widgets/add_book_sheet.dart';
 import 'package:leafy/ui/home/widgets/home_navigation_bar.dart';
 import 'package:leafy/ui/home/widgets/multi_select_fab.dart';
 import 'package:leafy/ui/home/widgets/sort_bottom_sheet.dart';
 import 'package:leafy/ui/statistics/statistics_screen.dart';
+import 'package:leafy/ui/test/test_screen.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildScaffoldBody() {
     return currentPageIndex == 0
-        ? BooksScreen()
+        ? TestBooksScreen()
         : currentPageIndex == 1
         ? const StatisticsScreen()
         : const SizedBox.shrink();

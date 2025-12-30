@@ -293,6 +293,8 @@ abstract class  LocaleKeys {
   static const error_cache_error = 'error.cache_error';
   static const error_unexpected = 'error.unexpected';
   static const error_no_error_return = 'error.no_error_return';
+  static const error_database = 'error.database';
+  static const error_not_found = 'error.not_found';
   static const error = 'error';
 
 }
