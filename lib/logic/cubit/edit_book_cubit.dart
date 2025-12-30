@@ -11,6 +11,52 @@ class EditBookCubit extends Cubit<Book> {
   // KHÔNG CẦN Inject UseCase nữa
   EditBookCubit() : super(Book.empty());
 
+  void initBookFromOpenLibrary({
+    required String title,
+    String? subtitle,
+    required String author,
+    int? pages,
+    List<String>? isbnList,
+    String? olidRaw,
+    int? publishYear,
+    required BookFormat defaultFormat,
+    required List<String> defaultTags,
+    BookStatus? status,
+    int? coverId,
+  }) {
+    final String? isbn = (isbnList != null && isbnList.isNotEmpty)
+        ? isbnList.first
+        : null;
+    final String? cleanOlid = olidRaw?.replaceAll('/works/', '');
+    final String? formattedTags = defaultTags.isNotEmpty
+        ? defaultTags.join('|||||')
+        : null;
+
+    final newBook = Book(
+      id: null,
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      status: status ?? BookStatus.unfinished,
+      favorite: false,
+      pages: pages,
+      isbn: isbn,
+      olid: cleanOlid,
+      publicationYear: publishYear,
+      bookFormat: defaultFormat,
+      readings: const [],
+      tags: formattedTags,
+      dateAdded: DateTime.now(),
+      dateModified: DateTime.now(),
+
+      rating: 0,
+      hasCover: false,
+    );
+
+    // 3. Emit state mới
+    emit(newBook);
+  }
+
   // Hàm này dùng để khởi tạo dữ liệu khi vào màn hình sửa
   void setBook(Book book) => emit(book);
 

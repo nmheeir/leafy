@@ -10,6 +10,8 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
 // Domain/Data imports
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
+import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 // UI Widgets
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
@@ -54,7 +56,9 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
   void _onScroll() {
     if (_isBottom) {
       // Bắn event LoadMore khi cuộn xuống đáy
-      context.read<OpenLibSearchBloc>().add(const OpenLibSearchEvent.loadMore());
+      context.read<OpenLibSearchBloc>().add(
+        const OpenLibSearchEvent.loadMore(),
+      );
     }
   }
 
@@ -84,7 +88,33 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
     List<String>? isbn,
     String? olid,
   }) {
-    // TODO: Create logic
+    final BookFormat defaultBookFormat = context.defaultBookFormat.state;
+
+    final List<String> defaultTags = context.defaultBookTag.state;
+
+    context.editBook.initBookFromOpenLibrary(
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      pages: pagesMedian,
+      isbnList: isbn,
+      olidRaw: olid,
+      publishYear: firstPublishYear,
+      defaultFormat: defaultBookFormat,
+      defaultTags: defaultTags,
+      coverId: cover,
+    );
+
+    // 3. Navigation
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BookEditorScreen(
+          fromOpenLibrary: true,
+          coverOpenLibraryID: cover,
+          work: olid,
+        ),
+      ),
+    );
   }
 
   void _onChooseEditionPressed(OLSearchResultDoc item) {
@@ -266,7 +296,9 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
               textCapitalization: TextCapitalization.sentences,
               onSubmitted: (_) => _startNewSearch(),
               onClear: () {
-                context.read<OpenLibSearchBloc>().add(OpenLibSearchEvent.queryChanged(''));
+                context.read<OpenLibSearchBloc>().add(
+                  OpenLibSearchEvent.queryChanged(''),
+                );
               },
               enable: canSearch,
             ),
