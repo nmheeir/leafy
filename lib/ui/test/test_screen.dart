@@ -33,8 +33,6 @@ class _TestBooksScreenState extends State<TestBooksScreen>
   @override
   void initState() {
     super.initState();
-    // TabController length nên lấy động theo bookListsOrder nếu có thể,
-    // nhưng hiện tại để cứng 4 cũng ổn nếu logic không đổi.
     _tabController = TabController(length: 4, vsync: this);
     _chipScrollController = ScrollController();
   }
@@ -81,7 +79,6 @@ class _TestBooksScreenState extends State<TestBooksScreen>
     );
   }
 
-  /// Hàm xây dựng danh sách các Tab
   List<Widget> _buildTabs(
     BuildContext context,
     List<BookStatus> bookListsOrder,
@@ -91,7 +88,7 @@ class _TestBooksScreenState extends State<TestBooksScreen>
         case BookStatus.finished:
           return _buildGenericBooksTab<SortFinishedBooksBloc>(
             listGetter: (state) =>
-                state.finishedBooks, // Lấy data từ LibraryState
+                state.finishedBooks,
             listNumber: 0,
           );
         case BookStatus.inProgress:

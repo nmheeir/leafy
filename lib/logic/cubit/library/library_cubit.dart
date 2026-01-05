@@ -18,7 +18,8 @@ class LibraryCubit extends Cubit<LibraryState> {
 
   StreamSubscription? _subscription;
 
-  LibraryCubit(this._watchAllBooks, this._logger) : super(LibraryState.initial()) {
+  LibraryCubit(this._watchAllBooks, this._logger)
+    : super(LibraryState.initial()) {
     _init();
   }
 
@@ -27,7 +28,6 @@ class LibraryCubit extends Cubit<LibraryState> {
 
     _subscription = _watchAllBooks().listen(
       (books) {
-        // Mỗi khi Repository gọi _refreshBooks(), hàm này sẽ chạy lại
         emit(LibraryState.loaded(allBooks: books));
       },
       onError: (error) {

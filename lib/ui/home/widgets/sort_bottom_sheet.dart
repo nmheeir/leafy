@@ -15,6 +15,7 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
+import 'package:leafy/ui/common/drag_handle.dart';
 import 'package:leafy/ui/home/widgets/tag_filter_chip.dart';
 import 'package:leafy/ui/home/widgets/year_filter_chip.dart';
 
@@ -47,20 +48,7 @@ class SortBottomSheetState extends State<SortBottomSheet> {
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (Platform.isAndroid)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                child: Container(
-                  height: 5,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                ),
-              ),
+            if (Platform.isAndroid) DragHandle(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
               child: BlocBuilder<BookListsOrderCubit, List<BookStatus>>(
