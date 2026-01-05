@@ -1,29 +1,36 @@
 part of 'open_lib_search_bloc.dart';
 
-sealed class OpenLibSearchState extends Equatable {
-  const OpenLibSearchState();
-  
-  @override
-  List<Object> get props => [];
+enum SearchStatus { initial, loading, success, failure }
+
+@freezed
+abstract class OpenLibSearchState with _$OpenLibSearchState {
+  const factory OpenLibSearchState({
+    @Default(SearchStatus.initial) SearchStatus status,
+    @Default(OLSearchType.general) OLSearchType searchType,
+    @Default([]) List<OLSearchResultDoc> books,
+    @Default(0) int numberOfResults,
+    @Default(false) bool hasReachedMax,
+    @Default(0) int page,
+    @Default('') String errorMessage,
+    @Default('') String currentQuery,
+    @Default({}) Map<OLSearchType, SearchTabData> cache,
+  }) = _SearchState;
 }
 
-final class OpenLibSearchGeneralState extends OpenLibSearchState {
-  @override
-  List<Object> get props => [];
-}
+class SearchTabData {
+  final List<OLSearchResultDoc> books;
+  final int page;
+  final bool hasReachedMax;
+  final int numberOfResults;
+  final String queryAtMoment;
+  final bool hasNoResults;
 
-final class OpenLibSearchTitleState extends OpenLibSearchState {
-  @override
-  // TODO: implement props
-  List<Object> get props => [];
-}
-
-final class OpenLibSearchAuthorState extends OpenLibSearchState {
-  @override
-  List<Object> get props => [];
-}
-
-final class OpenLibSearchISBNState extends OpenLibSearchState {
-  @override
-  List<Object> get props => [];
+  const SearchTabData({
+    this.books = const [],
+    this.page = 0,
+    this.hasReachedMax = false,
+    this.numberOfResults = 0,
+    this.queryAtMoment = '',
+    this.hasNoResults = false,
+  });
 }

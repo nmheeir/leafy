@@ -22,6 +22,7 @@ class BookTextField extends StatefulWidget {
     this.onSubmitted,
     this.suggestions,
     this.enable = true,
+    this.onClear,
   });
 
   final TextEditingController controller;
@@ -39,6 +40,7 @@ class BookTextField extends StatefulWidget {
   final EdgeInsets padding;
   final List<String>? suggestions;
   final bool enable;
+  final VoidCallback? onClear;
 
   @override
   State<BookTextField> createState() => _BookTextFieldState();
@@ -155,6 +157,10 @@ class _BookTextFieldState extends State<BookTextField> {
                     showClearButton = false;
                   });
                   focusNode?.requestFocus();
+                  if (widget.onClear != null) {
+                    widget.onClear!();
+                    FocusScope.of(context).unfocus();
+                  }
                 },
                 icon: const Icon(Icons.clear),
               )

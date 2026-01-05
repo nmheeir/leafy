@@ -8,7 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
@@ -260,9 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final status = BookStatus.finished;
     final bookFormat = context.read<DefaultBookFormatCubit>().state;
 
-    context.read<EditBookCubit>().setBook(
-      Book.empty(status: status, bookFormat: bookFormat),
-    );
+    context.read<EditBookCubit>().setBook(Book.empty());
   }
 
   void _addBookManually() {

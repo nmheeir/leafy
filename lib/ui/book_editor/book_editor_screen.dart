@@ -11,16 +11,19 @@ import 'package:http/http.dart' as http;
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/data/models/book.dart';
-import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/logic/cubit/library/library_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
@@ -82,7 +85,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     LocaleKeys.book_format_audiobook.tr(),
   ];
 
-  void _prefillBookDetails(Book book) {
+  void _prefillBookDetails(Book book) async {
     _titleCtrl.text = book.title;
     _subtitleCtrl.text = book.subtitle ?? '';
     _authorCtrl.text = book.author;
@@ -96,7 +99,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (!widget.fromOpenLibrary && !widget.fromOpenLibraryEdition) {
       if (!widget.duplicatingBook) {
-        context.read<EditBookCoverCubit>().setCover(book.getCoverBytes());
+        context.read<EditBookCoverCubit>().setCover(
+          await getCoverBytes(book.id),
+        );
       }
     }
   }
@@ -133,32 +138,30 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     return true;
   }
 
-  void _saveNewBook(Book book) async {
+  void _saveNewBook() async {
+    // 1. Ẩn bàn phím
     FocusManager.instance.primaryFocus?.unfocus();
 
+    // 2. Validate dữ liệu nhập
     if (!_validate()) return;
+
+    // Logic chờ tải ảnh (giữ nguyên vì đây là logic UI UX)
     if (await _checkIfWaitForCoverDownload(context) == true) return;
     if (!mounted) return;
 
-    Uint8List? cover;
+    // 3. Lấy dữ liệu từ các Cubit quản lý Form
+    // Lấy thông tin sách đã nhập
+    final bookDraft = context.read<EditBookCubit>().state;
 
-    book.hasCover == false
-        ? context.read<EditBookCoverCubit>().deleteCover(book.id)
-        : cover = context.read<EditBookCoverCubit>().state;
+    // Lấy ảnh bìa (nếu sách có bìa)
+    Uint8List? coverBytes;
+    if (bookDraft.hasCover) {
+      coverBytes = context.read<EditBookCoverCubit>().state;
+    }
 
-    final newBookID = await context.read<EditBookCubit>().addNewBook(cover);
-    book = book.copyWith(id: newBookID);
-    if (!mounted) return;
-
-    context.read<CurrentBookCubit>().setBook(book);
-
-    // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [book]));
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const BookScreen(heroTag: "")),
-      (route) => route.isFirst,
-    );
+    // 4. Gửi lệnh cho BookActorCubit
+    // Cubit này sẽ lo việc gọi UseCase, lưu DB, lưu file ảnh...
+    context.bookActor.addBook(bookDraft, coverBytes);
   }
 
   void _updateBook(Book book) async {
@@ -173,11 +176,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (book.hasCover == false) {
       context.read<EditBookCoverCubit>().deleteCover(book.id);
-      context.read<EditBookCubit>().updateBook(null, context);
+      context.bookActor.updateBook(book, null);
     } else {
-      context.read<EditBookCubit>().updateBook(
+      context.bookActor.updateBook(
+        book,
         context.read<EditBookCoverCubit>().state,
-        context,
       );
     }
 
@@ -266,7 +269,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       if (!mounted) return;
 
       if (!mounted) return;
-      await generateBlurHash(response.bodyBytes, context);
+      await generateBlurHash(response.bodyBytes);
 
       if (!mounted) return;
       context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
@@ -280,7 +283,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   void _downloadWork() async {
     if (widget.work != null) {
-      final openLibraryWork = await getIt<OpenLibraryService>().getWork(widget.work!);
+      final openLibraryWork = await getIt<OpenLibraryService>().getWork(
+        widget.work!,
+      );
 
       if (!mounted) return;
 
@@ -314,7 +319,8 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       return;
     }
 
-    context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
+    // TODO: uncomment this
+    // context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
 
     _tagsCtrl.clear();
   }
@@ -424,292 +430,368 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardDismissible(
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            widget.editingExistingBook
-                ? LocaleKeys.edit_book.tr()
-                : LocaleKeys.add_new_book.tr(),
-            style: const TextStyle(fontSize: 18),
-          ),
-          actions: [
-            BlocBuilder<EditBookCubit, Book>(
-              builder: (context, state) {
-                return TextButton(
-                  onPressed: (state.id != null)
-                      ? () => _updateBook(state)
-                      : () => _saveNewBook(state),
-                  child: Text(
-                    LocaleKeys.save.tr(),
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                _buildCover(),
-                const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                BookTextField(
-                  controller: _titleCtrl,
-                  hint: LocaleKeys.enter_title.tr(),
-                  icon: Icons.book,
-                  keyboardType: TextInputType.text,
-                  autofocus:
-                      (widget.fromOpenLibrary || widget.editingExistingBook)
-                      ? false
-                      : true,
-                  maxLines: 5,
-                  maxLength: 255,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 10),
-                BookTextField(
-                  controller: _subtitleCtrl,
-                  hint: LocaleKeys.enter_subtitle.tr(),
-                  icon: Icons.book,
-                  keyboardType: TextInputType.text,
-                  maxLines: 5,
-                  maxLength: 255,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 10),
-                StreamBuilder<List<String>>(
-                  stream: bookCubit.authors,
-                  builder: (context, AsyncSnapshot<List<String>?> snapshot) {
-                    return BookTextField(
-                      controller: _authorCtrl,
-                      hint: LocaleKeys.enter_author.tr(),
-                      icon: Icons.person,
-                      keyboardType: TextInputType.text,
-                      maxLines: 5,
-                      maxLength: 255,
-                      textCapitalization: TextCapitalization.words,
-                      suggestions: snapshot.data,
-                    );
-                  },
-                ),
-                const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                BookStatusRow(
-                  animDuration: _animDuration,
-                  defaultHeight: Constants.formHeight,
-                ),
-                const SizedBox(height: 10),
-                BookRatingBar(animDuration: _animDuration),
-                BlocBuilder<EditBookCubit, Book>(
-                  builder: (context, state) {
-                    return Column(
-                      children: [
-                        ...state.readings.asMap().entries.map((entry) {
-                          return ReadingRow(
-                            index: entry.key,
-                            reading: entry.value,
-                          );
-                        }),
-                      ],
-                    );
-                  },
-                ),
-                _buildAddNewReadingButton(context),
-                const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                BookTypeDropdown(
-                  bookTypes: bookTypes,
-                  changeBookType: _changeBookType,
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: BookTextField(
-                        controller: _pagesCtrl,
-                        hint: LocaleKeys.enter_pages.tr(),
-                        icon: FontAwesomeIcons.solidFileLines,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        maxLength: 10,
-                        padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-                      ),
-                    ),
-                    Expanded(
-                      child: BookTextField(
-                        controller: _pubYearCtrl,
-                        hint: LocaleKeys.enter_publication_year.tr(),
-                        icon: FontAwesomeIcons.solidCalendar,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        maxLength: 4,
-                        padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                BookTextField(
-                  controller: _descriptionCtrl,
-                  hint: LocaleKeys.enter_description.tr(),
-                  icon: FontAwesomeIcons.solidKeyboard,
-                  keyboardType: TextInputType.multiline,
-                  maxLength: 5000,
-                  hideCounter: false,
-                  maxLines: 15,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: BookTextField(
-                        controller: _isbnCtrl,
-                        hint: LocaleKeys.isbn.tr(),
-                        icon: FontAwesomeIcons.i,
-                        textCapitalization: TextCapitalization.characters,
-                        keyboardType: TextInputType.text,
-                        maxLength: 20,
-                      ),
-                    ),
-                    InkWell(
-                      customBorder: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(cornerRadius),
-                      ),
-                      onTap: () async {
-                        // var result = await BarcodeScanner.scan(
-                        //   options: ScanOptions(
-                        //     strings: {
-                        //       'cancel': LocaleKeys.cancel.tr(),
-                        //       'flash_on': LocaleKeys.flash_on.tr(),
-                        //       'flash_off': LocaleKeys.flash_off.tr(),
-                        //     },
-                        //   ),
-                        // );
+    return BlocListener<BookActorCubit, BookActorState>(
+      listener: (context, state) {
+        state.whenOrNull(
+          success: (message, newBookId) {
+            // 1. Hiển thị thông báo thành công
+            // (Tùy chọn, vì chuyển màn hình ngay nên có thể ko cần snackbar)
 
-                        // if (result.type == ResultType.Barcode) {
-                        //   setState(() {
-                        //     _isbnCtrl.text = result.rawContent;
-                        //   });
-                        // }
-                      },
-                      child: Container(
-                        height: 60,
-                        width: 60,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(cornerRadius),
-                          color: context.colorScheme.surfaceContainerHighest
-                              .withValues(alpha: 0.5),
-                        ),
-                        child: Icon(
-                          FontAwesomeIcons.barcode,
-                          size: 28,
-                          color: context.colorScheme.primary,
+            // 2. Cập nhật CurrentBookCubit để màn hình chi tiết hiển thị đúng
+            // Lấy lại data từ form để có thông tin mới nhất
+            var bookSaved = context.read<EditBookCubit>().state;
+
+            // Gán ID mới vừa được tạo từ DB (nếu có)
+            if (newBookId != null) {
+              bookSaved = bookSaved.copyWith(id: newBookId);
+            }
+
+            context.read<CurrentBookCubit>().setBook(bookSaved);
+
+            // 3. Logic Sync (nếu có)
+            // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [bookSaved]));
+
+            // 4. Điều hướng sang màn hình chi tiết
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const BookScreen(heroTag: ""),
+              ),
+              (route) => route.isFirst,
+            );
+          },
+          failure: (errorMessage) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage), // Hoặc .tr() nếu là key
+                backgroundColor: Colors.red,
+              ),
+            );
+          },
+        );
+      },
+      child: KeyboardDismissible(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(
+              widget.editingExistingBook
+                  ? LocaleKeys.edit_book.tr()
+                  : LocaleKeys.add_new_book.tr(),
+              style: const TextStyle(fontSize: 18),
+            ),
+            actions: [
+              BlocBuilder<EditBookCubit, Book>(
+                builder: (context, state) {
+                  return TextButton(
+                    onPressed: (state.id != null)
+                        ? () => _updateBook(state)
+                        : () => _saveNewBook(),
+                    child: Text(
+                      LocaleKeys.save.tr(),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  _buildCover(),
+                  const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  BookTextField(
+                    controller: _titleCtrl,
+                    hint: LocaleKeys.enter_title.tr(),
+                    icon: Icons.book,
+                    keyboardType: TextInputType.text,
+                    autofocus:
+                        (widget.fromOpenLibrary || widget.editingExistingBook)
+                        ? false
+                        : true,
+                    maxLines: 5,
+                    maxLength: 255,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 10),
+                  BookTextField(
+                    controller: _subtitleCtrl,
+                    hint: LocaleKeys.enter_subtitle.tr(),
+                    icon: Icons.book,
+                    keyboardType: TextInputType.text,
+                    maxLines: 5,
+                    maxLength: 255,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 10),
+                  // DEPRECATED:
+                  // StreamBuilder<List<String>>(
+                  //   stream: bookCubit.authors,
+                  //   builder: (context, AsyncSnapshot<List<String>?> snapshot) {
+                  //     return BookTextField(
+                  //       controller: _authorCtrl,
+                  //       hint: LocaleKeys.enter_author.tr(),
+                  //       icon: Icons.person,
+                  //       keyboardType: TextInputType.text,
+                  //       maxLines: 5,
+                  //       maxLength: 255,
+                  //       textCapitalization: TextCapitalization.words,
+                  //       suggestions: snapshot.data,
+                  //     );
+                  //   },
+                  // ),
+                  BlocSelector<LibraryCubit, LibraryState, List<String>>(
+                    selector: (state) => state.allAuthors,
+                    builder: (context, author) {
+                      return BookTextField(
+                        controller: _authorCtrl,
+                        hint: LocaleKeys.enter_author.tr(),
+                        icon: Icons.person,
+                        keyboardType: TextInputType.text,
+                        maxLines: 5,
+                        maxLength: 255,
+                        textCapitalization: TextCapitalization.words,
+                        suggestions: author,
+                      );
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  BookStatusRow(
+                    animDuration: _animDuration,
+                    defaultHeight: Constants.formHeight,
+                  ),
+                  const SizedBox(height: 10),
+                  BookRatingBar(animDuration: _animDuration),
+                  BlocBuilder<EditBookCubit, Book>(
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          ...state.readings.asMap().entries.map((entry) {
+                            return ReadingRow(
+                              index: entry.key,
+                              reading: entry.value,
+                            );
+                          }),
+                        ],
+                      );
+                    },
+                  ),
+                  _buildAddNewReadingButton(context),
+                  const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  BookTypeDropdown(
+                    bookTypes: bookTypes,
+                    changeBookType: _changeBookType,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: BookTextField(
+                          controller: _pagesCtrl,
+                          hint: LocaleKeys.enter_pages.tr(),
+                          icon: FontAwesomeIcons.solidFileLines,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          maxLength: 10,
+                          padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                BookTextField(
-                  controller: _olidCtrl,
-                  hint: LocaleKeys.open_library_ID.tr(),
-                  icon: FontAwesomeIcons.o,
-                  keyboardType: TextInputType.text,
-                  maxLength: 20,
-                  textCapitalization: TextCapitalization.characters,
-                ),
-                const SizedBox(height: 10),
-                StreamBuilder<List<String>>(
-                  stream: bookCubit.tags,
-                  builder: (context, AsyncSnapshot<List<String>?> snapshot) {
-                    return TagsField(
-                      controller: _tagsCtrl,
-                      hint: LocaleKeys.enter_tags.tr(),
-                      icon: FontAwesomeIcons.tags,
-                      keyboardType: TextInputType.text,
-                      maxLength: Constants.maxTagLength,
-                      onSubmitted: (_) => _addNewTag(),
-                      onEditingComplete: () {},
-                      unselectTag: (tag) => _unselectTag(tag),
-                      allTags: snapshot.data,
-                    );
-                  },
-                ),
-                const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                BookTextField(
-                  controller: _myReviewCtrl,
-                  hint: LocaleKeys.my_review.tr(),
-                  icon: FontAwesomeIcons.solidKeyboard,
-                  keyboardType: TextInputType.multiline,
-                  maxLength: 5000,
-                  hideCounter: false,
-                  maxLines: 15,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 10),
-                BookTextField(
-                  controller: _notesCtrl,
-                  hint: LocaleKeys.notes.tr(),
-                  icon: FontAwesomeIcons.noteSticky,
-                  keyboardType: TextInputType.multiline,
-                  maxLength: 5000,
-                  hideCounter: false,
-                  maxLines: 15,
-                  textCapitalization: TextCapitalization.sentences,
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  children: [
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 10,
-                      child: FilledButton.tonal(
-                        onPressed: () => Navigator.pop(context),
-                        style: ButtonStyle(
-                          shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(cornerRadius),
-                            ),
+                      Expanded(
+                        child: BookTextField(
+                          controller: _pubYearCtrl,
+                          hint: LocaleKeys.enter_publication_year.tr(),
+                          icon: FontAwesomeIcons.solidCalendar,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          maxLength: 4,
+                          padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  BookTextField(
+                    controller: _descriptionCtrl,
+                    hint: LocaleKeys.enter_description.tr(),
+                    icon: FontAwesomeIcons.solidKeyboard,
+                    keyboardType: TextInputType.multiline,
+                    maxLength: 5000,
+                    hideCounter: false,
+                    maxLines: 15,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: BookTextField(
+                          controller: _isbnCtrl,
+                          hint: LocaleKeys.isbn.tr(),
+                          icon: FontAwesomeIcons.i,
+                          textCapitalization: TextCapitalization.characters,
+                          keyboardType: TextInputType.text,
+                          maxLength: 20,
+                        ),
+                      ),
+                      InkWell(
+                        customBorder: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(cornerRadius),
+                        ),
+                        onTap: () async {
+                          // var result = await BarcodeScanner.scan(
+                          //   options: ScanOptions(
+                          //     strings: {
+                          //       'cancel': LocaleKeys.cancel.tr(),
+                          //       'flash_on': LocaleKeys.flash_on.tr(),
+                          //       'flash_off': LocaleKeys.flash_off.tr(),
+                          //     },
+                          //   ),
+                          // );
+
+                          // if (result.type == ResultType.Barcode) {
+                          //   setState(() {
+                          //     _isbnCtrl.text = result.rawContent;
+                          //   });
+                          // }
+                        },
+                        child: Container(
+                          height: 60,
+                          width: 60,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(cornerRadius),
+                            color: context.colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.5),
+                          ),
+                          child: Icon(
+                            FontAwesomeIcons.barcode,
+                            size: 28,
+                            color: context.colorScheme.primary,
                           ),
                         ),
-                        child: Center(child: Text(LocaleKeys.cancel.tr())),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 19,
-                      child: BlocBuilder<EditBookCubit, Book>(
-                        builder: (context, state) {
-                          return FilledButton(
-                            onPressed: (state.id != null)
-                                ? () => _updateBook(state)
-                                : () => _saveNewBook(state),
-                            style: ButtonStyle(
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    cornerRadius,
-                                  ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  BookTextField(
+                    controller: _olidCtrl,
+                    hint: LocaleKeys.open_library_ID.tr(),
+                    icon: FontAwesomeIcons.o,
+                    keyboardType: TextInputType.text,
+                    maxLength: 20,
+                    textCapitalization: TextCapitalization.characters,
+                  ),
+                  const SizedBox(height: 10),
+                  // DEPRECATED
+                  // StreamBuilder<List<String>>(
+                  //   stream: bookCubit.tags,
+                  //   builder: (context, AsyncSnapshot<List<String>?> snapshot) {
+                  //     return TagsField(
+                  //       controller: _tagsCtrl,
+                  //       hint: LocaleKeys.enter_tags.tr(),
+                  //       icon: FontAwesomeIcons.tags,
+                  //       keyboardType: TextInputType.text,
+                  //       maxLength: Constants.maxTagLength,
+                  //       onSubmitted: (_) => _addNewTag(),
+                  //       onEditingComplete: () {},
+                  //       unselectTag: (tag) => _unselectTag(tag),
+                  //       allTags: snapshot.data,
+                  //     );
+                  //   },
+                  // ),
+                  BlocSelector<LibraryCubit, LibraryState, List<String>>(
+                    selector: (state) => state.allTags,
+                    builder: (context, tags) {
+                      return TagsField(
+                        controller: _tagsCtrl,
+                        hint: LocaleKeys.enter_tags.tr(),
+                        icon: FontAwesomeIcons.tags,
+                        keyboardType: TextInputType.text,
+                        maxLength: Constants.maxTagLength,
+                        onSubmitted: (_) => _addNewTag(),
+                        onEditingComplete: () {},
+                        unselectTag: (tag) => _unselectTag(tag),
+                        allTags: tags,
+                      );
+                    },
+                  ),
+                  const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  BookTextField(
+                    controller: _myReviewCtrl,
+                    hint: LocaleKeys.my_review.tr(),
+                    icon: FontAwesomeIcons.solidKeyboard,
+                    keyboardType: TextInputType.multiline,
+                    maxLength: 5000,
+                    hideCounter: false,
+                    maxLines: 15,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 10),
+                  BookTextField(
+                    controller: _notesCtrl,
+                    hint: LocaleKeys.notes.tr(),
+                    icon: FontAwesomeIcons.noteSticky,
+                    keyboardType: TextInputType.multiline,
+                    maxLength: 5000,
+                    hideCounter: false,
+                    maxLines: 15,
+                    textCapitalization: TextCapitalization.sentences,
+                  ),
+                  const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 10,
+                        child: FilledButton.tonal(
+                          onPressed: () => Navigator.pop(context),
+                          style: ButtonStyle(
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  cornerRadius,
                                 ),
                               ),
                             ),
-                            child: Center(child: Text(LocaleKeys.save.tr())),
-                          );
-                        },
+                          ),
+                          child: Center(child: Text(LocaleKeys.cancel.tr())),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                  ],
-                ),
-                const SizedBox(height: 50.0),
-              ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 19,
+                        child: BlocBuilder<EditBookCubit, Book>(
+                          builder: (context, state) {
+                            return FilledButton(
+                              onPressed: (state.id != null)
+                                  ? () => _updateBook(state)
+                                  : () => _saveNewBook(),
+                              style: ButtonStyle(
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(
+                                      cornerRadius,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              child: Center(child: Text(LocaleKeys.save.tr())),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                  const SizedBox(height: 50.0),
+                ],
+              ),
             ),
           ),
         ),

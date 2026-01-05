@@ -9,45 +9,230 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/bulk_edit_option.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/domain/book/usecases/params/bulk_update_params.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
-class MultiSelectFAB extends StatelessWidget {
-  MultiSelectFAB({super.key});
+class MultiSelectFAB extends StatefulWidget {
+  const MultiSelectFAB({super.key});
 
-  final bookTypes = [
-    LocaleKeys.book_format_paperback.tr(),
-    LocaleKeys.book_format_hardcover.tr(),
-    LocaleKeys.book_format_ebook.tr(),
-    LocaleKeys.book_format_audiobook.tr(),
-  ];
+  @override
+  State<MultiSelectFAB> createState() => _MultiSelectFABState();
+}
 
-  final _authorCtrl = TextEditingController();
+class _MultiSelectFABState extends State<MultiSelectFAB> {
+  late final TextEditingController _authorCtrl;
 
-  String _getLabel(BulkEditOption bulkEditOption) {
-    String label = '';
-    switch (bulkEditOption) {
-      case BulkEditOption.format:
-        label = LocaleKeys.change_book_format.tr();
-        break;
-      case BulkEditOption.author:
-        label = LocaleKeys.change_books_author.tr();
-        break;
-      default:
-        label = '';
-    }
+  // Cache danh sách chuỗi định dạng sách để dùng cho Dropdown
+  late final List<String> _bookFormatLabels;
 
-    return label;
+  @override
+  void initState() {
+    super.initState();
+    _authorCtrl = TextEditingController();
+    _bookFormatLabels = [
+      LocaleKeys.book_format_paperback.tr(),
+      LocaleKeys.book_format_hardcover.tr(),
+      LocaleKeys.book_format_ebook.tr(),
+      LocaleKeys.book_format_audiobook.tr(),
+    ];
   }
 
-  Material _buildBottomSheet(
+  @override
+  void dispose() {
+    _authorCtrl.dispose();
+    super.dispose();
+  }
+
+  // --- UI EVENT HANDLERS (Gọi Cubit) ---
+
+  void _onUpdateFormat(
     BuildContext context,
-    BulkEditOption bulkEditOption,
+    String bookTypeStr,
+    List<int> ids,
+  ) {
+    // 1. Map từ String hiển thị trên UI sang Enum
+    final format = _mapStringToBookFormat(bookTypeStr);
+
+    // 2. Gọi Cubit thực hiện Bulk Update
+    context.bookActor.bulkUpdate(
+      BulkUpdateBooksParams(ids: ids.toSet(), format: format),
+    );
+
+    // 3. Đóng BottomSheet (UI Optimistic)
+    Navigator.pop(context);
+  }
+
+  void _onUpdateAuthor(BuildContext context, List<int> ids) {
+    final author = _authorCtrl.text.trim();
+    if (author.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(LocaleKeys.bulk_update_unsuccessful_message.tr()),
+        ),
+      );
+      return;
+    }
+
+    // Gọi Cubit
+    context.bookActor.bulkUpdate(
+      BulkUpdateBooksParams(ids: ids.toSet(), author: author),
+    );
+
+    Navigator.pop(context); // Đóng BottomSheet
+  }
+
+  void _onBulkDelete(BuildContext context, List<int> ids) {
+    // Gọi Cubit (Giả sử bạn đã thêm hàm bulkDelete hoặc dùng bulkUpdate status)
+    // Nếu chưa có bulkDelete, dùng logic update deleted = true
+    context.bookActor.bulkDelete(ids.toSet());
+
+    Navigator.pop(context); // Đóng Dialog
+  }
+
+  // --- HELPER FUNCTIONS ---
+
+  BookFormat _mapStringToBookFormat(String label) {
+    if (label == _bookFormatLabels[1]) return BookFormat.hardcover;
+    if (label == _bookFormatLabels[2]) return BookFormat.ebook;
+    if (label == _bookFormatLabels[3]) return BookFormat.audiobook;
+    return BookFormat.paperback; // Default
+  }
+
+  String _getLabel(BulkEditOption bulkEditOption) {
+    switch (bulkEditOption) {
+      case BulkEditOption.format:
+        return LocaleKeys.change_book_format.tr();
+      case BulkEditOption.author:
+        return LocaleKeys.change_books_author.tr();
+      case BulkEditOption.delete:
+        return LocaleKeys.delete_book.tr();
+    }
+  }
+
+  // --- BUILD METHODS ---
+
+  @override
+  Widget build(BuildContext context) {
+    // BlocListener để lắng nghe kết quả từ BookActorCubit
+    return BlocListener<BookActorCubit, BookActorState>(
+      listener: (context, state) {
+        state.whenOrNull(
+          success: (message, _) {
+            // Reset selection sau khi thành công
+            context.read<SelectedBooksCubit>().resetSelection();
+
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+          failure: (message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message), backgroundColor: Colors.red),
+            );
+          },
+        );
+      },
+      child: BlocBuilder<SelectedBooksCubit, List<int>>(
+        builder: (context, selectedList) {
+          // Nếu không chọn sách nào thì ẩn FAB (hoặc disable)
+          if (selectedList.isEmpty) return const SizedBox.shrink();
+
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 0),
+            child: SpeedDial(
+              spacing: 20,
+              icon: FontAwesomeIcons.penToSquare,
+              activeIcon: Icons.close,
+              childPadding: const EdgeInsets.all(5),
+              spaceBetweenChildren: 10,
+              children: [
+                _buildSpeedDialChild(
+                  context,
+                  icon: FontAwesomeIcons.bookOpen,
+                  label: LocaleKeys.change_book_format.tr(),
+                  color: context.colorScheme.secondary,
+                  onColor: context.colorScheme.onSecondary,
+                  onTap: () => _showBottomSheet(
+                    context,
+                    BulkEditOption.format,
+                    selectedList,
+                  ),
+                ),
+                _buildSpeedDialChild(
+                  context,
+                  icon: FontAwesomeIcons.user,
+                  label: LocaleKeys.change_books_author.tr(),
+                  color: context.colorScheme.secondary,
+                  onColor: context.colorScheme.onSecondary,
+                  onTap: () => _showBottomSheet(
+                    context,
+                    BulkEditOption.author,
+                    selectedList,
+                  ),
+                ),
+                _buildSpeedDialChild(
+                  context,
+                  icon: FontAwesomeIcons.trash,
+                  label: LocaleKeys.delete_books.tr(),
+                  color: context.colorScheme.tertiary,
+                  onColor: context.colorScheme.onTertiary,
+                  onTap: () => _showDeleteBooksDialog(context, selectedList),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  SpeedDialChild _buildSpeedDialChild(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color onColor,
+    required VoidCallback onTap,
+  }) {
+    return SpeedDialChild(
+      child: FaIcon(icon, color: onColor, size: 18),
+      backgroundColor: color,
+      labelBackgroundColor: context.colorScheme.surfaceContainerHighest,
+      foregroundColor: context.colorScheme.onSurfaceVariant,
+      label: label,
+      onTap: onTap,
+    );
+  }
+
+  void _showBottomSheet(
+    BuildContext context,
+    BulkEditOption option,
+    List<int> selectedList,
+  ) {
+    if (Platform.isIOS) {
+      showCupertinoModalBottomSheet(
+        context: context,
+        expand: false,
+        builder: (_) => _buildBottomSheetContent(context, option, selectedList),
+      );
+    } else {
+      showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (_) => _buildBottomSheetContent(context, option, selectedList),
+      );
+    }
+  }
+
+  Widget _buildBottomSheetContent(
+    BuildContext context,
+    BulkEditOption option,
     List<int> selectedList,
   ) {
     return Material(
@@ -57,28 +242,25 @@ class MultiSelectFAB extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (Platform.isAndroid)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
-                  child: Container(
-                    height: 5,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: context.colorScheme.onSurfaceVariant.withValues(
-                        alpha: 0.4,
-                      ),
-                      borderRadius: BorderRadius.circular(50),
+              if (Platform.isAndroid) ...[
+                Container(
+                  height: 5,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: context.colorScheme.onSurfaceVariant.withOpacity(
+                      0.4,
                     ),
+                    borderRadius: BorderRadius.circular(50),
                   ),
                 ),
-              const SizedBox(height: 10),
-              _buildHeader(bulkEditOption),
+                const SizedBox(height: 10),
+              ],
+              _buildHeader(option),
               const SizedBox(height: 30),
-              bulkEditOption == BulkEditOption.format
-                  ? _buildEditFormat(selectedList, context)
-                  : bulkEditOption == BulkEditOption.author
-                  ? _buildEditAuthor(selectedList, context)
-                  : const SizedBox(),
+              if (option == BulkEditOption.format)
+                _buildEditFormat(context, selectedList)
+              else if (option == BulkEditOption.author)
+                _buildEditAuthor(context, selectedList),
             ],
           ),
         ),
@@ -86,68 +268,57 @@ class MultiSelectFAB extends StatelessWidget {
     );
   }
 
-  Future<void> _updateBooksFormat(
-    BuildContext context,
-    String bookType,
-    List<int> selectedIds,
-  ) async {
-    List<Book> booksToSync = List.empty(growable: true);
-    late BookFormat selectedBookType;
-
-    if (bookType == bookTypes[0]) {
-      selectedBookType = BookFormat.paperback;
-    } else if (bookType == bookTypes[1]) {
-      selectedBookType = BookFormat.hardcover;
-    } else if (bookType == bookTypes[2]) {
-      selectedBookType = BookFormat.ebook;
-    } else if (bookType == bookTypes[3]) {
-      selectedBookType = BookFormat.audiobook;
-    } else {
-      selectedBookType = BookFormat.paperback;
-    }
-
-    for (final bookId in selectedIds) {
-      Book? book = await bookCubit.getBook(bookId);
-
-      if (book == null) continue;
-      book = book.copyWith(bookFormat: selectedBookType);
-      booksToSync.add(book);
-
-      await bookCubit.updateBook(book);
-    }
-
-    if (!context.mounted) return;
+  Widget _buildEditAuthor(BuildContext context, List<int> selectedList) {
+    return Column(
+      children: [
+        BookTextField(
+          controller: _authorCtrl,
+          hint: LocaleKeys.enter_author.tr(),
+          icon: Icons.person,
+          keyboardType: TextInputType.name,
+          maxLines: 5,
+          maxLength: 255,
+          textCapitalization: TextCapitalization.words,
+          padding: EdgeInsets.zero,
+        ),
+        const SizedBox(height: 20),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            style: FilledButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(cornerRadius),
+              ),
+            ),
+            onPressed: () => _onUpdateAuthor(context, selectedList),
+            child: Text(LocaleKeys.save.tr()),
+          ),
+        ),
+      ],
+    );
   }
 
-  Future<void> _updateBooksAuthor(
-    BuildContext context,
-    List<int> selectedIds,
-  ) async {
-    List<Book> booksToSync = List.empty(growable: true);
-    final author = _authorCtrl.text;
+  Widget _buildEditFormat(BuildContext context, List<int> selectedList) {
+    return BookTypeDropdown(
+      bookTypes: _bookFormatLabels,
+      padding: EdgeInsets.zero,
+      changeBookType: (bookTypeStr) {
+        if (bookTypeStr == null) return;
+        _onUpdateFormat(context, bookTypeStr, selectedList);
+      },
+    );
+  }
 
-    if (author.isEmpty) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(LocaleKeys.bulk_update_unsuccessful_message.tr()),
+  Widget _buildHeader(BulkEditOption option) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            _getLabel(option),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ),
-      );
-    }
-
-    for (final bookId in selectedIds) {
-      Book? book = await bookCubit.getBook(bookId);
-
-      if (book == null) continue;
-      book = book.copyWith(author: author);
-      booksToSync.add(book);
-
-      await bookCubit.updateBook(book);
-    }
-
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(LocaleKeys.update_successful_message.tr())),
+      ],
     );
   }
 
@@ -166,30 +337,24 @@ class MultiSelectFAB extends StatelessWidget {
           actionsAlignment: MainAxisAlignment.spaceBetween,
           actions: [
             FilledButton.tonal(
-              style: ButtonStyle(
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(cornerRadius),
-                  ),
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(cornerRadius),
                 ),
               ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(LocaleKeys.no.tr()),
               ),
             ),
             FilledButton(
-              style: ButtonStyle(
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(cornerRadius),
-                  ),
+              style: FilledButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(cornerRadius),
                 ),
               ),
-              onPressed: () => _bulkDeleteBooks(context, selectedList),
+              onPressed: () => _onBulkDelete(context, selectedList),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: Text(LocaleKeys.yes.tr()),
@@ -198,198 +363,6 @@ class MultiSelectFAB extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-
-  Future<void> _bulkDeleteBooks(
-    BuildContext context,
-    List<int> selectedList,
-  ) async {
-    List<Book> booksToSync = List.empty(growable: true);
-
-    for (final bookId in selectedList) {
-      Book? book = await bookCubit.getBook(bookId);
-
-      if (book == null) continue;
-      book = book.copyWith(deleted: true);
-      booksToSync.add(book);
-
-      await bookCubit.updateBook(book);
-    }
-
-    bookCubit.getDeletedBooks();
-
-    if (!context.mounted) return;
-
-    context.read<SelectedBooksCubit>().resetSelection();
-
-    Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<SelectedBooksCubit, List<int>>(
-      builder: (context, selectedList) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 00),
-          child: SpeedDial(
-            spacing: 20,
-            dialRoot: (ctx, open, toggleChildren) {
-              return FloatingActionButton(
-                onPressed: toggleChildren,
-                child: const FaIcon(FontAwesomeIcons.penToSquare),
-              );
-            },
-            childPadding: const EdgeInsets.all(5),
-            spaceBetweenChildren: 10,
-            children: [
-              SpeedDialChild(
-                child: FaIcon(
-                  FontAwesomeIcons.bookOpen,
-                  color: context.colorScheme.onSecondary,
-                  size: 18,
-                ),
-                backgroundColor: context.colorScheme.secondary,
-                labelBackgroundColor:
-                    context.colorScheme.surfaceContainerHighest,
-                foregroundColor: context.colorScheme.onSurfaceVariant,
-                label: LocaleKeys.change_book_format.tr(),
-                onTap: () {
-                  showModalBottomSheet(
-                    isScrollControlled: true,
-                    context: context,
-                    builder: (context) {
-                      return _buildBottomSheet(
-                        context,
-                        BulkEditOption.format,
-                        selectedList,
-                      );
-                    },
-                  );
-                },
-              ),
-              SpeedDialChild(
-                child: FaIcon(
-                  FontAwesomeIcons.user,
-                  color: context.colorScheme.onSecondary,
-                  size: 18,
-                ),
-                backgroundColor: context.colorScheme.secondary,
-                labelBackgroundColor:
-                    context.colorScheme.surfaceContainerHighest,
-                foregroundColor: context.colorScheme.onSurfaceVariant,
-                label: LocaleKeys.change_books_author.tr(),
-                onTap: () {
-                  if (Platform.isIOS) {
-                    showCupertinoModalBottomSheet(
-                      context: context,
-                      expand: false,
-                      builder: (_) {
-                        return _buildBottomSheet(
-                          context,
-                          BulkEditOption.author,
-                          selectedList,
-                        );
-                      },
-                    );
-                  } else if (Platform.isAndroid) {
-                    showModalBottomSheet(
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (context) {
-                        return _buildBottomSheet(
-                          context,
-                          BulkEditOption.author,
-                          selectedList,
-                        );
-                      },
-                    );
-                  }
-                },
-              ),
-              SpeedDialChild(
-                child: FaIcon(
-                  FontAwesomeIcons.trash,
-                  color: context.colorScheme.onTertiary,
-                  size: 18,
-                ),
-                backgroundColor: context.colorScheme.tertiary,
-                labelBackgroundColor:
-                    context.colorScheme.surfaceContainerHighest,
-                foregroundColor: context.colorScheme.onSurfaceVariant,
-                label: LocaleKeys.delete_books.tr(),
-                onTap: () => _showDeleteBooksDialog(context, selectedList),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Column _buildEditAuthor(List<int> selectedList, BuildContext context) {
-    return Column(
-      children: [
-        BookTextField(
-          controller: _authorCtrl,
-          hint: LocaleKeys.enter_author.tr(),
-          icon: Icons.person,
-          keyboardType: TextInputType.name,
-          maxLines: 5,
-          maxLength: 255,
-          textCapitalization: TextCapitalization.words,
-          padding: const EdgeInsets.all(0),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Expanded(
-              child: FilledButton(
-                style: ButtonStyle(
-                  shape: WidgetStatePropertyAll(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(cornerRadius),
-                    ),
-                  ),
-                ),
-                onPressed: () => _updateBooksAuthor(context, selectedList),
-                child: Text(LocaleKeys.save.tr()),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  BookTypeDropdown _buildEditFormat(
-    List<int> selectedList,
-    BuildContext context,
-  ) {
-    return BookTypeDropdown(
-      bookTypes: bookTypes,
-      padding: const EdgeInsets.all(0),
-      changeBookType: (bookType) {
-        if (bookType == null) return;
-        _updateBooksFormat(context, bookType, selectedList);
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(LocaleKeys.update_successful_message.tr())),
-        );
-      },
-    );
-  }
-
-  Row _buildHeader(BulkEditOption bulkEditOption) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            _getLabel(bulkEditOption),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 }

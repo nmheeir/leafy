@@ -4,6 +4,7 @@ import 'package:leafy/core/constants/enums/sort_type.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 
+// BUG: SortBloc không hoạt động như mong muốn
 class SortBloc extends HydratedBloc<SortEvent, SortState> {
   final String uniqueId;
 

@@ -1,0 +1,643 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'open_lib_search_bloc.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// dart format off
+T _$identity<T>(T value) => value;
+/// @nodoc
+mixin _$OpenLibSearchEvent {
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OpenLibSearchEvent);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'OpenLibSearchEvent()';
+}
+
+
+}
+
+/// @nodoc
+class $OpenLibSearchEventCopyWith<$Res>  {
+$OpenLibSearchEventCopyWith(OpenLibSearchEvent _, $Res Function(OpenLibSearchEvent) __);
+}
+
+
+/// Adds pattern-matching-related methods to [OpenLibSearchEvent].
+extension OpenLibSearchEventPatterns on OpenLibSearchEvent {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _QueryChanged value)?  queryChanged,TResult Function( _TypeChanged value)?  typeChanged,TResult Function( _LoadMore value)?  loadMore,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _QueryChanged() when queryChanged != null:
+return queryChanged(_that);case _TypeChanged() when typeChanged != null:
+return typeChanged(_that);case _LoadMore() when loadMore != null:
+return loadMore(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _QueryChanged value)  queryChanged,required TResult Function( _TypeChanged value)  typeChanged,required TResult Function( _LoadMore value)  loadMore,}){
+final _that = this;
+switch (_that) {
+case _QueryChanged():
+return queryChanged(_that);case _TypeChanged():
+return typeChanged(_that);case _LoadMore():
+return loadMore(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _QueryChanged value)?  queryChanged,TResult? Function( _TypeChanged value)?  typeChanged,TResult? Function( _LoadMore value)?  loadMore,}){
+final _that = this;
+switch (_that) {
+case _QueryChanged() when queryChanged != null:
+return queryChanged(_that);case _TypeChanged() when typeChanged != null:
+return typeChanged(_that);case _LoadMore() when loadMore != null:
+return loadMore(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String query)?  queryChanged,TResult Function( OLSearchType type)?  typeChanged,TResult Function()?  loadMore,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _QueryChanged() when queryChanged != null:
+return queryChanged(_that.query);case _TypeChanged() when typeChanged != null:
+return typeChanged(_that.type);case _LoadMore() when loadMore != null:
+return loadMore();case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String query)  queryChanged,required TResult Function( OLSearchType type)  typeChanged,required TResult Function()  loadMore,}) {final _that = this;
+switch (_that) {
+case _QueryChanged():
+return queryChanged(_that.query);case _TypeChanged():
+return typeChanged(_that.type);case _LoadMore():
+return loadMore();case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String query)?  queryChanged,TResult? Function( OLSearchType type)?  typeChanged,TResult? Function()?  loadMore,}) {final _that = this;
+switch (_that) {
+case _QueryChanged() when queryChanged != null:
+return queryChanged(_that.query);case _TypeChanged() when typeChanged != null:
+return typeChanged(_that.type);case _LoadMore() when loadMore != null:
+return loadMore();case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _QueryChanged implements OpenLibSearchEvent {
+  const _QueryChanged(this.query);
+  
+
+ final  String query;
+
+/// Create a copy of OpenLibSearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$QueryChangedCopyWith<_QueryChanged> get copyWith => __$QueryChangedCopyWithImpl<_QueryChanged>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QueryChanged&&(identical(other.query, query) || other.query == query));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,query);
+
+@override
+String toString() {
+  return 'OpenLibSearchEvent.queryChanged(query: $query)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$QueryChangedCopyWith<$Res> implements $OpenLibSearchEventCopyWith<$Res> {
+  factory _$QueryChangedCopyWith(_QueryChanged value, $Res Function(_QueryChanged) _then) = __$QueryChangedCopyWithImpl;
+@useResult
+$Res call({
+ String query
+});
+
+
+
+
+}
+/// @nodoc
+class __$QueryChangedCopyWithImpl<$Res>
+    implements _$QueryChangedCopyWith<$Res> {
+  __$QueryChangedCopyWithImpl(this._self, this._then);
+
+  final _QueryChanged _self;
+  final $Res Function(_QueryChanged) _then;
+
+/// Create a copy of OpenLibSearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? query = null,}) {
+  return _then(_QueryChanged(
+null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _TypeChanged implements OpenLibSearchEvent {
+  const _TypeChanged(this.type);
+  
+
+ final  OLSearchType type;
+
+/// Create a copy of OpenLibSearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TypeChangedCopyWith<_TypeChanged> get copyWith => __$TypeChangedCopyWithImpl<_TypeChanged>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TypeChanged&&(identical(other.type, type) || other.type == type));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,type);
+
+@override
+String toString() {
+  return 'OpenLibSearchEvent.typeChanged(type: $type)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TypeChangedCopyWith<$Res> implements $OpenLibSearchEventCopyWith<$Res> {
+  factory _$TypeChangedCopyWith(_TypeChanged value, $Res Function(_TypeChanged) _then) = __$TypeChangedCopyWithImpl;
+@useResult
+$Res call({
+ OLSearchType type
+});
+
+
+
+
+}
+/// @nodoc
+class __$TypeChangedCopyWithImpl<$Res>
+    implements _$TypeChangedCopyWith<$Res> {
+  __$TypeChangedCopyWithImpl(this._self, this._then);
+
+  final _TypeChanged _self;
+  final $Res Function(_TypeChanged) _then;
+
+/// Create a copy of OpenLibSearchEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? type = null,}) {
+  return _then(_TypeChanged(
+null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as OLSearchType,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _LoadMore implements OpenLibSearchEvent {
+  const _LoadMore();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoadMore);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'OpenLibSearchEvent.loadMore()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+mixin _$OpenLibSearchState {
+
+ SearchStatus get status; OLSearchType get searchType; List<OLSearchResultDoc> get books; int get numberOfResults; bool get hasReachedMax; int get page; String get errorMessage; String get currentQuery; Map<OLSearchType, SearchTabData> get cache;
+/// Create a copy of OpenLibSearchState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OpenLibSearchStateCopyWith<OpenLibSearchState> get copyWith => _$OpenLibSearchStateCopyWithImpl<OpenLibSearchState>(this as OpenLibSearchState, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OpenLibSearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other.books, books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other.cache, cache));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(books),numberOfResults,hasReachedMax,page,errorMessage,currentQuery,const DeepCollectionEquality().hash(cache));
+
+@override
+String toString() {
+  return 'OpenLibSearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OpenLibSearchStateCopyWith<$Res>  {
+  factory $OpenLibSearchStateCopyWith(OpenLibSearchState value, $Res Function(OpenLibSearchState) _then) = _$OpenLibSearchStateCopyWithImpl;
+@useResult
+$Res call({
+ SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, int numberOfResults, bool hasReachedMax, int page, String errorMessage, String currentQuery, Map<OLSearchType, SearchTabData> cache
+});
+
+
+
+
+}
+/// @nodoc
+class _$OpenLibSearchStateCopyWithImpl<$Res>
+    implements $OpenLibSearchStateCopyWith<$Res> {
+  _$OpenLibSearchStateCopyWithImpl(this._self, this._then);
+
+  final OpenLibSearchState _self;
+  final $Res Function(OpenLibSearchState) _then;
+
+/// Create a copy of OpenLibSearchState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
+  return _then(_self.copyWith(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as SearchStatus,searchType: null == searchType ? _self.searchType : searchType // ignore: cast_nullable_to_non_nullable
+as OLSearchType,books: null == books ? _self.books : books // ignore: cast_nullable_to_non_nullable
+as List<OLSearchResultDoc>,numberOfResults: null == numberOfResults ? _self.numberOfResults : numberOfResults // ignore: cast_nullable_to_non_nullable
+as int,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,currentQuery: null == currentQuery ? _self.currentQuery : currentQuery // ignore: cast_nullable_to_non_nullable
+as String,cache: null == cache ? _self.cache : cache // ignore: cast_nullable_to_non_nullable
+as Map<OLSearchType, SearchTabData>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [OpenLibSearchState].
+extension OpenLibSearchStatePatterns on OpenLibSearchState {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SearchState value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SearchState() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SearchState value)  $default,){
+final _that = this;
+switch (_that) {
+case _SearchState():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SearchState value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SearchState() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SearchState() when $default != null:
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)  $default,) {final _that = this;
+switch (_that) {
+case _SearchState():
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( SearchStatus status,  OLSearchType searchType,  List<OLSearchResultDoc> books,  int numberOfResults,  bool hasReachedMax,  int page,  String errorMessage,  String currentQuery,  Map<OLSearchType, SearchTabData> cache)?  $default,) {final _that = this;
+switch (_that) {
+case _SearchState() when $default != null:
+return $default(_that.status,_that.searchType,_that.books,_that.numberOfResults,_that.hasReachedMax,_that.page,_that.errorMessage,_that.currentQuery,_that.cache);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _SearchState implements OpenLibSearchState {
+  const _SearchState({this.status = SearchStatus.initial, this.searchType = OLSearchType.general, final  List<OLSearchResultDoc> books = const [], this.numberOfResults = 0, this.hasReachedMax = false, this.page = 0, this.errorMessage = '', this.currentQuery = '', final  Map<OLSearchType, SearchTabData> cache = const {}}): _books = books,_cache = cache;
+  
+
+@override@JsonKey() final  SearchStatus status;
+@override@JsonKey() final  OLSearchType searchType;
+ final  List<OLSearchResultDoc> _books;
+@override@JsonKey() List<OLSearchResultDoc> get books {
+  if (_books is EqualUnmodifiableListView) return _books;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_books);
+}
+
+@override@JsonKey() final  int numberOfResults;
+@override@JsonKey() final  bool hasReachedMax;
+@override@JsonKey() final  int page;
+@override@JsonKey() final  String errorMessage;
+@override@JsonKey() final  String currentQuery;
+ final  Map<OLSearchType, SearchTabData> _cache;
+@override@JsonKey() Map<OLSearchType, SearchTabData> get cache {
+  if (_cache is EqualUnmodifiableMapView) return _cache;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_cache);
+}
+
+
+/// Create a copy of OpenLibSearchState
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SearchStateCopyWith<_SearchState> get copyWith => __$SearchStateCopyWithImpl<_SearchState>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SearchState&&(identical(other.status, status) || other.status == status)&&(identical(other.searchType, searchType) || other.searchType == searchType)&&const DeepCollectionEquality().equals(other._books, _books)&&(identical(other.numberOfResults, numberOfResults) || other.numberOfResults == numberOfResults)&&(identical(other.hasReachedMax, hasReachedMax) || other.hasReachedMax == hasReachedMax)&&(identical(other.page, page) || other.page == page)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.currentQuery, currentQuery) || other.currentQuery == currentQuery)&&const DeepCollectionEquality().equals(other._cache, _cache));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,status,searchType,const DeepCollectionEquality().hash(_books),numberOfResults,hasReachedMax,page,errorMessage,currentQuery,const DeepCollectionEquality().hash(_cache));
+
+@override
+String toString() {
+  return 'OpenLibSearchState(status: $status, searchType: $searchType, books: $books, numberOfResults: $numberOfResults, hasReachedMax: $hasReachedMax, page: $page, errorMessage: $errorMessage, currentQuery: $currentQuery, cache: $cache)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SearchStateCopyWith<$Res> implements $OpenLibSearchStateCopyWith<$Res> {
+  factory _$SearchStateCopyWith(_SearchState value, $Res Function(_SearchState) _then) = __$SearchStateCopyWithImpl;
+@override @useResult
+$Res call({
+ SearchStatus status, OLSearchType searchType, List<OLSearchResultDoc> books, int numberOfResults, bool hasReachedMax, int page, String errorMessage, String currentQuery, Map<OLSearchType, SearchTabData> cache
+});
+
+
+
+
+}
+/// @nodoc
+class __$SearchStateCopyWithImpl<$Res>
+    implements _$SearchStateCopyWith<$Res> {
+  __$SearchStateCopyWithImpl(this._self, this._then);
+
+  final _SearchState _self;
+  final $Res Function(_SearchState) _then;
+
+/// Create a copy of OpenLibSearchState
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? searchType = null,Object? books = null,Object? numberOfResults = null,Object? hasReachedMax = null,Object? page = null,Object? errorMessage = null,Object? currentQuery = null,Object? cache = null,}) {
+  return _then(_SearchState(
+status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as SearchStatus,searchType: null == searchType ? _self.searchType : searchType // ignore: cast_nullable_to_non_nullable
+as OLSearchType,books: null == books ? _self._books : books // ignore: cast_nullable_to_non_nullable
+as List<OLSearchResultDoc>,numberOfResults: null == numberOfResults ? _self.numberOfResults : numberOfResults // ignore: cast_nullable_to_non_nullable
+as int,hasReachedMax: null == hasReachedMax ? _self.hasReachedMax : hasReachedMax // ignore: cast_nullable_to_non_nullable
+as bool,page: null == page ? _self.page : page // ignore: cast_nullable_to_non_nullable
+as int,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,currentQuery: null == currentQuery ? _self.currentQuery : currentQuery // ignore: cast_nullable_to_non_nullable
+as String,cache: null == cache ? _self._cache : cache // ignore: cast_nullable_to_non_nullable
+as Map<OLSearchType, SearchTabData>,
+  ));
+}
+
+
+}
+
+// dart format on

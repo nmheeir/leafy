@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 
 class BookTypeDropdown extends StatelessWidget {
@@ -39,7 +39,9 @@ class BookTypeDropdown extends StatelessWidget {
       padding: padding,
       child: Container(
         decoration: BoxDecoration(
-          color: context.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+          color: context.colorScheme.surfaceContainerHighest.withValues(
+            alpha: 0.5,
+          ),
           borderRadius: BorderRadius.circular(cornerRadius),
         ),
         child: BlocBuilder<EditBookCubit, Book>(

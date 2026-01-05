@@ -1,0 +1,26 @@
+import 'package:fpdart/fpdart.dart';
+import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
+import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
+import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result_model.dart';
+import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
+
+@LazySingleton(as: GutendexRepository)
+class GutendexRepositoryImpl implements GutendexRepository {
+  @override
+  Future<Either<Failure, GtdBooksResultModel>> getBooks({
+    required int? page,
+    required int? authorYearStart,
+    required int? authorYearEnd,
+    required List<bool?>? copyright,
+    required List<int>? ids,
+    required List<GtdLang>? languages,
+    required String? mimeType,
+    required String? search,
+    required GtdSortType? sort,
+    required String? topic,
+  }) {
+    throw UnimplementedError();
+  }
+}

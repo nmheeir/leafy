@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/ui/book/widgets/cover_background.dart';
 
 class CoverView extends StatefulWidget {
@@ -29,7 +30,7 @@ class _CoverViewState extends State<CoverView> {
     if (widget.coverFile != null) {
       coverFile = widget.coverFile;
     } else if (widget.book != null) {
-      coverFile = widget.book!.getCoverFile();
+      coverFile = getCoverFile(widget.book!.id);
     }
   }
 
@@ -43,11 +44,7 @@ class _CoverViewState extends State<CoverView> {
         SizedBox(
           width: mediaQuery.size.width,
           height: (mediaQuery.size.height / 2.5) + mediaQuery.padding.top + 20,
-          child: const Stack(
-            children: [
-              CoverBackground(),
-            ],
-          ),
+          child: Stack(children: [CoverBackground()]),
         ),
         Column(
           children: [

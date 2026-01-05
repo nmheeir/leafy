@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:diacritic/diacritic.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,8 @@ import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/core/constants/enums/sort_type.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
@@ -211,7 +212,7 @@ class BookCardList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final coverFile = book.getCoverFile();
+    final coverFile = getCoverFile(book.id);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(5, 0, 5, addBottomPadding ? 90 : 5),

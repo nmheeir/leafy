@@ -1,0 +1,41 @@
+- Domain: 
+    - Entity: Chỉ chứa dữ liệu thuần tuý, không phụ thuộc vào các layer khác
+
+- Data:
+    - Model: chứa dữ liệu phục vụ cho việc truy vấn API hoặc local
+
+* Nguyên tắc:
+    - Use Case = quyết định làm hay không
+    - Repository = quyết định làm như thế nào
+    - UI → Presentation → Domain → Core
+
+    - Progress là state, không phải side effect
+
+    - UI chỉ render theo state
+
+    - UseCase phát ra tiến trình
+
+    - Cubit/Bloc chuyển tiến trình thành state
+
+| Layer          | Trách nhiệm     |
+| -------------- | --------------- |
+| Presentation   | State, UI logic |
+| Domain         | Business rules  |
+| Data           | DB, API, Cache  |
+| Infrastructure | Framework, IO   |
+
+
+* Có cách nào khác không? (So sánh với Option)
+    Trong lập trình hàm (Functional Programming) với dartz hoặc fpdart, có một cách khác là sử dụng kiểu Option (tương đương Optional trong Java).
+
+    Kiểu trả về sẽ là: Future<Either<Failure, Option<Book>>>.
+
+        - Left: Lỗi hệ thống (DB chết, query sai...).
+
+        - Right(None): Truy vấn thành công, nhưng không có dữ liệu (Not Found).
+
+        - Right(Some(Book)): Truy vấn thành công, có dữ liệu.
+
+* Validate cần được xử lý trong use case
+
+    

@@ -1,0 +1,116 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/utils/converters/int_to_bool_converter.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+
+part 'book_model.freezed.dart';
+part 'book_model.g.dart';
+
+@freezed
+abstract class BookModel with _$BookModel {
+  const BookModel._();
+
+  const factory BookModel({
+    @JsonKey(name: 'id') int? id,
+    @JsonKey(name: 'title') required String title,
+    @JsonKey(name: 'subtitle') String? subtitle,
+    @JsonKey(name: 'author') required String author,
+    @JsonKey(name: 'description') String? description,
+
+    @JsonKey(name: 'book_type')
+    @Default(BookFormat.paperback)
+    BookFormat bookFormat,
+
+    @JsonKey(name: 'status') @Default(BookStatus.finished) BookStatus status,
+
+    @JsonKey(name: 'rating') int? rating,
+
+    @IntToBoolConverter()
+    @JsonKey(name: 'favorite')
+    @Default(false)
+    bool favorite,
+
+    @IntToBoolConverter()
+    @JsonKey(name: 'deleted')
+    @Default(false)
+    bool deleted,
+
+    @JsonKey(name: 'start_date') DateTime? startDate,
+    @JsonKey(name: 'finish_date') DateTime? finishDate,
+    @JsonKey(name: 'date_added') required DateTime dateAdded,
+    @JsonKey(name: 'date_modified') required DateTime dateModified,
+
+    @JsonKey(name: 'pages') int? pages,
+    @JsonKey(name: 'publication_year') int? publicationYear,
+    @JsonKey(name: 'isbn') String? isbn,
+    @JsonKey(name: 'olid') String? olid,
+    @JsonKey(name: 'tags') String? tags,
+    @JsonKey(name: 'my_review') String? myReview,
+    @JsonKey(name: 'notes') String? notes,
+
+    @IntToBoolConverter()
+    @JsonKey(name: 'has_cover')
+    @Default(false)
+    bool hasCover,
+
+    @JsonKey(name: 'blur_hash') String? blurHash,
+  }) = _BookModel;
+
+  factory BookModel.fromJson(Map<String, dynamic> json) =>
+      _$BookModelFromJson(json);
+
+  factory BookModel.fromEntity(Book entity) {
+    return BookModel(
+      title: entity.title,
+      author: entity.author,
+      dateAdded: entity.dateAdded,
+      dateModified: entity.dateModified,
+      blurHash: entity.blurHash,
+      bookFormat: entity.bookFormat,
+      deleted: entity.deleted,
+      description: entity.description,
+      favorite: entity.favorite,
+      hasCover: entity.hasCover,
+      id: entity.id,
+      isbn: entity.isbn,
+      myReview: entity.myReview,
+      notes: entity.notes,
+      olid: entity.olid,
+      pages: entity.pages,
+      publicationYear: entity.publicationYear,
+      rating: entity.rating,
+      status: entity.status,
+      subtitle: entity.subtitle,
+      tags: entity.tags,
+      // TODO: còn start date và finished date
+    );
+  }
+
+  Book toEntity() {
+    return Book(
+      id: id,
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      description: description,
+      status: status,
+      favorite: favorite,
+      deleted: deleted,
+      rating: rating,
+      pages: pages,
+      publicationYear: publicationYear,
+      isbn: isbn,
+      olid: olid,
+      tags: tags,
+      myReview: myReview,
+      notes: notes,
+      blurHash: blurHash,
+      bookFormat: bookFormat,
+      hasCover: hasCover,
+      dateAdded: dateAdded,
+      // TODO: reading thành một bảng riêng. cần sửa lại book entity không nhận reading, thêm một entity mới là reading, ở đây sử dụng mảng rỗng để tránh lỗi
+      readings: [],
+      dateModified: dateModified,
+    );
+  }
+}

@@ -5,8 +5,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/themes/app_theme.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book.dart';
-import 'package:leafy/data/models/reading_time.dart';
+import 'package:leafy/data/models/book/reading_time/reading_time.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/main.dart';
@@ -89,10 +89,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
           borderRadius: BorderRadius.circular(10),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 10,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -130,10 +127,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
           color: context.colorScheme.secondaryContainer,
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 8,
-            horizontal: 10,
-          ),
+          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
           child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -173,9 +167,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
             ),
           ],
         ),
-        Divider(
-          color: context.colorScheme.onSurface.withAlpha(25),
-        ),
+        Divider(color: context.colorScheme.onSurface.withAlpha(25)),
         const SizedBox(height: 3),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -183,14 +175,9 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildRating(context),
-              ],
+              children: [_buildRating(context)],
             ),
-            LikeButton(
-              isLiked: widget.book.favorite,
-              onTap: widget.onLikeTap,
-            ),
+            LikeButton(isLiked: widget.book.favorite, onTap: widget.onLikeTap),
           ],
         ),
       ],
@@ -202,8 +189,9 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
       builder: (context, state) {
         if (state is RatingTypeBar) {
           return RatingBar.builder(
-            initialRating:
-                (widget.book.rating != null) ? widget.book.rating! / 10 : 0,
+            initialRating: (widget.book.rating != null)
+                ? widget.book.rating! / 10
+                : 0,
             allowHalfRating: true,
             unratedColor: context.colorScheme.surfaceContainerLow,
             glow: false,
@@ -249,26 +237,20 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
       late Widget widget;
       final startDate = reading.startDate;
       final finishDate = reading.finishDate;
-      final readingTime = reading.customReadingTime;
+      // TODO: xem lại chô reading time này
+      final readingTime = reading.readingTimeMs;
 
       if (startDate != null && finishDate != null) {
         widget = _buildStartAndFinishDate(
           startDate,
           finishDate,
-          readingTime,
+          null, // Here
           context,
         );
       } else if (startDate == null && finishDate != null) {
-        widget = _buildOnlyFinishDate(
-          finishDate,
-          readingTime,
-          context,
-        );
+        widget = _buildOnlyFinishDate(finishDate, null, context);
       } else if (startDate != null && finishDate == null) {
-        widget = _buildOnlyStartDate(
-          startDate,
-          context,
-        );
+        widget = _buildOnlyStartDate(startDate, context);
       } else {
         widget = const SizedBox();
       }
@@ -276,11 +258,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
       widgets.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 3),
-          child: Row(
-            children: [
-              Expanded(child: widget),
-            ],
-          ),
+          child: Row(children: [Expanded(child: widget)]),
         ),
       );
     }
@@ -294,12 +272,8 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
     ReadingTime? readingTime,
     BuildContext context,
   ) {
-    final readingTimeText = ' ${_generateReadingTime(
-      startDate: startDate,
-      finishDate: finishDate,
-      context: context,
-      readingTime: readingTime,
-    )}';
+    final readingTimeText =
+        ' ${_generateReadingTime(startDate: startDate, finishDate: finishDate, context: context, readingTime: readingTime)}';
 
     return RichText(
       selectionRegistrar: SelectionContainer.maybeOf(context),
@@ -314,9 +288,7 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
             text:
                 '${dateFormat.format(startDate)} - ${dateFormat.format(finishDate)}',
           ),
-          TextSpan(
-            text: readingTimeText,
-          ),
+          TextSpan(text: readingTimeText),
         ],
       ),
     );
@@ -327,12 +299,8 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
     ReadingTime? readingTime,
     BuildContext context,
   ) {
-    final readingTimeText = ' ${_generateReadingTime(
-      startDate: null,
-      finishDate: null,
-      context: context,
-      readingTime: readingTime,
-    )}';
+    final readingTimeText =
+        ' ${_generateReadingTime(startDate: null, finishDate: null, context: context, readingTime: readingTime)}';
 
     return RichText(
       selectionRegistrar: SelectionContainer.maybeOf(context),
@@ -347,18 +315,13 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
             text:
                 '${LocaleKeys.finished_on_date.tr()} ${dateFormat.format(finishDate)}',
           ),
-          TextSpan(
-            text: readingTimeText,
-          ),
+          TextSpan(text: readingTimeText),
         ],
       ),
     );
   }
 
-  Widget _buildOnlyStartDate(
-    DateTime startDate,
-    BuildContext context,
-  ) {
+  Widget _buildOnlyStartDate(DateTime startDate, BuildContext context) {
     return RichText(
       selectionRegistrar: SelectionContainer.maybeOf(context),
       selectionColor: ThemeGetters.getSelectionColor(context),
@@ -400,18 +363,13 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: context
-                            .colorScheme
-                            .onSurface
-                            .withAlpha(220),
+                        color: context.colorScheme.onSurface.withAlpha(220),
                         height: 0.5,
                       ),
                     ),
                   ],
                 ),
-                Divider(
-                  color: context.colorScheme.onSurface.withAlpha(25),
-                ),
+                Divider(color: context.colorScheme.onSurface.withAlpha(25)),
               ],
             ),
           )

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/index.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
@@ -40,9 +40,7 @@ class _BooksListState extends State<BooksList>
 
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => BookScreen(heroTag: heroTag),
-      ),
+      MaterialPageRoute(builder: (context) => BookScreen(heroTag: heroTag)),
     );
   }
 
@@ -64,9 +62,11 @@ class _BooksListState extends State<BooksList>
                 allBooksCount: widget.allBooksCount!,
               )
             : const SliverToBoxAdapter(),
-        BlocBuilder<SelectedBooksCubit, List<int>>(builder: (context, list) {
-          return _buildList(list: list);
-        }),
+        BlocBuilder<SelectedBooksCubit, List<int>>(
+          builder: (context, list) {
+            return _buildList(list: list);
+          },
+        ),
       ],
     );
   }
@@ -74,9 +74,7 @@ class _BooksListState extends State<BooksList>
   @override
   bool get wantKeepAlive => true;
 
-  Widget _buildList({
-    required List<int> list,
-  }) {
+  Widget _buildList({required List<int> list}) {
     bool multiSelectMode = list.isNotEmpty;
 
     const unselectedCardColor = null;

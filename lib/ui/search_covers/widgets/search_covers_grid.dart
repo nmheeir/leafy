@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
@@ -34,7 +35,7 @@ class _SearchCoversGridState extends State<SearchCoversGrid> {
 
     if (!mounted) return;
 
-    await generateBlurHash(croppedPhotoBytes, context);
+    await generateBlurHash(croppedPhotoBytes);
 
     context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
     context.read<EditBookCubit>().setHasCover(true);

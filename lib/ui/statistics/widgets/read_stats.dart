@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 
@@ -60,13 +61,13 @@ class ReadStats extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  book != null && book!.getCoverFile() != null
+                  book != null && getCoverFile(book!.id) != null
                       ? Padding(
                           padding: const EdgeInsets.only(right: 10),
                           child: Hero(
                             tag: '${book?.id}-$heroKey',
                             child: Image.file(
-                              book!.getCoverFile()!,
+                              getCoverFile(book!.id)!,
                               fit: BoxFit.cover,
                               width: 70,
                             ),
@@ -78,10 +79,7 @@ class ReadStats extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         (iconData == null)
-                            ? Text(
-                                value,
-                                style: const TextStyle(fontSize: 14),
-                              )
+                            ? Text(value, style: const TextStyle(fontSize: 14))
                             : Row(
                                 children: [
                                   Text(
@@ -92,9 +90,9 @@ class ReadStats extends StatelessWidget {
                                   Icon(
                                     iconData,
                                     size: 18,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.primaryContainer,
                                   ),
                                 ],
                               ),

@@ -1,0 +1,298 @@
+import 'package:flutter/foundation.dart';
+import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/data/models/book/reading/reading.dart';
+
+// DEPRECATED
+// TODO: use freezed and json serialization
+class Book {
+  int? id;
+  String title;
+  String? subtitle;
+  String author;
+  String? description;
+  BookStatus status;
+  bool favorite;
+  bool deleted;
+  int? rating;
+  int? pages;
+  int? publicationYear;
+  String? isbn;
+  String? olid;
+  String? tags;
+  String? myReview;
+  String? notes;
+  Uint8List? cover; // Not used since 2.2.0
+  String? blurHash;
+  BookFormat bookFormat;
+  bool hasCover;
+  List<Reading> readings;
+  DateTime dateAdded;
+  DateTime dateModified;
+
+  Book({
+    this.id,
+    required this.title,
+    required this.author,
+    required this.status,
+    this.subtitle,
+    this.description,
+    this.favorite = false,
+    this.deleted = false,
+    this.rating,
+    this.pages,
+    this.publicationYear,
+    this.isbn,
+    this.olid,
+    this.tags,
+    this.myReview,
+    this.notes,
+    this.cover,
+    this.blurHash,
+    this.bookFormat = BookFormat.paperback,
+    this.hasCover = false,
+    required this.readings,
+    required this.dateAdded,
+    required this.dateModified,
+  });
+
+  factory Book.empty({
+    BookStatus status = BookStatus.finished,
+    BookFormat bookFormat = BookFormat.paperback,
+  }) {
+    final newBookDate = DateTime.now();
+
+    return Book(
+      id: null,
+      title: '',
+      author: '',
+      status: status,
+      favorite: false,
+      deleted: false,
+      bookFormat: bookFormat,
+      hasCover: false,
+      readings: List<Reading>.empty(growable: true),
+      tags: null,
+      dateAdded: newBookDate,
+      dateModified: newBookDate,
+    );
+  }
+
+  factory Book.fromJSON(Map<String, dynamic> json) {
+    return Book(
+      id: json['id'],
+      title: json['title'],
+      subtitle: json['subtitle'],
+      author: json['author'],
+      description: json['description'],
+      status: parseBookStatus(json['status']),
+      rating: json['rating'],
+      favorite: (json['favorite'] == 1) ? true : false,
+      hasCover: (json['has_cover'] == 1) ? true : false,
+      deleted: (json['deleted'] == 1) ? true : false,
+      pages: json['pages'],
+      publicationYear: json['publication_year'],
+      isbn: json['isbn'],
+      olid: json['olid'],
+      tags: json['tags'],
+      myReview: json['my_review'],
+      notes: json['notes'],
+      cover: json['cover'] != null
+          ? Uint8List.fromList(json['cover'].cast<int>().toList())
+          : null,
+      blurHash: json['blur_hash'],
+      bookFormat: json['book_type'] == 'audiobook'
+          ? BookFormat.audiobook
+          : json['book_type'] == 'ebook'
+          ? BookFormat.ebook
+          : json['book_type'] == 'hardcover'
+          ? BookFormat.hardcover
+          : json['book_type'] == 'paperback'
+          ? BookFormat.paperback
+          : BookFormat.paperback,
+      readings: _sortReadings(_parseReadingsFromJson(json)),
+      dateAdded: json['date_added'] != null
+          ? DateTime.parse(json['date_added'])
+          : DateTime.now(),
+      dateModified: json['date_modified'] != null
+          ? DateTime.parse(json['date_modified'])
+          : DateTime.now(),
+    );
+  }
+
+  Book copyWith({
+    int? id,
+    String? title,
+    String? author,
+    BookStatus? status,
+    String? subtitle,
+    String? description,
+    bool? favorite,
+    bool? deleted,
+    int? rating,
+    int? pages,
+    int? publicationYear,
+    String? isbn,
+    String? olid,
+    String? tags,
+    String? myReview,
+    String? notes,
+    Uint8List? cover,
+    String? blurHash,
+    BookFormat? bookFormat,
+    bool? hasCover,
+    List<Reading>? readings,
+    DateTime? dateAdded,
+    DateTime? dateModified,
+  }) {
+    return Book(
+      id: this.id ?? id,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      author: author ?? this.author,
+      status: status ?? this.status,
+      description: description ?? this.description,
+      favorite: favorite ?? this.favorite,
+      deleted: deleted ?? this.deleted,
+      rating: rating ?? this.rating,
+      pages: pages ?? this.pages,
+      publicationYear: publicationYear ?? this.publicationYear,
+      isbn: isbn ?? this.isbn,
+      olid: olid ?? this.olid,
+      tags: tags ?? this.tags,
+      myReview: myReview ?? this.myReview,
+      notes: notes ?? this.notes,
+      cover: cover ?? this.cover,
+      blurHash: blurHash ?? this.blurHash,
+      bookFormat: bookFormat ?? this.bookFormat,
+      hasCover: hasCover ?? this.hasCover,
+      readings: readings ?? this.readings,
+      dateAdded: dateAdded ?? this.dateAdded,
+      dateModified: dateModified ?? this.dateModified,
+    );
+  }
+
+  Book copyWithNullCover() {
+    return Book(
+      id: id,
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      status: status,
+      description: description,
+      favorite: favorite,
+      deleted: deleted,
+      rating: rating,
+      pages: pages,
+      publicationYear: publicationYear,
+      isbn: isbn,
+      olid: olid,
+      tags: tags,
+      myReview: myReview,
+      notes: notes,
+      cover: null,
+      blurHash: blurHash,
+      bookFormat: bookFormat,
+      hasCover: hasCover,
+      readings: readings,
+      dateAdded: dateAdded,
+      dateModified: dateModified,
+    );
+  }
+
+  Map<String, dynamic> toJSON() {
+    return {
+      'id': id,
+      'title': title,
+      'subtitle': subtitle,
+      'author': author,
+      'description': description,
+      'status': status.value,
+      'rating': rating,
+      'favorite': favorite ? 1 : 0,
+      'deleted': deleted ? 1 : 0,
+      'pages': pages,
+      'publication_year': publicationYear,
+      'isbn': isbn,
+      'olid': olid,
+      'tags': tags,
+      'my_review': myReview,
+      'notes': notes,
+      'blur_hash': blurHash,
+      'has_cover': hasCover ? 1 : 0,
+      'book_type': bookFormat == BookFormat.audiobook
+          ? 'audiobook'
+          : bookFormat == BookFormat.ebook
+          ? 'ebook'
+          : bookFormat == BookFormat.hardcover
+          ? 'hardcover'
+          : bookFormat == BookFormat.paperback
+          ? 'paperback'
+          : 'paperback',
+      'readings': readings.map((reading) => reading.toString()).join(';'),
+      'date_added': dateAdded.toIso8601String(),
+      'date_modified': dateModified.toIso8601String(),
+    };
+  }
+
+  // TODO: tách thành extension
+  static List<Reading> _parseReadingsFromJson(Map<String, dynamic> json) {
+    if (json['readings'] != null) {
+      final splittedReadings = json['readings'].split(';');
+
+      if (splittedReadings.isNotEmpty) {
+        return List<Reading>.from(
+          splittedReadings
+              .map((e) {
+                final reading = Reading.fromString(e);
+
+                if (reading.startDate == null &&
+                    reading.finishDate == null &&
+                    reading.customReadingTime == null) {
+                  return null;
+                } else {
+                  return reading;
+                }
+              })
+              .where((reading) => reading != null),
+        );
+      } else {
+        return List<Reading>.empty(growable: true);
+      }
+    } else if (json['start_date'] != null || json['finish_date'] != null) {
+      return [
+        Reading(
+          startDate: json['start_date'] != null
+              ? DateTime.parse(json['start_date'])
+              : null,
+          finishDate: json['finish_date'] != null
+              ? DateTime.parse(json['finish_date'])
+              : null,
+        ),
+      ];
+    } else {
+      return List<Reading>.empty(growable: true);
+    }
+  }
+
+  // order readings
+  // first order the ones with only start date - first newest
+  // after them order ones with finish date - first newest
+  // TODO: logic này cần được viết trong blog/cubit
+  static List<Reading> _sortReadings(List<Reading> readings) {
+    final sortedReadings = readings;
+
+    sortedReadings.sort((a, b) {
+      if (a.finishDate == null && b.finishDate != null) {
+        return -1;
+      } else if (a.finishDate != null && b.finishDate == null) {
+        return 1;
+      } else if (a.finishDate != null && b.finishDate != null) {
+        return b.finishDate!.compareTo(a.finishDate!);
+      } else {
+        return b.startDate!.compareTo(a.startDate!);
+      }
+    });
+
+    return sortedReadings;
+  }
+}

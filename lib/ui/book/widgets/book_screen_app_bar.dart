@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/data/models/book.dart';
+import 'package:leafy/data/models/book/utils/utils.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -89,7 +90,7 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     required bool deleted,
   }) {
     if (deletePermanently == true) {
-      _deleteBookPermanently(book);
+      _deleteBookPermanently(context, book);
     } else {
       _changeDeleteStatus(context, deleted, book);
     }
@@ -105,16 +106,16 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   ) async {
     book = book.copyWith(deleted: deleted);
 
-    await bookCubit.updateBook(book);
-    bookCubit.getDeletedBooks();
+    await context.bookActor.updateBook(book, null);
+    // bookCubit.getDeletedBooks();
   }
 
-  Future<void> _deleteBookPermanently(Book book) async {
+  Future<void> _deleteBookPermanently(BuildContext context, Book book) async {
     if (book.id != null) {
-      await bookCubit.deleteBook(book.id!);
+      await context.bookActor.deleteBook(book.id!);
     }
 
-    bookCubit.getDeletedBooks();
+    // bookCubit.getDeletedBooks();
   }
 
   @override
@@ -174,7 +175,7 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                               ),
                             );
                           } else if (choice == moreButtonOptions[1]) {
-                            final cover = state.getCoverBytes();
+                            final cover = await getCoverBytes(state.id);
 
                             context.read<EditBookCoverCubit>().setCover(cover);
 
@@ -183,8 +184,8 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                                   '${state.title} ${LocaleKeys.copy_book.tr()}',
                               readings: [],
                               rating: 0,
+                              id: null,
                             );
-                            newBook.id = null;
 
                             context.read<EditBookCubit>().setBook(newBook);
                             context.read<EditBookCubit>().setHasCover(true);

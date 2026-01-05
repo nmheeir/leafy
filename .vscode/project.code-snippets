@@ -1,0 +1,10 @@
+{
+  "Deprecated Comment": {
+    "scope": "dart",
+    "prefix": "deprecated",
+    "body": [
+      "// DEPRECATED: $1"
+    ],
+    "description": "Insert DEPRECATED comment"
+  }
+}

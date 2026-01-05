@@ -3,9 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/data/models/book.dart';
 import 'package:leafy/data/models/ol_edition_result.dart';
-import 'package:leafy/data/models/reading.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
@@ -13,6 +13,7 @@ import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/search_ol_edition/widgets/ol_editions_grid.dart';
 
+// NOTE: Khi thoát ra ngoài không cancel request tới API
 class SearchOLEditionsScreen extends StatefulWidget {
   const SearchOLEditionsScreen({
     super.key,

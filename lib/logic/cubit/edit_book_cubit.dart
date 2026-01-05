@@ -1,208 +1,183 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/data/models/book.dart';
-import 'package:leafy/data/models/reading.dart';
-import 'package:leafy/data/models/reading_time.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/data/models/book/reading_time/reading_time.dart';
+import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/book/entities/reading.dart';
 
 @injectable
 class EditBookCubit extends Cubit<Book> {
+  // KHÔNG CẦN Inject UseCase nữa
   EditBookCubit() : super(Book.empty());
 
+  void initBookFromOpenLibrary({
+    required String title,
+    String? subtitle,
+    required String author,
+    int? pages,
+    List<String>? isbnList,
+    String? olidRaw,
+    int? publishYear,
+    required BookFormat defaultFormat,
+    required List<String> defaultTags,
+    BookStatus? status,
+    int? coverId,
+  }) {
+    final String? isbn = (isbnList != null && isbnList.isNotEmpty)
+        ? isbnList.first
+        : null;
+    final String? cleanOlid = olidRaw?.replaceAll('/works/', '');
+    final String? formattedTags = defaultTags.isNotEmpty
+        ? defaultTags.join('|||||')
+        : null;
+
+    final newBook = Book(
+      id: null,
+      title: title,
+      subtitle: subtitle,
+      author: author,
+      status: status ?? BookStatus.unfinished,
+      favorite: false,
+      pages: pages,
+      isbn: isbn,
+      olid: cleanOlid,
+      publicationYear: publishYear,
+      bookFormat: defaultFormat,
+      readings: const [],
+      tags: formattedTags,
+      dateAdded: DateTime.now(),
+      dateModified: DateTime.now(),
+
+      rating: 0,
+      hasCover: false,
+    );
+
+    // 3. Emit state mới
+    emit(newBook);
+  }
+
+  // Hàm này dùng để khởi tạo dữ liệu khi vào màn hình sửa
   void setBook(Book book) => emit(book);
 
-  void updateBook(Uint8List? cover, BuildContext context) {
-    if (state.id == null) return;
+  // --- CÁC HÀM CẬP NHẬT TRƯỜNG DỮ LIỆU ---
 
-    bookCubit.updateBook(state, cover: cover, context: context);
-  }
+  void setStatus(BookStatus status) => emit(state.copyWith(status: status));
 
-  Future<int> addNewBook(Uint8List? cover) async {
-    debugPrint('[EditBookCubit] Attempting to add new book: ${state.title}');
-    final bookID = await bookCubit.addBook(state, cover: cover);
+  void setRating(double rating) =>
+      emit(state.copyWith(rating: (rating * 10).toInt()));
 
-    debugPrint('[EditBookCubit] Book added successfully with ID: $bookID');
+  void setBookFormat(BookFormat format) =>
+      emit(state.copyWith(bookFormat: format));
 
-    return bookID;
-  }
+  void setTitle(String title) => emit(state.copyWith(title: title));
 
-  void setStatus(BookStatus status) {
-    final book = state.copyWith();
+  void setSubtitle(String subtitle) =>
+      emit(state.copyWith(subtitle: subtitle.isEmpty ? null : subtitle));
 
-    emit(book.copyWith(status: status));
-  }
+  void setAuthor(String author) => emit(state.copyWith(author: author));
 
-  void setRating(double rating) {
-    emit(state.copyWith(rating: (rating * 10).toInt()));
-  }
+  void setPages(String pages) =>
+      emit(state.copyWith(pages: pages.isEmpty ? null : int.parse(pages)));
 
-  void setBookFormat(BookFormat bookFormat) {
-    emit(state.copyWith(bookFormat: bookFormat));
-  }
+  void setDescription(String description) => emit(
+    state.copyWith(description: description.isEmpty ? null : description),
+  );
 
-  void setTitle(String title) {
-    emit(state.copyWith(title: title));
-  }
+  void setISBN(String isbn) =>
+      emit(state.copyWith(isbn: isbn.isEmpty ? null : isbn));
 
-  void setSubtitle(String subtitle) {
-    final book = state.copyWith();
-    book.subtitle = subtitle.isNotEmpty ? subtitle : null;
-    emit(book);
-  }
+  void setOLID(String olid) =>
+      emit(state.copyWith(olid: olid.isEmpty ? null : olid));
 
-  void setAuthor(String author) {
-    emit(state.copyWith(author: author));
-  }
+  void setPublicationYear(String year) => emit(
+    state.copyWith(publicationYear: year.isEmpty ? null : int.parse(year)),
+  );
 
-  void setPages(String pages) {
-    final book = state.copyWith();
-    book.pages = pages.isEmpty ? null : int.parse(pages);
-    emit(book);
-  }
+  void setMyReview(String review) =>
+      emit(state.copyWith(myReview: review.isEmpty ? null : review));
 
-  void setDescription(String description) {
-    final book = state.copyWith();
-    book.description = description.isNotEmpty ? description : null;
-    emit(book);
-  }
+  void setNotes(String notes) =>
+      emit(state.copyWith(notes: notes.isEmpty ? null : notes));
 
-  void setISBN(String isbn) {
-    final book = state.copyWith();
-    book.isbn = isbn.isNotEmpty ? isbn : null;
-    emit(book);
-  }
+  void setBlurHash(String? blurHash) =>
+      emit(state.copyWith(blurHash: blurHash));
 
-  void setOLID(String olid) {
-    final book = state.copyWith();
-    book.olid = olid.isNotEmpty ? olid : null;
-    emit(book);
-  }
+  void setHasCover(bool hasCover) => emit(state.copyWith(hasCover: hasCover));
 
-  void setPublicationYear(String publicationYear) {
-    final book = state.copyWith();
-    book.publicationYear = publicationYear.isEmpty
-        ? null
-        : int.parse(publicationYear);
-
-    emit(book);
-  }
-
-  void setMyReview(String myReview) {
-    final book = state.copyWith();
-    book.myReview = myReview.isNotEmpty ? myReview : null;
-
-    emit(book);
-  }
-
-  void setNotes(String notes) {
-    final book = state.copyWith();
-    book.notes = notes.isNotEmpty ? notes : null;
-
-    emit(book);
-  }
-
-  void setBlurHash(String? blurHash) {
-    final book = state.copyWith();
-    book.blurHash = blurHash;
-
-    emit(book);
-  }
-
-  void setHasCover(bool hasCover) {
-    final book = state.copyWith();
-    book.hasCover = hasCover;
-
-    emit(book);
-  }
-
-  void addNewTag(String tag) {
-    // Remove space at the end of the string if exists
-    if (tag.substring(tag.length - 1) == ' ') {
-      tag = tag.substring(0, tag.length - 1);
-    }
-
-    // Remove illegal characte
-    tag = tag.replaceAll('@', '').replaceAll('|', '');
-
-    List<String> tags = state.tags == null ? [] : state.tags!.split('|||||');
-
-    if (tags.contains(tag)) return;
-    tags.add(tag);
-
-    final book = state.copyWith();
-    book.tags = tags.join('|||||');
-
-    emit(book);
-  }
-
-  void removeTag(String tag) {
-    List<String> tags = state.tags == null ? [] : state.tags!.split('|||||');
-
-    if (!tags.contains(tag)) return;
-    tags.remove(tag);
-
-    final book = state.copyWith();
-    book.tags = tags.isEmpty ? null : tags.join('|||||');
-
-    emit(book);
-  }
+  // --- LOGIC XỬ LÝ DANH SÁCH ĐỌC (READINGS) ---
 
   void addNewReading(Reading reading) {
-    List<Reading> readings = state.readings;
-
-    readings.add(reading);
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    // Luôn tạo list mới để đảm bảo tính immutability
+    emit(state.copyWith(readings: [...state.readings, reading]));
   }
 
   void removeReading(int index) {
-    List<Reading> readings = state.readings;
+    if (index < 0 || index >= state.readings.length) return;
 
-    readings.removeAt(index);
-
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    final readings = List<Reading>.from(state.readings)..removeAt(index);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setReadingStartDate(DateTime? startDate, int index) {
-    List<Reading> readings = state.readings;
+  void setReadingStartDate(DateTime? date, int index) {
+    if (index < 0 || index >= state.readings.length) return;
 
-    readings[index].startDate = startDate;
+    final readings = List<Reading>.from(state.readings);
+    readings[index] = readings[index].copyWith(startDate: date);
 
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setReadingFinishDate(DateTime? finishDate, int index) {
-    List<Reading> readings = state.readings;
+  void setReadingFinishDate(DateTime? date, int index) {
+    if (index < 0 || index >= state.readings.length) return;
 
-    readings[index].finishDate = finishDate;
+    final readings = List<Reading>.from(state.readings);
+    readings[index] = readings[index].copyWith(finishDate: date);
 
-    final book = state.copyWith();
-    book.readings = readings;
-
-    emit(book);
+    emit(state.copyWith(readings: readings));
   }
 
-  void setCustomReadingTime(ReadingTime? readingTime, int index) {
-    List<Reading> readings = state.readings;
+  // ĐÃ FIX: Logic cập nhật CustomReadingTime
+  void setCustomReadingTime(ReadingTime? time, int index) {
+    if (index < 0 || index >= state.readings.length) return;
 
-    readings[index].customReadingTime = readingTime;
+    final readings = List<Reading>.from(state.readings);
+    readings[index] = readings[index].copyWith(
+      readingTimeMs: time!.milliSeconds,
+    );
 
-    final book = state.copyWith();
-    book.readings = readings;
+    emit(state.copyWith(readings: readings));
+  }
 
-    emit(book);
+  // --- LOGIC XỬ LÝ TAGS ---
+
+  void addNewTag(String tag) {
+    // Clean tag input
+    tag = tag.trim().replaceAll('@', '').replaceAll('|', '');
+    if (tag.isEmpty) return;
+
+    final currentTags = state.tags?.split('|||||') ?? [];
+    if (currentTags.contains(tag)) return; // Tránh trùng lặp
+
+    final newTagsList = [...currentTags, tag];
+
+    // Sort tag cho đẹp nếu muốn
+    newTagsList.sort();
+
+    emit(state.copyWith(tags: newTagsList.join('|||||')));
+  }
+
+  void removeTag(String tag) {
+    final currentTags = state.tags?.split('|||||') ?? [];
+
+    if (!currentTags.contains(tag)) return;
+
+    currentTags.remove(tag);
+
+    emit(
+      state.copyWith(
+        tags: currentTags.isEmpty ? null : currentTags.join('|||||'),
+      ),
+    );
   }
 }
