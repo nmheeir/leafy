@@ -33,19 +33,19 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    context.localSearch.close();
+    context.localSearchBloc.close();
     super.dispose();
   }
 
   void _onSearchChanged(String query) {
-    context.localSearch.add(LocalSearchEvent.queryChanged(query));
+    context.localSearchBloc.add(LocalSearchEvent.queryChanged(query));
   }
 
   @override
   Widget build(BuildContext context) {
     // Cung cấp Bloc cho cây widget con
     return BlocProvider.value(
-      value: context.localSearch,
+      value: context.localSearchBloc,
       child: KeyboardDismissible(
         child: Scaffold(
           appBar: AppBar(

@@ -13,27 +13,26 @@ import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 
 extension BlocExtensions on BuildContext {
   ///////////////////////////// CUBIT /////////////////////////////
-  LibraryCubit get library => read<LibraryCubit>();
 
-  BookActorCubit get bookActor => read<BookActorCubit>();
+  BookActorCubit get bookActorCubit => read<BookActorCubit>();
 
-  CurrentBookCubit get currentBook => read<CurrentBookCubit>();
+  CurrentBookCubit get currentBookCubit => read<CurrentBookCubit>();
 
-  TrashBinCubit get trashBin => read<TrashBinCubit>();
+  TrashBinCubit get trashBinCubit => read<TrashBinCubit>();
 
-  BookDetailCubit get bookDetail => read<BookDetailCubit>();
+  BookDetailCubit get bookDetailCubit => read<BookDetailCubit>();
 
-  EditBookCubit get editBook => read<EditBookCubit>();
+  EditBookCubit get editBookCubit => read<EditBookCubit>();
 
-  DefaultBookTagCubit get defaultBookTag => read<DefaultBookTagCubit>();
+  DefaultBookTagCubit get defaultBookTagCubit => read<DefaultBookTagCubit>();
 
-  DefaultBookFormatCubit get defaultBookFormat =>
+  DefaultBookFormatCubit get defaultBookFormatCubit =>
       read<DefaultBookFormatCubit>();
 
   LibraryCubit get libraryCubit => read<LibraryCubit>();
 
   ///////////////////////////// BLOC /////////////////////////////
-  LocalSearchBloc get localSearch => read<LocalSearchBloc>();
+  LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();
 
   StatsBloc get statsBloc => read<StatsBloc>();
 }

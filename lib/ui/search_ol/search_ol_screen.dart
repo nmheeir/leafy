@@ -88,11 +88,11 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
     List<String>? isbn,
     String? olid,
   }) {
-    final BookFormat defaultBookFormat = context.defaultBookFormat.state;
+    final BookFormat defaultBookFormat = context.defaultBookFormatCubit.state;
 
-    final List<String> defaultTags = context.defaultBookTag.state;
+    final List<String> defaultTags = context.defaultBookTagCubit.state;
 
-    context.editBook.initBookFromOpenLibrary(
+    context.editBookCubit.initBookFromOpenLibrary(
       title: title,
       subtitle: subtitle,
       author: author,

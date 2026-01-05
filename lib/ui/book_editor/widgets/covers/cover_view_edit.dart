@@ -86,7 +86,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
 
     context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
     context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
+    context.editBookCubit.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -125,7 +125,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
 
     context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
     context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
+    context.editBookCubit.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -172,7 +172,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     }
     context.read<EditBookCoverCubit>().setCover(cover);
     context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
+    context.editBookCubit.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -297,7 +297,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                       builder: (context, state) {
                         return _buildBlurHash(
                           context,
-                          context.editBook.state.blurHash,
+                          context.editBookCubit.state.blurHash,
                           boxConstraints,
                         );
                       },

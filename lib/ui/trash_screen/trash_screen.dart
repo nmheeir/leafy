@@ -147,9 +147,9 @@ class TrashScreen extends StatelessWidget {
           // Logic thực hiện hành động sau khi dismiss
           onDismissed: (direction) {
             if (direction == DismissDirection.endToStart) {
-              context.trashBin.deletePermanently(book.id!);
+              context.trashBinCubit.deletePermanently(book.id!);
             } else {
-              context.trashBin.restoreBook(book.id!);
+              context.trashBinCubit.restoreBook(book.id!);
             }
           },
           // Child là card sách (Tái sử dụng widget cũ của bạn)
@@ -229,7 +229,7 @@ class TrashScreen extends StatelessWidget {
   void _confirmEmptyTrash(BuildContext context) {
     _showConfirmDialog(context, 'Do you want to empty trash').then((confirmed) {
       if (confirmed && context.mounted) {
-        context.trashBin.emptyTrash();
+        context.trashBinCubit.emptyTrash();
       }
     });
   }

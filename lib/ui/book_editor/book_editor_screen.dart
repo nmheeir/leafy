@@ -161,7 +161,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     // 4. Gửi lệnh cho BookActorCubit
     // Cubit này sẽ lo việc gọi UseCase, lưu DB, lưu file ảnh...
-    context.bookActor.addBook(bookDraft, coverBytes);
+    context.bookActorCubit.addBook(bookDraft, coverBytes);
   }
 
   void _updateBook(Book book) async {
@@ -176,9 +176,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (book.hasCover == false) {
       context.read<EditBookCoverCubit>().deleteCover(book.id);
-      context.bookActor.updateBook(book, null);
+      context.bookActorCubit.updateBook(book, null);
     } else {
-      context.bookActor.updateBook(
+      context.bookActorCubit.updateBook(
         book,
         context.read<EditBookCoverCubit>().state,
       );
@@ -274,7 +274,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       if (!mounted) return;
       context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
       context.read<EditBookCubit>().setHasCover(true);
-      context.editBook.setBlurHash(blurHash);
+      context.editBookCubit.setBlurHash(blurHash);
 
       setState(() {
         _isCoverDownloading = false;
@@ -434,7 +434,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     return BlocListener<BookActorCubit, BookActorState>(
       listener: (context, state) {
         state.whenOrNull(
-          success: (message, newBookId) {
+          success: (message, newBook) {
             // 1. Hiển thị thông báo thành công
             // (Tùy chọn, vì chuyển màn hình ngay nên có thể ko cần snackbar)
 
@@ -443,8 +443,8 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
             var bookSaved = context.read<EditBookCubit>().state;
 
             // Gán ID mới vừa được tạo từ DB (nếu có)
-            if (newBookId != null) {
-              bookSaved = bookSaved.copyWith(id: newBookId);
+            if (newBook != null) {
+              bookSaved = newBook;
             }
 
             context.read<CurrentBookCubit>().setBook(bookSaved);
@@ -526,22 +526,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
-                  // DEPRECATED:
-                  // StreamBuilder<List<String>>(
-                  //   stream: bookCubit.authors,
-                  //   builder: (context, AsyncSnapshot<List<String>?> snapshot) {
-                  //     return BookTextField(
-                  //       controller: _authorCtrl,
-                  //       hint: LocaleKeys.enter_author.tr(),
-                  //       icon: Icons.person,
-                  //       keyboardType: TextInputType.text,
-                  //       maxLines: 5,
-                  //       maxLength: 255,
-                  //       textCapitalization: TextCapitalization.words,
-                  //       suggestions: snapshot.data,
-                  //     );
-                  //   },
-                  // ),
                   BlocSelector<LibraryCubit, LibraryState, List<String>>(
                     selector: (state) => state.allAuthors,
                     builder: (context, author) {
@@ -689,23 +673,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.characters,
                   ),
                   const SizedBox(height: 10),
-                  // DEPRECATED
-                  // StreamBuilder<List<String>>(
-                  //   stream: bookCubit.tags,
-                  //   builder: (context, AsyncSnapshot<List<String>?> snapshot) {
-                  //     return TagsField(
-                  //       controller: _tagsCtrl,
-                  //       hint: LocaleKeys.enter_tags.tr(),
-                  //       icon: FontAwesomeIcons.tags,
-                  //       keyboardType: TextInputType.text,
-                  //       maxLength: Constants.maxTagLength,
-                  //       onSubmitted: (_) => _addNewTag(),
-                  //       onEditingComplete: () {},
-                  //       unselectTag: (tag) => _unselectTag(tag),
-                  //       allTags: snapshot.data,
-                  //     );
-                  //   },
-                  // ),
                   BlocSelector<LibraryCubit, LibraryState, List<String>>(
                     selector: (state) => state.allTags,
                     builder: (context, tags) {

@@ -134,12 +134,12 @@ return failure(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String message,  int? bookId)?  success,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( String message,  Book? book)?  success,TResult Function( String message)?  failure,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.message,_that.bookId);case _Failure() when failure != null:
+return success(_that.message,_that.book);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return orElse();
 
@@ -158,12 +158,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String message,  int? bookId)  success,required TResult Function( String message)  failure,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( String message,  Book? book)  success,required TResult Function( String message)  failure,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Success():
-return success(_that.message,_that.bookId);case _Failure():
+return success(_that.message,_that.book);case _Failure():
 return failure(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -181,12 +181,12 @@ return failure(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String message,  int? bookId)?  success,TResult? Function( String message)?  failure,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( String message,  Book? book)?  success,TResult? Function( String message)?  failure,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Success() when success != null:
-return success(_that.message,_that.bookId);case _Failure() when failure != null:
+return success(_that.message,_that.book);case _Failure() when failure != null:
 return failure(_that.message);case _:
   return null;
 
@@ -275,11 +275,11 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 
 
 class _Success with DiagnosticableTreeMixin implements BookActorState {
-  const _Success({required this.message, this.bookId});
+  const _Success({required this.message, this.book});
   
 
  final  String message;
- final  int? bookId;
+ final  Book? book;
 
 /// Create a copy of BookActorState
 /// with the given fields replaced by the non-null parameter values.
@@ -292,21 +292,21 @@ _$SuccessCopyWith<_Success> get copyWith => __$SuccessCopyWithImpl<_Success>(thi
 void debugFillProperties(DiagnosticPropertiesBuilder properties) {
   properties
     ..add(DiagnosticsProperty('type', 'BookActorState.success'))
-    ..add(DiagnosticsProperty('message', message))..add(DiagnosticsProperty('bookId', bookId));
+    ..add(DiagnosticsProperty('message', message))..add(DiagnosticsProperty('book', book));
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.message, message) || other.message == message)&&(identical(other.bookId, bookId) || other.bookId == bookId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Success&&(identical(other.message, message) || other.message == message)&&(identical(other.book, book) || other.book == book));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,message,bookId);
+int get hashCode => Object.hash(runtimeType,message,book);
 
 @override
 String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
-  return 'BookActorState.success(message: $message, bookId: $bookId)';
+  return 'BookActorState.success(message: $message, book: $book)';
 }
 
 
@@ -317,7 +317,7 @@ abstract mixin class _$SuccessCopyWith<$Res> implements $BookActorStateCopyWith<
   factory _$SuccessCopyWith(_Success value, $Res Function(_Success) _then) = __$SuccessCopyWithImpl;
 @useResult
 $Res call({
- String message, int? bookId
+ String message, Book? book
 });
 
 
@@ -334,11 +334,11 @@ class __$SuccessCopyWithImpl<$Res>
 
 /// Create a copy of BookActorState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? message = null,Object? bookId = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? message = null,Object? book = freezed,}) {
   return _then(_Success(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
-as String,bookId: freezed == bookId ? _self.bookId : bookId // ignore: cast_nullable_to_non_nullable
-as int?,
+as String,book: freezed == book ? _self.book : book // ignore: cast_nullable_to_non_nullable
+as Book?,
   ));
 }
 
