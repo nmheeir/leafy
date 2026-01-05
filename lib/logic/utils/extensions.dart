@@ -30,6 +30,8 @@ extension BlocExtensions on BuildContext {
   DefaultBookFormatCubit get defaultBookFormat =>
       read<DefaultBookFormatCubit>();
 
+  LibraryCubit get libraryCubit => read<LibraryCubit>();
+
   ///////////////////////////// BLOC /////////////////////////////
   LocalSearchBloc get localSearch => read<LocalSearchBloc>();
 

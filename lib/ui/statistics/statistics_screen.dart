@@ -16,12 +16,18 @@ class StatisticsScreen extends StatefulWidget {
 }
 
 class _StatisticsScreenState extends State<StatisticsScreen> {
-  late FocusNode _focusNode;
-
   @override
   void initState() {
     super.initState();
-    _focusNode = FocusNode();
+    _initLoad();
+  }
+
+  void _initLoad() {
+    final libraryState = context.libraryCubit.state;
+
+    libraryState.mapOrNull(
+      loaded: (value) => context.statsBloc..add(StatsLoad(value.allBooks)),
+    );
   }
 
   void _setChallenge(int books, int pages, int year) {
@@ -36,52 +42,48 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: BlocBuilder<LibraryCubit, LibraryState>(
-        builder: (context, libraryState) {
-          return libraryState.maybeWhen(
-            loaded: (allBooks) {
-              return BlocProvider(
-                create: (context) {
-                  // BUG: Nếu ngừoi dùng mở statistic screen lần thứ 2 sẽ bị lỗi 'Cannot add new event after call close'
-                  return context.statsBloc..add(StatsLoad(allBooks));
+    return BlocProvider.value(
+      value: context.statsBloc,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<LibraryCubit, LibraryState>(
+            listener: (context, libraryState) {
+              libraryState.mapOrNull(
+                loaded: (state) {
+                  context.statsBloc.add(StatsLoad(state.allBooks));
                 },
-                child: SelectableRegion(
-                  selectionControls: materialTextSelectionControls,
-                  focusNode: _focusNode,
-                  child: BlocBuilder<StatsBloc, StatsState>(
-                    builder: (context, state) {
-                      return switch (state) {
-                        StatsLoading() => Center(
-                          child: LoadingAnimationWidget.fourRotatingDots(
-                            color: context.colorScheme.primary,
-                            size: 42,
-                          ),
-                        ),
-                        StatsLoaded() => Statistics(
-                          state: state,
-                          setChallenge: _setChallenge,
-                        ),
-                        StatsEmpty() => Center(child: Text('Empty')),
-                        StatsFailure() => Center(
-                          child: Text(switch (state.type) {
-                            StatsFailureType.emptyData => 'Empty Data',
-                            StatsFailureType.unknown => 'Unknow Error',
-                          }),
-                        ),
-                      };
-                    },
-                  ),
-                ),
               );
             },
-            loading: () => LoadingAnimationWidget.fourRotatingDots(
-              color: context.colorScheme.inversePrimary,
-              size: 40,
+          ),
+        ],
+        child: Scaffold(
+          body: SafeArea(
+            child: BlocBuilder<StatsBloc, StatsState>(
+              builder: (context, state) {
+                return switch (state) {
+                  StatsLoading() => Center(
+                    child: LoadingAnimationWidget.fourRotatingDots(
+                      color: context.colorScheme.primary,
+                      size: 42,
+                    ),
+                  ),
+                  StatsLoaded() => Statistics(
+                    state: state,
+                    setChallenge: _setChallenge,
+                  ),
+                  // TODO: change to LocalesKey
+                  StatsEmpty() => const Center(child: Text('Empty')),
+                  StatsFailure() => Center(
+                    child: Text(switch (state.type) {
+                      StatsFailureType.emptyData => 'Empty Data',
+                      StatsFailureType.unknown => 'Unknown Error',
+                    }),
+                  ),
+                };
+              },
             ),
-            orElse: () => Center(child: Text('error')),
-          );
-        },
+          ),
+        ),
       ),
     );
   }
