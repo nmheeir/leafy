@@ -78,7 +78,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       return;
     }
 
-    await generateBlurHash(croppedPhotoBytes);
+    final blurHash = await generateBlurHash(croppedPhotoBytes);
     if (!context.mounted) {
       _setCoverLoading(false);
       return;
@@ -86,6 +86,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
 
     context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
     context.read<EditBookCubit>().setHasCover(true);
+    context.editBook.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -115,7 +116,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       return;
     }
 
-    await generateBlurHash(croppedPhotoBytes);
+    final blurHash = await generateBlurHash(croppedPhotoBytes);
 
     if (!context.mounted) {
       _setCoverLoading(false);
@@ -124,6 +125,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
 
     context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
     context.read<EditBookCubit>().setHasCover(true);
+    context.editBook.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -162,7 +164,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       _setCoverLoading(false);
       return;
     }
-    await generateBlurHash(cover);
+    final blurHash = await generateBlurHash(cover);
 
     if (!context.mounted) {
       _setCoverLoading(false);
@@ -170,6 +172,7 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     }
     context.read<EditBookCoverCubit>().setCover(cover);
     context.read<EditBookCubit>().setHasCover(true);
+    context.editBook.setBlurHash(blurHash);
 
     _setCoverLoading(false);
   }
@@ -294,7 +297,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                       builder: (context, state) {
                         return _buildBlurHash(
                           context,
-                          // BUG: chỗ này là nguyên nhân gây ra bug, do lấy blurhash từ editbook, mà blurhash chưa được gán giá trị
                           context.editBook.state.blurHash,
                           boxConstraints,
                         );

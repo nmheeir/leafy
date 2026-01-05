@@ -269,11 +269,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       if (!mounted) return;
 
       if (!mounted) return;
-      await generateBlurHash(response.bodyBytes);
+      final blurHash = await generateBlurHash(response.bodyBytes);
 
       if (!mounted) return;
       context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
       context.read<EditBookCubit>().setHasCover(true);
+      context.editBook.setBlurHash(blurHash);
 
       setState(() {
         _isCoverDownloading = false;

@@ -111,7 +111,7 @@ class BookRepositoryImpl implements BookRepository {
   Future<Either<Failure, int>> addBook(AddBookParams params) async {
     try {
       _logger.i(
-        'Repository: Adding new book "${params.book.title}"...',
+        'Repository: Adding new book "${params.book}"...',
       ); // Log Info
 
       if (params.cover == null) {

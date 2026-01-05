@@ -15,7 +15,6 @@ class CoverBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<CurrentBookCubit, Book>(
-      // BUG: blurhash đang là null
       buildWhen: (previous, current) {
         return previous.blurHash != current.blurHash;
       },
