@@ -8,9 +8,7 @@ part of 'ol_work.dart';
 
 _OLWork _$OLWorkFromJson(Map<String, dynamic> json) => _OLWork(
   firstPublishDate: json['first_publish_date'] as String?,
-  description: json['description'] == null
-      ? null
-      : Created.fromJson(json['description'] as Map<String, dynamic>),
+  description: json['description'] as String?,
   links: (json['links'] as List<dynamic>?)
       ?.map((e) => OLLink.fromJson(e as Map<String, dynamic>))
       .toList(),

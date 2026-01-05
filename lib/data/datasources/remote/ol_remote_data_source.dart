@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/data/models/open_library/ol_search_result/ol_search_result.dart';
+import 'package:leafy/data/models/open_library/ol_work/ol_work.dart';
 import 'package:retrofit/retrofit.dart';
 
 part 'ol_remote_data_source.g.dart';
@@ -25,4 +26,7 @@ abstract class OlRemoteDataSource {
     String fields =
         'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i',
   });
+
+  @GET("/{workId}.json")
+  Future<OLWork> getWork(@Path("workId") String workId);
 }

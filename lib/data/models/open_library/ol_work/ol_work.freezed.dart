@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OLWork {
 
-@JsonKey(name: "first_publish_date") String? get firstPublishDate;@JsonKey(name: "description") Created? get description;@JsonKey(name: "links") List<OLLink>? get links;@JsonKey(name: "title") String? get title;@JsonKey(name: "created") Created? get created;@JsonKey(name: "last_modified") Created? get lastModified;@JsonKey(name: "covers") List<int>? get covers;@JsonKey(name: "lc_classifications") List<String>? get lcClassifications;@JsonKey(name: "latest_revision") int? get latestRevision;@JsonKey(name: "key") String? get key;@JsonKey(name: "authors") List<Author>? get authors;@JsonKey(name: "dewey_number") List<String>? get deweyNumber;@JsonKey(name: "type") OLType? get type;@JsonKey(name: "subjects") List<String>? get subjects;@JsonKey(name: "revision") int? get revision;
+@JsonKey(name: "first_publish_date") String? get firstPublishDate;@JsonKey(name: "description") String? get description;@JsonKey(name: "links") List<OLLink>? get links;@JsonKey(name: "title") String? get title;@JsonKey(name: "created") Created? get created;@JsonKey(name: "last_modified") Created? get lastModified;@JsonKey(name: "covers") List<int>? get covers;@JsonKey(name: "lc_classifications") List<String>? get lcClassifications;@JsonKey(name: "latest_revision") int? get latestRevision;@JsonKey(name: "key") String? get key;@JsonKey(name: "authors") List<Author>? get authors;@JsonKey(name: "dewey_number") List<String>? get deweyNumber;@JsonKey(name: "type") OLType? get type;@JsonKey(name: "subjects") List<String>? get subjects;@JsonKey(name: "revision") int? get revision;
 /// Create a copy of OLWork
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $OLWorkCopyWith<$Res>  {
   factory $OLWorkCopyWith(OLWork value, $Res Function(OLWork) _then) = _$OLWorkCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: "first_publish_date") String? firstPublishDate,@JsonKey(name: "description") Created? description,@JsonKey(name: "links") List<OLLink>? links,@JsonKey(name: "title") String? title,@JsonKey(name: "created") Created? created,@JsonKey(name: "last_modified") Created? lastModified,@JsonKey(name: "covers") List<int>? covers,@JsonKey(name: "lc_classifications") List<String>? lcClassifications,@JsonKey(name: "latest_revision") int? latestRevision,@JsonKey(name: "key") String? key,@JsonKey(name: "authors") List<Author>? authors,@JsonKey(name: "dewey_number") List<String>? deweyNumber,@JsonKey(name: "type") OLType? type,@JsonKey(name: "subjects") List<String>? subjects,@JsonKey(name: "revision") int? revision
+@JsonKey(name: "first_publish_date") String? firstPublishDate,@JsonKey(name: "description") String? description,@JsonKey(name: "links") List<OLLink>? links,@JsonKey(name: "title") String? title,@JsonKey(name: "created") Created? created,@JsonKey(name: "last_modified") Created? lastModified,@JsonKey(name: "covers") List<int>? covers,@JsonKey(name: "lc_classifications") List<String>? lcClassifications,@JsonKey(name: "latest_revision") int? latestRevision,@JsonKey(name: "key") String? key,@JsonKey(name: "authors") List<Author>? authors,@JsonKey(name: "dewey_number") List<String>? deweyNumber,@JsonKey(name: "type") OLType? type,@JsonKey(name: "subjects") List<String>? subjects,@JsonKey(name: "revision") int? revision
 });
 
 
-$CreatedCopyWith<$Res>? get description;$CreatedCopyWith<$Res>? get created;$CreatedCopyWith<$Res>? get lastModified;$OLTypeCopyWith<$Res>? get type;
+$CreatedCopyWith<$Res>? get created;$CreatedCopyWith<$Res>? get lastModified;$OLTypeCopyWith<$Res>? get type;
 
 }
 /// @nodoc
@@ -69,7 +69,7 @@ class _$OLWorkCopyWithImpl<$Res>
   return _then(_self.copyWith(
 firstPublishDate: freezed == firstPublishDate ? _self.firstPublishDate : firstPublishDate // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as Created?,links: freezed == links ? _self.links : links // ignore: cast_nullable_to_non_nullable
+as String?,links: freezed == links ? _self.links : links // ignore: cast_nullable_to_non_nullable
 as List<OLLink>?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
 as Created?,lastModified: freezed == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
@@ -86,18 +86,6 @@ as int?,
   ));
 }
 /// Create a copy of OLWork
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$CreatedCopyWith<$Res>? get description {
-    if (_self.description == null) {
-    return null;
-  }
-
-  return $CreatedCopyWith<$Res>(_self.description!, (value) {
-    return _then(_self.copyWith(description: value));
-  });
-}/// Create a copy of OLWork
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
@@ -215,7 +203,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  Created? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  String? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OLWork() when $default != null:
 return $default(_that.firstPublishDate,_that.description,_that.links,_that.title,_that.created,_that.lastModified,_that.covers,_that.lcClassifications,_that.latestRevision,_that.key,_that.authors,_that.deweyNumber,_that.type,_that.subjects,_that.revision);case _:
@@ -236,7 +224,7 @@ return $default(_that.firstPublishDate,_that.description,_that.links,_that.title
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  Created? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  String? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)  $default,) {final _that = this;
 switch (_that) {
 case _OLWork():
 return $default(_that.firstPublishDate,_that.description,_that.links,_that.title,_that.created,_that.lastModified,_that.covers,_that.lcClassifications,_that.latestRevision,_that.key,_that.authors,_that.deweyNumber,_that.type,_that.subjects,_that.revision);case _:
@@ -256,7 +244,7 @@ return $default(_that.firstPublishDate,_that.description,_that.links,_that.title
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  Created? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: "first_publish_date")  String? firstPublishDate, @JsonKey(name: "description")  String? description, @JsonKey(name: "links")  List<OLLink>? links, @JsonKey(name: "title")  String? title, @JsonKey(name: "created")  Created? created, @JsonKey(name: "last_modified")  Created? lastModified, @JsonKey(name: "covers")  List<int>? covers, @JsonKey(name: "lc_classifications")  List<String>? lcClassifications, @JsonKey(name: "latest_revision")  int? latestRevision, @JsonKey(name: "key")  String? key, @JsonKey(name: "authors")  List<Author>? authors, @JsonKey(name: "dewey_number")  List<String>? deweyNumber, @JsonKey(name: "type")  OLType? type, @JsonKey(name: "subjects")  List<String>? subjects, @JsonKey(name: "revision")  int? revision)?  $default,) {final _that = this;
 switch (_that) {
 case _OLWork() when $default != null:
 return $default(_that.firstPublishDate,_that.description,_that.links,_that.title,_that.created,_that.lastModified,_that.covers,_that.lcClassifications,_that.latestRevision,_that.key,_that.authors,_that.deweyNumber,_that.type,_that.subjects,_that.revision);case _:
@@ -270,12 +258,12 @@ return $default(_that.firstPublishDate,_that.description,_that.links,_that.title
 /// @nodoc
 @JsonSerializable()
 
-class _OLWork implements OLWork {
-  const _OLWork({@JsonKey(name: "first_publish_date") this.firstPublishDate, @JsonKey(name: "description") this.description, @JsonKey(name: "links") final  List<OLLink>? links, @JsonKey(name: "title") this.title, @JsonKey(name: "created") this.created, @JsonKey(name: "last_modified") this.lastModified, @JsonKey(name: "covers") final  List<int>? covers, @JsonKey(name: "lc_classifications") final  List<String>? lcClassifications, @JsonKey(name: "latest_revision") this.latestRevision, @JsonKey(name: "key") this.key, @JsonKey(name: "authors") final  List<Author>? authors, @JsonKey(name: "dewey_number") final  List<String>? deweyNumber, @JsonKey(name: "type") this.type, @JsonKey(name: "subjects") final  List<String>? subjects, @JsonKey(name: "revision") this.revision}): _links = links,_covers = covers,_lcClassifications = lcClassifications,_authors = authors,_deweyNumber = deweyNumber,_subjects = subjects;
+class _OLWork extends OLWork {
+  const _OLWork({@JsonKey(name: "first_publish_date") this.firstPublishDate, @JsonKey(name: "description") this.description, @JsonKey(name: "links") final  List<OLLink>? links, @JsonKey(name: "title") this.title, @JsonKey(name: "created") this.created, @JsonKey(name: "last_modified") this.lastModified, @JsonKey(name: "covers") final  List<int>? covers, @JsonKey(name: "lc_classifications") final  List<String>? lcClassifications, @JsonKey(name: "latest_revision") this.latestRevision, @JsonKey(name: "key") this.key, @JsonKey(name: "authors") final  List<Author>? authors, @JsonKey(name: "dewey_number") final  List<String>? deweyNumber, @JsonKey(name: "type") this.type, @JsonKey(name: "subjects") final  List<String>? subjects, @JsonKey(name: "revision") this.revision}): _links = links,_covers = covers,_lcClassifications = lcClassifications,_authors = authors,_deweyNumber = deweyNumber,_subjects = subjects,super._();
   factory _OLWork.fromJson(Map<String, dynamic> json) => _$OLWorkFromJson(json);
 
 @override@JsonKey(name: "first_publish_date") final  String? firstPublishDate;
-@override@JsonKey(name: "description") final  Created? description;
+@override@JsonKey(name: "description") final  String? description;
  final  List<OLLink>? _links;
 @override@JsonKey(name: "links") List<OLLink>? get links {
   final value = _links;
@@ -371,11 +359,11 @@ abstract mixin class _$OLWorkCopyWith<$Res> implements $OLWorkCopyWith<$Res> {
   factory _$OLWorkCopyWith(_OLWork value, $Res Function(_OLWork) _then) = __$OLWorkCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: "first_publish_date") String? firstPublishDate,@JsonKey(name: "description") Created? description,@JsonKey(name: "links") List<OLLink>? links,@JsonKey(name: "title") String? title,@JsonKey(name: "created") Created? created,@JsonKey(name: "last_modified") Created? lastModified,@JsonKey(name: "covers") List<int>? covers,@JsonKey(name: "lc_classifications") List<String>? lcClassifications,@JsonKey(name: "latest_revision") int? latestRevision,@JsonKey(name: "key") String? key,@JsonKey(name: "authors") List<Author>? authors,@JsonKey(name: "dewey_number") List<String>? deweyNumber,@JsonKey(name: "type") OLType? type,@JsonKey(name: "subjects") List<String>? subjects,@JsonKey(name: "revision") int? revision
+@JsonKey(name: "first_publish_date") String? firstPublishDate,@JsonKey(name: "description") String? description,@JsonKey(name: "links") List<OLLink>? links,@JsonKey(name: "title") String? title,@JsonKey(name: "created") Created? created,@JsonKey(name: "last_modified") Created? lastModified,@JsonKey(name: "covers") List<int>? covers,@JsonKey(name: "lc_classifications") List<String>? lcClassifications,@JsonKey(name: "latest_revision") int? latestRevision,@JsonKey(name: "key") String? key,@JsonKey(name: "authors") List<Author>? authors,@JsonKey(name: "dewey_number") List<String>? deweyNumber,@JsonKey(name: "type") OLType? type,@JsonKey(name: "subjects") List<String>? subjects,@JsonKey(name: "revision") int? revision
 });
 
 
-@override $CreatedCopyWith<$Res>? get description;@override $CreatedCopyWith<$Res>? get created;@override $CreatedCopyWith<$Res>? get lastModified;@override $OLTypeCopyWith<$Res>? get type;
+@override $CreatedCopyWith<$Res>? get created;@override $CreatedCopyWith<$Res>? get lastModified;@override $OLTypeCopyWith<$Res>? get type;
 
 }
 /// @nodoc
@@ -392,7 +380,7 @@ class __$OLWorkCopyWithImpl<$Res>
   return _then(_OLWork(
 firstPublishDate: freezed == firstPublishDate ? _self.firstPublishDate : firstPublishDate // ignore: cast_nullable_to_non_nullable
 as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
-as Created?,links: freezed == links ? _self._links : links // ignore: cast_nullable_to_non_nullable
+as String?,links: freezed == links ? _self._links : links // ignore: cast_nullable_to_non_nullable
 as List<OLLink>?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,created: freezed == created ? _self.created : created // ignore: cast_nullable_to_non_nullable
 as Created?,lastModified: freezed == lastModified ? _self.lastModified : lastModified // ignore: cast_nullable_to_non_nullable
@@ -410,18 +398,6 @@ as int?,
 }
 
 /// Create a copy of OLWork
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$CreatedCopyWith<$Res>? get description {
-    if (_self.description == null) {
-    return null;
-  }
-
-  return $CreatedCopyWith<$Res>(_self.description!, (value) {
-    return _then(_self.copyWith(description: value));
-  });
-}/// Create a copy of OLWork
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')

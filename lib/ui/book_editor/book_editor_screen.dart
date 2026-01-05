@@ -7,18 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:http/http.dart' as http;
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
-import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
-import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
+import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
@@ -74,10 +71,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   bool _isCoverDownloading = false;
 
-  static const String coverBaseUrl = 'https://covers.openlibrary.org/';
-  late final String coverUrl =
-      '${coverBaseUrl}b/id/${widget.coverOpenLibraryID}-L.jpg';
-
   List<String> bookTypes = [
     LocaleKeys.book_format_paperback.tr(),
     LocaleKeys.book_format_hardcover.tr(),
@@ -112,10 +105,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     ).showSnackBar(SnackBar(content: Text(message)));
   }
 
+  // TODO: cần xử lý validate trong cubit
+  // NOTE: hiện tại để cubit ở đây vì chưa biết xử lý failure như nào cho hợp lý
   bool _validate() {
     ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
-    final book = context.read<EditBookCubit>().state;
+    final book = context.editBookCubit.state;
 
     if (book.title.isEmpty) {
       _showSnackbar(LocaleKeys.title_cannot_be_empty.tr());
@@ -151,7 +146,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     // 3. Lấy dữ liệu từ các Cubit quản lý Form
     // Lấy thông tin sách đã nhập
-    final bookDraft = context.read<EditBookCubit>().state;
+    final bookDraft = context.editBookCubit.state;
 
     // Lấy ảnh bìa (nếu sách có bìa)
     Uint8List? coverBytes;
@@ -172,7 +167,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     if (!mounted) return;
 
     book = book.copyWith(dateModified: DateTime.now());
-    context.read<EditBookCubit>().setBook(book);
+    context.editBookCubit.setBook(book);
 
     if (book.hasCover == false) {
       context.read<EditBookCoverCubit>().deleteCover(book.id);
@@ -246,70 +241,45 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     if (bookType == null) return;
 
     if (bookType == bookTypes[0]) {
-      context.read<EditBookCubit>().setBookFormat(BookFormat.paperback);
+      context.editBookCubit.setBookFormat(BookFormat.paperback);
     } else if (bookType == bookTypes[1]) {
-      context.read<EditBookCubit>().setBookFormat(BookFormat.hardcover);
+      context.editBookCubit.setBookFormat(BookFormat.hardcover);
     } else if (bookType == bookTypes[2]) {
-      context.read<EditBookCubit>().setBookFormat(BookFormat.ebook);
+      context.editBookCubit.setBookFormat(BookFormat.ebook);
     } else if (bookType == bookTypes[3]) {
-      context.read<EditBookCubit>().setBookFormat(BookFormat.audiobook);
+      context.editBookCubit.setBookFormat(BookFormat.audiobook);
     } else {
-      context.read<EditBookCubit>().setBookFormat(BookFormat.paperback);
+      context.editBookCubit.setBookFormat(BookFormat.paperback);
     }
 
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  void _downloadCover() async {
-    setState(() {
-      _isCoverDownloading = true;
-    });
-
-    http.get(Uri.parse(coverUrl)).then((response) async {
-      if (!mounted) return;
-
-      if (!mounted) return;
-      final blurHash = await generateBlurHash(response.bodyBytes);
-
-      if (!mounted) return;
-      context.read<EditBookCoverCubit>().setCover(response.bodyBytes);
-      context.read<EditBookCubit>().setHasCover(true);
-      context.editBookCubit.setBlurHash(blurHash);
-
-      setState(() {
-        _isCoverDownloading = false;
-      });
-    });
-  }
-
   void _downloadWork() async {
     if (widget.work != null) {
-      final openLibraryWork = await getIt<OpenLibraryService>().getWork(
-        widget.work!,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        if (openLibraryWork.description != null) {
-          _descriptionCtrl.text = openLibraryWork.description ?? '';
-        }
-      });
+      context.bookEditorActionCubit.getWork(widget.work!);
     }
   }
 
   Widget _buildCover() {
-    if (_isCoverDownloading) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50),
-        child: LoadingAnimationWidget.threeArchedCircle(
-          color: context.colorScheme.primary,
-          size: 36,
-        ),
-      );
-    } else {
-      return const CoverViewEdit();
-    }
+    return BlocBuilder<BookEditorActionCubit, BookEditorActionState>(
+      builder: (context, state) {
+        bool isDownloading = state.maybeMap(
+          coverDownloading: (_) => true,
+          orElse: () => false,
+        );
+        if (isDownloading) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50),
+            child: LoadingAnimationWidget.threeArchedCircle(
+              color: Theme.of(context).colorScheme.primary,
+              size: 36,
+            ),
+          );
+        }
+        return const CoverViewEdit();
+      },
+    );
   }
 
   void _addNewTag() {
@@ -321,54 +291,54 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     }
 
     // TODO: uncomment this
-    // context.read<EditBookCubit>().addNewTag(_tagsCtrl.text);
+    // context.editBookCubit.addNewTag(_tagsCtrl.text);
 
     _tagsCtrl.clear();
   }
 
   void _unselectTag(String tag) {
-    context.read<EditBookCubit>().removeTag(tag);
+    context.editBookCubit.removeTag(tag);
   }
 
   void _attachListeners() {
     _titleCtrl.addListener(() {
-      context.read<EditBookCubit>().setTitle(_titleCtrl.text);
+      context.editBookCubit.setTitle(_titleCtrl.text);
     });
 
     _subtitleCtrl.addListener(() {
-      context.read<EditBookCubit>().setSubtitle(_subtitleCtrl.text);
+      context.editBookCubit.setSubtitle(_subtitleCtrl.text);
     });
 
     _authorCtrl.addListener(() {
-      context.read<EditBookCubit>().setAuthor(_authorCtrl.text);
+      context.editBookCubit.setAuthor(_authorCtrl.text);
     });
 
     _pagesCtrl.addListener(() {
-      context.read<EditBookCubit>().setPages(_pagesCtrl.text);
+      context.editBookCubit.setPages(_pagesCtrl.text);
     });
 
     _descriptionCtrl.addListener(() {
-      context.read<EditBookCubit>().setDescription(_descriptionCtrl.text);
+      context.editBookCubit.setDescription(_descriptionCtrl.text);
     });
 
     _isbnCtrl.addListener(() {
-      context.read<EditBookCubit>().setISBN(_isbnCtrl.text);
+      context.editBookCubit.setISBN(_isbnCtrl.text);
     });
 
     _olidCtrl.addListener(() {
-      context.read<EditBookCubit>().setOLID(_olidCtrl.text);
+      context.editBookCubit.setOLID(_olidCtrl.text);
     });
 
     _pubYearCtrl.addListener(() {
-      context.read<EditBookCubit>().setPublicationYear(_pubYearCtrl.text);
+      context.editBookCubit.setPublicationYear(_pubYearCtrl.text);
     });
 
     _myReviewCtrl.addListener(() {
-      context.read<EditBookCubit>().setMyReview(_myReviewCtrl.text);
+      context.editBookCubit.setMyReview(_myReviewCtrl.text);
     });
 
     _notesCtrl.addListener(() {
-      context.read<EditBookCubit>().setNotes(_notesCtrl.text);
+      context.editBookCubit.setNotes(_notesCtrl.text);
     });
   }
 
@@ -377,7 +347,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   //   final defaultTags = context.read<DefaultBookTagsCubit>().state;
 
   //   if (book.id == null) {
-  //     context.read<EditBookCubit>().setBook(
+  //     context.editBookCubit.setBook(
   //       book.copyWith(
   //         tags: defaultTags.isNotEmpty ? defaultTags.join('|||||') : null,
   //       ),
@@ -388,10 +358,14 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   void _downloadInitData() {
     if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
       if (widget.coverOpenLibraryID != null) {
-        _downloadCover();
+        // context.read<EditBookCoverCubit>().setCover(null);
+        // context.read<EditBookCubit>().setHasCover(false);
+        ////// BUG: request bị gọi 2 lần liên tiếp
+        context.bookEditorActionCubit.downloadCover(
+          widget.coverOpenLibraryID.toString(),
+        );
       } else {
-        // Remove temp cover file if book/edition has no cover
-        context.read<EditBookCoverCubit>().setCover(null);
+        context.editBookCoverCubit.setCover(null);
       }
 
       if (widget.fromOpenLibrary) {
@@ -402,7 +376,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   @override
   void initState() {
-    final book = context.read<EditBookCubit>().state;
+    final book = context.editBookCubit.state;
 
     // _setDefaultTags(book);
     _prefillBookDetails(book);
@@ -431,46 +405,70 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<BookActorCubit, BookActorState>(
-      listener: (context, state) {
-        state.whenOrNull(
-          success: (message, newBook) {
-            // 1. Hiển thị thông báo thành công
-            // (Tùy chọn, vì chuyển màn hình ngay nên có thể ko cần snackbar)
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<BookActorCubit, BookActorState>(
+          listener: (context, state) {
+            state.whenOrNull(
+              success: (message, newBook) {
+                // 1. Hiển thị thông báo thành công
+                // (Tùy chọn, vì chuyển màn hình ngay nên có thể ko cần snackbar)
 
-            // 2. Cập nhật CurrentBookCubit để màn hình chi tiết hiển thị đúng
-            // Lấy lại data từ form để có thông tin mới nhất
-            var bookSaved = context.read<EditBookCubit>().state;
+                // 2. Cập nhật CurrentBookCubit để màn hình chi tiết hiển thị đúng
+                // Lấy lại data từ form để có thông tin mới nhất
+                var bookSaved = context.editBookCubit.state;
 
-            // Gán ID mới vừa được tạo từ DB (nếu có)
-            if (newBook != null) {
-              bookSaved = newBook;
-            }
+                // Gán ID mới vừa được tạo từ DB (nếu có)
+                if (newBook != null) {
+                  bookSaved = newBook;
+                }
 
-            context.read<CurrentBookCubit>().setBook(bookSaved);
+                context.read<CurrentBookCubit>().setBook(bookSaved);
 
-            // 3. Logic Sync (nếu có)
-            // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [bookSaved]));
+                // 3. Logic Sync (nếu có)
+                // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [bookSaved]));
 
-            // 4. Điều hướng sang màn hình chi tiết
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const BookScreen(heroTag: ""),
-              ),
-              (route) => route.isFirst,
+                // 4. Điều hướng sang màn hình chi tiết
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BookScreen(heroTag: ""),
+                  ),
+                  (route) => route.isFirst,
+                );
+              },
+              failure: (errorMessage) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(errorMessage), // Hoặc .tr() nếu là key
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              },
             );
           },
-          failure: (errorMessage) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(errorMessage), // Hoặc .tr() nếu là key
-                backgroundColor: Colors.red,
-              ),
+        ),
+        BlocListener<BookEditorActionCubit, BookEditorActionState>(
+          listener: (context, state) {
+            state.whenOrNull(
+              coverDownloaded: (bytes, blurHash) {
+                context.editBookCoverCubit.setCover(bytes);
+                context.editBookCubit.setHasCover(true);
+                context.editBookCubit.setBlurHash(blurHash);
+              },
+              validationFailure: (msg) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(msg)));
+              },
+              failure: (msg) {
+                // Xử lý lỗi tải ảnh thầm lặng hoặc thông báo tùy UX
+                debugPrint("Error: $msg");
+              },
             );
           },
-        );
-      },
+        ),
+      ],
       child: KeyboardDismissible(
         child: Scaffold(
           appBar: AppBar(
@@ -772,7 +770,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
       child: FilledButton.tonal(
         onPressed: () {
-          context.read<EditBookCubit>().addNewReading(Reading());
+          context.editBookCubit.addNewReading(Reading());
         },
         style: ButtonStyle(
           shape: WidgetStatePropertyAll(

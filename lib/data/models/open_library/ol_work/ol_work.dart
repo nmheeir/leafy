@@ -3,6 +3,7 @@ import 'package:leafy/data/models/open_library/author/author.dart';
 import 'package:leafy/data/models/open_library/created/created.dart';
 import 'package:leafy/data/models/open_library/ol_link/ol_link.dart';
 import 'package:leafy/data/models/open_library/ol_type/ol_type.dart';
+import 'package:leafy/domain/open_lib/entities/ol_work_result.dart';
 
 part 'ol_work.freezed.dart';
 part 'ol_work.g.dart';
@@ -11,7 +12,7 @@ part 'ol_work.g.dart';
 abstract class OLWork with _$OLWork {
   const factory OLWork({
     @JsonKey(name: "first_publish_date") String? firstPublishDate,
-    @JsonKey(name: "description") Created? description,
+    @JsonKey(name: "description") String? description,
     @JsonKey(name: "links") List<OLLink>? links,
     @JsonKey(name: "title") String? title,
     @JsonKey(name: "created") Created? created,
@@ -27,5 +28,11 @@ abstract class OLWork with _$OLWork {
     @JsonKey(name: "revision") int? revision,
   }) = _OLWork;
 
+  const OLWork._();
+
   factory OLWork.fromJson(Map<String, dynamic> json) => _$OLWorkFromJson(json);
+
+  OLWorkResult toEntity() {
+    return OLWorkResult(key: key, title: title, description: description);
+  }
 }
