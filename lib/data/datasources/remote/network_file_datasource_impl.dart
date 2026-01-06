@@ -49,8 +49,26 @@ class NetworkFileDataSourceImpl implements NetworkFileDataSource {
     Map<String, dynamic>? headers,
     CancelToken? cancelToken,
     void Function(int received, int total)? onReceiveProgress,
-  }) {
-    // TODO: implement downloadToFile
-    throw UnimplementedError();
+  }) async {
+    try {
+      await _dio.download(
+        url,
+        savePath,
+        options: Options(headers: headers),
+        cancelToken: cancelToken,
+        deleteOnError: true,
+        onReceiveProgress: onReceiveProgress,
+      );
+      return File(savePath);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  Exception _handleError(dynamic e) {
+    if (e is DioException) {
+      return e;
+    }
+    return Exception(e.toString());
   }
 }
