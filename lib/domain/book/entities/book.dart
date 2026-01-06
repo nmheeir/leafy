@@ -137,6 +137,7 @@ class Book extends Equatable {
     id,
     title,
     subtitle,
+    description,
     author,
     status,
     favorite,

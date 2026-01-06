@@ -20,21 +20,27 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
     this._downloadCoverUseCase,
     this._olGetWorkUseCase,
     // this._validateBookFormUseCase,
-  ) : super(const BookEditorActionState.idle());
+  ) : super(const BookEditorActionState());
 
   Future<void> downloadCover(String coverOLID) async {
-    emit(const BookEditorActionState.coverDownloading());
+    emit(state.copyWith(isCoverDownloading: true));
     final result = await _downloadCoverUseCase(coverOLID);
 
     result.fold(
       (failure) {
-        emit(BookEditorActionState.failure(failure.toString()));
+        emit(
+          state.copyWith(
+            isCoverDownloading: false,
+            errorMessage: failure.toString(),
+          ),
+        );
       },
       (result) {
         emit(
-          BookEditorActionState.coverDownloaded(
-            bytes: result.imageBytes,
-            blurHash: result.blurHash,
+          state.copyWith(
+            isCoverDownloading: false,
+            coverBytes: result.imageBytes,
+            coverBlurHash: result.blurHash,
           ),
         );
       },
@@ -46,10 +52,10 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
 
     result.fold(
       (failure) {
-        emit(BookEditorActionState.failure(failure.toString()));
+        emit(state.copyWith(errorMessage: failure.toString()));
       },
       (olWorkResult) {
-        emit(BookEditorActionState.workDownloaded(olWorkResult: olWorkResult));
+        emit(state.copyWith(olWorkResult: olWorkResult));
       },
     );
   }

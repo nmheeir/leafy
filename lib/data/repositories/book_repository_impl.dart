@@ -108,10 +108,10 @@ class BookRepositoryImpl implements BookRepository {
   // --- WRITE OPERATIONS ---
 
   @override
-  Future<Either<Failure, int>> addBook(AddBookParams params) async {
+  Future<Either<Failure, Book>> addBook(AddBookParams params) async {
     try {
       _logger.i(
-        'Repository: Adding new book "${params.book}"...',
+        'Repository: Adding new book "${BookModel.fromEntity(params.book)}"...',
       ); // Log Info
 
       if (params.cover == null) {
@@ -132,7 +132,7 @@ class BookRepositoryImpl implements BookRepository {
       _refreshBooks();
       _logger.i('Repository: Book added successfully. ID: $bookId');
 
-      return Right(bookId);
+      return Right(params.book.copyWith(id: bookId));
     } catch (e, stackTrace) {
       _logger.e('Repository: addBook failed', error: e, stackTrace: stackTrace);
       return Left(Failure.unexpected(e.toString()));

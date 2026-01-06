@@ -6,11 +6,9 @@ import 'package:image/image.dart' as img;
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:logger/logger.dart';
 
 class CoverBackground extends StatelessWidget {
-  CoverBackground({super.key});
-  final Logger _logger = Logger();
+  const CoverBackground({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +17,6 @@ class CoverBackground extends StatelessWidget {
         return previous.blurHash != current.blurHash;
       },
       builder: (context, state) {
-        _logger.i('Book: $state');
         final image = BlurHash.decode(state.blurHash!).toImage(35, 20);
 
         return Image.memory(

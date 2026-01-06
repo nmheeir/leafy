@@ -10,6 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/data/models/book/book/book_model.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
@@ -68,8 +69,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   final _notesCtrl = TextEditingController();
 
   final _animDuration = const Duration(milliseconds: 250);
-
-  bool _isCoverDownloading = false;
 
   List<String> bookTypes = [
     LocaleKeys.book_format_paperback.tr(),
@@ -134,29 +133,22 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   }
 
   void _saveNewBook() async {
-    // 1. Ẩn bàn phím
     FocusManager.instance.primaryFocus?.unfocus();
 
-    // 2. Validate dữ liệu nhập
     if (!_validate()) return;
 
-    // Logic chờ tải ảnh (giữ nguyên vì đây là logic UI UX)
     if (await _checkIfWaitForCoverDownload(context) == true) return;
     if (!mounted) return;
 
-    // 3. Lấy dữ liệu từ các Cubit quản lý Form
-    // Lấy thông tin sách đã nhập
     final bookDraft = context.editBookCubit.state;
 
-    // Lấy ảnh bìa (nếu sách có bìa)
     Uint8List? coverBytes;
     if (bookDraft.hasCover) {
       coverBytes = context.read<EditBookCoverCubit>().state;
     }
 
-    // 4. Gửi lệnh cho BookActorCubit
-    // Cubit này sẽ lo việc gọi UseCase, lưu DB, lưu file ảnh...
-    context.bookActorCubit.addBook(bookDraft, coverBytes);
+    debugPrint("${BookModel.fromEntity(bookDraft)}");
+    // context.bookActorCubit.addBook(bookDraft, coverBytes);
   }
 
   void _updateBook(Book book) async {
@@ -185,7 +177,10 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   }
 
   Future<bool?> _checkIfWaitForCoverDownload(BuildContext context) {
-    if (_isCoverDownloading) {
+    final isCoverDownloading =
+        context.bookEditorActionCubit.state.isCoverDownloading;
+
+    if (isCoverDownloading) {
       return showDialog<bool>(
         context: context,
         builder: (context) {
@@ -264,15 +259,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   Widget _buildCover() {
     return BlocBuilder<BookEditorActionCubit, BookEditorActionState>(
       builder: (context, state) {
-        bool isDownloading = state.maybeMap(
-          coverDownloading: (_) => true,
-          orElse: () => false,
-        );
+        bool isDownloading = state.isCoverDownloading;
         if (isDownloading) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 50),
             child: LoadingAnimationWidget.threeArchedCircle(
-              color: Theme.of(context).colorScheme.primary,
+              color: context.colorScheme.primary,
               size: 36,
             ),
           );
@@ -358,9 +350,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   void _downloadInitData() {
     if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
       if (widget.coverOpenLibraryID != null) {
-        // context.read<EditBookCoverCubit>().setCover(null);
-        // context.read<EditBookCubit>().setHasCover(false);
-        ////// BUG: request bị gọi 2 lần liên tiếp
         context.bookEditorActionCubit.downloadCover(
           widget.coverOpenLibraryID.toString(),
         );
@@ -411,24 +400,14 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           listener: (context, state) {
             state.whenOrNull(
               success: (message, newBook) {
-                // 1. Hiển thị thông báo thành công
-                // (Tùy chọn, vì chuyển màn hình ngay nên có thể ko cần snackbar)
-
-                // 2. Cập nhật CurrentBookCubit để màn hình chi tiết hiển thị đúng
-                // Lấy lại data từ form để có thông tin mới nhất
                 var bookSaved = context.editBookCubit.state;
 
-                // Gán ID mới vừa được tạo từ DB (nếu có)
                 if (newBook != null) {
                   bookSaved = newBook;
                 }
 
                 context.read<CurrentBookCubit>().setBook(bookSaved);
 
-                // 3. Logic Sync (nếu có)
-                // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [bookSaved]));
-
-                // 4. Điều hướng sang màn hình chi tiết
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
@@ -449,23 +428,27 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           },
         ),
         BlocListener<BookEditorActionCubit, BookEditorActionState>(
+          listenWhen: (previous, current) {
+            return previous.coverBytes != current.coverBytes ||
+                previous.errorMessage != current.errorMessage ||
+                previous.olWorkResult != current.olWorkResult;
+          },
           listener: (context, state) {
-            state.whenOrNull(
-              coverDownloaded: (bytes, blurHash) {
-                context.editBookCoverCubit.setCover(bytes);
-                context.editBookCubit.setHasCover(true);
-                context.editBookCubit.setBlurHash(blurHash);
-              },
-              validationFailure: (msg) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(SnackBar(content: Text(msg)));
-              },
-              failure: (msg) {
-                // Xử lý lỗi tải ảnh thầm lặng hoặc thông báo tùy UX
-                debugPrint("Error: $msg");
-              },
-            );
+            if (state.errorMessage != null) {
+              // TODO: cần thêm logic hiển thị error message
+              debugPrint("Error: ${state.errorMessage}");
+            }
+
+            if (state.coverBytes != null && state.coverBlurHash != null) {
+              context.editBookCoverCubit.setCover(state.coverBytes);
+              context.editBookCubit.setHasCover(true);
+              context.editBookCubit.setBlurHash(state.coverBlurHash!);
+            }
+
+            if (state.olWorkResult != null &&
+                state.olWorkResult!.description != null) {
+              _descriptionCtrl.text = state.olWorkResult!.description!;
+            }
           },
         ),
       ],

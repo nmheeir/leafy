@@ -9,9 +9,15 @@ abstract class BookLocalDataSource {
 
   Future<List<BookModel>> getAll({List<String>? columns});
   Future<List<BookModel>> getAllNotDeleted({List<String>? columns});
-  Future<List<BookModel>> getByStatus({required int status, List<String>? columns});
+  Future<List<BookModel>> getByStatus({
+    required int status,
+    List<String>? columns,
+  });
 
-  Future<List<BookModel>> search({required String query, List<String>? columns});
+  Future<List<BookModel>> search({
+    required String query,
+    List<String>? columns,
+  });
 
   Future<int> countByStatus(int status);
 

@@ -46,8 +46,13 @@ class BookActorCubit extends Cubit<BookActorState> {
       (failure) => emit(
         BookActorState.failure(message: failure.message ?? 'Message unknow'),
       ),
-      (_) {
-        emit(const BookActorState.success(message: "Thêm sách thành công"));
+      (newBook) {
+        emit(
+          BookActorState.success(
+            message: "Thêm sách thành công",
+            book: newBook,
+          ),
+        );
       },
     );
   }
@@ -177,7 +182,6 @@ class BookActorCubit extends Cubit<BookActorState> {
       (_) => emit(
         BookActorState.success(
           message: successMessage ?? "Cập nhật thành công",
-          book: book,
         ),
       ),
     );
