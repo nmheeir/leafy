@@ -72,7 +72,7 @@ class BookRepositoryImpl implements BookRepository {
   Future<Either<Failure, List<Book>>> getDeletedBooks() async {
     try {
       _logger.d('Repository: Fetching deleted books...');
-      final books = await _bookLocalDataSource.getDeleted();
+      final books = await _bookLocalDataSource.getSoftDeleted();
       return Right(books.map((e) => e.toEntity()).toList());
     } catch (e, stackTrace) {
       _logger.e(
@@ -167,14 +167,13 @@ class BookRepositoryImpl implements BookRepository {
     }
   }
 
+  /// Xoá vĩnh viễn sách
   @override
   Future<Either<Failure, Unit>> deleteBook(int id) async {
     try {
-      _logger.w(
-        'Repository: Permanently deleting book ID: $id...',
-      ); // Warning vì hành động nguy hiểm
+      _logger.w('Repository: Permanently deleting book ID: $id...');
 
-      await _bookLocalDataSource.delete(id);
+      await _bookLocalDataSource.hardDelete(id);
 
       // Xóa cả ảnh bìa
       await _deleteCoverFromStorage(id);
@@ -182,7 +181,7 @@ class BookRepositoryImpl implements BookRepository {
       _refreshBooks();
       _logger.i('Repository: Book deleted permanently.');
 
-      return const Right(unit);
+      return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
         'Repository: deleteBook failed',
@@ -213,7 +212,7 @@ class BookRepositoryImpl implements BookRepository {
       }
 
       _refreshBooks();
-      return const Right(unit);
+      return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
         'Repository: bulkUpdateBooks failed',
@@ -229,15 +228,10 @@ class BookRepositoryImpl implements BookRepository {
     try {
       _logger.i('Repository: Bulk Soft-Deleting ${ids.length} books...');
 
-      // Giả sử Datasource có hàm update deleted status, hoặc lặp qua update
-      // Nếu chưa có hàm bulk ở datasource, ta loop tạm (tuy nhiên bulk ở SQL tốt hơn)
-      for (final id in ids) {
-        // TODO: implement
-        //  await _bookLocalDataSource.updateDeletedStatus(id, true);
-      }
+      await _bookLocalDataSource.bulkSoftDetele(ids);
 
       _refreshBooks();
-      return const Right(unit);
+      return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
         'Repository: bulkDeleteBooks failed',
@@ -253,8 +247,7 @@ class BookRepositoryImpl implements BookRepository {
     try {
       _logger.i('Repository: Restoring book ID: $id...');
 
-      // TODO: implement
-      // await _bookLocalDataSource.updateDeletedStatus(id, false);
+      await _bookLocalDataSource.restore(id);
 
       _refreshBooks();
 

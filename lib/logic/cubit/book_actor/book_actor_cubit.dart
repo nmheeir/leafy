@@ -182,6 +182,7 @@ class BookActorCubit extends Cubit<BookActorState> {
       (_) => emit(
         BookActorState.success(
           message: successMessage ?? "Cập nhật thành công",
+          book: book,
         ),
       ),
     );

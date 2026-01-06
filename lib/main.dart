@@ -89,9 +89,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<LibraryCubit>()),
       BlocProvider(create: (context) => getIt<BookActorCubit>()),
       BlocProvider(create: (context) => getIt<BookEditorActionCubit>()),
-      BlocProvider(
-        create: (context) => getIt<TrashBinCubit>()..loadDeletedBooks(),
-      ),
+      BlocProvider(create: (context) => getIt<TrashBinCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

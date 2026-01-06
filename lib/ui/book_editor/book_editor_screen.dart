@@ -148,7 +148,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     }
 
     debugPrint("${BookModel.fromEntity(bookDraft)}");
-    // context.bookActorCubit.addBook(bookDraft, coverBytes);
+    context.bookActorCubit.addBook(bookDraft, coverBytes);
   }
 
   void _updateBook(Book book) async {
@@ -171,18 +171,17 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       );
     }
 
-    // context.read<PbSyncBloc>().add(TriggerSyncEvent(booksToSync: [book]));
-
     Navigator.pop(context);
   }
 
-  Future<bool?> _checkIfWaitForCoverDownload(BuildContext context) {
+  Future<bool?> _checkIfWaitForCoverDownload(BuildContext context) async {
     final isCoverDownloading =
         context.bookEditorActionCubit.state.isCoverDownloading;
 
     if (isCoverDownloading) {
-      return showDialog<bool>(
+      final result = await showDialog<bool>(
         context: context,
+        barrierDismissible: false,
         builder: (context) {
           return AlertDialog.adaptive(
             title: Text(LocaleKeys.cover_still_downloaded.tr()),
@@ -227,6 +226,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           );
         },
       );
+      return result ?? true;
     } else {
       return Future.value(false);
     }

@@ -10,8 +10,19 @@ import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_list.dart';
 
-class TrashScreen extends StatelessWidget {
+class TrashScreen extends StatefulWidget {
   const TrashScreen({super.key});
+
+  @override
+  State<TrashScreen> createState() => _TrashScreenState();
+}
+
+class _TrashScreenState extends State<TrashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.trashBinCubit.loadDeletedBooks();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +128,6 @@ class TrashScreen extends StatelessWidget {
         return Dismissible(
           key: uniqueKey,
           direction: DismissDirection.horizontal,
-          // Cấu hình nền khi vuốt
           background: _buildSwipeBackground(
             context,
             Alignment.centerLeft,
@@ -132,19 +142,16 @@ class TrashScreen extends StatelessWidget {
             Icons.delete_forever,
             LocaleKeys.delete_permanently.tr(),
           ),
-          // Logic xác nhận xóa vĩnh viễn
           confirmDismiss: (direction) async {
+            // Vuốt phái -> trái: hiển thị confirm delete permently dialog
             if (direction == DismissDirection.endToStart) {
-              // Vuốt trái (Xóa vĩnh viễn) -> Cần hỏi
               return await _showConfirmDialog(
                 context,
                 LocaleKeys.delete_perm_question.tr(),
               );
             }
-            // Vuốt phải (Khôi phục) -> Không cần hỏi
             return true;
           },
-          // Logic thực hiện hành động sau khi dismiss
           onDismissed: (direction) {
             if (direction == DismissDirection.endToStart) {
               context.trashBinCubit.deletePermanently(book.id!);
@@ -152,12 +159,10 @@ class TrashScreen extends StatelessWidget {
               context.trashBinCubit.restoreBook(book.id!);
             }
           },
-          // Child là card sách (Tái sử dụng widget cũ của bạn)
           child: BookCardList(
             book: book,
             heroTag: 'trash_hero_${book.id}',
             addBottomPadding: index == books.length - 1,
-            // Ở thùng rác thì không click vào xem chi tiết được, hoặc xem nhưng readonly
             onPressed: () {},
           ),
         );
@@ -181,8 +186,7 @@ class TrashScreen extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white),
           const SizedBox(width: 8),
-          if (alignment ==
-              Alignment.centerLeft) // Chỉ hiện text nếu không gian đủ rộng
+          if (alignment == Alignment.centerLeft)
             Text(
               label,
               style: const TextStyle(

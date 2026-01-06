@@ -246,7 +246,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i660.AddBookUseCase(gh<_i29.BookRepository>()),
     );
     gh.factory<_i821.TrashBinCubit>(
-      () => _i821.TrashBinCubit(gh<_i679.GetDeletedBooksUseCase>()),
+      () => _i821.TrashBinCubit(
+        gh<_i974.Logger>(),
+        gh<_i679.GetDeletedBooksUseCase>(),
+        gh<_i675.RestoreBookUseCase>(),
+      ),
     );
     gh.factory<_i939.LibraryCubit>(
       () => _i939.LibraryCubit(
