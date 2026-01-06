@@ -60,6 +60,10 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
     );
   }
 
+  void reset() {
+    emit(const BookEditorActionState()); // Emit state rỗng hoàn toàn
+  }
+
   // /// Trả về true nếu hợp lệ, false nếu không (và emit lỗi để UI hiện snackbar)
   // bool validateForm(Book book) {
   //   final error = _validateBookFormUseCase.execute(book);

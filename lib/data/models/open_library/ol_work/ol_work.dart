@@ -12,7 +12,8 @@ part 'ol_work.g.dart';
 abstract class OLWork with _$OLWork {
   const factory OLWork({
     @JsonKey(name: "first_publish_date") String? firstPublishDate,
-    @JsonKey(name: "description") String? description,
+    @JsonKey(name: "description", fromJson: _descriptionFromJson)
+    String? description,
     @JsonKey(name: "links") List<OLLink>? links,
     @JsonKey(name: "title") String? title,
     @JsonKey(name: "created") Created? created,
@@ -35,4 +36,15 @@ abstract class OLWork with _$OLWork {
   OLWorkResult toEntity() {
     return OLWorkResult(key: key, title: title, description: description);
   }
+}
+
+String? _descriptionFromJson(dynamic json) {
+  if (json == null) return null;
+  // Trường hợp 1: Trả về String trực tiếp
+  if (json is String) return json;
+  // Trường hợp 2: Trả về Map (Object) -> lấy value
+  if (json is Map<String, dynamic>) {
+    return json['value'] as String?;
+  }
+  return null;
 }

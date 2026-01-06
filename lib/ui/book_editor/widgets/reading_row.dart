@@ -184,7 +184,9 @@ class _ReadingRowState extends State<ReadingRow> {
             ),
           ),
           FilledButton.tonal(
-            onPressed: () {},
+            onPressed: () {
+              context.read<EditBookCubit>().removeReading(widget.index);
+            },
             style: ButtonStyle(
               shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(

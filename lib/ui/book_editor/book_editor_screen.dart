@@ -282,8 +282,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       return;
     }
 
-    // TODO: uncomment this
-    // context.editBookCubit.addNewTag(_tagsCtrl.text);
+    context.editBookCubit.addNewTag(_tagsCtrl.text);
 
     _tagsCtrl.clear();
   }
@@ -365,6 +364,8 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
   @override
   void initState() {
+    context.bookEditorActionCubit.reset();
+
     final book = context.editBookCubit.state;
 
     // _setDefaultTags(book);

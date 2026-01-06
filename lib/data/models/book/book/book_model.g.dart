@@ -11,7 +11,7 @@ _BookModel _$BookModelFromJson(Map<String, dynamic> json) => _BookModel(
   title: json['title'] as String,
   subtitle: json['subtitle'] as String?,
   author: json['author'] as String,
-  description: json['description'] as String?,
+  description: _descriptionFromJson(json['description']),
   bookFormat:
       $enumDecodeNullable(_$BookFormatEnumMap, json['book_type']) ??
       BookFormat.paperback,

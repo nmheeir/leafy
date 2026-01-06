@@ -15,7 +15,7 @@ abstract class BookModel with _$BookModel {
     @JsonKey(name: 'title') required String title,
     @JsonKey(name: 'subtitle') String? subtitle,
     @JsonKey(name: 'author') required String author,
-    @JsonKey(name: 'description') String? description,
+    @JsonKey(fromJson: _descriptionFromJson) String? description,
 
     @JsonKey(name: 'book_type')
     @Default(BookFormat.paperback)
@@ -113,4 +113,15 @@ abstract class BookModel with _$BookModel {
       dateModified: dateModified,
     );
   }
+}
+
+String? _descriptionFromJson(dynamic json) {
+  if (json == null) return null;
+  // Trường hợp 1: Trả về String trực tiếp
+  if (json is String) return json;
+  // Trường hợp 2: Trả về Map (Object) -> lấy value
+  if (json is Map<String, dynamic>) {
+    return json['value'] as String?;
+  }
+  return null;
 }
