@@ -36,7 +36,7 @@ class DbConstants {
   // =====================================================
   // 3. BOOK RESOURCES – file đọc được (epub / pdf / html)
   // =====================================================
-  static const createBookResouces = '''
+  static const createBookResoucesTable = '''
     CREATE TABLE book_resources (
       id INTEGER PRIMARY KEY AUTOINCREMENT, -- ID nội bộ
       uuid TEXT UNIQUE NOT NULL,            -- ID domain của file (dùng cho reader)
@@ -62,7 +62,7 @@ class DbConstants {
       end_time INTEGER NOT NULL,             -- Thời điểm kết thúc đọc (ms)
       duration_ms INTEGER NOT NULL,          -- Thời gian đọc thực tế
       chapter_index INTEGER,                -- Chương đang đọc (tham khảo)
-      FOREIGN KEY (book_id) REFERENCES booksTable (id) ON DELETE CASCADE
+      FOREIGN KEY (resource_id) REFERENCES booksTable (id) ON DELETE CASCADE
     )
   ''';
 

@@ -41,6 +41,10 @@ class DatabaseService {
 
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(DbConstants.createBooksTable);
+    await db.execute(DbConstants.createBookResoucesTable);
+    await db.execute(DbConstants.createReaderProgressTable);
+    await db.execute(DbConstants.createReadingSessionsTable);
+    await db.execute(DbConstants.createSessionTimeIndex);
 
     // if (version >= 2) {
     //   for (final script in DbConstants.migrationV1toV2) {
