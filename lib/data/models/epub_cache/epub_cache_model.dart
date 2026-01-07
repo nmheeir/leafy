@@ -25,8 +25,8 @@ abstract class EpubCacheModel with _$EpubCacheModel {
   ///   An instance of the `EpubCache` class is being returned with the specified properties `id`,
   /// `url`, `title`, `lastReadCfi`, and `progress` set to the values of the corresponding properties in
   /// the current object.
-  EpubCache toEntity() {
-    return EpubCache(
+  EpubMeta toEntity() {
+    return EpubMeta(
       id: id,
       url: url,
       title: title,
@@ -45,7 +45,7 @@ abstract class EpubCacheModel with _$EpubCacheModel {
   /// Returns:
   ///   An instance of `EpubCacheModel` is being returned with the properties initialized using the values
   /// from the `EpubCache` entity passed as a parameter.
-  factory EpubCacheModel.fromEntity(EpubCache entity) {
+  factory EpubCacheModel.fromEntity(EpubMeta entity) {
     return EpubCacheModel(
       id: entity.id,
       url: entity.url,

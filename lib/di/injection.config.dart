@@ -22,14 +22,22 @@ import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
 import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
+import '../data/datasources/local/book_resource_local_datasource.dart' as _i880;
+import '../data/datasources/local/book_resource_local_datasource_impl.dart'
+    as _i612;
 import '../data/datasources/local/database_service.dart' as _i328;
 import '../data/datasources/local/epub_file_local_datasource.dart' as _i620;
 import '../data/datasources/local/epub_file_local_datasource_impl.dart'
     as _i536;
+import '../data/datasources/local/reader_progress_local_datasource.dart'
+    as _i770;
+import '../data/datasources/local/reader_progress_local_datasource_impl.dart'
+    as _i1030;
 import '../data/datasources/remote/network_file_datasource.dart' as _i798;
 import '../data/datasources/remote/network_file_datasource_impl.dart' as _i643;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
 import '../data/repositories/book_repository_impl.dart' as _i329;
+import '../data/repositories/book_resource_repository_impl.dart' as _i722;
 import '../data/repositories/epub_cache_repository_impl.dart' as _i827;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
@@ -46,6 +54,14 @@ import '../domain/book/usecases/search_books.dart' as _i755;
 import '../domain/book/usecases/stat_calculator.dart' as _i800;
 import '../domain/book/usecases/update_book.dart' as _i552;
 import '../domain/book/usecases/watch_all_books.dart' as _i864;
+import '../domain/book_resource/repositories/book_resource_repository.dart'
+    as _i1042;
+import '../domain/book_resource/usecase/add_book_resource.dart' as _i693;
+import '../domain/book_resource/usecase/check_book_resource_exist_by_hash.dart'
+    as _i336;
+import '../domain/book_resource/usecase/delete_book_resource.dart' as _i518;
+import '../domain/book_resource/usecase/update_book_resource_file.dart'
+    as _i589;
 import '../domain/epub_cache/repositories/epub_cache_repository.dart' as _i57;
 import '../domain/epub_cache/usecases/get_epub.dart' as _i756;
 import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
@@ -53,6 +69,8 @@ import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
 import '../domain/open_lib/repositories/open_lib_repository.dart' as _i751;
 import '../domain/open_lib/usecases/ol_get_work.dart' as _i138;
 import '../domain/open_lib/usecases/open_lib_search.dart' as _i14;
+import '../domain/reader_progress/usecases/clear_reader_progress.dart' as _i389;
+import '../domain/reader_progress/usecases/save_reader_progress.dart' as _i860;
 import '../domain/services/epub_cached_service.dart' as _i374;
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
@@ -161,6 +179,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i750.GtdGetBooksUseCase>(
       () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
     );
+    gh.lazySingleton<_i880.BookResourceLocalDatasource>(
+      () => _i612.BookResourceLocalDatasourceImpl(gh<_i328.DatabaseService>()),
+    );
     gh.lazySingleton<_i751.OpenLibRepository>(
       () => _i946.OpenLibRepositoryImpl(
         gh<_i715.OlRemoteDataSource>(),
@@ -188,6 +209,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i14.OpenLibSearchUseCase>(
       () => _i14.OpenLibSearchUseCase(gh<_i751.OpenLibRepository>()),
     );
+    gh.lazySingleton<_i770.ReaderProgressLocalDatasource>(
+      () =>
+          _i1030.ReaderProgressLocalDatasourceImpl(gh<_i328.DatabaseService>()),
+    );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
@@ -202,6 +227,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i1042.BookResourceRepository>(
+      () => _i722.BookResourceRepositoryImpl(
+        gh<_i880.BookResourceLocalDatasource>(),
+        gh<_i770.ReaderProgressLocalDatasource>(),
+      ),
     );
     gh.lazySingleton<_i29.BookRepository>(
       () => _i329.BookRepositoryImpl(
@@ -235,6 +266,30 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i864.WatchAllBooksUseCase>(
       () => _i864.WatchAllBooksUseCase(gh<_i29.BookRepository>()),
+    );
+    gh.factory<_i693.AddBookResourceUseCase>(
+      () => _i693.AddBookResourceUseCase(gh<_i1042.BookResourceRepository>()),
+    );
+    gh.factory<_i336.CheckBookResourceExistsByHashUseCase>(
+      () => _i336.CheckBookResourceExistsByHashUseCase(
+        gh<_i1042.BookResourceRepository>(),
+      ),
+    );
+    gh.factory<_i518.DeleteBookResourceUseCase>(
+      () =>
+          _i518.DeleteBookResourceUseCase(gh<_i1042.BookResourceRepository>()),
+    );
+    gh.factory<_i589.UpdateBookResourceFileUseCase>(
+      () => _i589.UpdateBookResourceFileUseCase(
+        gh<_i1042.BookResourceRepository>(),
+      ),
+    );
+    gh.factory<_i389.ClearReaderProgressUseCase>(
+      () =>
+          _i389.ClearReaderProgressUseCase(gh<_i1042.BookResourceRepository>()),
+    );
+    gh.factory<_i860.SaveReaderProgress>(
+      () => _i860.SaveReaderProgress(gh<_i1042.BookResourceRepository>()),
     );
     gh.factory<_i52.OpenLibSearchBloc>(
       () => _i52.OpenLibSearchBloc(

@@ -42,21 +42,21 @@ class DatabaseService {
   Future<void> _onCreate(Database db, int version) async {
     await db.execute(DbConstants.createBooksTable);
 
-    if (version >= 2) {
-      for (final script in DbConstants.migrationV1toV2) {
-        await db.execute(script);
-      }
-    }
+    // if (version >= 2) {
+    //   for (final script in DbConstants.migrationV1toV2) {
+    //     await db.execute(script);
+    //   }
+    // }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     final batch = db.batch();
 
-    if (oldVersion < 2) {
-      for (final script in DbConstants.migrationV1toV2) {
-        batch.execute(script);
-      }
-    }
+    // if (oldVersion < 2) {
+    //   for (final script in DbConstants.migrationV1toV2) {
+    //     batch.execute(script);
+    //   }
+    // }
 
     await batch.commit(noResult: true);
   }

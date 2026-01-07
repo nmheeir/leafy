@@ -16,7 +16,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
 
   BookLocalDataSourceImpl(this._db);
 
-  static const _table = 'booksTable';
+  static const _table = 'books';
 
   @override
   Future<int> create(BookModel book) async {

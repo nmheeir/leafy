@@ -13,6 +13,7 @@ class GetEpubUseCase implements UseCase<File, GetEpubParam> {
 
   GetEpubUseCase(this.epubCacheRepository);
 
+  // NOTE: cần trả về EpubMeta
   @override
   Future<Either<Failure, File>> call(GetEpubParam params) {
     return epubCacheRepository.getEpub(

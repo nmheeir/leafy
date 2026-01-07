@@ -13,6 +13,6 @@ abstract class EpubCacheRepository {
     CancelToken? cancelToken,
   });
 
-  Future<Either<Failure, Unit>> saveMeta(EpubCache cache);
-  Future<Either<Failure, Option<EpubCache>>> loadMeta(String url);
+  Future<Either<Failure, Unit>> saveMeta(EpubMeta cache);
+  Future<Either<Failure, Option<EpubMeta>>> loadMeta(String url);
 }

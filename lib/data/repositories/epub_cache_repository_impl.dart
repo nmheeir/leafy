@@ -66,7 +66,7 @@ class EpubCacheRepositoryImpl implements EpubCacheRepository {
   }
 
   @override
-  Future<Either<Failure, Unit>> saveMeta(EpubCache cache) async {
+  Future<Either<Failure, Unit>> saveMeta(EpubMeta cache) async {
     try {
       final epubCacheModel = EpubCacheModel.fromEntity(cache);
       await _localDataSource.saveMeta(epubCacheModel);
@@ -77,7 +77,7 @@ class EpubCacheRepositoryImpl implements EpubCacheRepository {
   }
 
   @override
-  Future<Either<Failure, Option<EpubCache>>> loadMeta(String url) async {
+  Future<Either<Failure, Option<EpubMeta>>> loadMeta(String url) async {
     try {
       final metaModel = await _localDataSource.loadMeta(url);
       if (metaModel != null) {

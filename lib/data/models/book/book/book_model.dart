@@ -17,7 +17,7 @@ abstract class BookModel with _$BookModel {
     @JsonKey(name: 'author') required String author,
     @JsonKey(fromJson: _descriptionFromJson) String? description,
 
-    @JsonKey(name: 'book_type')
+    @JsonKey(name: 'book_format')
     @Default(BookFormat.paperback)
     BookFormat bookFormat,
 
