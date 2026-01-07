@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:go_router/go_router.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
@@ -9,8 +8,7 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SearchCoversGrid extends StatefulWidget {
@@ -37,8 +35,8 @@ class _SearchCoversGridState extends State<SearchCoversGrid> {
 
     await generateBlurHash(croppedPhotoBytes);
 
-    context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
-    context.read<EditBookCubit>().setHasCover(true);
+    context.editBookCoverCubit.setCoverImage(croppedPhotoBytes);
+    context.editBookCubit.setHasCover(true);
 
     context.pop();
   }

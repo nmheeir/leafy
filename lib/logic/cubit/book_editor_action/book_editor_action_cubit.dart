@@ -3,7 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/ol_cover_type.dart';
 import 'package:leafy/domain/book/usecases/download_cover.dart';
+import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
 import 'package:leafy/domain/open_lib/entities/ol_work_result.dart';
 import 'package:leafy/domain/open_lib/usecases/ol_get_work.dart';
 
@@ -24,7 +26,9 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
 
   Future<void> downloadCover(String coverOLID) async {
     emit(state.copyWith(isCoverDownloading: true));
-    final result = await _downloadCoverUseCase(coverOLID);
+    final result = await _downloadCoverUseCase(
+      DownloadCoverParams(value: coverOLID, type: OlCoverType.coverId),
+    );
 
     result.fold(
       (failure) {

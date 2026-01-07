@@ -7,7 +7,7 @@ import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.da
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';

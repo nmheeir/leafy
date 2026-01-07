@@ -18,7 +18,6 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
@@ -91,9 +90,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     if (!widget.fromOpenLibrary && !widget.fromOpenLibraryEdition) {
       if (!widget.duplicatingBook) {
-        context.read<EditBookCoverCubit>().setCover(
-          await getCoverBytes(book.id),
-        );
+        context.editBookCoverCubit.setCoverImage(await getCoverBytes(book.id));
       }
     }
   }
@@ -144,7 +141,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
     Uint8List? coverBytes;
     if (bookDraft.hasCover) {
-      coverBytes = context.read<EditBookCoverCubit>().state;
+      coverBytes = context.editBookCoverCubit.state.coverData;
     }
 
     debugPrint("${BookModel.fromEntity(bookDraft)}");
@@ -162,12 +159,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     context.editBookCubit.setBook(book);
 
     if (book.hasCover == false) {
-      context.read<EditBookCoverCubit>().deleteCover(book.id);
+      context.editBookCoverCubit.deleteCover(book.id);
       context.bookActorCubit.updateBook(book, null);
     } else {
       context.bookActorCubit.updateBook(
         book,
-        context.read<EditBookCoverCubit>().state,
+        context.editBookCoverCubit.state.coverData,
       );
     }
 
@@ -353,7 +350,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           widget.coverOpenLibraryID.toString(),
         );
       } else {
-        context.editBookCoverCubit.setCover(null);
+        context.editBookCoverCubit.setCoverImage(null);
       }
 
       if (widget.fromOpenLibrary) {
@@ -441,7 +438,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
             }
 
             if (state.coverBytes != null && state.coverBlurHash != null) {
-              context.editBookCoverCubit.setCover(state.coverBytes);
+              context.editBookCoverCubit.setCoverImage(state.coverBytes);
               context.editBookCubit.setHasCover(true);
               context.editBookCubit.setBlurHash(state.coverBlurHash!);
             }

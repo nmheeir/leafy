@@ -91,7 +91,7 @@ import '../logic/cubit/current_book_cubit.dart' as _i754;
 import '../logic/cubit/default_book_format_cubit.dart' as _i185;
 import '../logic/cubit/default_book_tag_cubit.dart' as _i260;
 import '../logic/cubit/display_cubit.dart' as _i985;
-import '../logic/cubit/edit_book_cover_cubit.dart' as _i67;
+import '../logic/cubit/edit_book_cover/edit_book_cover_cubit.dart' as _i1064;
 import '../logic/cubit/edit_book_cubit.dart' as _i232;
 import '../logic/cubit/epub_view/epub_view_cubit.dart' as _i724;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
@@ -135,7 +135,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i260.DefaultBookTagCubit>(() => _i260.DefaultBookTagCubit());
     gh.factory<_i985.DisplayCubit>(() => _i985.DisplayCubit());
-    gh.factory<_i67.EditBookCoverCubit>(() => _i67.EditBookCoverCubit());
     gh.factory<_i232.EditBookCubit>(() => _i232.EditBookCubit());
     gh.factory<_i772.SelectedBooksCubit>(() => _i772.SelectedBooksCubit());
     await gh.singletonAsync<_i497.Directory>(
@@ -239,6 +238,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i758.BookLocalDataSource>(),
         gh<_i974.Logger>(),
       ),
+    );
+    gh.factory<_i1064.EditBookCoverCubit>(
+      () => _i1064.EditBookCoverCubit(gh<_i901.DownloadCoverUseCase>()),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),

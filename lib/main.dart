@@ -27,7 +27,7 @@ import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';

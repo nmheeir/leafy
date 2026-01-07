@@ -8,7 +8,6 @@ import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
@@ -177,7 +176,7 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                           } else if (choice == moreButtonOptions[1]) {
                             final cover = await getCoverBytes(state.id);
 
-                            context.read<EditBookCoverCubit>().setCover(cover);
+                            context.editBookCoverCubit.setCoverImage(cover);
 
                             final newBook = state.copyWith(
                               title:

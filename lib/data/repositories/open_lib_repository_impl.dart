@@ -2,11 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/constants/enums/ol_cover_type.dart';
 import 'package:leafy/core/constants/enums/ol_search_type.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/data/datasources/remote/network_file_datasource.dart';
 import 'package:leafy/data/datasources/remote/ol_remote_data_source.dart';
+import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
 import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/open_lib/entities/ol_search_result.dart';
 import 'package:leafy/domain/open_lib/entities/ol_work_result.dart';
@@ -14,7 +16,7 @@ import 'package:leafy/domain/open_lib/repositories/open_lib_repository.dart';
 
 @LazySingleton(as: OpenLibRepository)
 class OpenLibRepositoryImpl implements OpenLibRepository {
-  final String coverUrl = '${Constants.coverBaseUrl}b/id/';
+  final String coverUrl = '${Constants.coverBaseUrl}b';
 
   final OlRemoteDataSource remoteDataSource;
   final NetworkFileDataSource networkFileDataSource;
@@ -52,10 +54,10 @@ class OpenLibRepositoryImpl implements OpenLibRepository {
 
   @override
   Future<Either<Failure, DownloadCoverResult>> downloadCover(
-    String coverOLID,
+    DownloadCoverParams params,
   ) async {
     try {
-      final fullUrl = '$coverUrl$coverOLID-L.jpg';
+      final fullUrl = '$coverUrl/${params.type.apiValue}/${params.value}-L.jpg';
 
       final bytes = await networkFileDataSource.downloadBytes(fullUrl);
       final blurHash = await generateBlurHash(bytes);
