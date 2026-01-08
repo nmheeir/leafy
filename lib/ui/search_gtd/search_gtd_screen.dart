@@ -6,7 +6,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/search_gtd/search_gtd_bloc.dart';
-import 'package:leafy/ui/epub_view/epub_view_screen.dart';
+import 'package:leafy/ui/search_gtd/widgets/gtd_book_tile.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SearchGtdScreen extends StatelessWidget {
@@ -82,7 +82,7 @@ class _SearchGtdViewState extends State<SearchGtdView> {
                 itemCount: state.hasReachedMax
                     ? state.books.length
                     : state.books.length + 1,
-                separatorBuilder: (context, index) => const Divider(),
+                separatorBuilder: (context, index) => const SizedBox.shrink(),
                 itemBuilder: (context, index) {
                   if (index >= state.books.length) {
                     return Padding(
@@ -97,22 +97,7 @@ class _SearchGtdViewState extends State<SearchGtdView> {
                   }
 
                   final item = state.books[index];
-                  return ListTile(
-                    title: Text(item.title ?? 'No Title'),
-                    subtitle: Text(item.authors.map((e) => e.name).join(', ')),
-                    onTap: () {
-                      if (item.formats?.applicationEpubZip != null) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            // NOTE: chỗ này cần navigate qua trang hiển thị chi tiết thông tin cuốn sách
-                            builder: (context) => EpubViewScreen(
-                              resourceUuid: item.formats!.applicationEpubZip!,
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  );
+                  return GtdBookTile(book: item);
                 },
               );
           }
