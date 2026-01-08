@@ -6,7 +6,11 @@ sealed class EpubViewState with _$EpubViewState {
 
   const factory EpubViewState.loading(double progress) = _EpubViewLoading;
 
-  const factory EpubViewState.loaded(File file) = _EpubViewLoaded;
+  const factory EpubViewState.loaded({
+    required File file,
+    required BookResource resource,
+    String? initialLocator, // CFI string để resume vị trí đọc
+  }) = _EpubViewLoaded;
 
   const factory EpubViewState.error({required String message}) = _EpubViewError;
 }

@@ -4,7 +4,7 @@ class SaveReaderProgressParams extends Equatable {
   final String resourceUuid;
   final String locator;
   final double progress;
-  final int lastReadAt;
+  final DateTime lastReadAt;
 
   const SaveReaderProgressParams({
     required this.resourceUuid,
@@ -14,6 +14,5 @@ class SaveReaderProgressParams extends Equatable {
   });
 
   @override
-  List<Object> get props =>
-      [resourceUuid, locator, progress, lastReadAt];
+  List<Object> get props => [resourceUuid, locator, progress, lastReadAt];
 }

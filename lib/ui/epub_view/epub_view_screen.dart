@@ -7,22 +7,23 @@ import 'package:go_router/go_router.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/reading_touching_handler.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 import 'package:leafy/logic/cubit/epub_view/epub_view_cubit.dart';
 import 'package:leafy/ui/epub_view/widgets/chapter_drawer.dart';
 
 class EpubViewScreen extends StatelessWidget {
-  final String epubUrl;
+  final String resourceUuid;
 
   const EpubViewScreen({
     super.key,
-    this.epubUrl = 'https://www.gutenberg.org/ebooks/84.epub3.images',
+    this.resourceUuid = 'https://www.gutenberg.org/ebooks/84.epub3.images',
   });
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       // Inject Cubit và gọi hàm load ngay khi khởi tạo
-      create: (context) => getIt<EpubViewCubit>()..loadEpub(epubUrl),
+      create: (context) => getIt<EpubViewCubit>()..init(resourceUuid),
       child: const _EpubViewContent(),
     );
   }
@@ -75,51 +76,33 @@ class _EpubViewContentState extends State<_EpubViewContent> {
           initial: (value) {
             return const SizedBox.shrink();
           },
-          loading: (value) => Scaffold(
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: context.colorScheme.primaryContainer,
-                    value: value.progress > 0 ? value.progress : null,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Đang tải sách: ${(value.progress * 100).toStringAsFixed(0)}%',
-                  ),
-                ],
-              ),
-            ),
-          ),
 
-          // 2. Trạng thái Error
-          error: (value) => Scaffold(
-            appBar: AppBar(
-              leading: IconButton(
-                onPressed: () => context.pop(),
-                icon: const Icon(Icons.arrow_back_ios),
-              ),
-            ),
-            body: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Text('Lỗi: ${value.message}'),
-              ),
-            ),
-          ),
+          loading: (value) => _buildLoading(context, value.progress),
 
-          loaded: (value) => _buildEpubViewer(context, value.file),
+          error: (value) => _buildError(context, value.message),
+
+          loaded: (value) => _buildEpubViewer(
+            context,
+            value.file,
+            value.resource,
+            value.initialLocator,
+          ),
         );
       },
     );
   }
 
-  Widget _buildEpubViewer(BuildContext context, File file) {
+  Widget _buildEpubViewer(
+    BuildContext context,
+    File file,
+    BookResource resource,
+    String? initialLocator,
+  ) {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: const Text('Title'),
+        // Hiển thị tên file hoặc title nếu có trong metadata
+        title: Text(resource.filePath.split('/').last),
         actions: [
           IconButton(
             onPressed: () => context.pop(),
@@ -132,6 +115,7 @@ class _EpubViewContentState extends State<_EpubViewContent> {
         children: [
           Column(
             children: [
+              // Thanh tiến trình đọc
               ValueListenableBuilder<double>(
                 valueListenable: _readingProgressNotifier,
                 builder: (context, value, child) {
@@ -149,6 +133,8 @@ class _EpubViewContentState extends State<_EpubViewContent> {
                   displaySettings: _epubDisplaySettings,
                   onRelocated: (value) {
                     _readingProgressNotifier.value = value.progress;
+
+                    print(value.toJson());
                   },
                   onTouchDown: (x, y) {
                     debugPrint('on touch down');
@@ -202,6 +188,41 @@ class _EpubViewContentState extends State<_EpubViewContent> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoading(BuildContext context, double progress) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(
+              color: context.colorScheme.primaryContainer,
+              value: progress > 0 ? progress : null,
+            ),
+            const SizedBox(height: 10),
+            Text('Đang tải sách: ${(progress * 100).toStringAsFixed(0)}%'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildError(BuildContext context, String message) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => context.pop(),
+          icon: const Icon(Icons.arrow_back_ios),
+        ),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text('Lỗi: $message'),
+        ),
       ),
     );
   }

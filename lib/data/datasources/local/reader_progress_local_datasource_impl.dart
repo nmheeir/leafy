@@ -24,7 +24,7 @@ class ReaderProgressLocalDatasourceImpl
     required int resourceId,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   }) async {
     final db = await _db.database;
 

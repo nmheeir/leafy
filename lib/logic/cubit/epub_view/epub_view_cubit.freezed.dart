@@ -125,12 +125,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( File file)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( File file,  BookResource resource,  String? initialLocator)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EpubViewInitial() when initial != null:
 return initial();case _EpubViewLoading() when loading != null:
 return loading(_that.progress);case _EpubViewLoaded() when loaded != null:
-return loaded(_that.file);case _EpubViewError() when error != null:
+return loaded(_that.file,_that.resource,_that.initialLocator);case _EpubViewError() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -149,12 +149,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( File file)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( File file,  BookResource resource,  String? initialLocator)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _EpubViewInitial():
 return initial();case _EpubViewLoading():
 return loading(_that.progress);case _EpubViewLoaded():
-return loaded(_that.file);case _EpubViewError():
+return loaded(_that.file,_that.resource,_that.initialLocator);case _EpubViewError():
 return error(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -169,12 +169,12 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( File file)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( File file,  BookResource resource,  String? initialLocator)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _EpubViewInitial() when initial != null:
 return initial();case _EpubViewLoading() when loading != null:
 return loading(_that.progress);case _EpubViewLoaded() when loaded != null:
-return loaded(_that.file);case _EpubViewError() when error != null:
+return loaded(_that.file,_that.resource,_that.initialLocator);case _EpubViewError() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -285,10 +285,12 @@ as double,
 
 
 class _EpubViewLoaded implements EpubViewState {
-  const _EpubViewLoaded(this.file);
+  const _EpubViewLoaded({required this.file, required this.resource, this.initialLocator});
   
 
  final  File file;
+ final  BookResource resource;
+ final  String? initialLocator;
 
 /// Create a copy of EpubViewState
 /// with the given fields replaced by the non-null parameter values.
@@ -300,16 +302,16 @@ _$EpubViewLoadedCopyWith<_EpubViewLoaded> get copyWith => __$EpubViewLoadedCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpubViewLoaded&&(identical(other.file, file) || other.file == file));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpubViewLoaded&&(identical(other.file, file) || other.file == file)&&(identical(other.resource, resource) || other.resource == resource)&&(identical(other.initialLocator, initialLocator) || other.initialLocator == initialLocator));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,file);
+int get hashCode => Object.hash(runtimeType,file,resource,initialLocator);
 
 @override
 String toString() {
-  return 'EpubViewState.loaded(file: $file)';
+  return 'EpubViewState.loaded(file: $file, resource: $resource, initialLocator: $initialLocator)';
 }
 
 
@@ -320,7 +322,7 @@ abstract mixin class _$EpubViewLoadedCopyWith<$Res> implements $EpubViewStateCop
   factory _$EpubViewLoadedCopyWith(_EpubViewLoaded value, $Res Function(_EpubViewLoaded) _then) = __$EpubViewLoadedCopyWithImpl;
 @useResult
 $Res call({
- File file
+ File file, BookResource resource, String? initialLocator
 });
 
 
@@ -337,10 +339,12 @@ class __$EpubViewLoadedCopyWithImpl<$Res>
 
 /// Create a copy of EpubViewState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? file = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? file = null,Object? resource = null,Object? initialLocator = freezed,}) {
   return _then(_EpubViewLoaded(
-null == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
-as File,
+file: null == file ? _self.file : file // ignore: cast_nullable_to_non_nullable
+as File,resource: null == resource ? _self.resource : resource // ignore: cast_nullable_to_non_nullable
+as BookResource,initialLocator: freezed == initialLocator ? _self.initialLocator : initialLocator // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

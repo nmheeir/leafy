@@ -26,7 +26,7 @@ abstract class BookResourceRepository {
     required String resourceUuid,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   });
 
   /// Reset progress của một resource (đổi file, đọc lại)
@@ -80,6 +80,6 @@ abstract class BookResourceRepository {
     required String resourceUuid,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   });
 }

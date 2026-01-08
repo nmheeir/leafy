@@ -3,7 +3,7 @@ abstract class ReaderProgressLocalDatasource {
     required int resourceId,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   });
 
   Future<void> deleteByResourceId(int resourceId);

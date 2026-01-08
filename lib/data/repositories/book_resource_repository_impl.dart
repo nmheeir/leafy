@@ -127,7 +127,7 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
     required String resourceUuid,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   }) async {
     try {
       final resource = await _resourceDs.getByUuid(resourceUuid);
@@ -153,7 +153,7 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
     required String resourceUuid,
     required String locator,
     required double progress,
-    required int lastReadAt,
+    required DateTime lastReadAt,
   }) {
     // Về bản chất giống saveReaderProgress
     return saveReaderProgress(

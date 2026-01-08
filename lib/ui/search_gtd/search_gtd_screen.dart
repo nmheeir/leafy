@@ -83,7 +83,7 @@ class _SearchGtdScreenState extends State<SearchGtdScreen> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => EpubViewScreen(
-                        epubUrl: item.formats!.applicationEpubZip!,
+                        resourceUuid: item.formats!.applicationEpubZip!,
                       ),
                     ),
                   );
