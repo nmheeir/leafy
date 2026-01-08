@@ -211,8 +211,8 @@ return $default(_that.count,_that.next,_that.previous,_that.results);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _GtdBooksResultModel implements GtdBooksResultModel {
-   _GtdBooksResultModel({required this.count, required this.next, required this.previous, required final  List<GtdBookResultModel> results}): _results = results;
+class _GtdBooksResultModel extends GtdBooksResultModel {
+   _GtdBooksResultModel({required this.count, required this.next, required this.previous, required final  List<GtdBookResultModel> results}): _results = results,super._();
   factory _GtdBooksResultModel.fromJson(Map<String, dynamic> json) => _$GtdBooksResultModelFromJson(json);
 
 @override final  int? count;

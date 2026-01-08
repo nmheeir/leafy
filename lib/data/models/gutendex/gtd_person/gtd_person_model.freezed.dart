@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'gtd_person.dart';
+part of 'gtd_person_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -13,22 +13,22 @@ part of 'gtd_person.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
-mixin _$GtdPerson {
+mixin _$GtdPersonModel {
 
- String? get name; int? get birthYear; int? get deathYear;
-/// Create a copy of GtdPerson
+ String? get name;@JsonKey(name: 'birth_year') int? get birthYear;@JsonKey(name: 'death_year') int? get deathYear;
+/// Create a copy of GtdPersonModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-$GtdPersonCopyWith<GtdPerson> get copyWith => _$GtdPersonCopyWithImpl<GtdPerson>(this as GtdPerson, _$identity);
+$GtdPersonModelCopyWith<GtdPersonModel> get copyWith => _$GtdPersonModelCopyWithImpl<GtdPersonModel>(this as GtdPersonModel, _$identity);
 
-  /// Serializes this GtdPerson to a JSON map.
+  /// Serializes this GtdPersonModel to a JSON map.
   Map<String, dynamic> toJson();
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GtdPerson&&(identical(other.name, name) || other.name == name)&&(identical(other.birthYear, birthYear) || other.birthYear == birthYear)&&(identical(other.deathYear, deathYear) || other.deathYear == deathYear));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GtdPersonModel&&(identical(other.name, name) || other.name == name)&&(identical(other.birthYear, birthYear) || other.birthYear == birthYear)&&(identical(other.deathYear, deathYear) || other.deathYear == deathYear));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -37,18 +37,18 @@ int get hashCode => Object.hash(runtimeType,name,birthYear,deathYear);
 
 @override
 String toString() {
-  return 'GtdPerson(name: $name, birthYear: $birthYear, deathYear: $deathYear)';
+  return 'GtdPersonModel(name: $name, birthYear: $birthYear, deathYear: $deathYear)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $GtdPersonCopyWith<$Res>  {
-  factory $GtdPersonCopyWith(GtdPerson value, $Res Function(GtdPerson) _then) = _$GtdPersonCopyWithImpl;
+abstract mixin class $GtdPersonModelCopyWith<$Res>  {
+  factory $GtdPersonModelCopyWith(GtdPersonModel value, $Res Function(GtdPersonModel) _then) = _$GtdPersonModelCopyWithImpl;
 @useResult
 $Res call({
- String? name, int? birthYear, int? deathYear
+ String? name,@JsonKey(name: 'birth_year') int? birthYear,@JsonKey(name: 'death_year') int? deathYear
 });
 
 
@@ -56,14 +56,14 @@ $Res call({
 
 }
 /// @nodoc
-class _$GtdPersonCopyWithImpl<$Res>
-    implements $GtdPersonCopyWith<$Res> {
-  _$GtdPersonCopyWithImpl(this._self, this._then);
+class _$GtdPersonModelCopyWithImpl<$Res>
+    implements $GtdPersonModelCopyWith<$Res> {
+  _$GtdPersonModelCopyWithImpl(this._self, this._then);
 
-  final GtdPerson _self;
-  final $Res Function(GtdPerson) _then;
+  final GtdPersonModel _self;
+  final $Res Function(GtdPersonModel) _then;
 
-/// Create a copy of GtdPerson
+/// Create a copy of GtdPersonModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = freezed,Object? birthYear = freezed,Object? deathYear = freezed,}) {
   return _then(_self.copyWith(
@@ -77,8 +77,8 @@ as int?,
 }
 
 
-/// Adds pattern-matching-related methods to [GtdPerson].
-extension GtdPersonPatterns on GtdPerson {
+/// Adds pattern-matching-related methods to [GtdPersonModel].
+extension GtdPersonModelPatterns on GtdPersonModel {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -91,10 +91,10 @@ extension GtdPersonPatterns on GtdPerson {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GtdPerson value)?  $default,{required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GtdPersonModel value)?  $default,{required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _GtdPerson() when $default != null:
+case _GtdPersonModel() when $default != null:
 return $default(_that);case _:
   return orElse();
 
@@ -113,10 +113,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GtdPerson value)  $default,){
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GtdPersonModel value)  $default,){
 final _that = this;
 switch (_that) {
-case _GtdPerson():
+case _GtdPersonModel():
 return $default(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -134,10 +134,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GtdPerson value)?  $default,){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GtdPersonModel value)?  $default,){
 final _that = this;
 switch (_that) {
-case _GtdPerson() when $default != null:
+case _GtdPersonModel() when $default != null:
 return $default(_that);case _:
   return null;
 
@@ -155,9 +155,9 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name,  int? birthYear,  int? deathYear)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? name, @JsonKey(name: 'birth_year')  int? birthYear, @JsonKey(name: 'death_year')  int? deathYear)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _GtdPerson() when $default != null:
+case _GtdPersonModel() when $default != null:
 return $default(_that.name,_that.birthYear,_that.deathYear);case _:
   return orElse();
 
@@ -176,9 +176,9 @@ return $default(_that.name,_that.birthYear,_that.deathYear);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name,  int? birthYear,  int? deathYear)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? name, @JsonKey(name: 'birth_year')  int? birthYear, @JsonKey(name: 'death_year')  int? deathYear)  $default,) {final _that = this;
 switch (_that) {
-case _GtdPerson():
+case _GtdPersonModel():
 return $default(_that.name,_that.birthYear,_that.deathYear);case _:
   throw StateError('Unexpected subclass');
 
@@ -196,9 +196,9 @@ return $default(_that.name,_that.birthYear,_that.deathYear);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name,  int? birthYear,  int? deathYear)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? name, @JsonKey(name: 'birth_year')  int? birthYear, @JsonKey(name: 'death_year')  int? deathYear)?  $default,) {final _that = this;
 switch (_that) {
-case _GtdPerson() when $default != null:
+case _GtdPersonModel() when $default != null:
 return $default(_that.name,_that.birthYear,_that.deathYear);case _:
   return null;
 
@@ -210,28 +210,28 @@ return $default(_that.name,_that.birthYear,_that.deathYear);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _GtdPerson implements GtdPerson {
-  const _GtdPerson({required this.name, required this.birthYear, required this.deathYear});
-  factory _GtdPerson.fromJson(Map<String, dynamic> json) => _$GtdPersonFromJson(json);
+class _GtdPersonModel extends GtdPersonModel {
+  const _GtdPersonModel({required this.name, @JsonKey(name: 'birth_year') required this.birthYear, @JsonKey(name: 'death_year') required this.deathYear}): super._();
+  factory _GtdPersonModel.fromJson(Map<String, dynamic> json) => _$GtdPersonModelFromJson(json);
 
 @override final  String? name;
-@override final  int? birthYear;
-@override final  int? deathYear;
+@override@JsonKey(name: 'birth_year') final  int? birthYear;
+@override@JsonKey(name: 'death_year') final  int? deathYear;
 
-/// Create a copy of GtdPerson
+/// Create a copy of GtdPersonModel
 /// with the given fields replaced by the non-null parameter values.
 @override @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$GtdPersonCopyWith<_GtdPerson> get copyWith => __$GtdPersonCopyWithImpl<_GtdPerson>(this, _$identity);
+_$GtdPersonModelCopyWith<_GtdPersonModel> get copyWith => __$GtdPersonModelCopyWithImpl<_GtdPersonModel>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
-  return _$GtdPersonToJson(this, );
+  return _$GtdPersonModelToJson(this, );
 }
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GtdPerson&&(identical(other.name, name) || other.name == name)&&(identical(other.birthYear, birthYear) || other.birthYear == birthYear)&&(identical(other.deathYear, deathYear) || other.deathYear == deathYear));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GtdPersonModel&&(identical(other.name, name) || other.name == name)&&(identical(other.birthYear, birthYear) || other.birthYear == birthYear)&&(identical(other.deathYear, deathYear) || other.deathYear == deathYear));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -240,18 +240,18 @@ int get hashCode => Object.hash(runtimeType,name,birthYear,deathYear);
 
 @override
 String toString() {
-  return 'GtdPerson(name: $name, birthYear: $birthYear, deathYear: $deathYear)';
+  return 'GtdPersonModel(name: $name, birthYear: $birthYear, deathYear: $deathYear)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$GtdPersonCopyWith<$Res> implements $GtdPersonCopyWith<$Res> {
-  factory _$GtdPersonCopyWith(_GtdPerson value, $Res Function(_GtdPerson) _then) = __$GtdPersonCopyWithImpl;
+abstract mixin class _$GtdPersonModelCopyWith<$Res> implements $GtdPersonModelCopyWith<$Res> {
+  factory _$GtdPersonModelCopyWith(_GtdPersonModel value, $Res Function(_GtdPersonModel) _then) = __$GtdPersonModelCopyWithImpl;
 @override @useResult
 $Res call({
- String? name, int? birthYear, int? deathYear
+ String? name,@JsonKey(name: 'birth_year') int? birthYear,@JsonKey(name: 'death_year') int? deathYear
 });
 
 
@@ -259,17 +259,17 @@ $Res call({
 
 }
 /// @nodoc
-class __$GtdPersonCopyWithImpl<$Res>
-    implements _$GtdPersonCopyWith<$Res> {
-  __$GtdPersonCopyWithImpl(this._self, this._then);
+class __$GtdPersonModelCopyWithImpl<$Res>
+    implements _$GtdPersonModelCopyWith<$Res> {
+  __$GtdPersonModelCopyWithImpl(this._self, this._then);
 
-  final _GtdPerson _self;
-  final $Res Function(_GtdPerson) _then;
+  final _GtdPersonModel _self;
+  final $Res Function(_GtdPersonModel) _then;
 
-/// Create a copy of GtdPerson
+/// Create a copy of GtdPersonModel
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? name = freezed,Object? birthYear = freezed,Object? deathYear = freezed,}) {
-  return _then(_GtdPerson(
+  return _then(_GtdPersonModel(
 name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String?,birthYear: freezed == birthYear ? _self.birthYear : birthYear // ignore: cast_nullable_to_non_nullable
 as int?,deathYear: freezed == deathYear ? _self.deathYear : deathYear // ignore: cast_nullable_to_non_nullable

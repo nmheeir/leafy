@@ -1,11 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
 import 'package:leafy/core/errors/failures.dart';
-import 'package:leafy/data/models/gutendex/gtd_books_result/gtd_books_result_model.dart';
+import 'package:leafy/domain/gutendex/entities/gtd_book.dart';
+import 'package:leafy/domain/gutendex/entities/gtd_books.dart';
 
 abstract class GutendexRepository {
-  Future<Either<Failure, GtdBooksResultModel>> getBooks({
+  Future<Either<Failure, GtdBooks>> getBooks({
     required int? page,
     required int? authorYearStart,
     required int? authorYearEnd,
@@ -16,5 +18,8 @@ abstract class GutendexRepository {
     required String? search,
     required GtdSortType? sort,
     required String? topic,
+    required CancelToken? cancelToken,
   });
+
+  Future<Either<Failure, GtdBook>> getBook({required int id});
 }

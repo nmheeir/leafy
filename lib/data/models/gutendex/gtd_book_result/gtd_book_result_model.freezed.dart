@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$GtdBookResultModel {
 
- int? get id; String? get title; List<GtdPerson> get authors; List<String> get summaries; List<GtdPerson> get editors; List<GtdPerson> get translators; List<String> get subjects; List<String> get bookshelves; List<String> get languages; bool? get copyright;@JsonKey(name: 'media_type') String? get mediaType; GtdFormat? get formats;@JsonKey(name: 'download_count') int? get downloadCount;
+ int? get id; String? get title; List<GtdPersonModel> get authors; List<String> get summaries; List<GtdPersonModel> get editors; List<GtdPersonModel> get translators; List<String> get subjects; List<String> get bookshelves; List<String> get languages; bool? get copyright;@JsonKey(name: 'media_type') String? get mediaType; GtdFormatModel? get formats;@JsonKey(name: 'download_count') int? get downloadCount;
 /// Create a copy of GtdBookResultModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $GtdBookResultModelCopyWith<$Res>  {
   factory $GtdBookResultModelCopyWith(GtdBookResultModel value, $Res Function(GtdBookResultModel) _then) = _$GtdBookResultModelCopyWithImpl;
 @useResult
 $Res call({
- int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormat? formats,@JsonKey(name: 'download_count') int? downloadCount
+ int? id, String? title, List<GtdPersonModel> authors, List<String> summaries, List<GtdPersonModel> editors, List<GtdPersonModel> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormatModel? formats,@JsonKey(name: 'download_count') int? downloadCount
 });
 
 
-$GtdFormatCopyWith<$Res>? get formats;
+$GtdFormatModelCopyWith<$Res>? get formats;
 
 }
 /// @nodoc
@@ -70,16 +70,16 @@ class _$GtdBookResultModelCopyWithImpl<$Res>
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,authors: null == authors ? _self.authors : authors // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,summaries: null == summaries ? _self.summaries : summaries // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,summaries: null == summaries ? _self.summaries : summaries // ignore: cast_nullable_to_non_nullable
 as List<String>,editors: null == editors ? _self.editors : editors // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,translators: null == translators ? _self.translators : translators // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,subjects: null == subjects ? _self.subjects : subjects // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,translators: null == translators ? _self.translators : translators // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,subjects: null == subjects ? _self.subjects : subjects // ignore: cast_nullable_to_non_nullable
 as List<String>,bookshelves: null == bookshelves ? _self.bookshelves : bookshelves // ignore: cast_nullable_to_non_nullable
 as List<String>,languages: null == languages ? _self.languages : languages // ignore: cast_nullable_to_non_nullable
 as List<String>,copyright: freezed == copyright ? _self.copyright : copyright // ignore: cast_nullable_to_non_nullable
 as bool?,mediaType: freezed == mediaType ? _self.mediaType : mediaType // ignore: cast_nullable_to_non_nullable
 as String?,formats: freezed == formats ? _self.formats : formats // ignore: cast_nullable_to_non_nullable
-as GtdFormat?,downloadCount: freezed == downloadCount ? _self.downloadCount : downloadCount // ignore: cast_nullable_to_non_nullable
+as GtdFormatModel?,downloadCount: freezed == downloadCount ? _self.downloadCount : downloadCount // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }
@@ -87,12 +87,12 @@ as int?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$GtdFormatCopyWith<$Res>? get formats {
+$GtdFormatModelCopyWith<$Res>? get formats {
     if (_self.formats == null) {
     return null;
   }
 
-  return $GtdFormatCopyWith<$Res>(_self.formats!, (value) {
+  return $GtdFormatModelCopyWith<$Res>(_self.formats!, (value) {
     return _then(_self.copyWith(formats: value));
   });
 }
@@ -177,7 +177,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPersonModel> authors,  List<String> summaries,  List<GtdPersonModel> editors,  List<GtdPersonModel> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormatModel? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GtdBookResultModel() when $default != null:
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -198,7 +198,7 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String? title,  List<GtdPersonModel> authors,  List<String> summaries,  List<GtdPersonModel> editors,  List<GtdPersonModel> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormatModel? formats, @JsonKey(name: 'download_count')  int? downloadCount)  $default,) {final _that = this;
 switch (_that) {
 case _GtdBookResultModel():
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -218,7 +218,7 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? title,  List<GtdPerson> authors,  List<String> summaries,  List<GtdPerson> editors,  List<GtdPerson> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormat? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String? title,  List<GtdPersonModel> authors,  List<String> summaries,  List<GtdPersonModel> editors,  List<GtdPersonModel> translators,  List<String> subjects,  List<String> bookshelves,  List<String> languages,  bool? copyright, @JsonKey(name: 'media_type')  String? mediaType,  GtdFormatModel? formats, @JsonKey(name: 'download_count')  int? downloadCount)?  $default,) {final _that = this;
 switch (_that) {
 case _GtdBookResultModel() when $default != null:
 return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors,_that.translators,_that.subjects,_that.bookshelves,_that.languages,_that.copyright,_that.mediaType,_that.formats,_that.downloadCount);case _:
@@ -232,14 +232,14 @@ return $default(_that.id,_that.title,_that.authors,_that.summaries,_that.editors
 /// @nodoc
 @JsonSerializable()
 
-class _GtdBookResultModel implements GtdBookResultModel {
-  const _GtdBookResultModel({required this.id, required this.title, required final  List<GtdPerson> authors, required final  List<String> summaries, required final  List<GtdPerson> editors, required final  List<GtdPerson> translators, required final  List<String> subjects, required final  List<String> bookshelves, required final  List<String> languages, required this.copyright, @JsonKey(name: 'media_type') required this.mediaType, required this.formats, @JsonKey(name: 'download_count') required this.downloadCount}): _authors = authors,_summaries = summaries,_editors = editors,_translators = translators,_subjects = subjects,_bookshelves = bookshelves,_languages = languages;
+class _GtdBookResultModel extends GtdBookResultModel {
+  const _GtdBookResultModel({required this.id, required this.title, required final  List<GtdPersonModel> authors, required final  List<String> summaries, required final  List<GtdPersonModel> editors, required final  List<GtdPersonModel> translators, required final  List<String> subjects, required final  List<String> bookshelves, required final  List<String> languages, required this.copyright, @JsonKey(name: 'media_type') required this.mediaType, required this.formats, @JsonKey(name: 'download_count') required this.downloadCount}): _authors = authors,_summaries = summaries,_editors = editors,_translators = translators,_subjects = subjects,_bookshelves = bookshelves,_languages = languages,super._();
   factory _GtdBookResultModel.fromJson(Map<String, dynamic> json) => _$GtdBookResultModelFromJson(json);
 
 @override final  int? id;
 @override final  String? title;
- final  List<GtdPerson> _authors;
-@override List<GtdPerson> get authors {
+ final  List<GtdPersonModel> _authors;
+@override List<GtdPersonModel> get authors {
   if (_authors is EqualUnmodifiableListView) return _authors;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_authors);
@@ -252,15 +252,15 @@ class _GtdBookResultModel implements GtdBookResultModel {
   return EqualUnmodifiableListView(_summaries);
 }
 
- final  List<GtdPerson> _editors;
-@override List<GtdPerson> get editors {
+ final  List<GtdPersonModel> _editors;
+@override List<GtdPersonModel> get editors {
   if (_editors is EqualUnmodifiableListView) return _editors;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_editors);
 }
 
- final  List<GtdPerson> _translators;
-@override List<GtdPerson> get translators {
+ final  List<GtdPersonModel> _translators;
+@override List<GtdPersonModel> get translators {
   if (_translators is EqualUnmodifiableListView) return _translators;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_translators);
@@ -289,7 +289,7 @@ class _GtdBookResultModel implements GtdBookResultModel {
 
 @override final  bool? copyright;
 @override@JsonKey(name: 'media_type') final  String? mediaType;
-@override final  GtdFormat? formats;
+@override final  GtdFormatModel? formats;
 @override@JsonKey(name: 'download_count') final  int? downloadCount;
 
 /// Create a copy of GtdBookResultModel
@@ -325,11 +325,11 @@ abstract mixin class _$GtdBookResultModelCopyWith<$Res> implements $GtdBookResul
   factory _$GtdBookResultModelCopyWith(_GtdBookResultModel value, $Res Function(_GtdBookResultModel) _then) = __$GtdBookResultModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, String? title, List<GtdPerson> authors, List<String> summaries, List<GtdPerson> editors, List<GtdPerson> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormat? formats,@JsonKey(name: 'download_count') int? downloadCount
+ int? id, String? title, List<GtdPersonModel> authors, List<String> summaries, List<GtdPersonModel> editors, List<GtdPersonModel> translators, List<String> subjects, List<String> bookshelves, List<String> languages, bool? copyright,@JsonKey(name: 'media_type') String? mediaType, GtdFormatModel? formats,@JsonKey(name: 'download_count') int? downloadCount
 });
 
 
-@override $GtdFormatCopyWith<$Res>? get formats;
+@override $GtdFormatModelCopyWith<$Res>? get formats;
 
 }
 /// @nodoc
@@ -347,16 +347,16 @@ class __$GtdBookResultModelCopyWithImpl<$Res>
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,title: freezed == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String?,authors: null == authors ? _self._authors : authors // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,summaries: null == summaries ? _self._summaries : summaries // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,summaries: null == summaries ? _self._summaries : summaries // ignore: cast_nullable_to_non_nullable
 as List<String>,editors: null == editors ? _self._editors : editors // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,translators: null == translators ? _self._translators : translators // ignore: cast_nullable_to_non_nullable
-as List<GtdPerson>,subjects: null == subjects ? _self._subjects : subjects // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,translators: null == translators ? _self._translators : translators // ignore: cast_nullable_to_non_nullable
+as List<GtdPersonModel>,subjects: null == subjects ? _self._subjects : subjects // ignore: cast_nullable_to_non_nullable
 as List<String>,bookshelves: null == bookshelves ? _self._bookshelves : bookshelves // ignore: cast_nullable_to_non_nullable
 as List<String>,languages: null == languages ? _self._languages : languages // ignore: cast_nullable_to_non_nullable
 as List<String>,copyright: freezed == copyright ? _self.copyright : copyright // ignore: cast_nullable_to_non_nullable
 as bool?,mediaType: freezed == mediaType ? _self.mediaType : mediaType // ignore: cast_nullable_to_non_nullable
 as String?,formats: freezed == formats ? _self.formats : formats // ignore: cast_nullable_to_non_nullable
-as GtdFormat?,downloadCount: freezed == downloadCount ? _self.downloadCount : downloadCount // ignore: cast_nullable_to_non_nullable
+as GtdFormatModel?,downloadCount: freezed == downloadCount ? _self.downloadCount : downloadCount // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }
@@ -365,12 +365,12 @@ as int?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$GtdFormatCopyWith<$Res>? get formats {
+$GtdFormatModelCopyWith<$Res>? get formats {
     if (_self.formats == null) {
     return null;
   }
 
-  return $GtdFormatCopyWith<$Res>(_self.formats!, (value) {
+  return $GtdFormatModelCopyWith<$Res>(_self.formats!, (value) {
     return _then(_self.copyWith(formats: value));
   });
 }

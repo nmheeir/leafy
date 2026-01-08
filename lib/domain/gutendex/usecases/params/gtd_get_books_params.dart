@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
 
@@ -12,6 +13,8 @@ class GtdGetBooksParams {
   final String? search;
   final GtdSortType? sort;
   final String? topic;
+  final CancelToken? cancelToken;
+
   const GtdGetBooksParams({
     this.page,
     this.authorYearStart,
@@ -23,5 +26,6 @@ class GtdGetBooksParams {
     this.search,
     this.sort,
     this.topic,
+    this.cancelToken,
   });
 }

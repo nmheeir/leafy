@@ -4,6 +4,7 @@ abstract final class Constants {
   static const duckDuckGoURL = 'https://duckduckgo.com/';
   static const duckDuckGoImagesURL = 'https://duckduckgo.com/i.js';
   static const String coverBaseUrl = 'https://covers.openlibrary.org/';
+  static const String gutendexUrl = 'https://gutendex.com/books';
 
   static const blurHashX = 2;
   static const blurHashY = 2;

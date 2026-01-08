@@ -33,6 +33,8 @@ import '../data/datasources/local/reader_progress_local_datasource.dart'
     as _i770;
 import '../data/datasources/local/reader_progress_local_datasource_impl.dart'
     as _i1030;
+import '../data/datasources/remote/gutendex_remote_datasource/gutendex_remote_datasource.dart'
+    as _i92;
 import '../data/datasources/remote/network_file_datasource.dart' as _i798;
 import '../data/datasources/remote/network_file_datasource_impl.dart' as _i643;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
@@ -67,6 +69,7 @@ import '../domain/book_resource/usecase/update_book_resource_file.dart'
 import '../domain/epub_cache/repositories/epub_cache_repository.dart' as _i57;
 import '../domain/epub_cache/usecases/get_epub.dart' as _i756;
 import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
+import '../domain/gutendex/usecases/gtd_get_book.dart' as _i433;
 import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
 import '../domain/open_lib/repositories/open_lib_repository.dart' as _i751;
 import '../domain/open_lib/usecases/ol_get_work.dart' as _i138;
@@ -80,6 +83,7 @@ import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
 import '../logic/bloc/rating_type/rating_type_bloc.dart' as _i280;
+import '../logic/bloc/search_gtd/search_gtd_bloc.dart' as _i641;
 import '../logic/bloc/sort_bloc/sort_bloc.dart' as _i713;
 import '../logic/bloc/stats_bloc/stats_bloc.dart' as _i780;
 import '../logic/bloc/theme/theme_bloc.dart' as _i774;
@@ -161,11 +165,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i620.EpubFileLocalDataSource>(
       () => _i536.EpubFileLocalDataSourceImpl(gh<_i497.Directory>()),
     );
+    gh.lazySingleton<_i92.GutendexRemoteDataSource>(
+      () => _i92.GutendexRemoteDataSource(gh<_i361.Dio>()),
+    );
     gh.lazySingleton<_i715.OlRemoteDataSource>(
       () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
     );
     gh.lazySingleton<_i844.GutendexRepository>(
-      () => _i779.GutendexRepositoryImpl(),
+      () => _i779.GutendexRepositoryImpl(gh<_i92.GutendexRemoteDataSource>()),
     );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
@@ -176,6 +183,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
         gh<_i497.Directory>(),
       ),
+    );
+    gh.factory<_i433.GtdGetBookUseCase>(
+      () => _i433.GtdGetBookUseCase(gh<_i844.GutendexRepository>()),
     );
     gh.factory<_i750.GtdGetBooksUseCase>(
       () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
@@ -216,6 +226,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
+    );
+    gh.factory<_i641.SearchGtdBloc>(
+      () => _i641.SearchGtdBloc(gh<_i750.GtdGetBooksUseCase>()),
     );
     gh.factory<_i113.BookEditorActionCubit>(
       () => _i113.BookEditorActionCubit(
