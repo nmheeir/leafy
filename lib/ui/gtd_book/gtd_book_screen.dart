@@ -6,6 +6,7 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
 import 'package:leafy/ui/book/widgets/book_detail_long.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -303,7 +304,7 @@ class GtdBookScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) =>
-            BookEditorScreen(fromGutendex: true, gutendexFormat: book.formats),
+            BookEditorScreen(args: BookEditorArgs.fromGutendex(book)),
       ),
     );
 

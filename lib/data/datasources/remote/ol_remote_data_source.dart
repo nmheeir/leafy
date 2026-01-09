@@ -25,7 +25,7 @@ abstract class OlRemoteDataSource {
     @Query("mode") String mode = 'everything',
     @Query("fields")
     String fields =
-        'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i',
+        'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i,description',
   });
 
   @GET("/{workId}.json")

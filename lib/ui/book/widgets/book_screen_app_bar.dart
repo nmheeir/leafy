@@ -10,6 +10,7 @@ import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -166,10 +167,15 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                           if (!context.mounted) return;
 
                           if (choice == moreButtonOptions[0]) {
+                            final cover = await getCoverBytes(state.id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => const BookEditorScreen(
-                                  editingExistingBook: true,
+                                builder: (_) => BookEditorScreen(
+                                  args: BookEditorArgs.fromLocal(
+                                    state,
+                                    // NOTE: nếu lỗi cover thì kiểm tra lại chỗ này
+                                    cover,
+                                  ),
                                 ),
                               ),
                             );

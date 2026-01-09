@@ -7,6 +7,7 @@ class OLSearchResultDoc extends Equatable {
     this.type,
     this.seed,
     this.title,
+    this.description,
     this.titleSuggest,
     this.editionCount,
     this.editionKey,
@@ -86,6 +87,7 @@ class OLSearchResultDoc extends Equatable {
   final String? type;
   final List<String>? seed;
   final String? title;
+  final String? description;
   final String? titleSuggest;
   final int? editionCount;
   final List<String>? editionKey;
@@ -166,6 +168,7 @@ class OLSearchResultDoc extends Equatable {
     type,
     seed,
     title,
+    description,
     titleSuggest,
     editionCount,
     editionKey,

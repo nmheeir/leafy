@@ -142,24 +142,6 @@ class BookScreen extends StatelessWidget {
         : const SizedBox();
   }
 
-  Widget _buildOLIDDetail(Book state) {
-    return (state.olid != null)
-        ? BookDetail(
-            title: LocaleKeys.open_library_ID.tr(),
-            text: (state.olid ?? "").toString(),
-          )
-        : const SizedBox();
-  }
-
-  Widget _buildISBNDetail(Book state) {
-    return (state.isbn != null)
-        ? BookDetail(
-            title: LocaleKeys.isbn.tr(),
-            text: (state.isbn ?? "").toString(),
-          )
-        : const SizedBox();
-  }
-
   Widget _buildPagesDetail(Book state) {
     return (state.pages != null)
         ? BookDetail(

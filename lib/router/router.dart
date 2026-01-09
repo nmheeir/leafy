@@ -26,13 +26,6 @@ GoRouter router() => GoRouter(
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
     GoRoute(path: Routes.search, builder: (context, state) => SearchScreen()),
     GoRoute(
-      path: Routes.bookEditor,
-      builder: (context, state) {
-        // final args = state.extra as Map<String, dynamic>? ?? {};
-        return BookEditorScreen();
-      },
-    ),
-    GoRoute(
       path: Routes.setting,
       builder: (context, state) => SettingsScreen(),
     ),

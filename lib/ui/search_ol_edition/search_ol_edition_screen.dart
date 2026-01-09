@@ -10,6 +10,7 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/search_ol_edition/widgets/ol_editions_grid.dart';
 
@@ -79,16 +80,12 @@ class _SearchOLEditionsScreenState extends State<SearchOLEditionsScreen> {
 
     context.read<EditBookCubit>().setBook(book);
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => BookEditorScreen(
-          fromOpenLibrary: true,
-          fromOpenLibraryEdition: true,
-          work: work,
-          coverOpenLibraryID: cover,
-        ),
-      ),
-    );
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (_) =>
+    //         BookEditorScreen(args: BookEditorArgs.fromOpenLibrary(result)),
+    //   ),
+    // );
   }
 
   @override

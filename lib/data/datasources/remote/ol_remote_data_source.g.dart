@@ -32,7 +32,7 @@ class _OlRemoteDataSource implements OlRemoteDataSource {
     required int offset,
     String mode = 'everything',
     String fields =
-        'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i',
+        'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i,description',
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{

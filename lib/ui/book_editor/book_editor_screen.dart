@@ -11,10 +11,8 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/book/book/book_model.dart';
-import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
-import 'package:leafy/domain/gutendex/entities/gtd_format.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
@@ -23,6 +21,7 @@ import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/book_screen.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
@@ -36,24 +35,27 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 class BookEditorScreen extends StatefulWidget {
   const BookEditorScreen({
     super.key,
-    this.fromGutendex = false,
-    this.fromOpenLibrary = false,
-    this.fromOpenLibraryEdition = false,
-    this.editingExistingBook = false,
-    this.duplicatingBook = false,
-    this.coverOpenLibraryID,
-    this.gutendexFormat,
-    this.work,
+    // this.fromGutendex = false,
+    // this.fromOpenLibrary = false,
+    // this.fromOpenLibraryEdition = false,
+    // this.editingExistingBook = false,
+    // this.duplicatingBook = false,
+    // this.coverOpenLibraryID,
+    // this.gutendexFormat,
+    // this.work,
+    required this.args,
   });
 
-  final bool fromGutendex;
-  final bool fromOpenLibrary;
-  final bool fromOpenLibraryEdition;
-  final bool editingExistingBook;
-  final bool duplicatingBook;
-  final int? coverOpenLibraryID;
-  final GtdFormat? gutendexFormat;
-  final String? work;
+  // final bool fromGutendex;
+  // final bool fromOpenLibrary;
+  // final bool fromOpenLibraryEdition;
+  // final bool editingExistingBook;
+  // final bool duplicatingBook;
+  // final int? coverOpenLibraryID;
+  // final GtdFormat? gutendexFormat;
+  // final String? work;
+
+  final BookEditorArgs args;
 
   @override
   State<BookEditorScreen> createState() => _BookEditorScreenState();
@@ -66,8 +68,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   final _pagesCtrl = TextEditingController();
   final _pubYearCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
-  final _isbnCtrl = TextEditingController();
-  final _olidCtrl = TextEditingController();
   final _tagsCtrl = TextEditingController();
   final _myReviewCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
@@ -81,23 +81,15 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     LocaleKeys.book_format_audiobook.tr(),
   ];
 
-  void _prefillBookDetails(Book book) async {
+  void _prefillControllers(Book book) {
     _titleCtrl.text = book.title;
     _subtitleCtrl.text = book.subtitle ?? '';
     _authorCtrl.text = book.author;
     _pubYearCtrl.text = (book.publicationYear ?? '').toString();
     _pagesCtrl.text = (book.pages ?? '').toString();
     _descriptionCtrl.text = book.description ?? '';
-    _isbnCtrl.text = book.isbn ?? '';
-    _olidCtrl.text = book.olid ?? '';
     _myReviewCtrl.text = book.myReview ?? '';
     _notesCtrl.text = book.notes ?? '';
-
-    if (!widget.fromOpenLibrary && !widget.fromOpenLibraryEdition) {
-      if (!widget.duplicatingBook) {
-        context.editBookCoverCubit.setCoverImage(await getCoverBytes(book.id));
-      }
-    }
   }
 
   void _showSnackbar(String message) {
@@ -134,54 +126,47 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     return true;
   }
 
-  void _saveNewBook() async {
+  void _handleSaveButton() async {
     FocusManager.instance.primaryFocus?.unfocus();
 
     if (!_validate()) return;
-
     if (await _checkIfWaitForCoverDownload(context) == true) return;
     if (!mounted) return;
 
-    final bookDraft = context.editBookCubit.state;
+    final bookData = context.editBookCubit.state;
 
+    // Lấy bytes ảnh (nếu có)
     Uint8List? coverBytes;
-    if (bookDraft.hasCover) {
+    if (bookData.hasCover) {
       coverBytes = context.editBookCoverCubit.state.coverData;
     }
 
-    debugPrint("${BookModel.fromEntity(bookDraft)}");
-    if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
-      context.bookActorCubit.addBook(bookDraft, coverBytes);
-    } else if (widget.fromGutendex) {
-      context.bookActorCubit.addBook(
-        bookDraft,
-        coverBytes,
-        widget.gutendexFormat!.applicationEpubZip!,
-      );
-    }
-  }
+    if (widget.args.isEditMode) {
+      // --- UPDATE EXISTING BOOK ---
+      final updatedBook = bookData.copyWith(dateModified: DateTime.now());
+      context.editBookCubit.setBook(updatedBook);
 
-  void _updateBook(Book book) async {
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    if (!_validate()) return;
-    if (await _checkIfWaitForCoverDownload(context) == true) return;
-    if (!mounted) return;
-
-    book = book.copyWith(dateModified: DateTime.now());
-    context.editBookCubit.setBook(book);
-
-    if (book.hasCover == false) {
-      context.editBookCoverCubit.deleteCover(book.id);
-      context.bookActorCubit.updateBook(book, null);
+      if (updatedBook.hasCover == false) {
+        context.editBookCoverCubit.deleteCover(updatedBook.id);
+        context.bookActorCubit.updateBook(updatedBook, null);
+      } else {
+        context.bookActorCubit.updateBook(updatedBook, coverBytes);
+      }
+      Navigator.pop(context);
     } else {
-      context.bookActorCubit.updateBook(
-        book,
-        context.editBookCoverCubit.state.coverData,
-      );
+      // --- ADD NEW BOOK ---
+      // Nếu có URL file download (từ Gutendex) thì truyền vào
+      if (widget.args.downloadFileUrl != null) {
+        context.bookActorCubit.addBook(
+          bookData,
+          coverBytes,
+          widget.args.downloadFileUrl!,
+        );
+      } else {
+        // Trường hợp OpenLibrary hoặc nhập tay
+        context.bookActorCubit.addBook(bookData, coverBytes);
+      }
     }
-
-    Navigator.pop(context);
   }
 
   Future<bool?> _checkIfWaitForCoverDownload(BuildContext context) async {
@@ -260,12 +245,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
   }
 
-  void _downloadWork() async {
-    if (widget.work != null) {
-      context.bookEditorActionCubit.getWork(widget.work!);
-    }
-  }
-
   Widget _buildCover() {
     return BlocBuilder<BookEditorActionCubit, BookEditorActionState>(
       builder: (context, state) {
@@ -322,14 +301,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       context.editBookCubit.setDescription(_descriptionCtrl.text);
     });
 
-    _isbnCtrl.addListener(() {
-      context.editBookCubit.setISBN(_isbnCtrl.text);
-    });
-
-    _olidCtrl.addListener(() {
-      context.editBookCubit.setOLID(_olidCtrl.text);
-    });
-
     _pubYearCtrl.addListener(() {
       context.editBookCubit.setPublicationYear(_pubYearCtrl.text);
     });
@@ -356,43 +327,35 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   //   }
   // }
 
-  void _downloadInitData() {
-    if (widget.fromOpenLibrary ||
-        widget.fromOpenLibraryEdition ||
-        widget.fromGutendex) {
-      if (widget.coverOpenLibraryID != null) {
-        context.bookEditorActionCubit.downloadCover(
-          source: widget.coverOpenLibraryID.toString(),
-          isGutenbergUrl: false,
-        );
-      } else if (widget.gutendexFormat != null &&
-          widget.gutendexFormat!.imageJpeg != null) {
-        context.bookEditorActionCubit.downloadCover(
-          source: widget.gutendexFormat!.imageJpeg!,
-          isGutenbergUrl: true,
-        );
-      } else {
-        context.editBookCoverCubit.setCoverImage(null);
-      }
-
-      if (widget.fromOpenLibrary) {
-        _downloadWork();
-      }
-    }
-  }
-
   @override
   void initState() {
+    super.initState();
+    // 1. Reset Cubit trạng thái
     context.bookEditorActionCubit.reset();
 
-    final book = context.editBookCubit.state;
+    final args = widget.args;
 
-    // _setDefaultTags(book);
-    _prefillBookDetails(book);
+    // 2. Set dữ liệu sách vào Cubit & Controller
+    // Logic này dùng chung cho cả Edit và Add New
+    context.editBookCubit.setBook(args.initialBook);
+    _prefillControllers(args.initialBook);
     _attachListeners();
-    _downloadInitData();
 
-    super.initState();
+    // 3. Xử lý logic Cover (Ảnh bìa)
+    if (args.localCoverBytes != null) {
+      // Ưu tiên 1: Dùng ảnh local (Edit mode hoặc Import file)
+      context.editBookCoverCubit.setCoverImage(args.localCoverBytes);
+      context.editBookCubit.setHasCover(true);
+    } else if (args.remoteCoverUrl != null) {
+      // Ưu tiên 2: Download từ URL (Gutendex / OpenLibrary)
+      context.bookEditorActionCubit.downloadCover(
+        source: args.remoteCoverUrl!,
+        isGutenbergUrl: args.isGutenbergUrl,
+      );
+    } else {
+      // Không có cover
+      context.editBookCoverCubit.setCoverImage(null);
+    }
   }
 
   @override
@@ -403,8 +366,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     _pagesCtrl.dispose();
     _pubYearCtrl.dispose();
     _descriptionCtrl.dispose();
-    _isbnCtrl.dispose();
-    _olidCtrl.dispose();
     _tagsCtrl.dispose();
     _myReviewCtrl.dispose();
     _notesCtrl.dispose();
@@ -448,26 +409,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
           },
         ),
         BlocListener<BookEditorActionCubit, BookEditorActionState>(
-          listenWhen: (previous, current) {
-            return previous.coverBytes != current.coverBytes ||
-                previous.errorMessage != current.errorMessage ||
-                previous.olWorkResult != current.olWorkResult;
-          },
           listener: (context, state) {
-            if (state.errorMessage != null) {
-              // TODO: cần thêm logic hiển thị error message
-              debugPrint("Error: ${state.errorMessage}");
-            }
-
+            // Logic update Cover tự động
             if (state.coverBytes != null && state.coverBlurHash != null) {
               context.editBookCoverCubit.setCoverImage(state.coverBytes);
               context.editBookCubit.setHasCover(true);
               context.editBookCubit.setBlurHash(state.coverBlurHash!);
-            }
-
-            if (state.olWorkResult != null &&
-                state.olWorkResult!.description != null) {
-              _descriptionCtrl.text = state.olWorkResult!.description!;
             }
           },
         ),
@@ -476,24 +423,18 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
         child: Scaffold(
           appBar: AppBar(
             title: Text(
-              widget.editingExistingBook
+              widget.args.isEditMode
                   ? LocaleKeys.edit_book.tr()
                   : LocaleKeys.add_new_book.tr(),
               style: const TextStyle(fontSize: 18),
             ),
             actions: [
-              BlocBuilder<EditBookCubit, Book>(
-                builder: (context, state) {
-                  return TextButton(
-                    onPressed: (state.id != null)
-                        ? () => _updateBook(state)
-                        : () => _saveNewBook(),
-                    child: Text(
-                      LocaleKeys.save.tr(),
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                  );
-                },
+              TextButton(
+                onPressed: _handleSaveButton,
+                child: Text(
+                  LocaleKeys.save.tr(),
+                  style: const TextStyle(fontSize: 16),
+                ),
               ),
             ],
           ),
@@ -508,10 +449,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     hint: LocaleKeys.enter_title.tr(),
                     icon: Icons.book,
                     keyboardType: TextInputType.text,
-                    autofocus:
-                        (widget.fromOpenLibrary || widget.editingExistingBook)
-                        ? false
-                        : true,
+                    autofocus: _titleCtrl.text.isEmpty,
                     maxLines: 5,
                     maxLength: 255,
                     textCapitalization: TextCapitalization.sentences,
@@ -543,7 +481,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     },
                   ),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                  if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition)
+                  if (widget.args.isEditMode)
                     BookStatusRow(
                       animDuration: _animDuration,
                       defaultHeight: Constants.formHeight,
@@ -740,24 +678,18 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       const SizedBox(width: 10),
                       Expanded(
                         flex: 19,
-                        child: BlocBuilder<EditBookCubit, Book>(
-                          builder: (context, state) {
-                            return FilledButton(
-                              onPressed: (state.id != null)
-                                  ? () => _updateBook(state)
-                                  : () => _saveNewBook(),
-                              style: ButtonStyle(
-                                shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(
-                                      cornerRadius,
-                                    ),
-                                  ),
+                        child: FilledButton(
+                          onPressed: _handleSaveButton,
+                          style: ButtonStyle(
+                            shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  cornerRadius,
                                 ),
                               ),
-                              child: Center(child: Text(LocaleKeys.save.tr())),
-                            );
-                          },
+                            ),
+                          ),
+                          child: Center(child: Text(LocaleKeys.save.tr())),
                         ),
                       ),
                       const SizedBox(width: 10),

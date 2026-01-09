@@ -4,8 +4,8 @@ import 'dart:developer';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/core/services/connectivity_service.dart';
+import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 
 part 'open_lib_event.dart';
 part 'open_lib_state.dart';

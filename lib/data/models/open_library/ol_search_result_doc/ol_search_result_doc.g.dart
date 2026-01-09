@@ -13,6 +13,7 @@ _OLSearchResultDocModel _$OLSearchResultDocModelFromJson(
   type: json['type'] as String?,
   seed: (json['seed'] as List<dynamic>?)?.map((e) => e as String).toList(),
   title: json['title'] as String?,
+  description: json['description'] as String?,
   titleSuggest: json['title_suggest'] as String?,
   editionCount: (json['edition_count'] as num?)?.toInt(),
   editionKey: (json['edition_key'] as List<dynamic>?)
@@ -188,6 +189,7 @@ Map<String, dynamic> _$OLSearchResultDocModelToJson(
   'type': instance.type,
   'seed': instance.seed,
   'title': instance.title,
+  'description': instance.description,
   'title_suggest': instance.titleSuggest,
   'edition_count': instance.editionCount,
   'edition_key': instance.editionKey,
