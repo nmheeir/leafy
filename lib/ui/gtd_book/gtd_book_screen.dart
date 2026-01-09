@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
 import 'package:leafy/ui/book/widgets/book_detail_long.dart';
+import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-// NOTE: thêm một nút để lưu sách vào trong database
 
 class GtdBookScreen extends StatelessWidget {
   final GtdBook book;
@@ -16,34 +16,50 @@ class GtdBookScreen extends StatelessWidget {
 
   const GtdBookScreen({super.key, required this.book, this.heroTag});
 
+  bool get _hasEpub => book.formats?.applicationEpubZip != null;
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
+      floatingActionButton: _buildSaveFab(context),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: context.colorScheme.surface.withValues(alpha: 0.5),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.arrow_back),
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.download_rounded),
-            onPressed: () {
-              _onDownloadPressed(context);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.share),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.colorScheme.surface.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.share),
+            ),
             onPressed: () async {
-              await SharePlus.instance.share(
-                ShareParams(uri: Uri.parse(book.formats!.textHtml!)),
-              );
+              final url =
+                  book.formats?.textHtml ?? book.formats?.applicationEpubZip;
+              if (url != null) {
+                await SharePlus.instance.share(
+                  ShareParams(uri: Uri.parse(url)),
+                );
+              }
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
@@ -57,9 +73,9 @@ class GtdBookScreen extends StatelessWidget {
                 children: [
                   const SizedBox(height: 20),
                   _buildHeaderInfo(context),
-                  const SizedBox(height: 20),
-                  _buildActionButtons(context),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+                  _buildOnlineReadButton(context),
+                  const SizedBox(height: 24),
                   const Divider(),
                   _buildStatsRow(context),
                   const Divider(),
@@ -87,45 +103,82 @@ class GtdBookScreen extends StatelessWidget {
     );
   }
 
-  // 1. Cover Image Area (Remote Image)
-  Widget _buildCoverSpace(MediaQueryData mediaQuery, BuildContext context) {
-    final coverUrl = book.formats?.imageJpeg ?? book.formats?.imageJpeg;
-    final double height = mediaQuery.size.height * 0.35;
+  Widget _buildSaveFab(BuildContext context) {
+    return FloatingActionButton.extended(
+      onPressed: _hasEpub ? () => _onSavePressed(context) : null,
+      backgroundColor: _hasEpub
+          ? context.colorScheme.primary
+          : context.colorScheme.surfaceContainerHighest,
+      foregroundColor: _hasEpub
+          ? context.colorScheme.onPrimary
+          : context.colorScheme.onSurfaceVariant,
+      icon: Icon(_hasEpub ? Icons.save_alt_rounded : Icons.block),
+      label: Text(_hasEpub ? "Save to Library" : "No EPUB"),
+    );
+  }
 
-    return Container(
-      width: double.infinity,
-      height: height + mediaQuery.padding.top,
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerHighest.withValues(
-          alpha: 0.3,
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
-        ),
-      ),
+  Widget _buildCoverSpace(MediaQueryData mediaQuery, BuildContext context) {
+    final coverUrl = book.formats?.imageJpeg;
+    final double height = mediaQuery.size.height * 0.40;
+
+    return SizedBox(
+      height: height,
       child: Stack(
-        alignment: Alignment.center,
+        fit: StackFit.expand,
         children: [
+          // Background mờ
+          // NOTE: thay bằng generate blur hash
+          if (coverUrl != null)
+            Image.network(
+              coverUrl,
+              fit: BoxFit.cover,
+              color: Colors.black.withValues(alpha: 0.6),
+              colorBlendMode: BlendMode.darken,
+            )
+          else
+            Container(color: context.colorScheme.surfaceContainerHighest),
+
+          // Gradient fade xuống body
           Positioned(
-            bottom: 20,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 100,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    context.colorScheme.surfaceContainer,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Ảnh bìa chính
+          Align(
+            alignment: Alignment.bottomCenter,
             child: Hero(
               tag: heroTag ?? book.id.toString(),
               child: Container(
-                height: height * 0.8,
-                width: (height * 0.8) * 0.65,
+                height: height * 0.65,
+                width: (height * 0.65) * 0.65,
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.2),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+                      color: Colors.black.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: coverUrl != null
                       ? Image.network(
                           coverUrl,
@@ -134,6 +187,42 @@ class GtdBookScreen extends StatelessWidget {
                         )
                       : _buildPlaceholderCover(),
                 ),
+              ),
+            ),
+          ),
+
+          // Badge: EPUB Available Indicator
+          Positioned(
+            top: mediaQuery.padding.top + 60,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: _hasEpub ? Colors.green : Colors.red,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white, width: 1.5),
+                boxShadow: const [
+                  BoxShadow(blurRadius: 4, color: Colors.black26),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _hasEpub ? Icons.check_circle : Icons.cancel,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _hasEpub ? "EPUB" : "No EPUB",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -151,7 +240,6 @@ class GtdBookScreen extends StatelessWidget {
     );
   }
 
-  // 2. Title & Author
   Widget _buildHeaderInfo(BuildContext context) {
     final authors = book.authors.map((e) => e.name ?? "Unknown").join(", ");
 
@@ -160,10 +248,10 @@ class GtdBookScreen extends StatelessWidget {
       children: [
         SelectableText(
           book.title ?? 'Unknown Title',
-          style: context.textTheme.headlineSmall?.copyWith(
+          style: context.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
+            height: 1.2,
           ),
-          textAlign: TextAlign.left,
         ),
         if (authors.isNotEmpty) ...[
           const SizedBox(height: 8),
@@ -171,6 +259,7 @@ class GtdBookScreen extends StatelessWidget {
             authors,
             style: context.textTheme.titleMedium?.copyWith(
               color: context.colorScheme.primary,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -178,42 +267,54 @@ class GtdBookScreen extends StatelessWidget {
     );
   }
 
-  // 3. Action Buttons (Download / Read)
-  Widget _buildActionButtons(BuildContext context) {
-    final hasEpub = book.formats?.applicationEpubZip != null;
-    final hasHtml = book.formats?.textHtml != null;
+  Widget _buildOnlineReadButton(BuildContext context) {
+    if (book.formats?.textHtml == null) return const SizedBox.shrink();
 
-    return Row(
-      children: [
-        if (hasEpub)
-          Expanded(
-            child: FilledButton.icon(
-              onPressed: () => _onDownloadPressed(context),
-              icon: const Icon(Icons.download),
-              label: const Text("Download EPUB"),
-            ),
-          ),
-        if (hasEpub && hasHtml) const SizedBox(width: 10),
-        if (hasHtml)
-          Expanded(
-            child: OutlinedButton.icon(
-              onPressed: () async {
-                if (!await launchUrl(
-                  Uri.parse(book.formats!.textHtml ?? ''),
-                  mode: LaunchMode.externalApplication,
-                )) {
-                  throw Exception('Could not launch ${book.formats?.textHtml}');
-                }
-              },
-              icon: const Icon(Icons.open_in_browser),
-              label: const Text("Read Online"),
-            ),
-          ),
-      ],
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          side: BorderSide(color: context.colorScheme.outline),
+        ),
+        onPressed: () async {
+          final uri = Uri.parse(book.formats!.textHtml!);
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            // Handle error
+          }
+        },
+        icon: const Icon(Icons.public),
+        label: const Text("Read Online (Web)"),
+      ),
     );
   }
 
-  // 4. Statistics Row
+  // --- Logic: Navigate to Save Screen ---
+  void _onSavePressed(BuildContext context) {
+    if (!_hasEpub) return;
+
+    context.editBookCubit.initBookFromGutendex(
+      title: book.title,
+      authors: book.authors,
+      bookshelves: book.bookshelves,
+      subjects: book.subjects,
+    );
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) =>
+            BookEditorScreen(fromGutendex: true, gutendexFormat: book.formats),
+      ),
+    );
+
+    // ScaffoldMessenger.of(context).showSnackBar(
+    //   SnackBar(
+    //     content: Text("Preparing to save '${book.title}'..."),
+    //     action: SnackBarAction(label: "GO", onPressed: () {}),
+    //   ),
+    // );
+  }
+
   Widget _buildStatsRow(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -277,7 +378,6 @@ class GtdBookScreen extends StatelessWidget {
     );
   }
 
-  // 5. Tags (Subjects & Bookshelves)
   Widget _buildTagsSection(BuildContext context) {
     final allTags = [...book.bookshelves, ...book.subjects];
 
@@ -310,39 +410,21 @@ class GtdBookScreen extends StatelessWidget {
     );
   }
 
-  // 6. Summaries (Description)
   Widget _buildSummariesDetail() {
     if (book.summaries.isEmpty) return const SizedBox.shrink();
 
-    // Nối các summary lại hoặc lấy cái đầu tiên
     final text = book.summaries.join("\n\n");
     return BookDetailLong(title: LocaleKeys.description.tr(), text: text);
   }
 
-  // Helper for Person List
   Widget _buildPersonListDetail(String title, List<dynamic> persons) {
     if (persons.isEmpty) return const SizedBox.shrink();
     final text = persons.map((p) => p.name).join("\n");
     return BookDetail(title: title, text: text);
   }
 
-  // Helper for Simple Row
   Widget _buildDetailRow(String title, String text) {
     if (text.isEmpty) return const SizedBox.shrink();
     return BookDetail(title: title, text: text);
-  }
-
-  void _onDownloadPressed(BuildContext context) {
-    final epubUrl = book.formats?.applicationEpubZip;
-    if (epubUrl != null) {
-      // TODO: Call Cubit/Bloc to download and add to database
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Downloading from: $epubUrl")));
-    } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("No EPUB format available")));
-    }
   }
 }

@@ -48,7 +48,8 @@ import '../domain/book/usecases/add_book.dart' as _i660;
 import '../domain/book/usecases/bulk_delete.dart' as _i909;
 import '../domain/book/usecases/bulk_update.dart' as _i429;
 import '../domain/book/usecases/delete_book.dart' as _i565;
-import '../domain/book/usecases/download_cover.dart' as _i901;
+import '../domain/book/usecases/download_gtd_cover.dart' as _i466;
+import '../domain/book/usecases/download_ol_cover.dart' as _i151;
 import '../domain/book/usecases/get_book.dart' as _i137;
 import '../domain/book/usecases/get_deleted_book.dart' as _i679;
 import '../domain/book/usecases/restore_book.dart' as _i675;
@@ -171,9 +172,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i715.OlRemoteDataSource>(
       () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
     );
-    gh.lazySingleton<_i844.GutendexRepository>(
-      () => _i779.GutendexRepositoryImpl(gh<_i92.GutendexRemoteDataSource>()),
-    );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
     );
@@ -184,14 +182,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i497.Directory>(),
       ),
     );
-    gh.factory<_i433.GtdGetBookUseCase>(
-      () => _i433.GtdGetBookUseCase(gh<_i844.GutendexRepository>()),
-    );
-    gh.factory<_i750.GtdGetBooksUseCase>(
-      () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
-    );
     gh.lazySingleton<_i880.BookResourceLocalDatasource>(
       () => _i612.BookResourceLocalDatasourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i844.GutendexRepository>(
+      () => _i779.GutendexRepositoryImpl(
+        gh<_i92.GutendexRemoteDataSource>(),
+        gh<_i798.NetworkFileDataSource>(),
+      ),
     );
     gh.lazySingleton<_i751.OpenLibRepository>(
       () => _i946.OpenLibRepositoryImpl(
@@ -211,8 +209,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i756.GetEpubUseCase>(
       () => _i756.GetEpubUseCase(gh<_i57.EpubCacheRepository>()),
     );
-    gh.factory<_i901.DownloadCoverUseCase>(
-      () => _i901.DownloadCoverUseCase(gh<_i751.OpenLibRepository>()),
+    gh.factory<_i151.DownloadOlCoverUseCase>(
+      () => _i151.DownloadOlCoverUseCase(gh<_i751.OpenLibRepository>()),
     );
     gh.factory<_i138.OlGetWorkUseCase>(
       () => _i138.OlGetWorkUseCase(gh<_i751.OpenLibRepository>()),
@@ -227,17 +225,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
-    gh.factory<_i641.SearchGtdBloc>(
-      () => _i641.SearchGtdBloc(gh<_i750.GtdGetBooksUseCase>()),
-    );
-    gh.factory<_i113.BookEditorActionCubit>(
-      () => _i113.BookEditorActionCubit(
-        gh<_i901.DownloadCoverUseCase>(),
-        gh<_i138.OlGetWorkUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.factory<_i1064.EditBookCoverCubit>(
+      () => _i1064.EditBookCoverCubit(gh<_i151.DownloadOlCoverUseCase>()),
     );
     gh.lazySingleton<_i1042.BookResourceRepository>(
       () => _i722.BookResourceRepositoryImpl(
@@ -251,8 +243,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
-    gh.factory<_i1064.EditBookCoverCubit>(
-      () => _i1064.EditBookCoverCubit(gh<_i901.DownloadCoverUseCase>()),
+    gh.factory<_i466.DownloadGtdCoverUseCase>(
+      () => _i466.DownloadGtdCoverUseCase(gh<_i844.GutendexRepository>()),
+    );
+    gh.factory<_i433.GtdGetBookUseCase>(
+      () => _i433.GtdGetBookUseCase(gh<_i844.GutendexRepository>()),
+    );
+    gh.factory<_i750.GtdGetBooksUseCase>(
+      () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),
@@ -329,11 +327,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i675.RestoreBookUseCase>(),
       ),
     );
+    gh.factory<_i641.SearchGtdBloc>(
+      () => _i641.SearchGtdBloc(gh<_i750.GtdGetBooksUseCase>()),
+    );
     gh.factory<_i724.EpubViewCubit>(
       () => _i724.EpubViewCubit(
         gh<_i756.GetEpubUseCase>(),
         gh<_i1012.GetBookResourceByUuidUseCase>(),
         gh<_i860.SaveReaderProgress>(),
+      ),
+    );
+    gh.factory<_i113.BookEditorActionCubit>(
+      () => _i113.BookEditorActionCubit(
+        gh<_i151.DownloadOlCoverUseCase>(),
+        gh<_i138.OlGetWorkUseCase>(),
+        gh<_i466.DownloadGtdCoverUseCase>(),
       ),
     );
     gh.factory<_i939.LibraryCubit>(

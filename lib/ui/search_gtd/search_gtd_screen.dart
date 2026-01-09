@@ -3,7 +3,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/di/injection.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/search_gtd/search_gtd_bloc.dart';
 import 'package:leafy/ui/search_gtd/widgets/gtd_book_tile.dart';
@@ -14,11 +13,7 @@ class SearchGtdScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<SearchGtdBloc>()..add(const SearchGtdEvent.fetched()),
-      child: const SearchGtdView(),
-    );
+    return const SearchGtdView();
   }
 }
 

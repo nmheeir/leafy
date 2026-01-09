@@ -7,7 +7,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/ol_cover_type.dart';
 import 'package:leafy/core/utils/helpers/blurhash_util.dart';
-import 'package:leafy/domain/book/usecases/download_cover.dart';
+import 'package:leafy/domain/book/usecases/download_ol_cover.dart';
 import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
 import 'package:leafy/main.dart';
 
@@ -16,7 +16,7 @@ part 'edit_book_cover_cubit.freezed.dart';
 
 @injectable
 class EditBookCoverCubit extends Cubit<EditBookCoverState> {
-  final DownloadCoverUseCase _downloadCoverUseCase;
+  final DownloadOlCoverUseCase _downloadCoverUseCase;
 
   EditBookCoverCubit(this._downloadCoverUseCase)
     : super(const EditBookCoverState());

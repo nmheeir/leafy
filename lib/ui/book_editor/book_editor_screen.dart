@@ -14,6 +14,7 @@ import 'package:leafy/data/models/book/book/book_model.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
+import 'package:leafy/domain/gutendex/entities/gtd_format.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
@@ -35,19 +36,23 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 class BookEditorScreen extends StatefulWidget {
   const BookEditorScreen({
     super.key,
+    this.fromGutendex = false,
     this.fromOpenLibrary = false,
     this.fromOpenLibraryEdition = false,
     this.editingExistingBook = false,
     this.duplicatingBook = false,
     this.coverOpenLibraryID,
+    this.gutendexFormat,
     this.work,
   });
 
+  final bool fromGutendex;
   final bool fromOpenLibrary;
   final bool fromOpenLibraryEdition;
   final bool editingExistingBook;
   final bool duplicatingBook;
   final int? coverOpenLibraryID;
+  final GtdFormat? gutendexFormat;
   final String? work;
 
   @override
@@ -145,7 +150,15 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     }
 
     debugPrint("${BookModel.fromEntity(bookDraft)}");
-    context.bookActorCubit.addBook(bookDraft, coverBytes);
+    if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
+      context.bookActorCubit.addBook(bookDraft, coverBytes);
+    } else if (widget.fromGutendex) {
+      context.bookActorCubit.addBook(
+        bookDraft,
+        coverBytes,
+        widget.gutendexFormat!.applicationEpubZip!,
+      );
+    }
   }
 
   void _updateBook(Book book) async {
@@ -344,10 +357,19 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   // }
 
   void _downloadInitData() {
-    if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition) {
+    if (widget.fromOpenLibrary ||
+        widget.fromOpenLibraryEdition ||
+        widget.fromGutendex) {
       if (widget.coverOpenLibraryID != null) {
         context.bookEditorActionCubit.downloadCover(
-          widget.coverOpenLibraryID.toString(),
+          source: widget.coverOpenLibraryID.toString(),
+          isGutenbergUrl: false,
+        );
+      } else if (widget.gutendexFormat != null &&
+          widget.gutendexFormat!.imageJpeg != null) {
+        context.bookEditorActionCubit.downloadCover(
+          source: widget.gutendexFormat!.imageJpeg!,
+          isGutenbergUrl: true,
         );
       } else {
         context.editBookCoverCubit.setCoverImage(null);
@@ -521,10 +543,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     },
                   ),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                  BookStatusRow(
-                    animDuration: _animDuration,
-                    defaultHeight: Constants.formHeight,
-                  ),
+                  if (widget.fromOpenLibrary || widget.fromOpenLibraryEdition)
+                    BookStatusRow(
+                      animDuration: _animDuration,
+                      defaultHeight: Constants.formHeight,
+                    ),
                   const SizedBox(height: 10),
                   BookRatingBar(animDuration: _animDuration),
                   BlocBuilder<EditBookCubit, Book>(
@@ -541,7 +564,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       );
                     },
                   ),
-                  _buildAddNewReadingButton(context),
+                  // _buildAddNewReadingButton(context),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   BookTypeDropdown(
                     bookTypes: bookTypes,
@@ -550,32 +573,34 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   const SizedBox(height: 10),
                   Row(
                     children: [
-                      Expanded(
-                        child: BookTextField(
-                          controller: _pagesCtrl,
-                          hint: LocaleKeys.enter_pages.tr(),
-                          icon: FontAwesomeIcons.solidFileLines,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          maxLength: 10,
-                          padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-                        ),
-                      ),
-                      Expanded(
-                        child: BookTextField(
-                          controller: _pubYearCtrl,
-                          hint: LocaleKeys.enter_publication_year.tr(),
-                          icon: FontAwesomeIcons.solidCalendar,
-                          keyboardType: TextInputType.number,
-                          inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          maxLength: 4,
-                          padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
-                        ),
-                      ),
+                      // DEPRECATED
+                      // Expanded(
+                      //   child: BookTextField(
+                      //     controller: _pagesCtrl,
+                      //     hint: LocaleKeys.enter_pages.tr(),
+                      //     icon: FontAwesomeIcons.solidFileLines,
+                      //     keyboardType: TextInputType.number,
+                      //     inputFormatters: <TextInputFormatter>[
+                      //       FilteringTextInputFormatter.digitsOnly,
+                      //     ],
+                      //     maxLength: 10,
+                      //     padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
+                      //   ),
+                      // ),
+                      // DEPRECATED
+                      // Expanded(
+                      //   child: BookTextField(
+                      //     controller: _pubYearCtrl,
+                      //     hint: LocaleKeys.enter_publication_year.tr(),
+                      //     icon: FontAwesomeIcons.solidCalendar,
+                      //     keyboardType: TextInputType.number,
+                      //     inputFormatters: <TextInputFormatter>[
+                      //       FilteringTextInputFormatter.digitsOnly,
+                      //     ],
+                      //     maxLength: 4,
+                      //     padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -590,67 +615,69 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: BookTextField(
-                          controller: _isbnCtrl,
-                          hint: LocaleKeys.isbn.tr(),
-                          icon: FontAwesomeIcons.i,
-                          textCapitalization: TextCapitalization.characters,
-                          keyboardType: TextInputType.text,
-                          maxLength: 20,
-                        ),
-                      ),
-                      InkWell(
-                        customBorder: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(cornerRadius),
-                        ),
-                        onTap: () async {
-                          // var result = await BarcodeScanner.scan(
-                          //   options: ScanOptions(
-                          //     strings: {
-                          //       'cancel': LocaleKeys.cancel.tr(),
-                          //       'flash_on': LocaleKeys.flash_on.tr(),
-                          //       'flash_off': LocaleKeys.flash_off.tr(),
-                          //     },
-                          //   ),
-                          // );
+                  // DEPRECATED:
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: BookTextField(
+                  //         controller: _isbnCtrl,
+                  //         hint: LocaleKeys.isbn.tr(),
+                  //         icon: FontAwesomeIcons.i,
+                  //         textCapitalization: TextCapitalization.characters,
+                  //         keyboardType: TextInputType.text,
+                  //         maxLength: 20,
+                  //       ),
+                  //     ),
+                  //     InkWell(
+                  //       customBorder: RoundedRectangleBorder(
+                  //         borderRadius: BorderRadius.circular(cornerRadius),
+                  //       ),
+                  //       onTap: () async {
+                  //         // var result = await BarcodeScanner.scan(
+                  //         //   options: ScanOptions(
+                  //         //     strings: {
+                  //         //       'cancel': LocaleKeys.cancel.tr(),
+                  //         //       'flash_on': LocaleKeys.flash_on.tr(),
+                  //         //       'flash_off': LocaleKeys.flash_off.tr(),
+                  //         //     },
+                  //         //   ),
+                  //         // );
 
-                          // if (result.type == ResultType.Barcode) {
-                          //   setState(() {
-                          //     _isbnCtrl.text = result.rawContent;
-                          //   });
-                          // }
-                        },
-                        child: Container(
-                          height: 60,
-                          width: 60,
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(cornerRadius),
-                            color: context.colorScheme.surfaceContainerHighest
-                                .withValues(alpha: 0.5),
-                          ),
-                          child: Icon(
-                            FontAwesomeIcons.barcode,
-                            size: 28,
-                            color: context.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                  ),
+                  //         // if (result.type == ResultType.Barcode) {
+                  //         //   setState(() {
+                  //         //     _isbnCtrl.text = result.rawContent;
+                  //         //   });
+                  //         // }
+                  //       },
+                  //       child: Container(
+                  //         height: 60,
+                  //         width: 60,
+                  //         padding: const EdgeInsets.all(10),
+                  //         decoration: BoxDecoration(
+                  //           borderRadius: BorderRadius.circular(cornerRadius),
+                  //           color: context.colorScheme.surfaceContainerHighest
+                  //               .withValues(alpha: 0.5),
+                  //         ),
+                  //         child: Icon(
+                  //           FontAwesomeIcons.barcode,
+                  //           size: 28,
+                  //           color: context.colorScheme.primary,
+                  //         ),
+                  //       ),
+                  //     ),
+                  //     const SizedBox(width: 10),
+                  //   ],
+                  // ),
                   const SizedBox(height: 10),
-                  BookTextField(
-                    controller: _olidCtrl,
-                    hint: LocaleKeys.open_library_ID.tr(),
-                    icon: FontAwesomeIcons.o,
-                    keyboardType: TextInputType.text,
-                    maxLength: 20,
-                    textCapitalization: TextCapitalization.characters,
-                  ),
+                  // DEPRECATED:
+                  // BookTextField(
+                  //   controller: _olidCtrl,
+                  //   hint: LocaleKeys.open_library_ID.tr(),
+                  //   icon: FontAwesomeIcons.o,
+                  //   keyboardType: TextInputType.text,
+                  //   maxLength: 20,
+                  //   textCapitalization: TextCapitalization.characters,
+                  // ),
                   const SizedBox(height: 10),
                   BlocSelector<LibraryCubit, LibraryState, List<String>>(
                     selector: (state) => state.allTags,

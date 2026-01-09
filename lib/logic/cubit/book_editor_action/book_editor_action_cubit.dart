@@ -1,11 +1,15 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/ol_cover_type.dart';
-import 'package:leafy/domain/book/usecases/download_cover.dart';
+import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/domain/book/usecases/download_gtd_cover.dart';
+import 'package:leafy/domain/book/usecases/download_ol_cover.dart';
 import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
+import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/open_lib/entities/ol_work_result.dart';
 import 'package:leafy/domain/open_lib/usecases/ol_get_work.dart';
 
@@ -14,21 +18,32 @@ part 'book_editor_action_state.dart';
 
 @injectable
 class BookEditorActionCubit extends Cubit<BookEditorActionState> {
-  final DownloadCoverUseCase _downloadCoverUseCase;
+  final DownloadOlCoverUseCase _downloadOlCoverUseCase;
+  final DownloadGtdCoverUseCase _downloadGtdCoverUseCase;
   final OlGetWorkUseCase _olGetWorkUseCase;
   // final ValidateBookFormUseCase _validateBookFormUseCase;
 
   BookEditorActionCubit(
-    this._downloadCoverUseCase,
+    this._downloadOlCoverUseCase,
     this._olGetWorkUseCase,
+    this._downloadGtdCoverUseCase,
     // this._validateBookFormUseCase,
   ) : super(const BookEditorActionState());
 
-  Future<void> downloadCover(String coverOLID) async {
+  Future<void> downloadCover({
+    required String source,
+    bool isGutenbergUrl = false,
+  }) async {
     emit(state.copyWith(isCoverDownloading: true));
-    final result = await _downloadCoverUseCase(
-      DownloadCoverParams(value: coverOLID, type: OlCoverType.coverId),
-    );
+    final Either<Failure, DownloadCoverResult> result;
+
+    if (isGutenbergUrl) {
+      result = await _downloadGtdCoverUseCase(source);
+    } else {
+      result = await _downloadOlCoverUseCase(
+        DownloadCoverParams(value: source, type: OlCoverType.coverId),
+      );
+    }
 
     result.fold(
       (failure) {
@@ -67,6 +82,8 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
   void reset() {
     emit(const BookEditorActionState()); // Emit state rỗng hoàn toàn
   }
+
+  Future<void> _downLoadCover() async {}
 
   // /// Trả về true nếu hợp lệ, false nếu không (và emit lỗi để UI hiện snackbar)
   // bool validateForm(Book book) {

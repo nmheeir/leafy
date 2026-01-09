@@ -3,6 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_book.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_books.dart';
 
@@ -22,4 +23,8 @@ abstract class GutendexRepository {
   });
 
   Future<Either<Failure, GtdBook>> getBook({required int id});
+
+  Future<Either<Failure, DownloadCoverResult>> downloadCover({
+    required String gtdCoverUrl,
+  });
 }

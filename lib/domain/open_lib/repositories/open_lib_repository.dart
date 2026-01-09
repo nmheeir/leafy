@@ -14,7 +14,9 @@ abstract class OpenLibRepository {
     required OLSearchType searchType,
   });
 
-  Future<Either<Failure, DownloadCoverResult>> downloadCover(DownloadCoverParams params);
+  Future<Either<Failure, DownloadCoverResult>> downloadCover(
+    DownloadCoverParams params,
+  );
 
   Future<Either<Failure, OLWorkResult>> getWork(String workId);
 }

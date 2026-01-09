@@ -7,11 +7,11 @@ import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/open_lib/repositories/open_lib_repository.dart';
 
 @injectable
-class DownloadCoverUseCase
+class DownloadOlCoverUseCase
     implements UseCase<DownloadCoverResult, DownloadCoverParams> {
   final OpenLibRepository openLibRepository;
 
-  DownloadCoverUseCase(this.openLibRepository);
+  DownloadOlCoverUseCase(this.openLibRepository);
 
   @override
   Future<Either<Failure, DownloadCoverResult>> call(DownloadCoverParams params) async {

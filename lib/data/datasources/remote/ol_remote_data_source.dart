@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/data/models/ol_edition_result.dart';
 import 'package:leafy/data/models/open_library/ol_search_result/ol_search_result.dart';
 import 'package:leafy/data/models/open_library/ol_work/ol_work.dart';
 import 'package:retrofit/retrofit.dart';
@@ -29,4 +30,7 @@ abstract class OlRemoteDataSource {
 
   @GET("/{workId}.json")
   Future<OLWork> getWork(@Path("workId") String workId);
+
+  @GET("/works/{editionId}.json")
+  Future<OLEditionResult> getEdition(@Path("editionId") String edtionId);
 }

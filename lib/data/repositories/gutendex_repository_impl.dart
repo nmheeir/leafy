@@ -4,7 +4,10 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_lang.dart';
 import 'package:leafy/core/constants/enums/gutendex/gtd_sort_type.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/data/datasources/remote/gutendex_remote_datasource/gutendex_remote_datasource.dart';
+import 'package:leafy/data/datasources/remote/network_file_datasource.dart';
+import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_book.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_books.dart';
 import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
@@ -12,8 +15,12 @@ import 'package:leafy/domain/gutendex/repositories/gutendex_repository.dart';
 @LazySingleton(as: GutendexRepository)
 class GutendexRepositoryImpl implements GutendexRepository {
   final GutendexRemoteDataSource gutendexRemoteDataSource;
+  final NetworkFileDataSource networkFileDataSource;
 
-  GutendexRepositoryImpl(this.gutendexRemoteDataSource);
+  GutendexRepositoryImpl(
+    this.gutendexRemoteDataSource,
+    this.networkFileDataSource,
+  );
 
   @override
   Future<Either<Failure, GtdBooks>> getBooks({
@@ -76,6 +83,22 @@ class GutendexRepositoryImpl implements GutendexRepository {
       return Right(result.toEntity());
     } catch (e) {
       return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, DownloadCoverResult>> downloadCover({
+    required String gtdCoverUrl,
+  }) async {
+    try {
+      final bytes = await networkFileDataSource.downloadBytes(gtdCoverUrl);
+      final blurHash = await generateBlurHash(bytes);
+
+      return Right(DownloadCoverResult(bytes, blurHash ?? ''));
+    } on DioException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
     }
   }
 }
