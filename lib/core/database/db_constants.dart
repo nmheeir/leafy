@@ -34,19 +34,23 @@ class DbConstants {
   ''';
 
   // =====================================================
-  // 3. BOOK RESOURCES – file đọc được (epub / pdf / html)
+  // 3. BOOK RESOURCES – Quản lý file (Local & Remote)
   // =====================================================
   static const createBookResoucesTable = '''
     CREATE TABLE book_resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT, -- ID nội bộ
-      uuid TEXT UNIQUE NOT NULL,            -- ID domain của file (dùng cho reader)
-      book_id INTEGER NOT NULL,             -- FK → booksTable.id
-      format TEXT NOT NULL,                 -- Định dạng file: epub | pdf | html
-      file_path TEXT NOT NULL,              -- Đường dẫn file local
-      file_hash TEXT,                       -- Hash file (phát hiện thay đổi)
-      file_size INTEGER,                    -- Kích thước file (bytes)
-      language TEXT,                        -- Ngôn ngữ nội dung
-      created_at INTEGER,                  -- Timestamp khi thêm file
+      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      uuid TEXT UNIQUE NOT NULL,            -- ID domain (nhận từ Gutendex hoặc tự gen)
+      book_id INTEGER NOT NULL,             
+      format TEXT NOT NULL,                 -- epub | pdf | audio
+      
+      storage_type TEXT DEFAULT 'local',    -- 'local' | 'remote'
+      url TEXT,                             -- Link tải gốc (VD: link gutendex). Dùng để re-download.
+      file_path TEXT,                       -- Đường dẫn local (NULL nếu chưa tải)
+      
+      file_hash TEXT,                       
+      file_size INTEGER,                    
+      language TEXT,                        
+      created_at INTEGER,                  
       FOREIGN KEY (book_id) REFERENCES booksTable (id) ON DELETE CASCADE
     );
   ''';

@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
+import 'package:leafy/core/constants/enums/storage_type.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 
@@ -42,6 +43,8 @@ abstract class BookResourceRepository {
     required String uuid,
     required BookResourceFormat format,
     required String filePath,
+    required StorageType storageType,
+    String? url,
     String? fileHash,
     int? fileSize,
     String? language,

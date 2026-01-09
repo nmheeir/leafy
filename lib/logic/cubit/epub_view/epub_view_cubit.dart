@@ -21,7 +21,7 @@ class EpubViewCubit extends Cubit<EpubViewState> {
   final GetEpubUseCase _getEpubUseCase;
   final GetBookResourceByUuidUseCase _getBookResourceByUuidUseCase;
   final SaveReaderProgress _saveReaderProgress;
-  
+
   // Dependencies cho việc tracking session có thể được inject thêm vào đây
   // final SaveReadingSession _saveReadingSession;
 
@@ -49,9 +49,10 @@ class EpubViewCubit extends Cubit<EpubViewState> {
       (failure) async => emit(EpubViewState.error(message: failure.toString())),
       (resourceOption) async {
         await resourceOption.fold(
-          () async => emit(const EpubViewState.error(message: 'Resource not found')),
+          () async =>
+              emit(const EpubViewState.error(message: 'Resource not found')),
           (resource) async {
-             await _loadEpubFile(resource);
+            await _loadEpubFile(resource);
           },
         );
       },
@@ -64,7 +65,7 @@ class EpubViewCubit extends Cubit<EpubViewState> {
     // Ở đây giả định UseCase xử lý được dựa trên URL/Path.
     final result = await _getEpubUseCase(
       GetEpubParam(
-        url: resource.filePath, 
+        url: resource.url!,
         cancelToken: _cancelToken,
         forceReload: false,
         onProgress: (progress) {
@@ -82,11 +83,13 @@ class EpubViewCubit extends Cubit<EpubViewState> {
       (file) {
         // TODO: Tại bước này, nếu có GetReaderProgressUseCase, hãy gọi nó để lấy `locator`
         // Giả sử chưa có locator (null)
-        emit(EpubViewState.loaded(
-          file: file, 
-          resource: resource,
-          initialLocator: null,
-        ));
+        emit(
+          EpubViewState.loaded(
+            file: file,
+            resource: resource,
+            initialLocator: null,
+          ),
+        );
       },
     );
   }
@@ -97,19 +100,26 @@ class EpubViewCubit extends Cubit<EpubViewState> {
     if (currentState is! _EpubViewLoaded) return;
 
     // Chỉ lưu sau khi người dùng dừng cuộn 1 giây
-    if (_saveProgressDebounce?.isActive ?? false) _saveProgressDebounce!.cancel();
+    if (_saveProgressDebounce?.isActive ?? false)
+      _saveProgressDebounce!.cancel();
     _saveProgressDebounce = Timer(const Duration(seconds: 1), () {
       _saveProgress(currentState.resource.uuid, locator, progress);
     });
   }
 
-  Future<void> _saveProgress(String resourceUuid, String locator, double progress) async {
-    await _saveReaderProgress(SaveReaderProgressParams(
-      resourceUuid: resourceUuid,
-      locator: locator,
-      progress: progress,
-      lastReadAt: DateTime.now(),
-    ));
+  Future<void> _saveProgress(
+    String resourceUuid,
+    String locator,
+    double progress,
+  ) async {
+    await _saveReaderProgress(
+      SaveReaderProgressParams(
+        resourceUuid: resourceUuid,
+        locator: locator,
+        progress: progress,
+        lastReadAt: DateTime.now(),
+      ),
+    );
   }
 
   @override

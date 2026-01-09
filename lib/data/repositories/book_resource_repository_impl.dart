@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
+import 'package:leafy/core/constants/enums/storage_type.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/local/book_resource_local_datasource.dart';
 import 'package:leafy/data/datasources/local/reader_progress_local_datasource.dart';
@@ -21,13 +22,14 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
     required String uuid,
     required BookResourceFormat format,
     required String filePath,
+    required StorageType storageType,
+    String? url,
     String? fileHash,
     int? fileSize,
     String? language,
   }) async {
     try {
       final model = BookResourceModel(
-        id: null,
         uuid: uuid,
         bookId: bookId,
         format: format,
@@ -35,6 +37,8 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
         fileHash: fileHash,
         fileSize: fileSize,
         language: language,
+        storageType: storageType,
+        url: url,
         createdAt: DateTime.now(),
       );
 

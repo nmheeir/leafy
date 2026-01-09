@@ -35,12 +35,11 @@ class BookActorCubit extends Cubit<BookActorState> {
     this._bulkDeleteUseCase,
   ) : super(const BookActorState.initial());
 
+  // NOTE: khi thêm một cuốn sách thì xem file: notes/flow.txt
   Future<void> addBook(Book book, Uint8List? cover, [String? epubUrl]) async {
     emit(const BookActorState.loading());
 
-    if (epubUrl != null) {
-      
-    }
+    if (epubUrl != null) {}
 
     final result = await _addBookUseCase(
       AddBookParams(book: book, cover: cover),

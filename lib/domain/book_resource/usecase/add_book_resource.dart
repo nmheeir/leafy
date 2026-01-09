@@ -7,7 +7,8 @@ import 'package:leafy/domain/book_resource/repositories/book_resource_repository
 import 'package:leafy/domain/book_resource/usecase/params/add_book_resource_params.dart';
 
 @injectable
-class AddBookResourceUseCase implements UseCase<BookResource, AddBookResourceParams> {
+class AddBookResourceUseCase
+    implements UseCase<BookResource, AddBookResourceParams> {
   final BookResourceRepository repository;
 
   AddBookResourceUseCase(this.repository);
@@ -22,6 +23,8 @@ class AddBookResourceUseCase implements UseCase<BookResource, AddBookResourcePar
       fileHash: params.fileHash,
       fileSize: params.fileSize,
       language: params.language,
+      storageType: params.storageType,
+      url: params.url,
     );
   }
 }

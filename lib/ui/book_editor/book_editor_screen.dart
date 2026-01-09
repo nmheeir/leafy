@@ -22,6 +22,7 @@ import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
+import 'package:leafy/ui/book_editor/widgets/book_file_card.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
@@ -71,6 +72,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   final _tagsCtrl = TextEditingController();
   final _myReviewCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
+
+  String? _currentFilePath;
+  String? _currentDownloadUrl;
 
   final _animDuration = const Duration(milliseconds: 250);
 
@@ -157,11 +161,13 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       // --- ADD NEW BOOK ---
       // Nếu có URL file download (từ Gutendex) thì truyền vào
       if (widget.args.downloadFileUrl != null) {
-        context.bookActorCubit.addBook(
-          bookData,
-          coverBytes,
-          widget.args.downloadFileUrl!,
-        );
+        print('BookEditorScreen - epubUrl: ${widget.args.downloadFileUrl}');
+
+        // context.bookActorCubit.addBook(
+        //   bookData,
+        //   coverBytes,
+        //   widget.args.downloadFileUrl!,
+        // );
       } else {
         // Trường hợp OpenLibrary hoặc nhập tay
         context.bookActorCubit.addBook(bookData, coverBytes);
@@ -327,6 +333,32 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   //   }
   // }
 
+  void _handlePickFile() async {
+    // TODO: Sử dụng file_picker package để chọn file .epub
+    // FilePickerResult? result = await FilePicker.platform.pickFiles(
+    //   type: FileType.custom,
+    //   allowedExtensions: ['epub'],
+    // );
+
+    // if (result != null) {
+    //   setState(() {
+    //     _currentFilePath = result.files.single.path;
+    //     _currentDownloadUrl = null; // Nếu pick file local thì bỏ url download đi
+    //   });
+    //   // Update vào Cubit nếu cần: context.editBookCubit.setFilePath(...)
+    // }
+
+    debugPrint("User clicked Pick File");
+  }
+
+  void _handleDeleteFile() {
+    setState(() {
+      _currentFilePath = null;
+      _currentDownloadUrl = null;
+    });
+    // Update vào Cubit: context.editBookCubit.setFilePath(null);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -334,6 +366,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     context.bookEditorActionCubit.reset();
 
     final args = widget.args;
+    // _currentFilePath = widget.args.initialBook.filePath;
+    // _currentFilePath = "adsfjlajdf";
+    _currentDownloadUrl = widget.args.downloadFileUrl;
 
     // 2. Set dữ liệu sách vào Cubit & Controller
     // Logic này dùng chung cho cả Edit và Add New
@@ -479,6 +514,13 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                         suggestions: author,
                       );
                     },
+                  ),
+                  const SizedBox(height: 10),
+                  BookFileCard(
+                    localFilePath: _currentFilePath,
+                    downloadUrl: _currentDownloadUrl,
+                    onPickFile: _handlePickFile,
+                    onDeleteFile: _handleDeleteFile,
                   ),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   if (widget.args.isEditMode)

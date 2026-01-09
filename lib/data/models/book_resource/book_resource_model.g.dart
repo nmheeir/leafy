@@ -14,7 +14,11 @@ _BookResourceModel _$BookResourceModelFromJson(Map<String, dynamic> json) =>
       format: const BookResourceFormatConverter().fromJson(
         json['format'] as String,
       ),
-      filePath: json['file_path'] as String,
+      storageType: const StorageTypeConverter().fromJson(
+        json['storage_type'] as String,
+      ),
+      url: json['url'] as String?,
+      filePath: json['file_path'] as String?,
       fileHash: json['file_hash'] as String?,
       fileSize: (json['file_size'] as num?)?.toInt(),
       language: json['language'] as String?,
@@ -29,6 +33,8 @@ Map<String, dynamic> _$BookResourceModelToJson(_BookResourceModel instance) =>
       'uuid': instance.uuid,
       'book_id': instance.bookId,
       'format': const BookResourceFormatConverter().toJson(instance.format),
+      'storage_type': const StorageTypeConverter().toJson(instance.storageType),
+      'url': instance.url,
       'file_path': instance.filePath,
       'file_hash': instance.fileHash,
       'file_size': instance.fileSize,

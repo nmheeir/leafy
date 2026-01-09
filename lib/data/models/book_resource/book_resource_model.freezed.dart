@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BookResourceModel {
 
- int? get id; String get uuid;@JsonKey(name: 'book_id') int get bookId;@BookResourceFormatConverter() BookResourceFormat get format;@JsonKey(name: 'file_path') String get filePath;@JsonKey(name: 'file_hash') String? get fileHash;@JsonKey(name: 'file_size') int? get fileSize; String? get language;@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? get createdAt;
+ int? get id; String get uuid;@JsonKey(name: 'book_id') int get bookId;@BookResourceFormatConverter() BookResourceFormat get format;@JsonKey(name: 'storage_type')@StorageTypeConverter() StorageType get storageType; String? get url;@JsonKey(name: 'file_path') String? get filePath;@JsonKey(name: 'file_hash') String? get fileHash;@JsonKey(name: 'file_size') int? get fileSize; String? get language;@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? get createdAt;
 /// Create a copy of BookResourceModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $BookResourceModelCopyWith<BookResourceModel> get copyWith => _$BookResourceMode
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookResourceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.bookId, bookId) || other.bookId == bookId)&&(identical(other.format, format) || other.format == format)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileHash, fileHash) || other.fileHash == fileHash)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.language, language) || other.language == language)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BookResourceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.bookId, bookId) || other.bookId == bookId)&&(identical(other.format, format) || other.format == format)&&(identical(other.storageType, storageType) || other.storageType == storageType)&&(identical(other.url, url) || other.url == url)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileHash, fileHash) || other.fileHash == fileHash)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.language, language) || other.language == language)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,uuid,bookId,format,filePath,fileHash,fileSize,language,createdAt);
+int get hashCode => Object.hash(runtimeType,id,uuid,bookId,format,storageType,url,filePath,fileHash,fileSize,language,createdAt);
 
 @override
 String toString() {
-  return 'BookResourceModel(id: $id, uuid: $uuid, bookId: $bookId, format: $format, filePath: $filePath, fileHash: $fileHash, fileSize: $fileSize, language: $language, createdAt: $createdAt)';
+  return 'BookResourceModel(id: $id, uuid: $uuid, bookId: $bookId, format: $format, storageType: $storageType, url: $url, filePath: $filePath, fileHash: $fileHash, fileSize: $fileSize, language: $language, createdAt: $createdAt)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $BookResourceModelCopyWith<$Res>  {
   factory $BookResourceModelCopyWith(BookResourceModel value, $Res Function(BookResourceModel) _then) = _$BookResourceModelCopyWithImpl;
 @useResult
 $Res call({
- int? id, String uuid,@JsonKey(name: 'book_id') int bookId,@BookResourceFormatConverter() BookResourceFormat format,@JsonKey(name: 'file_path') String filePath,@JsonKey(name: 'file_hash') String? fileHash,@JsonKey(name: 'file_size') int? fileSize, String? language,@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? createdAt
+ int? id, String uuid,@JsonKey(name: 'book_id') int bookId,@BookResourceFormatConverter() BookResourceFormat format,@JsonKey(name: 'storage_type')@StorageTypeConverter() StorageType storageType, String? url,@JsonKey(name: 'file_path') String? filePath,@JsonKey(name: 'file_hash') String? fileHash,@JsonKey(name: 'file_size') int? fileSize, String? language,@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? createdAt
 });
 
 
@@ -65,14 +65,16 @@ class _$BookResourceModelCopyWithImpl<$Res>
 
 /// Create a copy of BookResourceModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? uuid = null,Object? bookId = null,Object? format = null,Object? filePath = null,Object? fileHash = freezed,Object? fileSize = freezed,Object? language = freezed,Object? createdAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? uuid = null,Object? bookId = null,Object? format = null,Object? storageType = null,Object? url = freezed,Object? filePath = freezed,Object? fileHash = freezed,Object? fileSize = freezed,Object? language = freezed,Object? createdAt = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,bookId: null == bookId ? _self.bookId : bookId // ignore: cast_nullable_to_non_nullable
 as int,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
-as BookResourceFormat,filePath: null == filePath ? _self.filePath : filePath // ignore: cast_nullable_to_non_nullable
-as String,fileHash: freezed == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
+as BookResourceFormat,storageType: null == storageType ? _self.storageType : storageType // ignore: cast_nullable_to_non_nullable
+as StorageType,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,filePath: freezed == filePath ? _self.filePath : filePath // ignore: cast_nullable_to_non_nullable
+as String?,fileHash: freezed == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
 as String?,fileSize: freezed == fileSize ? _self.fileSize : fileSize // ignore: cast_nullable_to_non_nullable
 as int?,language: freezed == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -161,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'file_path')  String filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'storage_type')@StorageTypeConverter()  StorageType storageType,  String? url, @JsonKey(name: 'file_path')  String? filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BookResourceModel() when $default != null:
-return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
+return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.storageType,_that.url,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
   return orElse();
 
 }
@@ -182,10 +184,10 @@ return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'file_path')  String filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'storage_type')@StorageTypeConverter()  StorageType storageType,  String? url, @JsonKey(name: 'file_path')  String? filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _BookResourceModel():
-return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
+return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.storageType,_that.url,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +204,10 @@ return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'file_path')  String filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id,  String uuid, @JsonKey(name: 'book_id')  int bookId, @BookResourceFormatConverter()  BookResourceFormat format, @JsonKey(name: 'storage_type')@StorageTypeConverter()  StorageType storageType,  String? url, @JsonKey(name: 'file_path')  String? filePath, @JsonKey(name: 'file_hash')  String? fileHash, @JsonKey(name: 'file_size')  int? fileSize,  String? language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter()  DateTime? createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _BookResourceModel() when $default != null:
-return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
+return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.storageType,_that.url,_that.filePath,_that.fileHash,_that.fileSize,_that.language,_that.createdAt);case _:
   return null;
 
 }
@@ -217,14 +219,16 @@ return $default(_that.id,_that.uuid,_that.bookId,_that.format,_that.filePath,_th
 @JsonSerializable()
 
 class _BookResourceModel extends BookResourceModel {
-  const _BookResourceModel({this.id, required this.uuid, @JsonKey(name: 'book_id') required this.bookId, @BookResourceFormatConverter() required this.format, @JsonKey(name: 'file_path') required this.filePath, @JsonKey(name: 'file_hash') this.fileHash, @JsonKey(name: 'file_size') this.fileSize, this.language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter() this.createdAt}): super._();
+  const _BookResourceModel({this.id, required this.uuid, @JsonKey(name: 'book_id') required this.bookId, @BookResourceFormatConverter() required this.format, @JsonKey(name: 'storage_type')@StorageTypeConverter() required this.storageType, this.url, @JsonKey(name: 'file_path') this.filePath, @JsonKey(name: 'file_hash') this.fileHash, @JsonKey(name: 'file_size') this.fileSize, this.language, @JsonKey(name: 'created_at')@IntToDatetimeCoverter() this.createdAt}): super._();
   factory _BookResourceModel.fromJson(Map<String, dynamic> json) => _$BookResourceModelFromJson(json);
 
 @override final  int? id;
 @override final  String uuid;
 @override@JsonKey(name: 'book_id') final  int bookId;
 @override@BookResourceFormatConverter() final  BookResourceFormat format;
-@override@JsonKey(name: 'file_path') final  String filePath;
+@override@JsonKey(name: 'storage_type')@StorageTypeConverter() final  StorageType storageType;
+@override final  String? url;
+@override@JsonKey(name: 'file_path') final  String? filePath;
 @override@JsonKey(name: 'file_hash') final  String? fileHash;
 @override@JsonKey(name: 'file_size') final  int? fileSize;
 @override final  String? language;
@@ -243,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookResourceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.bookId, bookId) || other.bookId == bookId)&&(identical(other.format, format) || other.format == format)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileHash, fileHash) || other.fileHash == fileHash)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.language, language) || other.language == language)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _BookResourceModel&&(identical(other.id, id) || other.id == id)&&(identical(other.uuid, uuid) || other.uuid == uuid)&&(identical(other.bookId, bookId) || other.bookId == bookId)&&(identical(other.format, format) || other.format == format)&&(identical(other.storageType, storageType) || other.storageType == storageType)&&(identical(other.url, url) || other.url == url)&&(identical(other.filePath, filePath) || other.filePath == filePath)&&(identical(other.fileHash, fileHash) || other.fileHash == fileHash)&&(identical(other.fileSize, fileSize) || other.fileSize == fileSize)&&(identical(other.language, language) || other.language == language)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,uuid,bookId,format,filePath,fileHash,fileSize,language,createdAt);
+int get hashCode => Object.hash(runtimeType,id,uuid,bookId,format,storageType,url,filePath,fileHash,fileSize,language,createdAt);
 
 @override
 String toString() {
-  return 'BookResourceModel(id: $id, uuid: $uuid, bookId: $bookId, format: $format, filePath: $filePath, fileHash: $fileHash, fileSize: $fileSize, language: $language, createdAt: $createdAt)';
+  return 'BookResourceModel(id: $id, uuid: $uuid, bookId: $bookId, format: $format, storageType: $storageType, url: $url, filePath: $filePath, fileHash: $fileHash, fileSize: $fileSize, language: $language, createdAt: $createdAt)';
 }
 
 
@@ -263,7 +267,7 @@ abstract mixin class _$BookResourceModelCopyWith<$Res> implements $BookResourceM
   factory _$BookResourceModelCopyWith(_BookResourceModel value, $Res Function(_BookResourceModel) _then) = __$BookResourceModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id, String uuid,@JsonKey(name: 'book_id') int bookId,@BookResourceFormatConverter() BookResourceFormat format,@JsonKey(name: 'file_path') String filePath,@JsonKey(name: 'file_hash') String? fileHash,@JsonKey(name: 'file_size') int? fileSize, String? language,@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? createdAt
+ int? id, String uuid,@JsonKey(name: 'book_id') int bookId,@BookResourceFormatConverter() BookResourceFormat format,@JsonKey(name: 'storage_type')@StorageTypeConverter() StorageType storageType, String? url,@JsonKey(name: 'file_path') String? filePath,@JsonKey(name: 'file_hash') String? fileHash,@JsonKey(name: 'file_size') int? fileSize, String? language,@JsonKey(name: 'created_at')@IntToDatetimeCoverter() DateTime? createdAt
 });
 
 
@@ -280,14 +284,16 @@ class __$BookResourceModelCopyWithImpl<$Res>
 
 /// Create a copy of BookResourceModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? uuid = null,Object? bookId = null,Object? format = null,Object? filePath = null,Object? fileHash = freezed,Object? fileSize = freezed,Object? language = freezed,Object? createdAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? uuid = null,Object? bookId = null,Object? format = null,Object? storageType = null,Object? url = freezed,Object? filePath = freezed,Object? fileHash = freezed,Object? fileSize = freezed,Object? language = freezed,Object? createdAt = freezed,}) {
   return _then(_BookResourceModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,uuid: null == uuid ? _self.uuid : uuid // ignore: cast_nullable_to_non_nullable
 as String,bookId: null == bookId ? _self.bookId : bookId // ignore: cast_nullable_to_non_nullable
 as int,format: null == format ? _self.format : format // ignore: cast_nullable_to_non_nullable
-as BookResourceFormat,filePath: null == filePath ? _self.filePath : filePath // ignore: cast_nullable_to_non_nullable
-as String,fileHash: freezed == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
+as BookResourceFormat,storageType: null == storageType ? _self.storageType : storageType // ignore: cast_nullable_to_non_nullable
+as StorageType,url: freezed == url ? _self.url : url // ignore: cast_nullable_to_non_nullable
+as String?,filePath: freezed == filePath ? _self.filePath : filePath // ignore: cast_nullable_to_non_nullable
+as String?,fileHash: freezed == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
 as String?,fileSize: freezed == fileSize ? _self.fileSize : fileSize // ignore: cast_nullable_to_non_nullable
 as int?,language: freezed == language ? _self.language : language // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: freezed == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
