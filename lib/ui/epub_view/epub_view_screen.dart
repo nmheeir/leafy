@@ -102,7 +102,7 @@ class _EpubViewContentState extends State<_EpubViewContent> {
       key: _scaffoldKey,
       appBar: AppBar(
         // Hiển thị tên file hoặc title nếu có trong metadata
-        title: Text(resource.filePath.split('/').last),
+        // title: Text(resource.filePath.split('/').last),
         actions: [
           IconButton(
             onPressed: () => context.pop(),

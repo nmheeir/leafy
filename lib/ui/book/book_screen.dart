@@ -17,6 +17,7 @@ import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 import 'package:leafy/ui/extensions/book_status_extension.dart';
+import 'package:leafy/ui/test/test_screen.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -34,6 +35,13 @@ class BookScreen extends StatelessWidget {
     Book book,
   ) async {
     int? rating;
+
+    if (status == BookStatus.unfinished) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => TestEpubReaderScreen()));
+      return;
+    }
 
     if (status == BookStatus.inProgress) {
       rating = await showDialog<int?>(
