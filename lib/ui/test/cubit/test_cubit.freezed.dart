@@ -128,13 +128,13 @@ return loaded(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( String message)?  error,TResult Function( EpubBook book,  int currentChapterIndex)?  loaded,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( String message)?  error,TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)?  loaded,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.progress);case _Error() when error != null:
 return error(_that.message);case _Loaded() when loaded != null:
-return loaded(_that.book,_that.currentChapterIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
   return orElse();
 
 }
@@ -152,13 +152,13 @@ return loaded(_that.book,_that.currentChapterIndex);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( String message)  error,required TResult Function( EpubBook book,  int currentChapterIndex)  loaded,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( String message)  error,required TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)  loaded,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading(_that.progress);case _Error():
 return error(_that.message);case _Loaded():
-return loaded(_that.book,_that.currentChapterIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +175,13 @@ return loaded(_that.book,_that.currentChapterIndex);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( String message)?  error,TResult? Function( EpubBook book,  int currentChapterIndex)?  loaded,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( String message)?  error,TResult? Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)?  loaded,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.progress);case _Error() when error != null:
 return error(_that.message);case _Loaded() when loaded != null:
-return loaded(_that.book,_that.currentChapterIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
   return null;
 
 }
@@ -357,12 +357,20 @@ as String,
 
 
 class _Loaded implements TestCubitState {
-  const _Loaded({required this.book, this.currentChapterIndex = 0});
+  const _Loaded({required this.book, required final  List<EpubDisplayItem> displayItems, required this.currentChapterIndex, this.currentItemIndex = 0}): _displayItems = displayItems;
   
 
  final  EpubBook book;
-// Model Entity của bạn
-@JsonKey() final  int currentChapterIndex;
+ final  List<EpubDisplayItem> _displayItems;
+ List<EpubDisplayItem> get displayItems {
+  if (_displayItems is EqualUnmodifiableListView) return _displayItems;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_displayItems);
+}
+
+// <--- THÊM MỚI
+ final  int currentChapterIndex;
+@JsonKey() final  int currentItemIndex;
 
 /// Create a copy of TestCubitState
 /// with the given fields replaced by the non-null parameter values.
@@ -374,16 +382,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.book, book) || other.book == book)&&(identical(other.currentChapterIndex, currentChapterIndex) || other.currentChapterIndex == currentChapterIndex));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.book, book) || other.book == book)&&const DeepCollectionEquality().equals(other._displayItems, _displayItems)&&(identical(other.currentChapterIndex, currentChapterIndex) || other.currentChapterIndex == currentChapterIndex)&&(identical(other.currentItemIndex, currentItemIndex) || other.currentItemIndex == currentItemIndex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,book,currentChapterIndex);
+int get hashCode => Object.hash(runtimeType,book,const DeepCollectionEquality().hash(_displayItems),currentChapterIndex,currentItemIndex);
 
 @override
 String toString() {
-  return 'TestCubitState.loaded(book: $book, currentChapterIndex: $currentChapterIndex)';
+  return 'TestCubitState.loaded(book: $book, displayItems: $displayItems, currentChapterIndex: $currentChapterIndex, currentItemIndex: $currentItemIndex)';
 }
 
 
@@ -394,7 +402,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $TestCubitStateCopyWith<$
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- EpubBook book, int currentChapterIndex
+ EpubBook book, List<EpubDisplayItem> displayItems, int currentChapterIndex, int currentItemIndex
 });
 
 
@@ -411,10 +419,12 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of TestCubitState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? book = null,Object? currentChapterIndex = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? book = null,Object? displayItems = null,Object? currentChapterIndex = null,Object? currentItemIndex = null,}) {
   return _then(_Loaded(
 book: null == book ? _self.book : book // ignore: cast_nullable_to_non_nullable
-as EpubBook,currentChapterIndex: null == currentChapterIndex ? _self.currentChapterIndex : currentChapterIndex // ignore: cast_nullable_to_non_nullable
+as EpubBook,displayItems: null == displayItems ? _self._displayItems : displayItems // ignore: cast_nullable_to_non_nullable
+as List<EpubDisplayItem>,currentChapterIndex: null == currentChapterIndex ? _self.currentChapterIndex : currentChapterIndex // ignore: cast_nullable_to_non_nullable
+as int,currentItemIndex: null == currentItemIndex ? _self.currentItemIndex : currentItemIndex // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

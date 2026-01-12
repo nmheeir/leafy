@@ -1,11 +1,13 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart'; // Thư viện render HTML
 import 'package:go_router/go_router.dart';
-import 'package:leafy/core/utils/extensions/extensions.dart'; // Giả sử bạn có extension cho colorScheme
-import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/domain/epub_reader/entities/epub_chapter.dart';
+import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
+import 'package:leafy/domain/epub_reader/entities/epub_image.dart';
 import 'package:leafy/ui/test/cubit/test_cubit.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class TestEpubReaderScreen extends StatelessWidget {
   final String filePath;
@@ -36,11 +38,19 @@ class _EpubReaderContent extends StatefulWidget {
 
 class _EpubReaderContentState extends State<_EpubReaderContent>
     with SingleTickerProviderStateMixin {
-  final ScrollController _scrollController = ScrollController();
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+
   final ValueNotifier<double> _chapterProgressNotifier = ValueNotifier(0.0);
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   bool _showControls = false;
+  bool _isProgrammaticScroll = false;
   late AnimationController _controlsAnimController;
+
+  int _totalDisplayItems = 1;
 
   @override
   void initState() {
@@ -51,32 +61,55 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       value: 1.0,
     );
 
-    _scrollController.addListener(_onScroll);
+    _itemPositionsListener.itemPositions.addListener(_onVisibleItemsChanged);
   }
 
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
+  void _onVisibleItemsChanged() {
+    final positions = _itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) return;
 
-    final maxScroll = _scrollController.position.maxScrollExtent;
-    final currentScroll = _scrollController.position.pixels;
+    // Sắp xếp để lấy cả item đầu và item cuối đang hiển thị
+    final sorted = positions.toList()
+      ..sort((a, b) => a.index.compareTo(b.index));
 
-    // Nếu nội dung ngắn quá thì maxScroll = 0 -> progress = 100%
-    if (maxScroll <= 0) {
+    final first = sorted.first;
+    final last = sorted.last; // Lấy item cuối cùng đang hiển thị
+
+    final currentItemIdx = first.index;
+
+    // --- SỬA LOGIC TÍNH % ---
+    // Nếu item cuối cùng của sách đang hiển thị VÀ đáy của nó đã nằm trong màn hình
+    // (itemTrailingEdge <= 1.05 là cho phép sai số nhỏ để bắt dính đáy)
+    if (last.index == _totalDisplayItems - 1 && last.itemTrailingEdge <= 1.05) {
       _chapterProgressNotifier.value = 1.0;
-      return;
+    } else {
+      // Logic bình thường: Tính dựa trên item đầu tiên
+      if (_totalDisplayItems > 1) {
+        // Chia cho (total - 1) để index cuối cùng trùng khớp với 100%
+        final globalProgress = currentItemIdx / (_totalDisplayItems - 1);
+        _chapterProgressNotifier.value = globalProgress.clamp(0.0, 1.0);
+      } else {
+        _chapterProgressNotifier.value = 1.0;
+      }
     }
+    // ------------------------
 
-    // Cập nhật % đọc
-    _chapterProgressNotifier.value = (currentScroll / maxScroll).clamp(
-      0.0,
-      1.0,
+    if (_isProgrammaticScroll) return;
+
+    // 2. Cập nhật Chapter Index hiện tại (Giữ nguyên logic cũ của bạn)
+    final currentState = context.read<TestCubit>().state;
+    currentState.mapOrNull(
+      loaded: (data) {
+        if (currentItemIdx < data.displayItems.length) {
+          final currentDisplayItem = data.displayItems[currentItemIdx];
+          if (data.currentChapterIndex != currentDisplayItem.chapterIndex) {
+            context.read<TestCubit>().updateChapterIndexOnly(
+              currentDisplayItem.chapterIndex,
+            );
+          }
+        }
+      },
     );
-
-    // Logic ẩn/hiện controls tự động khi cuộn (Option)
-    if (_showControls &&
-        _scrollController.position.userScrollDirection.index != 0) {
-      _toggleControls(false); // Bỏ comment nếu muốn tự ẩn khi cuộn
-    }
   }
 
   void _toggleControls([bool? show]) {
@@ -88,45 +121,71 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     });
   }
 
-  void _navigateChapter(BuildContext context, int newIndex, int totalChapters) {
-    if (newIndex >= 0 && newIndex < totalChapters) {
-      context.read<TestCubit>().selectChapter(newIndex);
-      // QUAN TRỌNG: Reset cuộn lên đầu khi sang chương mới
-      if (_scrollController.hasClients) {
-        _scrollController.jumpTo(0);
+  // Hàm nhảy đến chương (từ Drawer hoặc nút Next/Prev)
+  // Hàm tìm vị trí Header của chương SAU
+  int _findNextChapterHeaderIndex(int currentIdx, List<EpubDisplayItem> items) {
+    for (int i = currentIdx + 1; i < items.length; i++) {
+      if (items[i] is ChapterHeaderItem) {
+        return i;
       }
+    }
+    return -1; // Không còn chương nào
+  }
+
+  // Hàm tìm vị trí Header của chương TRƯỚC (hoặc đầu chương hiện tại)
+  int _findPrevChapterHeaderIndex(int currentIdx, List<EpubDisplayItem> items) {
+    // 1. Tìm đầu chương hiện tại trước
+    // Quét ngược từ vị trí hiện tại lên trên
+    int currentChapterStart = 0;
+    for (int i = currentIdx; i >= 0; i--) {
+      if (items[i] is ChapterHeaderItem) {
+        currentChapterStart = i;
+        break;
+      }
+    }
+
+    // Logic thông minh:
+    // Nếu đang ở quá xa đầu chương (> 5 item) -> Quay về đầu chương hiện tại
+    if (currentIdx - currentChapterStart > 5) {
+      return currentChapterStart;
+    }
+
+    // Nếu đang ở sát đầu chương -> Tìm chương trước đó nữa
+    for (int i = currentChapterStart - 1; i >= 0; i--) {
+      if (items[i] is ChapterHeaderItem) {
+        return i;
+      }
+    }
+
+    return 0; // Về đầu sách
+  }
+
+  // Hàm thực hiện nhảy
+  void _jumpToTarget(int targetIndex) {
+    if (targetIndex != -1) {
+      _itemScrollController.jumpTo(index: targetIndex, alignment: 0);
+      _isProgrammaticScroll = true; // Chặn update ngược
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) _isProgrammaticScroll = false;
+      });
     }
   }
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _chapterProgressNotifier.dispose();
     _controlsAnimController.dispose();
+    _itemPositionsListener.itemPositions.removeListener(_onVisibleItemsChanged);
     super.dispose();
-  }
-
-  void _onChapterChanged() {
-    // Reset scroll lên đầu khi đổi chương
-    if (_scrollController.hasClients) {
-      _scrollController.jumpTo(0);
-      _chapterProgressNotifier.value = 0.0;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<TestCubit, TestCubitState>(
-      listener: (context, state) {
-        state.mapOrNull(
-          loaded: (data) {
-            _onChapterChanged();
-          },
-        );
-      },
+    return BlocBuilder<TestCubit, TestCubitState>(
       builder: (context, state) {
         return Scaffold(
-          // drawer: _buildDrawer(context, state),
+          key: _scaffoldKey,
+          drawer: _buildDrawer(context, state),
           body: SafeArea(
             child: Stack(
               children: [
@@ -134,11 +193,13 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                   initial: (_) => const SizedBox.shrink(),
                   loading: (data) => _buildLoading(data.progress),
                   error: (data) => _buildError(data.message),
-                  loaded: (data) => _buildReaderBody(
-                    context,
-                    data.book,
-                    data.currentChapterIndex,
-                  ),
+                  loaded: (data) {
+                    _totalDisplayItems = data.displayItems.length;
+                    return _buildContinuousReaderBody(
+                      context,
+                      data.displayItems,
+                    );
+                  },
                 ),
 
                 Positioned(
@@ -173,180 +234,105 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     );
   }
 
-  PreferredSizeWidget _buildAppBar(BuildContext context, TestCubitState state) {
-    return AppBar(
-      title: state.maybeMap(
-        loaded: (data) => Text(
-          data.book.title,
-          style: const TextStyle(fontSize: 16),
-          overflow: TextOverflow.ellipsis,
-        ),
-        orElse: () => const Text('Đang tải...'),
-      ),
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios),
-        onPressed: () => context.pop(),
-      ),
-      actions: [
-        // Hiển thị số trang/chương hiện tại
-        state.maybeMap(
-          loaded: (data) => Center(
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0),
-              child: Text(
-                "${data.currentChapterIndex + 1}/${data.book.chapters.length}",
-                style: TextStyle(color: context.colorScheme.onSurfaceVariant),
-              ),
-            ),
-          ),
-          orElse: () => const SizedBox.shrink(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildReaderBody(
+  Widget _buildContinuousReaderBody(
     BuildContext context,
-    EpubBook book,
-    int chapterIndex,
+    List<EpubDisplayItem> items,
   ) {
-    // Lấy nội dung chương hiện tại
-    // Lưu ý: chapterIndex cần được kiểm tra bounds
-    if (chapterIndex >= book.chapters.length) {
-      return const Center(child: Text("Hết sách"));
-    }
-
-    final currentChapter = book.chapters[chapterIndex];
-
-    // --- THÊM LOG DEBUG ---
-    debugPrint("Chapter Index: $chapterIndex");
-    debugPrint("Body Length: ${currentChapter.body.length}");
-    debugPrint("First 100 chars: ${currentChapter.body.take(100)}");
-    // ----------------------
+    _totalDisplayItems = items.length;
 
     return GestureDetector(
-      onTap: _toggleControls,
-      child: Column(
-        children: [
-          // 1. Thanh Progress Bar (Tiến độ đọc chương hiện tại)
-          ValueListenableBuilder<double>(
-            valueListenable: _chapterProgressNotifier,
-            builder: (context, value, child) {
-              return LinearProgressIndicator(
-                value: value,
-                minHeight: 3,
-                backgroundColor: context.colorScheme.surfaceContainerHighest,
-                color: context.colorScheme.primary,
-              );
-            },
-          ),
+      onTap: () => _toggleControls(),
+      // 1. Đổi từ .separated sang .builder thường để tránh lỗi Layout Cycle
+      child: ScrollablePositionedList.builder(
+        itemCount: items.length,
+        itemScrollController: _itemScrollController,
+        itemPositionsListener: _itemPositionsListener,
+        padding: const EdgeInsets.symmetric(vertical: 24),
 
-          // 2. Nội dung sách (Render HTML)
-          Expanded(
-            child: SingleChildScrollView(
-              controller: _scrollController,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-              child: HtmlWidget(
-                currentChapter.body,
+        itemBuilder: (context, index) {
+          final item = items[index];
 
-                // Tùy chỉnh Style cơ bản
-                textStyle: TextStyle(
-                  fontSize: 18,
-                  height: 1.5,
-                  color: context.colorScheme.onSurface,
-                  fontFamily: 'Georgia', // Font serif dễ đọc sách
+          // A. Xây dựng Widget chính (Nội dung)
+          Widget content;
+          if (item is ChapterHeaderItem) {
+            content = Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Text(
+                item.title,
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Georgia',
                 ),
-
-                // Xử lý ảnh (Tạm thời placeholder, cần logic load ảnh từ Uint8List sau)
-                onErrorBuilder: (context, element, error) => const Center(
-                  child: Icon(Icons.broken_image, color: Colors.grey),
-                ),
-
-                // Tùy chỉnh render các thẻ đặc biệt nếu cần
-                customStylesBuilder: (element) {
-                  if (element.localName == 'h1') {
-                    return {'text-align': 'center', 'font-weight': 'bold'};
-                  }
-                  return null;
-                },
-
-                customWidgetBuilder: (element) {
-                  if (element.localName == 'img') {
-                    final src = element.attributes['src'];
-                    if (src != null) {
-                      final imageEntity = book.images.firstWhereOrNull(
-                        (img) =>
-                            img.absPath.endsWith(src) ||
-                            src.endsWith(img.absPath),
-                      );
-
-                      if (imageEntity != null) {
-                        return Image.memory(
-                          imageEntity.image!,
-                          fit: BoxFit.contain,
-                        );
-                      }
-                    }
-                    // Nếu không tìm thấy ảnh thì hiện placeholder
-                    return Container(
-                      height: 100,
-                      color: Colors.grey.shade200,
-                      child: const Center(child: Icon(Icons.broken_image)),
-                    );
-                  }
-                  return null;
-                },
+                textAlign: TextAlign.center,
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+            );
+          } else if (item is ParagraphItem) {
+            content = Text(
+              item.content,
+              textAlign: TextAlign.justify,
+              style: TextStyle(
+                fontSize: 18,
+                height: 1.6,
+                fontFamily: 'Georgia',
+                color: context.colorScheme.onSurface.withValues(alpha: 0.9),
+              ),
+            );
+          } else if (item is ImageItem) {
+            content = Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(item.imageBytes, fit: BoxFit.contain),
+              ),
+            );
+          } else {
+            content = const SizedBox.shrink();
+          }
 
-  // Widget hiển thị vùng chạm để chuyển chương Prev/Next
-  Widget _buildTapZones(
-    BuildContext context,
-    int currentIndex,
-    int totalChapters,
-  ) {
-    return Row(
-      children: [
-        // Vùng quay lại chương trước (20% màn hình trái)
-        GestureDetector(
-          onTap: () {
-            if (currentIndex > 0) {
-              context.read<TestCubit>().selectChapter(currentIndex - 1);
+          // B. Xây dựng Separator (Đường kẻ) ngay bên trong Item
+          Widget bottomSpacing = const SizedBox.shrink();
+
+          // Kiểm tra xem có phải phần tử cuối cùng không
+          if (index < items.length - 1) {
+            final nextItem = items[index + 1];
+
+            // Logic cũ: So sánh chapterIndex
+            if (item.chapterIndex != nextItem.chapterIndex) {
+              // KHÁC NHAU -> Vẽ "Hết chương"
+              bottomSpacing = Column(
+                children: [
+                  const SizedBox(height: 40),
+                  Divider(
+                    color: context.colorScheme.primary.withValues(alpha: 0.2),
+                  ),
+                  Text(
+                    "Hết chương ${item.chapterIndex + 1}",
+                    style: const TextStyle(fontSize: 10, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 40),
+                ],
+              );
+            } else {
+              // GIỐNG NHAU -> Khoảng cách giãn dòng
+              bottomSpacing = const SizedBox(height: 16);
             }
-          },
-          behavior: HitTestBehavior.translucent,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.2,
-            height: double.infinity,
-          ),
-        ),
-        // Vùng giữa (trống để cuộn)
-        const Spacer(),
-        // Vùng sang chương sau (20% màn hình phải)
-        GestureDetector(
-          onTap: () {
-            if (currentIndex < totalChapters - 1) {
-              context.read<TestCubit>().selectChapter(currentIndex + 1);
-            }
-          },
-          behavior: HitTestBehavior.translucent,
-          child: SizedBox(
-            width: MediaQuery.of(context).size.width * 0.2,
-            height: double.infinity,
-          ),
-        ),
-      ],
+          }
+
+          // C. Gộp Content và Spacing vào 1 Column duy nhất
+          // Điều này giúp ScrollablePositionedList tính toán layout dễ hơn hẳn
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [content, bottomSpacing],
+          );
+        },
+      ),
     );
   }
 
   Widget _buildTopBar(BuildContext context, TestCubitState state) {
     return Container(
-      color: context.colorScheme.surface, // Màu nền tránh bị trong suốt
+      color: context.colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Row(
         children: [
@@ -364,6 +350,14 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               orElse: () => const Text(""),
             ),
           ),
+          IconButton(
+            tooltip: "Mục lục",
+            icon: const Icon(Icons.format_list_bulleted),
+            onPressed: () {
+              // Mở Drawer bằng key
+              _scaffoldKey.currentState?.openDrawer();
+            },
+          ),
           IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
         ],
       ),
@@ -371,8 +365,8 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
   }
 
   Widget _buildBottomControlBar(BuildContext context, dynamic data) {
-    final int currentIndex = data.currentChapterIndex;
-    final int totalChapters = data.book.chapters.length;
+    final items = data.displayItems as List<EpubDisplayItem>;
+    final totalItems = items.length;
 
     return Container(
       color: context.colorScheme.surface,
@@ -380,73 +374,30 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 1. Thanh Slider tiến trình đọc trong chương (Optional)
-          Row(
-            children: [
-              Text(
-                "${(currentIndex + 1)} / $totalChapters",
-                style: const TextStyle(fontSize: 12),
-              ),
-              Expanded(
-                child: ValueListenableBuilder<double>(
-                  valueListenable: _chapterProgressNotifier,
-                  builder: (context, value, child) {
-                    return Slider(
-                      value: value,
-                      onChanged: (val) {
-                        // Logic kéo slider để cuộn nhanh (Jump)
-                        final maxScroll =
-                            _scrollController.position.maxScrollExtent;
-                        _scrollController.jumpTo(val * maxScroll);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
+          // Slider lướt toàn bộ sách
+          ValueListenableBuilder<double>(
+            valueListenable:
+                _chapterProgressNotifier, // Giá trị từ 0.0 -> 1.0 (Global)
+            builder: (context, value, child) {
+              return Column(
+                children: [
+                  Text("${(value * 100).toInt()}%"), // Hiển thị VD: 48%
+                  Slider(
+                    value: value,
+                    onChanged: (val) {
+                      // Nhảy tới vị trí % của file
+                      final targetIndex = (val * totalItems).toInt();
+                      _itemScrollController.jumpTo(index: targetIndex);
+                    },
+                  ),
+                ],
+              );
+            },
           ),
+          const SizedBox(height: 4),
 
-          const SizedBox(height: 8),
-
-          // 2. Nút điều hướng Previous / Next
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              FilledButton.tonalIcon(
-                onPressed: currentIndex > 0
-                    ? () => _navigateChapter(
-                        context,
-                        currentIndex - 1,
-                        totalChapters,
-                      )
-                    : null, // Disable nếu là chương đầu
-                icon: const Icon(Icons.arrow_back_ios, size: 16),
-                label: const Text("Trước"),
-              ),
-
-              FilledButton.tonalIcon(
-                onPressed: currentIndex < totalChapters - 1
-                    ? () => _navigateChapter(
-                        context,
-                        currentIndex + 1,
-                        totalChapters,
-                      )
-                    : null, // Disable nếu là chương cuối
-                icon: const Icon(Icons.arrow_forward_ios, size: 16),
-                // Đảo icon sang phải
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.only(left: 20, right: 12),
-                ),
-                label: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Sau"),
-                    SizedBox(width: 8),
-                  ], // Hack layout để icon nằm bên phải
-                ),
-              ),
-            ],
-          ),
+          // 2. Chèn bộ nút Navigation vừa tạo vào đây
+          _buildNavigationButtons(context, items),
         ],
       ),
     );
@@ -497,10 +448,22 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                     ),
                     selected: isSelected,
                     selectedTileColor: context.colorScheme.primaryContainer
-                        .withOpacity(0.2),
+                        .withValues(alpha: 0.2),
                     onTap: () {
-                      context.read<TestCubit>().selectChapter(index);
                       Navigator.pop(context); // Đóng drawer
+
+                      // SỬA: Tìm vị trí thực tế của Header chương trong danh sách items phẳng
+                      // data.displayItems là danh sách chứa cả text và ảnh
+                      final targetItemIndex = data.displayItems.indexWhere(
+                        (item) =>
+                            item is ChapterHeaderItem &&
+                            item.chapterIndex == index,
+                      );
+
+                      // Nhảy đến vị trí tìm được
+                      if (targetItemIndex != -1) {
+                        _jumpToTarget(targetItemIndex);
+                      }
                     },
                   );
                 },
@@ -529,8 +492,340 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
   Widget _buildError(String message) {
     return Center(child: Text("Lỗi: $message"));
   }
+
+  // Thay thế toàn bộ hàm _buildNavigationButtons cũ bằng hàm này
+  Widget _buildNavigationButtons(
+    BuildContext context,
+    List<EpubDisplayItem> items,
+  ) {
+    // SỬA: Dùng ValueListenableBuilder để lắng nghe vị trí cuộn theo thời gian thực
+    return ValueListenableBuilder<Iterable<ItemPosition>>(
+      valueListenable: _itemPositionsListener.itemPositions,
+      builder: (context, positions, child) {
+        // Logic lấy vị trí hiện tại (copy logic cũ của bạn vào đây)
+        int currentIdx = 0;
+        if (positions.isNotEmpty) {
+          // Sắp xếp để lấy item đầu tiên đang hiển thị
+          final sorted = positions.toList()
+            ..sort((a, b) => a.index.compareTo(b.index));
+          currentIdx = sorted.first.index;
+        }
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // NÚT PREV
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8.0),
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    final target = _findPrevChapterHeaderIndex(
+                      currentIdx,
+                      items,
+                    );
+                    _jumpToTarget(target);
+                  },
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+                  label: const Text(
+                    "Chương trước",
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+            ),
+
+            // NÚT NEXT
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: FilledButton.tonalIcon(
+                  onPressed: () {
+                    final target = _findNextChapterHeaderIndex(
+                      currentIdx,
+                      items,
+                    );
+                    if (target != -1) {
+                      _jumpToTarget(target);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Đã là chương cuối cùng"),
+                          duration: Duration(milliseconds: 500),
+                        ),
+                      );
+                    }
+                  },
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  icon: const SizedBox.shrink(),
+                  label: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Text("Chương sau", overflow: TextOverflow.ellipsis),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 extension StringExtension on String {
   String take(int n) => length > n ? substring(0, n) : this;
+  bool get isNotBlank => trim().isNotEmpty;
+}
+
+class ImgEntry {
+  final String path;
+  final double? yrel;
+
+  ImgEntry(this.path, this.yrel);
+
+  static ImgEntry? fromXmlString(String text) {
+    // Regex khớp với format: <img src="path" yrel="1.5">
+    final RegExp regex = RegExp(r'<img\s+src="([^"]+)"\s+yrel="([^"]+)">');
+    final match = regex.firstMatch(text);
+
+    if (match != null) {
+      return ImgEntry(match.group(1)!, double.tryParse(match.group(2) ?? ''));
+    }
+    return null;
+  }
+}
+
+class ChapterContentItem extends StatelessWidget {
+  final EpubChapter chapter;
+  final List<EpubImage> images;
+  final int index;
+
+  const ChapterContentItem({
+    super.key,
+    required this.chapter,
+    required this.images,
+    required this.index,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Logic Chunk Text
+    final List<String> paragraphs = chapter.body
+        .split('\n\n')
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
+
+    final textStyle = TextStyle(
+      fontSize: 18,
+      height: 1.6,
+      color: context.colorScheme.onSurface.withValues(alpha: 0.88),
+      fontFamily: 'Georgia',
+    );
+
+    // Tiêu đề chương (được render ngay đầu mỗi chương)
+    final titleWidget = Padding(
+      padding: const EdgeInsets.only(bottom: 20, top: 10),
+      child: Text(
+        chapter.title,
+        style: textStyle.copyWith(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          height: 1.2,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (chapter.title.isNotEmpty) titleWidget,
+
+          ..._renderParagraphs(context, paragraphs, textStyle),
+        ],
+      ),
+    );
+  }
+
+  List<Widget> _renderParagraphs(
+    BuildContext context,
+    List<String> paragraphs,
+    TextStyle style,
+  ) {
+    final List<Widget> widgets = [];
+    final StringBuffer textBuffer = StringBuffer();
+
+    for (int i = 0; i < paragraphs.length; i++) {
+      final para = paragraphs[i];
+      final imgEntry = ImgEntry.fromXmlString(para);
+
+      if (imgEntry == null) {
+        textBuffer.write(para);
+        textBuffer.write("\n\n");
+      } else {
+        if (textBuffer.isNotEmpty) {
+          widgets.add(
+            Text(
+              textBuffer.toString().trimRight(),
+              style: style,
+              textAlign: TextAlign.justify,
+            ),
+          );
+          textBuffer.clear();
+        }
+
+        final imageEntity = images.firstWhereOrNull(
+          (img) =>
+              img.absPath.endsWith(imgEntry.path) ||
+              imgEntry.path.endsWith(img.absPath),
+        );
+
+        if (imageEntity != null) {
+          widgets.add(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.memory(imageEntity.image!, fit: BoxFit.contain),
+              ),
+            ),
+          );
+        }
+      }
+
+      if (i == paragraphs.length - 1 && textBuffer.isNotEmpty) {
+        widgets.add(
+          Text(
+            textBuffer.toString().trimRight(),
+            style: style,
+            textAlign: TextAlign.justify,
+          ),
+        );
+      }
+    }
+    return widgets;
+  }
+}
+
+class ReaderProgressWidget extends StatelessWidget {
+  final double progress; // Giá trị từ 0.0 đến 1.0
+  final int currentChapterIndex;
+  final int totalChapters;
+  final VoidCallback? onNext;
+  final VoidCallback? onPrev;
+
+  const ReaderProgressWidget({
+    super.key,
+    required this.progress,
+    required this.currentChapterIndex,
+    required this.totalChapters,
+    this.onNext,
+    this.onPrev,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: context.colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Dòng 1: Thông tin text + %
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Chương ${currentChapterIndex + 1} / $totalChapters",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colorScheme.onSurfaceVariant,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                "${(progress * 100).toInt()}%",
+                style: TextStyle(
+                  fontSize: 12,
+                  color: context.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 8),
+
+          // Dòng 2: Thanh Progress Bar + Nút điều hướng nhỏ
+          Row(
+            children: [
+              // Nút lùi chương nhỏ gọn
+              IconButton(
+                onPressed: onPrev,
+                icon: const Icon(Icons.skip_previous_rounded),
+                iconSize: 20,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                color: context.colorScheme.primary,
+              ),
+
+              const SizedBox(width: 12),
+
+              // Thanh Progress Bar
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: progress,
+                    minHeight: 6,
+                    backgroundColor:
+                        context.colorScheme.surfaceContainerHighest,
+                    color: context.colorScheme.primary,
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              // Nút tiến chương nhỏ gọn
+              IconButton(
+                onPressed: onNext,
+                icon: const Icon(Icons.skip_next_rounded),
+                iconSize: 20,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                color: context.colorScheme.primary,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 }
