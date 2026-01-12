@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
+import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
@@ -13,27 +15,31 @@ import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 
 extension BlocExtensions on BuildContext {
   ///////////////////////////// CUBIT /////////////////////////////
-  LibraryCubit get library => read<LibraryCubit>();
 
-  BookActorCubit get bookActor => read<BookActorCubit>();
+  BookActorCubit get bookActorCubit => read<BookActorCubit>();
 
-  CurrentBookCubit get currentBook => read<CurrentBookCubit>();
+  CurrentBookCubit get currentBookCubit => read<CurrentBookCubit>();
 
-  TrashBinCubit get trashBin => read<TrashBinCubit>();
+  TrashBinCubit get trashBinCubit => read<TrashBinCubit>();
 
-  BookDetailCubit get bookDetail => read<BookDetailCubit>();
+  BookDetailCubit get bookDetailCubit => read<BookDetailCubit>();
 
-  EditBookCubit get editBook => read<EditBookCubit>();
+  EditBookCubit get editBookCubit => read<EditBookCubit>();
 
-  DefaultBookTagCubit get defaultBookTag => read<DefaultBookTagCubit>();
+  EditBookCoverCubit get editBookCoverCubit => read<EditBookCoverCubit>();
 
-  DefaultBookFormatCubit get defaultBookFormat =>
+  DefaultBookTagCubit get defaultBookTagCubit => read<DefaultBookTagCubit>();
+
+  DefaultBookFormatCubit get defaultBookFormatCubit =>
       read<DefaultBookFormatCubit>();
 
   LibraryCubit get libraryCubit => read<LibraryCubit>();
 
+  BookEditorActionCubit get bookEditorActionCubit =>
+      read<BookEditorActionCubit>();
+
   ///////////////////////////// BLOC /////////////////////////////
-  LocalSearchBloc get localSearch => read<LocalSearchBloc>();
+  LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();
 
   StatsBloc get statsBloc => read<StatsBloc>();
 }

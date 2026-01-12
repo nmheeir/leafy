@@ -60,7 +60,7 @@ class _MultiSelectFABState extends State<MultiSelectFAB> {
     final format = _mapStringToBookFormat(bookTypeStr);
 
     // 2. Gọi Cubit thực hiện Bulk Update
-    context.bookActor.bulkUpdate(
+    context.bookActorCubit.bulkUpdate(
       BulkUpdateBooksParams(ids: ids.toSet(), format: format),
     );
 
@@ -80,7 +80,7 @@ class _MultiSelectFABState extends State<MultiSelectFAB> {
     }
 
     // Gọi Cubit
-    context.bookActor.bulkUpdate(
+    context.bookActorCubit.bulkUpdate(
       BulkUpdateBooksParams(ids: ids.toSet(), author: author),
     );
 
@@ -90,7 +90,7 @@ class _MultiSelectFABState extends State<MultiSelectFAB> {
   void _onBulkDelete(BuildContext context, List<int> ids) {
     // Gọi Cubit (Giả sử bạn đã thêm hàm bulkDelete hoặc dùng bulkUpdate status)
     // Nếu chưa có bulkDelete, dùng logic update deleted = true
-    context.bookActor.bulkDelete(ids.toSet());
+    context.bookActorCubit.bulkDelete(ids.toSet());
 
     Navigator.pop(context); // Đóng Dialog
   }

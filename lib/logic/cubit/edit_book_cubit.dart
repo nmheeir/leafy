@@ -5,6 +5,7 @@ import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
+import 'package:leafy/domain/gutendex/entities/gtd_person.dart';
 
 @injectable
 class EditBookCubit extends Cubit<Book> {
@@ -54,6 +55,35 @@ class EditBookCubit extends Cubit<Book> {
     );
 
     // 3. Emit state mới
+    emit(newBook);
+  }
+
+  void initBookFromGutendex({
+    String? title,
+    String? subtitle,
+    required List<GtdPerson> authors,
+    required List<String> bookshelves,
+    required List<String> subjects,
+    int? pages,
+    BookStatus? status,
+  }) {
+    final newAuthor = authors.map((e) => e.name ?? "Unknown").join(", ");
+    final allTags = [...bookshelves, ...subjects];
+
+    final String? formattedTags = allTags.isNotEmpty
+        ? allTags.join('|||||')
+        : null;
+
+    final newBook = Book(
+      title: title ?? 'Unknow title',
+      author: newAuthor,
+      status: BookStatus.unfinished,
+      readings: const [],
+      tags: formattedTags,
+      dateAdded: DateTime.now(),
+      dateModified: DateTime.now(),
+    );
+
     emit(newBook);
   }
 

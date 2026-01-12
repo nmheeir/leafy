@@ -1,17 +1,30 @@
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/constants/enums/ol_cover_type.dart';
 import 'package:leafy/core/constants/enums/ol_search_type.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/core/utils/helpers/blurhash_util.dart';
+import 'package:leafy/data/datasources/remote/network_file_datasource.dart';
 import 'package:leafy/data/datasources/remote/ol_remote_data_source.dart';
+import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
+import 'package:leafy/domain/book/usecases/results/donwload_cover_result.dart';
 import 'package:leafy/domain/open_lib/entities/ol_search_result.dart';
+import 'package:leafy/domain/open_lib/entities/ol_work_result.dart';
 import 'package:leafy/domain/open_lib/repositories/open_lib_repository.dart';
 
 @LazySingleton(as: OpenLibRepository)
 class OpenLibRepositoryImpl implements OpenLibRepository {
-  final OlRemoteDataSource remoteDataSource;
+  final String coverUrl = '${Constants.coverBaseUrl}b';
 
-  const OpenLibRepositoryImpl(this.remoteDataSource);
+  final OlRemoteDataSource remoteDataSource;
+  final NetworkFileDataSource networkFileDataSource;
+
+  const OpenLibRepositoryImpl(
+    this.remoteDataSource,
+    this.networkFileDataSource,
+  );
 
   @override
   Future<Either<Failure, OLSearchResult>> search({
@@ -34,6 +47,36 @@ class OpenLibRepositoryImpl implements OpenLibRepository {
       return Right(result.toEntity());
     } on DioException catch (e) {
       return Left(Failure.server(e.message));
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, DownloadCoverResult>> downloadCover(
+    DownloadCoverParams params,
+  ) async {
+    try {
+      final fullUrl = '$coverUrl/${params.type.apiValue}/${params.value}-L.jpg';
+
+      final bytes = await networkFileDataSource.downloadBytes(fullUrl);
+      final blurHash = await generateBlurHash(bytes);
+
+      return Right(DownloadCoverResult(bytes, blurHash ?? ''));
+    } on DioException catch (e) {
+      return Left(Failure.server(e.message));
+    } catch (e) {
+      // Xử lý lỗi logic khác
+      return Left(Failure.unexpected(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, OLWorkResult>> getWork(String workId) async {
+    try {
+      final result = await remoteDataSource.getWork(workId);
+
+      return Right(result.toEntity());
     } catch (e) {
       return Left(Failure.unexpected(e.toString()));
     }

@@ -11,16 +11,16 @@ _GtdBookResultModel _$GtdBookResultModelFromJson(Map<String, dynamic> json) =>
       id: (json['id'] as num?)?.toInt(),
       title: json['title'] as String?,
       authors: (json['authors'] as List<dynamic>)
-          .map((e) => GtdPerson.fromJson(e as Map<String, dynamic>))
+          .map((e) => GtdPersonModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       summaries: (json['summaries'] as List<dynamic>)
           .map((e) => e as String)
           .toList(),
       editors: (json['editors'] as List<dynamic>)
-          .map((e) => GtdPerson.fromJson(e as Map<String, dynamic>))
+          .map((e) => GtdPersonModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       translators: (json['translators'] as List<dynamic>)
-          .map((e) => GtdPerson.fromJson(e as Map<String, dynamic>))
+          .map((e) => GtdPersonModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       subjects: (json['subjects'] as List<dynamic>)
           .map((e) => e as String)
@@ -35,7 +35,7 @@ _GtdBookResultModel _$GtdBookResultModelFromJson(Map<String, dynamic> json) =>
       mediaType: json['media_type'] as String?,
       formats: json['formats'] == null
           ? null
-          : GtdFormat.fromJson(json['formats'] as Map<String, dynamic>),
+          : GtdFormatModel.fromJson(json['formats'] as Map<String, dynamic>),
       downloadCount: (json['download_count'] as num?)?.toInt(),
     );
 

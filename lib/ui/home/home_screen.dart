@@ -15,6 +15,8 @@ import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/router/routes.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
+import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/books/books_screen.dart';
 import 'package:leafy/ui/home/widgets/add_book_sheet.dart';
 import 'package:leafy/ui/home/widgets/home_navigation_bar.dart';
@@ -265,9 +267,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _addBookManually() {
     _setEmptyBookForEditorScreen();
-    context.push(
-      Routes.bookEditor,
-      extra: {'appBarTitle': 'Add New Book', 'initialBook': Book.empty()},
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BookEditorScreen(args: BookEditorArgs.newBook()),
+      ),
     );
   }
 

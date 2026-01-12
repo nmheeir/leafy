@@ -1,0 +1,51 @@
+Bước 1: Khi Import sách từ Gutendex/OpenLibrary
+    User chọn sách -> Lưu vào DB.
+
+    Tạo row trong books.
+
+    Tạo row trong book_resources:
+
+    format: 'epub'
+
+    storage_type: 'remote'
+
+    url: '[liên kết đáng ngờ đã bị xóa]'
+
+    file_path: NULL
+
+Bước 2: Hiển thị trên UI
+    Khi render danh sách hoặc chi tiết, bạn check book_resources:
+
+    Nếu file_path != null: Hiển thị nút "Read".
+
+    Nếu file_path == null && url != null: Hiển thị nút "Download" (hoặc icon đám mây).
+
+Bước 3: Khi User nhấn nút "Read" (lần đầu - chưa có file)
+    Hệ thống phát hiện file_path là NULL. Logic xử lý:
+
+    Hiển thị Loading/Progress.
+
+    Lấy url từ record đó -> Thực hiện download file về thư mục app.
+
+    Download thành công -> Update record đó:
+
+    file_path: '/data/user/0/.../books/abc.epub'
+
+    storage_type: 'local'
+
+    Mở Reader.
+
+Bước 4: Tính năng nâng cao (Xóa file giữ xác)
+    User muốn xóa bớt sách cho nhẹ máy nhưng không muốn mất sách trong thư viện:
+
+    User chọn "Remove download".
+
+    Hệ thống xóa file vật lý trên đĩa.
+
+    Update record:
+
+    file_path: NULL
+
+    storage_type: 'remote'
+
+    Sách vẫn còn trong thư viện, bìa sách vẫn còn, nhưng trạng thái quay về như Bước 1 (sẵn sàng để tải lại vì url vẫn còn đó).

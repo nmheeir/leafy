@@ -23,7 +23,7 @@ class BookCardOL extends StatelessWidget {
   final String title;
   final String? subtitle;
   final String author;
-  final String? coverKey;
+  final int? coverKey;
   final VoidCallback onChooseEditionPressed;
   final VoidCallback onAddBookPressed;
   final List<String>? editions;
@@ -31,7 +31,7 @@ class BookCardOL extends StatelessWidget {
   final int? firstPublishYear;
 
   static const String coverBaseUrl = 'https://covers.openlibrary.org/';
-  late final String coverUrl = '${coverBaseUrl}b/olid/$coverKey-M.jpg';
+  late final String coverUrl = '${coverBaseUrl}b/id/$coverKey-M.jpg';
 
   @override
   Widget build(BuildContext context) {

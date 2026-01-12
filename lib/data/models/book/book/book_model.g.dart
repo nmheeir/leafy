@@ -11,9 +11,9 @@ _BookModel _$BookModelFromJson(Map<String, dynamic> json) => _BookModel(
   title: json['title'] as String,
   subtitle: json['subtitle'] as String?,
   author: json['author'] as String,
-  description: json['description'] as String?,
+  description: _descriptionFromJson(json['description']),
   bookFormat:
-      $enumDecodeNullable(_$BookFormatEnumMap, json['book_type']) ??
+      $enumDecodeNullable(_$BookFormatEnumMap, json['book_format']) ??
       BookFormat.paperback,
   status:
       $enumDecodeNullable(_$BookStatusEnumMap, json['status']) ??
@@ -53,7 +53,7 @@ Map<String, dynamic> _$BookModelToJson(_BookModel instance) =>
       'subtitle': instance.subtitle,
       'author': instance.author,
       'description': instance.description,
-      'book_type': _$BookFormatEnumMap[instance.bookFormat]!,
+      'book_format': _$BookFormatEnumMap[instance.bookFormat]!,
       'status': _$BookStatusEnumMap[instance.status]!,
       'rating': instance.rating,
       'favorite': const IntToBoolConverter().toJson(instance.favorite),

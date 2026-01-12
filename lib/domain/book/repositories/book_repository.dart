@@ -18,7 +18,7 @@ abstract class BookRepository {
 
   Future<Either<Failure, int>> countBooksByStatus(int status);
 
-  Future<Either<Failure, int>> addBook(AddBookParams params);
+  Future<Either<Failure, Book>> addBook(AddBookParams params);
 
   Future<Either<Failure, Unit>> updateBook(UpdateBookParams params);
   Future<Either<Failure, Unit>> bulkUpdateBooks(BulkUpdateBooksParams params);

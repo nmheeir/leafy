@@ -2,17 +2,15 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/constants.dart';
-// Core imports
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/open_lib/entities/ol_search_result_doc.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
-// Domain/Data imports
 import 'package:leafy/logic/bloc/open_lib_search/open_lib_search_bloc.dart';
 import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
-// UI Widgets
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:leafy/ui/search_ol/widgets/book_card_ol.dart';
@@ -77,42 +75,27 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
     );
   }
 
-  void _saveNoEdition({
-    required List<String> editions,
-    required String title,
-    String? subtitle,
-    required String author,
-    int? firstPublishYear,
-    int? pagesMedian,
-    int? cover,
-    List<String>? isbn,
-    String? olid,
-  }) {
-    final BookFormat defaultBookFormat = context.defaultBookFormat.state;
+  void _saveNoEdition(OLSearchResultDoc doc) {
+    final BookFormat defaultBookFormat = context.defaultBookFormatCubit.state;
 
-    final List<String> defaultTags = context.defaultBookTag.state;
+    final List<String> defaultTags = context.defaultBookTagCubit.state;
 
-    context.editBook.initBookFromOpenLibrary(
-      title: title,
-      subtitle: subtitle,
-      author: author,
-      pages: pagesMedian,
-      isbnList: isbn,
-      olidRaw: olid,
-      publishYear: firstPublishYear,
+    context.editBookCubit.initBookFromOpenLibrary(
+      title: doc.title ?? '',
+      subtitle: doc.subtitle,
+      author: (doc.authorName != null && doc.authorName!.isNotEmpty)
+          ? doc.authorName![0]
+          : '',
+      pages: doc.medianPages,
       defaultFormat: defaultBookFormat,
       defaultTags: defaultTags,
-      coverId: cover,
     );
 
     // 3. Navigation
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => BookEditorScreen(
-          fromOpenLibrary: true,
-          coverOpenLibraryID: cover,
-          work: olid,
-        ),
+        builder: (_) =>
+            BookEditorScreen(args: BookEditorArgs.fromOpenLibrary(doc)),
       ),
     );
   }
@@ -363,23 +346,11 @@ class _SearchOLScreenState extends State<SearchOLScreen> {
       author: (doc.authorName != null && doc.authorName!.isNotEmpty)
           ? doc.authorName![0]
           : '',
-      coverKey: doc.coverEditionKey,
+      coverKey: doc.coverI,
       editions: doc.editionKey,
       pagesMedian: doc.medianPages,
       firstPublishYear: doc.firstPublishYear,
-      onAddBookPressed: () => _saveNoEdition(
-        editions: doc.editionKey!,
-        title: doc.title ?? '',
-        subtitle: doc.subtitle,
-        author: (doc.authorName != null && doc.authorName!.isNotEmpty)
-            ? doc.authorName![0]
-            : '',
-        pagesMedian: doc.medianPages,
-        isbn: doc.isbn,
-        olid: doc.key,
-        firstPublishYear: doc.firstPublishYear,
-        cover: doc.coverI,
-      ),
+      onAddBookPressed: () => _saveNoEdition(doc),
       onChooseEditionPressed: () => _onChooseEditionPressed(doc),
     );
   }

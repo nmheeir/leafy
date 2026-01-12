@@ -1,13 +1,13 @@
 import 'package:equatable/equatable.dart';
 
-class EpubCache extends Equatable {
+class EpubMeta extends Equatable {
   final String title;
   final String id;
   final String url;
   final String lastReadCfi;
   final double progress;
 
-  const EpubCache({
+  const EpubMeta({
     required this.id,
     required this.url,
     required this.title,

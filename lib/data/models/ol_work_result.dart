@@ -3,6 +3,7 @@ import 'dart:convert';
 OLWorkResult openLibraryWorkResultFromJson(String str) =>
     OLWorkResult.fromJson(json.decode(str));
 
+// DEPRECATED
 class OLWorkResult {
   OLWorkResult({
     this.description,

@@ -16,7 +16,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
 
   BookLocalDataSourceImpl(this._db);
 
-  static const _table = 'booksTable';
+  static const _table = 'books';
 
   @override
   Future<int> create(BookModel book) async {
@@ -98,7 +98,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<List<BookModel>> getDeleted() async {
+  Future<List<BookModel>> getSoftDeleted() async {
     final db = await _db.database;
     final result = await db.query(_table, where: 'deleted = 1');
     return result.map(BookModel.fromJson).toList();
@@ -116,7 +116,7 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   }
 
   @override
-  Future<int> delete(int id) async {
+  Future<int> hardDelete(int id) async {
     final db = await _db.database;
     return db.delete(_table, where: 'id = ?', whereArgs: [id]);
   }
@@ -232,5 +232,55 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
     } else {
       return null;
     }
+  }
+
+  @override
+  Future<int> restore(int id) async {
+    final db = await _db.database;
+    final result = db.update(
+      _table,
+      {'deleted': 0},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result;
+  }
+
+  @override
+  Future<int> bulkSoftDetele(Set<int> ids) async {
+    final db = await _db.database;
+    final batch = db.batch();
+
+    for (final id in ids) {
+      batch.update(_table, {'deleted': 1}, where: 'id = ?', whereArgs: [id]);
+    }
+
+    final results = await batch.commit(noResult: false);
+    return results.length;
+  }
+
+  @override
+  Future<int> softDelete(int id) async {
+    final db = await _db.database;
+    final result = db.update(
+      _table,
+      {'deleted': 1},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+    return result;
+  }
+
+  @override
+  Future<int> bulkHardDelete(Set<int> ids) async {
+    final db = await _db.database;
+    final batch = db.batch();
+
+    for (final id in ids) {
+      batch.delete(_table, where: 'id = ?', whereArgs: [id]);
+    }
+
+    final results = await batch.commit(noResult: false);
+    return results.length;
   }
 }

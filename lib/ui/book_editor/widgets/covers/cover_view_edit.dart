@@ -11,13 +11,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'package:leafy/core/constants/constants.dart';
-import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/core/utils/helpers/helpers.dart';
-import 'package:leafy/di/injection.dart';
-import 'package:leafy/domain/services/open_library_service.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/main.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_placeholder.dart';
@@ -40,141 +36,53 @@ class CoverViewEdit extends StatefulWidget {
 }
 
 class _CoverViewEditState extends State<CoverViewEdit> {
-  bool _isCoverLoading = false;
-
-  void _setCoverLoading(bool value) {
-    setState(() {
-      _isCoverLoading = value;
-    });
-  }
-
-  void _loadCoverFromStorage(BuildContext context) async {
-    _setCoverLoading(true);
+  Future<void> _pickAndCropImage(
+    BuildContext context, {
+    Uint8List? sourceBytes,
+  }) async {
     Navigator.of(context).pop();
 
-    final photoXFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+    Uint8List? bytesToCrop = sourceBytes;
 
-    if (photoXFile == null) {
-      _setCoverLoading(false);
-      return;
+    if (bytesToCrop == null) {
+      final photoXFile = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+      );
+      if (photoXFile == null) return;
+      bytesToCrop = await photoXFile.readAsBytes();
     }
 
-    final croppedPhoto = await cropImage(
-      context,
-      await photoXFile.readAsBytes(),
-    );
+    if (!context.mounted) return;
 
-    if (croppedPhoto == null) {
-      _setCoverLoading(false);
-      return;
-    }
+    final croppedPhoto = await cropImage(context, bytesToCrop);
+    if (croppedPhoto == null) return;
 
-    final croppedPhotoBytes = await croppedPhoto.readAsBytes();
+    final croppedBytes = await croppedPhoto.readAsBytes();
 
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
+    if (!context.mounted) return;
 
-    final blurHash = await generateBlurHash(croppedPhotoBytes);
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
-
-    context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
-    context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
-
-    _setCoverLoading(false);
+    context.editBookCoverCubit.setCoverImage(croppedBytes);
   }
 
-  void _editCurrentCover(BuildContext context) async {
-    _setCoverLoading(true);
+  void _editCurrentCover(BuildContext context, Uint8List? currentCover) {
+    if (currentCover == null) return;
+    _pickAndCropImage(context, sourceBytes: currentCover);
+  }
+
+  void _deleteCover(BuildContext context) {
+    context.editBookCoverCubit.deleteCover(context.editBookCubit.state.id);
+  }
+
+  void _loadCoverFromOpenLibrary(BuildContext context) {
     Navigator.of(context).pop();
+    final isbn = context.editBookCubit.state.isbn;
 
-    final cover = context.read<EditBookCoverCubit>().state;
-
-    if (cover == null) {
-      _setCoverLoading(false);
-      return;
-    }
-
-    final croppedPhoto = await cropImage(context, cover);
-
-    if (croppedPhoto == null) {
-      _setCoverLoading(false);
-      return;
-    }
-
-    final croppedPhotoBytes = await croppedPhoto.readAsBytes();
-
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
-
-    final blurHash = await generateBlurHash(croppedPhotoBytes);
-
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
-
-    context.read<EditBookCoverCubit>().setCover(croppedPhotoBytes);
-    context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
-
-    _setCoverLoading(false);
-  }
-
-  Future<void> _deleteCover(BuildContext context) async {
-    _setCoverLoading(true);
-
-    context.read<EditBookCubit>().setHasCover(false);
-    context.read<EditBookCubit>().setBlurHash(null);
-    context.read<EditBookCoverCubit>().setCover(null);
-
-    _setCoverLoading(false);
-  }
-
-  Future<void> _loadCoverFromOpenLibrary(BuildContext context) async {
-    Navigator.of(context).pop();
-
-    final isbn = context.read<EditBookCubit>().state.isbn;
-
-    if (isbn == null) {
+    if (isbn == null || isbn.isEmpty) {
       CoverViewEdit.showInfoSnackbar(LocaleKeys.isbn_cannot_be_empty.tr());
       return;
     }
 
-    _setCoverLoading(true);
-
-    final cover = await getIt<OpenLibraryService>().getCover(isbn);
-
-    if (cover == null) {
-      CoverViewEdit.showInfoSnackbar(LocaleKeys.cover_not_found_in_ol.tr());
-      _setCoverLoading(false);
-      return;
-    }
-
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
-    final blurHash = await generateBlurHash(cover);
-
-    if (!context.mounted) {
-      _setCoverLoading(false);
-      return;
-    }
-    context.read<EditBookCoverCubit>().setCover(cover);
-    context.read<EditBookCubit>().setHasCover(true);
-    context.editBook.setBlurHash(blurHash);
-
-    _setCoverLoading(false);
+    context.editBookCoverCubit.loadFromOpenLibrary(isbn);
   }
 
   void _showDuckDuckGoWarning(BuildContext context) {
@@ -208,103 +116,128 @@ class _CoverViewEditState extends State<CoverViewEdit> {
       context,
       MaterialPageRoute(
         builder: (context) =>
-            SearchCoversScreen(book: context.read<EditBookCubit>().state),
+            SearchCoversScreen(book: context.editBookCubit.state),
       ),
     );
   }
 
-  void showCoverLoadBottomSheet(BuildContext context) {
+  void showCoverLoadBottomSheet(BuildContext context, Uint8List? currentCover) {
     FocusManager.instance.primaryFocus?.unfocus();
+
+    final options = EditCoverOptions(
+      loadCoverFromStorage: () => _pickAndCropImage(context),
+      searchForCoverOnline: () => _searchForCoverOnline(context),
+      loadCoverFromOpenLibrary: () => _loadCoverFromOpenLibrary(context),
+      editCurrentCover: () => _editCurrentCover(context, currentCover),
+    );
 
     if (Platform.isIOS) {
       showCupertinoModalBottomSheet(
         context: context,
         expand: false,
-        builder: (_) {
-          return EditCoverOptions(
-            loadCoverFromStorage: () => _loadCoverFromStorage(context),
-            searchForCoverOnline: () => _searchForCoverOnline(context),
-            loadCoverFromOpenLibrary: () => _loadCoverFromOpenLibrary(context),
-            editCurrentCover: () => _editCurrentCover(context),
-          );
-        },
+        builder: (_) => options,
       );
-    } else if (Platform.isAndroid) {
+    } else {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.surface,
-        builder: (modalContext) {
-          return EditCoverOptions(
-            loadCoverFromStorage: () => _loadCoverFromStorage(context),
-            searchForCoverOnline: () => _searchForCoverOnline(context),
-            loadCoverFromOpenLibrary: () => _loadCoverFromOpenLibrary(context),
-            editCurrentCover: () => _editCurrentCover(context),
-          );
-        },
+        builder: (_) => options,
       );
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    // FIX LỖI CHỚP NHÁY:
+    // Lấy dữ liệu hiện tại từ EditBookCubit (đã có sẵn khi vào màn hình)
+    // và nạp ngay vào EditBookCoverCubit trước khi UI kịp vẽ frame đầu tiên.
+    final editBookState = context.editBookCubit.state;
+
+    // Lưu ý: Giả sử EditBookState có trường 'cover' (Uint8List?) lưu ảnh raw.
+    // Nếu EditBookState chỉ lưu đường dẫn file, bạn cần xử lý đọc file ở đây
+    // hoặc chỉ reset về null để tránh hiện ảnh cũ.
+    // Ở đây tôi giả định bạn muốn clear ảnh cũ đi để tránh hiện sai:
+
+    context.read<EditBookCoverCubit>().initialize(
+      currentCover: null,
+      currentBlurHash: editBookState.blurHash,
+    );
+
+    // NẾU EditBookCubit đã có sẵn bytes ảnh (ví dụ state.coverBytes), hãy truyền vào:
+    // currentCover: editBookState.coverBytes
+    // Để người dùng thấy ngay ảnh hiện tại mà không cần chờ load.
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _isCoverLoading
-            ? const LinearProgressIndicator(minHeight: 3)
-            : const SizedBox(height: 3),
-        const SizedBox(height: 5),
-        Builder(
-          builder: (context) {
-            return BlocBuilder<EditBookCoverCubit, Uint8List?>(
-              buildWhen: (p, c) {
-                return p != c;
-              },
-              builder: (context, state) {
-                if (state != null) {
-                  return _buildCoverViewEdit(
-                    context,
-                    () => showCoverLoadBottomSheet(context),
-                  );
-                } else {
-                  return CoverPlaceholder(
-                    defaultHeight: Constants.formHeight,
-                    onPressed: () => showCoverLoadBottomSheet(context),
-                  );
-                }
-              },
-            );
-          },
-        ),
-      ],
+    return BlocListener<EditBookCoverCubit, EditBookCoverState>(
+      listener: (context, state) {
+        if (state.status == EditCoverStatus.failure &&
+            state.errorMessage != null) {
+          final msg = state.errorMessage == 'cover_not_found_in_ol'
+              ? LocaleKeys.cover_not_found_in_ol.tr()
+              : state.errorMessage!;
+          CoverViewEdit.showInfoSnackbar(msg);
+        }
+
+        if (state.status == EditCoverStatus.success) {
+          final editBookCubit = context.editBookCubit;
+          editBookCubit.setHasCover(true);
+          editBookCubit.setBlurHash(state.blurHash);
+        }
+
+        if (state.status == EditCoverStatus.deleted) {
+          final editBookCubit = context.editBookCubit;
+
+          editBookCubit.setHasCover(false);
+          editBookCubit.setBlurHash(null);
+        }
+      },
+      child: BlocBuilder<EditBookCoverCubit, EditBookCoverState>(
+        builder: (context, state) {
+          final isLoading = state.status == EditCoverStatus.loading;
+          final coverData = state.coverData;
+
+          return Column(
+            children: [
+              isLoading
+                  ? const LinearProgressIndicator(minHeight: 3)
+                  : const SizedBox(height: 3),
+              const SizedBox(height: 5),
+              coverData != null
+                  ? _buildCoverViewEdit(context, coverData, state.blurHash)
+                  : CoverPlaceholder(
+                      defaultHeight: Constants.formHeight,
+                      onPressed: () => showCoverLoadBottomSheet(context, null),
+                    ),
+            ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildCoverViewEdit(BuildContext context, Function() onTap) {
+  Widget _buildCoverViewEdit(
+    BuildContext context,
+    Uint8List coverData,
+    String? blurHash,
+  ) {
     return LayoutBuilder(
       builder: (context, boxConstraints) {
         return InkWell(
-          onTap: onTap,
+          onTap: () => showCoverLoadBottomSheet(context, coverData),
           child: Stack(
             children: [
+              // Background BlurHash
               SizedBox(
                 width: boxConstraints.maxWidth,
                 height: boxConstraints.maxWidth / 1.2,
-                child: Stack(
-                  children: [
-                    BlocBuilder<EditBookCoverCubit, Uint8List?>(
-                      builder: (context, state) {
-                        return _buildBlurHash(
-                          context,
-                          context.editBook.state.blurHash,
-                          boxConstraints,
-                        );
-                      },
-                    ),
-                  ],
-                ),
+                child: _buildBlurHash(blurHash, boxConstraints),
               ),
+              // Main Image
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Center(
@@ -314,24 +247,16 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                     decoration: const BoxDecoration(color: Colors.transparent),
                     child: Stack(
                       children: [
-                        BlocBuilder<EditBookCoverCubit, Uint8List?>(
-                          builder: (context, state) {
-                            return Center(
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(
-                                  cornerRadius,
-                                ),
-                                child: (state != null)
-                                    ? Image.memory(
-                                        state,
-                                        fit: BoxFit.contain,
-                                        width: double.infinity,
-                                        height: double.infinity,
-                                      )
-                                    : const SizedBox(),
-                              ),
-                            );
-                          },
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(cornerRadius),
+                            child: Image.memory(
+                              coverData,
+                              fit: BoxFit.contain,
+                              width: double.infinity,
+                              height: double.infinity,
+                            ),
+                          ),
                         ),
                         Positioned(
                           right: 1,
@@ -358,17 +283,10 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     );
   }
 
-  Widget _buildBlurHash(
-    BuildContext context,
-    String? blurHashString,
-    BoxConstraints boxConstraints,
-  ) {
-    if (blurHashString == null) {
-      return const SizedBox();
-    }
+  Widget _buildBlurHash(String? blurHashString, BoxConstraints boxConstraints) {
+    if (blurHashString == null) return const SizedBox();
 
     final image = BlurHash.decode(blurHashString).toImage(35, 20);
-
     return Image(
       image: MemoryImage(Uint8List.fromList(img.encodeJpg(image))),
       fit: BoxFit.cover,

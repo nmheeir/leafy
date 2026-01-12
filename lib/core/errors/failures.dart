@@ -21,4 +21,7 @@ abstract class Failure with _$Failure {
 
   /// Lỗi không tìm thấy
   const factory Failure.notFound([String? message]) = _NotFoundFailure;
+
+  /// Lỗi parser
+  const factory Failure.parse([String? message]) = _ParseFailure;
 }

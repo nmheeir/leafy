@@ -15,7 +15,9 @@ class Book extends Equatable {
   final int? rating;
   final int? pages;
   final int? publicationYear;
+  @Deprecated('Will be removed in a future release.')
   final String? isbn;
+  @Deprecated('Will be removed in a future release.')
   final String? olid;
   final String? tags;
   final String? myReview;
@@ -23,6 +25,7 @@ class Book extends Equatable {
   final String? blurHash;
   final BookFormat bookFormat;
   final bool hasCover;
+  @Deprecated('Will be removed in a future release.')
   final List<Reading> readings;
   final DateTime dateAdded;
   final DateTime dateModified;
@@ -137,6 +140,7 @@ class Book extends Equatable {
     id,
     title,
     subtitle,
+    description,
     author,
     status,
     favorite,

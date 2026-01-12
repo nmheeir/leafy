@@ -3,17 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
 import 'package:leafy/ui/book/widgets/book_detail_long.dart';
+import 'package:leafy/ui/book/widgets/book_detailed_date_added_update.dart';
 import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
 import 'package:leafy/ui/book/widgets/book_status_detail.dart';
 import 'package:leafy/ui/book/widgets/book_title_detail.dart';
 import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
+import 'package:leafy/ui/extensions/book_format_extension.dart';
+import 'package:leafy/ui/extensions/book_status_extension.dart';
+import 'package:leafy/ui/test/test_screen.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -22,153 +26,105 @@ class BookScreen extends StatelessWidget {
   final String heroTag;
 
   void _onLikeTap(BuildContext context, Book book) {
-    book = book.copyWith(favorite: !book.favorite == true);
-
-    context.bookActor.updateBook(book, null);
-    context.currentBook.setBook(book);
+    context.bookActorCubit.toggleFavorite(book);
   }
 
-  IconData? _decideStatusIcon(BookStatus? status) {
-    if (status == BookStatus.finished) {
-      return Icons.done;
-    } else if (status == BookStatus.inProgress) {
-      return Icons.autorenew;
-    } else if (status == BookStatus.forLater) {
-      return Icons.timelapse;
-    } else if (status == BookStatus.unfinished) {
-      return Icons.not_interested;
-    } else {
-      return null;
-    }
-  }
-
-  String _decideStatusText(BookStatus? status, BuildContext context) {
-    if (status == BookStatus.finished) {
-      return LocaleKeys.book_status_finished.tr();
-    } else if (status == BookStatus.inProgress) {
-      return LocaleKeys.book_status_in_progress.tr();
-    } else if (status == BookStatus.forLater) {
-      return LocaleKeys.book_status_for_later.tr();
-    } else if (status == BookStatus.unfinished) {
-      return LocaleKeys.book_status_unfinished.tr();
-    } else {
-      return '';
-    }
-  }
-
-  String? _decideChangeStatusText(BookStatus? status, BuildContext context) {
-    if (status == BookStatus.inProgress) {
-      return LocaleKeys.finish_reading.tr();
-    } else if (status == BookStatus.forLater) {
-      return LocaleKeys.start_reading.tr();
-    } else if (status == BookStatus.unfinished) {
-      return LocaleKeys.start_reading.tr();
-    } else {
-      return null;
-    }
-  }
-
-  Future<int?> _getQuickRating(BuildContext context) async {
-    return await showDialog<int?>(
-      context: context,
-      builder: (BuildContext context) {
-        return const QuickRatingDialog();
-      },
-    );
-  }
-
-  void _changeStatusAction(
+  Future<void> _changeStatusAction(
     BuildContext context,
     BookStatus status,
     Book book,
   ) async {
-    final dateNow = DateTime.now();
-    final date = DateTime(dateNow.year, dateNow.month, dateNow.day);
+    int? rating;
 
-    // finishing the book
-    if (status == BookStatus.inProgress) {
-      final rating = await _getQuickRating(context);
-
-      book = book.copyWith(
-        status: BookStatus.finished,
-        rating: rating,
-        readings: book.readings.isNotEmpty
-            ? (book.readings..[0] = book.readings[0].copyWith(finishDate: date))
-            : [Reading(finishDate: date)],
-      );
-    } else if (status == BookStatus.forLater) {
-      book = book.copyWith(
-        status: BookStatus.inProgress,
-        readings: book.readings.isNotEmpty
-            ? (book.readings..[0] = book.readings[0].copyWith(startDate: date))
-            : [Reading(startDate: date)],
-      );
-    } else if (status == BookStatus.unfinished) {
-      book = book.copyWith(
-        status: BookStatus.inProgress,
-        readings: book.readings.isNotEmpty
-            ? (book.readings..[0] = book.readings[0].copyWith(startDate: date))
-            : [Reading(startDate: date)],
-      );
+    if (status == BookStatus.unfinished) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (context) => TestEpubReaderScreen()));
+      return;
     }
 
-    if (context.mounted) {
-      context.bookActor.updateBook(book, null);
+    if (status == BookStatus.inProgress) {
+      rating = await showDialog<int?>(
+        context: context,
+        builder: (_) => const QuickRatingDialog(),
+      );
     }
 
     if (!context.mounted) return;
-    context.read<CurrentBookCubit>().setBook(book);
+
+    context.bookActorCubit.changeReadingStatus(book, rating: rating);
   }
 
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
-    return SelectableRegion(
-      selectionControls: materialTextSelectionControls,
-      focusNode: FocusNode(),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: const BookScreenAppBar(),
-        body: BlocBuilder<CurrentBookCubit, Book>(
-          builder: (context, state) {
-            return SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildCoverSpace(state, mediaQuery),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildTitleDetail(state),
-                      _buildStatusDetail(state, context),
-                      _buildBookFormatDetail(state),
-                      _buildPublicationYearDetail(state),
-                      _buildPagesDetail(state),
-                      _buildISBNDetail(state),
-                      _buildOLIDDetail(state),
-                      const SizedBox(height: 50),
-                      _buildDescriptionDetail(state),
-                      _buildMyReviewDetail(state),
-                      _buildNotesDetail(state),
-                      // _buildEditDates(state),
-                      const SizedBox(height: 100),
-                    ],
-                  ),
-                ],
-              ),
+    return BlocListener<BookActorCubit, BookActorState>(
+      listener: (context, actorState) {
+        actorState.maybeWhen(
+          success: (message, book) {
+            if (book != null) {
+              context.currentBookCubit.setBook(book);
+            }
+
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+          failure: (message) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message), backgroundColor: Colors.red),
             );
           },
+          orElse: () {},
+        );
+      },
+      child: SelectableRegion(
+        selectionControls: materialTextSelectionControls,
+        focusNode: FocusNode(),
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: const BookScreenAppBar(),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                _buildCoverSpace(mediaQuery),
+                BlocBuilder<CurrentBookCubit, Book>(
+                  builder: (context, state) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildTitleDetail(state),
+                        _buildStatusDetail(state, context),
+                        _buildBookFormatDetail(state),
+                        _buildPublicationYearDetail(state),
+                        _buildPagesDetail(state),
+                        // _buildISBNDetail(state),
+                        // _buildOLIDDetail(state),
+                        const SizedBox(height: 50),
+                        _buildDescriptionDetail(state),
+                        _buildMyReviewDetail(state),
+                        _buildNotesDetail(state),
+                        _buildEditDates(state),
+                        const SizedBox(height: 100),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
-  // BookDetailDateAddedUpdated _buildEditDates(Book state) {
-  //   return BookDetailDateAddedUpdated(
-  //     dateAdded: state.dateAdded,
-  //     dateModified: state.dateModified,
-  //   );
-  // }
+  BookDetailDateAddedUpdated _buildEditDates(Book state) {
+    return BookDetailDateAddedUpdated(
+      dateAdded: state.dateAdded,
+      dateModified: state.dateModified,
+    );
+  }
 
   Widget _buildNotesDetail(Book state) {
     return (state.notes != null && state.notes!.isNotEmpty)
@@ -194,24 +150,6 @@ class BookScreen extends StatelessWidget {
         : const SizedBox();
   }
 
-  Widget _buildOLIDDetail(Book state) {
-    return (state.olid != null)
-        ? BookDetail(
-            title: LocaleKeys.open_library_ID.tr(),
-            text: (state.olid ?? "").toString(),
-          )
-        : const SizedBox();
-  }
-
-  Widget _buildISBNDetail(Book state) {
-    return (state.isbn != null)
-        ? BookDetail(
-            title: LocaleKeys.isbn.tr(),
-            text: (state.isbn ?? "").toString(),
-          )
-        : const SizedBox();
-  }
-
   Widget _buildPagesDetail(Book state) {
     return (state.pages != null)
         ? BookDetail(
@@ -224,13 +162,7 @@ class BookScreen extends StatelessWidget {
   Widget _buildBookFormatDetail(Book state) {
     return BookDetail(
       title: LocaleKeys.book_format.tr(),
-      text: state.bookFormat == BookFormat.audiobook
-          ? LocaleKeys.book_format_audiobook.tr()
-          : state.bookFormat == BookFormat.ebook
-          ? LocaleKeys.book_format_ebook.tr()
-          : state.bookFormat == BookFormat.hardcover
-          ? LocaleKeys.book_format_hardcover.tr()
-          : LocaleKeys.book_format_paperback.tr(),
+      text: state.bookFormat.text,
     );
   }
 
@@ -243,17 +175,19 @@ class BookScreen extends StatelessWidget {
         : const SizedBox();
   }
 
-  SingleChildRenderObjectWidget _buildCoverSpace(
-    Book state,
-    MediaQueryData mediaQuery,
-  ) {
-    return (state.hasCover == true)
-        ? Center(
-            child: CoverView(heroTag: heroTag, book: state),
-          )
-        : SizedBox(
-            height: mediaQuery.padding.top + AppBar().preferredSize.height,
-          );
+  Widget _buildCoverSpace(MediaQueryData mediaQuery) {
+    return BlocBuilder<CurrentBookCubit, Book>(
+      buildWhen: (previous, current) => previous.blurHash != current.blurHash,
+      builder: (context, state) {
+        return state.hasCover == true
+            ? Center(
+                child: CoverView(heroTag: heroTag, book: state),
+              )
+            : SizedBox(
+                height: mediaQuery.padding.top + AppBar().preferredSize.height,
+              );
+      },
+    );
   }
 
   BookTitleDetail _buildTitleDetail(Book state) {
@@ -270,14 +204,14 @@ class BookScreen extends StatelessWidget {
   BookStatusDetail _buildStatusDetail(Book state, BuildContext context) {
     return BookStatusDetail(
       book: state,
-      statusIcon: _decideStatusIcon(state.status),
-      statusText: _decideStatusText(state.status, context),
+      statusIcon: state.status.icon,
+      statusText: state.status.text,
       onLikeTap: () => _onLikeTap(context, state),
       showChangeStatus:
           (state.status == BookStatus.inProgress ||
           state.status == BookStatus.forLater ||
           state.status == BookStatus.unfinished),
-      changeStatusText: _decideChangeStatusText(state.status, context),
+      changeStatusText: state.status.changeStatus,
       changeStatusAction: () {
         _changeStatusAction(context, state.status, state);
       },

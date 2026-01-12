@@ -2,10 +2,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
-import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/models/ol_author_result.dart';
 import 'package:leafy/data/models/ol_edition_result.dart';
-import 'package:leafy/data/models/ol_search_result.dart';
 import 'package:leafy/data/models/ol_work_result.dart';
 import 'package:logger/logger.dart';
 
@@ -19,48 +17,6 @@ class OpenLibraryService {
   final Logger _logger;
 
   OpenLibraryService(this._dio, this._logger);
-
-  Future<OLSearchResult> getResults({
-    required String query,
-    required int offset,
-    required int limit,
-    required OLSearchType searchType,
-  }) async {
-    final searchTypeParam = switch (searchType) {
-      OLSearchType.general => 'q',
-      OLSearchType.author => 'author',
-      OLSearchType.title => 'title',
-      OLSearchType.isbn => 'isbn',
-      OLSearchType.openlibraryId => 'olid',
-    };
-
-    final queryParams = {
-      searchTypeParam: query,
-      'limit': limit,
-      'offset': offset,
-      'mode': 'everything',
-      'fields':
-          'key,title,subtitle,author_key,author_name,editions,number_of_pages_median,first_publish_year,isbn,edition_key,cover_edition_key,cover_i',
-    };
-
-    final uri = '$baseUrl/search.json';
-    _logger.d('Fetching results from: $uri with params: $queryParams');
-
-    try {
-      final response = await _dio.get(uri, queryParameters: queryParams);
-      return OLSearchResult.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e, st) {
-      _logger.e(
-        'DioError fetching results: ${e.message}',
-        error: e,
-        stackTrace: st,
-      );
-      rethrow;
-    } catch (e, st) {
-      _logger.e('Error fetching results: $e', error: e, stackTrace: st);
-      rethrow;
-    }
-  }
 
   Future<OLEditionResult> getEdition(String edition) async {
     final uri = '$baseUrl/works/$edition.json';

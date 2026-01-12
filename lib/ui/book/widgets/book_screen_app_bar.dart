@@ -8,9 +8,9 @@ import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -106,13 +106,13 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   ) async {
     book = book.copyWith(deleted: deleted);
 
-    await context.bookActor.updateBook(book, null);
+    await context.bookActorCubit.updateBook(book, null);
     // bookCubit.getDeletedBooks();
   }
 
   Future<void> _deleteBookPermanently(BuildContext context, Book book) async {
     if (book.id != null) {
-      await context.bookActor.deleteBook(book.id!);
+      await context.bookActorCubit.deleteBook(book.id!);
     }
 
     // bookCubit.getDeletedBooks();
@@ -167,17 +167,22 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                           if (!context.mounted) return;
 
                           if (choice == moreButtonOptions[0]) {
+                            final cover = await getCoverBytes(state.id);
                             Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => const BookEditorScreen(
-                                  editingExistingBook: true,
+                                builder: (_) => BookEditorScreen(
+                                  args: BookEditorArgs.fromLocal(
+                                    state,
+                                    // NOTE: nếu lỗi cover thì kiểm tra lại chỗ này
+                                    cover,
+                                  ),
                                 ),
                               ),
                             );
                           } else if (choice == moreButtonOptions[1]) {
                             final cover = await getCoverBytes(state.id);
 
-                            context.read<EditBookCoverCubit>().setCover(cover);
+                            context.editBookCoverCubit.setCoverImage(cover);
 
                             final newBook = state.copyWith(
                               title:

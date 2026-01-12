@@ -11,6 +11,7 @@ class ErrorMessageMapper {
       unexpected: (_) => LocaleKeys.error_unexpected.tr(),
       database: (message) => LocaleKeys.error_database.tr(),
       notFound: (message) => LocaleKeys.error_not_found.tr(),
+      parse: (message) => LocaleKeys.error.tr(),
     );
   }
 }

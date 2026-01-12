@@ -37,6 +37,7 @@ class EpubFileLocalDataSourceImpl implements EpubFileLocalDataSource {
   @override
   Future<void> saveMeta(EpubCacheModel cache) async {
     final file = metaFile(cache.url);
+    // NOTE: save meta vào trong database
     await file.writeAsString(jsonEncode(cache.toJson()));
   }
 
