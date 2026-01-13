@@ -148,4 +148,18 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
 
     await db.update(_table, values, where: 'uuid = ?', whereArgs: [uuid]);
   }
+
+  @override
+  Future<BookResourceModel?> findByPath(String path) async {
+    final db = await _db.database;
+    final result = await db.query(
+      _table,
+      where: 'file_path = ?',
+      whereArgs: [path],
+      limit: 1,
+    );
+
+    if (result.isEmpty) return null;
+    return BookResourceModel.fromJson(result.first);
+  }
 }

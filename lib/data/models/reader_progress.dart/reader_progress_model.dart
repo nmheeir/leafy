@@ -21,7 +21,9 @@ abstract class ReaderProgressModel with _$ReaderProgressModel {
     @JsonKey(name: 'progress_pct') @Default(0.0) double progressPct,
 
     /// Timestamp lần đọc cuối (millisecondsSinceEpoch)
-    @IntToDatetimeCoverter() @JsonKey(name: 'last_read_at') int? lastReadAt,
+    @IntToDatetimeCoverter()
+    @JsonKey(name: 'last_read_at')
+    DateTime? lastReadAt,
   }) = _ReaderProgressModel;
 
   factory ReaderProgressModel.fromJson(Map<String, dynamic> json) =>

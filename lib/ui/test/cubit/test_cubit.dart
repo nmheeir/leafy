@@ -7,19 +7,27 @@ import 'package:leafy/domain/epub_file/usecases/params/get_epub_param.dart';
 import 'package:leafy/domain/epub_file/usecases/parse_epub.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
+import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
 import 'package:logger/web.dart';
 
-part 'test_cubit_state.dart';
 part 'test_cubit.freezed.dart';
+part 'test_cubit_state.dart';
 
 @lazySingleton
 class TestCubit extends Cubit<TestCubitState> {
   final ParseEpubUseCase _parseEpubUseCase;
   final GetEpubUseCase _getEpubUseCase;
+  final SaveReaderProgressByPathUseCase _saveReaderProgressByPathUseCase;
   final Logger _logger;
 
-  TestCubit(this._parseEpubUseCase, this._logger, this._getEpubUseCase)
-    : super(TestCubitState.initial());
+  String? _currentFilePath;
+
+  TestCubit(
+    this._parseEpubUseCase,
+    this._logger,
+    this._getEpubUseCase,
+    this._saveReaderProgressByPathUseCase,
+  ) : super(TestCubitState.initial());
 
   void selectChapter(int index) {
     state.mapOrNull(
@@ -30,6 +38,7 @@ class TestCubit extends Cubit<TestCubitState> {
   }
 
   Future<void> loadEpubFile(String filePath) async {
+    _currentFilePath = filePath;
     final result = await _getEpubUseCase(
       GetEpubParam(
         url: filePath,
@@ -55,6 +64,7 @@ class TestCubit extends Cubit<TestCubitState> {
 
   Future<void> parseEpub(String filePath) async {
     emit(const TestCubitState.loading(progress: 0.0));
+    _currentFilePath = filePath;
 
     final result = await _parseEpubUseCase(filePath);
 
@@ -93,6 +103,27 @@ class TestCubit extends Cubit<TestCubitState> {
           emit(data.copyWith(currentChapterIndex: newChapterIndex));
         }
       },
+    );
+  }
+
+  Future<void> saveProgress() async {
+    final currentState = state;
+    _logger.d('currentFilePath: $_currentFilePath');
+    if (currentState is! _Loaded || _currentFilePath == null) return;
+
+    _logger.d('Saving progress for ${currentState.book.title}');
+
+    final flatItems = currentState.displayItems;
+    final currentItemIndex = currentState.currentItemIndex;
+    final progress = flatItems.isEmpty
+        ? 0.0
+        : currentItemIndex / flatItems.length;
+
+    await _saveReaderProgressByPathUseCase(
+      filePath: _currentFilePath!,
+      locator: 'item:$currentItemIndex',
+      progress: progress,
+      lastReadAt: DateTime.now(),
     );
   }
 }

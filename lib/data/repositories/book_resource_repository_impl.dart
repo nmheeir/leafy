@@ -6,15 +6,18 @@ import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/local/book_resource_local_datasource.dart';
 import 'package:leafy/data/datasources/local/reader_progress_local_datasource.dart';
 import 'package:leafy/data/models/book_resource/book_resource_model.dart';
+import 'package:leafy/data/models/reader_progress.dart/reader_progress_model.dart';
 import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 import 'package:leafy/domain/book_resource/repositories/book_resource_repository.dart';
+import 'package:logger/logger.dart';
 
 @LazySingleton(as: BookResourceRepository)
 class BookResourceRepositoryImpl implements BookResourceRepository {
   final BookResourceLocalDatasource _resourceDs;
   final ReaderProgressLocalDatasource _progressDs;
+  final Logger _logger;
 
-  BookResourceRepositoryImpl(this._resourceDs, this._progressDs);
+  BookResourceRepositoryImpl(this._resourceDs, this._progressDs, this._logger);
 
   @override
   Future<Either<Failure, BookResource>> addResource({
@@ -93,6 +96,18 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
   }
 
   @override
+  Future<Either<Failure, Option<BookResource>>> getResourceByPath(
+    String path,
+  ) async {
+    try {
+      final model = await _resourceDs.findByPath(path);
+      return Right(model == null ? const None() : Some(model.toEntity()));
+    } catch (e) {
+      return Left(Failure.database(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, Option<BookResource>>> getResourceByUuid(
     String uuid,
   ) async {
@@ -136,15 +151,22 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
     try {
       final resource = await _resourceDs.getByUuid(resourceUuid);
       if (resource == null) {
+        _logger.w('Resource not found');
         return Left(Failure.notFound('Resource not found'));
       }
 
+      _logger.i('Prepare to upsert reader progress');
+
       await _progressDs.upsert(
-        resourceId: resource.id!,
-        locator: locator,
-        progress: progress,
-        lastReadAt: lastReadAt,
+        ReaderProgressModel(
+          resourceId: resource.id!,
+          locator: locator,
+          progressPct: progress,
+          lastReadAt: lastReadAt,
+        ),
       );
+
+      _logger.i('upsert reader progress successfully');
 
       return right(unit);
     } catch (e) {

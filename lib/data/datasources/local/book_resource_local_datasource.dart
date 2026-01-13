@@ -17,6 +17,8 @@ abstract class BookResourceLocalDatasource {
   Future<bool> existsByUuid(String uuid);
   Future<bool> existsByFileHash(String hash);
 
+  Future<BookResourceModel?> findByPath(String path);
+
   Future<List<BookResourceModel>> getBrokenResources();
 }
 

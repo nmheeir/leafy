@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 import 'package:leafy/data/datasources/local/database_service.dart';
 import 'package:leafy/data/datasources/local/reader_progress_local_datasource.dart';
+import 'package:leafy/data/models/reader_progress.dart/reader_progress_model.dart';
 import 'package:sqflite/sqflite.dart';
 
 @LazySingleton(as: ReaderProgressLocalDatasource)
@@ -20,19 +21,13 @@ class ReaderProgressLocalDatasourceImpl
   }
 
   @override
-  Future<void> upsert({
-    required int resourceId,
-    required String locator,
-    required double progress,
-    required DateTime lastReadAt,
-  }) async {
+  Future<void> upsert(ReaderProgressModel model) async {
     final db = await _db.database;
 
-    await db.insert(_table, {
-      'resource_id': resourceId,
-      'locator': locator,
-      'progress_pct': progress,
-      'last_read_at': lastReadAt,
-    }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert(
+      _table,
+      model.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
   }
 }

@@ -15,6 +15,9 @@ abstract class BookResourceRepository {
   /// Lấy resource theo UUID (entry point cho reader, deep link)
   Future<Either<Failure, Option<BookResource>>> getResourceByUuid(String uuid);
 
+  /// Lấy resource theo đường dẫn file
+  Future<Either<Failure, Option<BookResource>>> getResourceByPath(String path);
+
   /// Lấy resource đang đọc gần nhất của một cuốn sách
   Future<Either<Failure, Option<BookResource>>> getLastReadResource(int bookId);
 
