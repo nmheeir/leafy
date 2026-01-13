@@ -418,74 +418,98 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
 
   Widget _buildDrawer(BuildContext context, TestCubitState state) {
     return state.maybeMap(
-      loaded: (data) => Drawer(
-        width: MediaQuery.of(context).size.width * 0.85,
-        child: Column(
-          children: [
-            // Header Drawer: Hiển thị bìa sách (nếu có)
-            UserAccountsDrawerHeader(
-              accountName: Text(
-                data.book.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              accountEmail: Text(data.book.author),
-              currentAccountPicture: data.book.coverImage != null
-                  ? Image.memory(data.book.coverImage!, fit: BoxFit.cover)
-                  : const CircleAvatar(child: Icon(Icons.book)),
-              //NOTE: background nên dùng blurhash của ảnh bìa cuốn sách cho đep
-              decoration: BoxDecoration(
-                color: context.colorScheme.primaryContainer,
-              ),
-            ),
-            // Danh sách Chapter
-            Expanded(
-              child: ListView.builder(
-                itemCount: data.book.chapters.length,
-                itemBuilder: (context, index) {
-                  final chapter = data.book.chapters[index];
-                  final isSelected = index == data.currentChapterIndex;
+      loaded: (data) {
+        const double itemHeight = 60.0;
 
-                  return ListTile(
-                    title: Text(
-                      chapter.title.isEmpty
-                          ? "Chương ${index + 1}"
-                          : chapter.title,
-                      style: TextStyle(
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: isSelected ? context.colorScheme.primary : null,
+        // 2. Tính toán vị trí cần cuộn đến
+        // Mục tiêu: Để chương hiện tại nằm ở khoảng giữa màn hình thay vì sát mép trên
+        final double screenHeight = MediaQuery.of(context).size.height;
+        final double halfScreen = screenHeight / 2;
+
+        double initialOffset =
+            (data.currentChapterIndex * itemHeight) - halfScreen;
+
+        // Đảm bảo không cuộn quá mức âm (trước item đầu tiên)
+        if (initialOffset < 0) initialOffset = 0;
+
+        // 3. Tạo ScrollController với vị trí khởi tạo
+        final scrollController = ScrollController(
+          initialScrollOffset: initialOffset,
+        );
+
+        return Drawer(
+          width: MediaQuery.of(context).size.width * 0.85,
+          child: Column(
+            children: [
+              // Header Drawer: Hiển thị bìa sách (nếu có)
+              UserAccountsDrawerHeader(
+                accountName: Text(
+                  data.book.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                accountEmail: Text(data.book.author),
+                currentAccountPicture: data.book.coverImage != null
+                    ? Image.memory(data.book.coverImage!, fit: BoxFit.cover)
+                    : const CircleAvatar(child: Icon(Icons.book)),
+                //NOTE: background nên dùng blurhash của ảnh bìa cuốn sách cho đep
+                decoration: BoxDecoration(
+                  color: context.colorScheme.primaryContainer,
+                ),
+              ),
+              // Danh sách Chapter
+              Expanded(
+                child: ScrollablePositionedList.builder(
+                  initialAlignment: 0.3,
+                  initialScrollIndex: data.currentChapterIndex,
+                  itemCount: data.book.chapters.length,
+                  itemBuilder: (context, index) {
+                    final chapter = data.book.chapters[index];
+                    final isSelected = index == data.currentChapterIndex;
+
+                    return ListTile(
+                      title: Text(
+                        chapter.title.isEmpty
+                            ? "Chương ${index + 1}"
+                            : chapter.title,
+                        style: TextStyle(
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: isSelected
+                              ? context.colorScheme.primary
+                              : null,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    selected: isSelected,
-                    selectedTileColor: context.colorScheme.primaryContainer
-                        .withValues(alpha: 0.2),
-                    onTap: () {
-                      Navigator.pop(context); // Đóng drawer
+                      selected: isSelected,
+                      selectedTileColor: context.colorScheme.primaryContainer
+                          .withValues(alpha: 0.2),
+                      onTap: () {
+                        Navigator.pop(context); // Đóng drawer
 
-                      // SỬA: Tìm vị trí thực tế của Header chương trong danh sách items phẳng
-                      // data.displayItems là danh sách chứa cả text và ảnh
-                      final targetItemIndex = data.displayItems.indexWhere(
-                        (item) =>
-                            item is ChapterHeaderItem &&
-                            item.chapterIndex == index,
-                      );
+                        // SỬA: Tìm vị trí thực tế của Header chương trong danh sách items phẳng
+                        // data.displayItems là danh sách chứa cả text và ảnh
+                        final targetItemIndex = data.displayItems.indexWhere(
+                          (item) =>
+                              item is ChapterHeaderItem &&
+                              item.chapterIndex == index,
+                        );
 
-                      // Nhảy đến vị trí tìm được
-                      if (targetItemIndex != -1) {
-                        _jumpToTarget(targetItemIndex);
-                      }
-                    },
-                  );
-                },
+                        // Nhảy đến vị trí tìm được
+                        if (targetItemIndex != -1) {
+                          _jumpToTarget(targetItemIndex);
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
       orElse: () => const SizedBox.shrink(),
     );
   }
