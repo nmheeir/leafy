@@ -5,6 +5,9 @@ import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 import 'package:leafy/domain/book_resource/repositories/book_resource_repository.dart';
 import 'package:leafy/domain/book_resource/usecase/params/get_book_resources_params.dart';
 
+import 'package:injectable/injectable.dart';
+
+@injectable
 class GetBookResourcesUseCase
     implements UseCase<List<BookResource>, GetBookResourcesParams> {
   final BookResourceRepository repository;

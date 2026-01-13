@@ -31,9 +31,9 @@
 - [ ] Áp dụng setting ngay lập tức khi thay đổi
 
 ## 5. Navigation & Interaction
-- [ ] Chuyển chapter trước / sau
+- [x] Chuyển chapter trước / sau
 - [ ] Chọn chapter từ danh sách TOC
-- [ ] Hiển thị progress đọc (theo chapter hoặc %)
+- [x] Hiển thị progress đọc (theo chapter hoặc %)
 - [ ] Tự động lưu progress khi người dùng rời screen
 - [ ] Khôi phục progress khi quay lại screen
 

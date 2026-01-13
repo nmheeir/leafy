@@ -9,21 +9,34 @@ import 'package:leafy/domain/epub_reader/entities/epub_image.dart';
 import 'package:leafy/ui/test/cubit/test_cubit.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class TestEpubReaderScreen extends StatelessWidget {
+class TestEpubReaderScreen extends StatefulWidget {
   final String filePath;
 
-  const TestEpubReaderScreen({
-    super.key,
-    // this.filePath =
-    //     'https://github.com/IDPF/epub3-samples/releases/download/20230704/accessible_epub_3.epub',
-    this.filePath =
-        '/data/data/com.example.leafy/app_flutter/8237d9dc918d61024e81ee23f6e2cea8.epub',
-  });
+  const TestEpubReaderScreen({super.key, required this.filePath});
+
+  @override
+  State<TestEpubReaderScreen> createState() => _TestEpubReaderScreenState();
+}
+
+class _TestEpubReaderScreenState extends State<TestEpubReaderScreen> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<TestCubit>().parseEpub(widget.filePath);
+  }
+
+  @override
+  void didUpdateWidget(covariant TestEpubReaderScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.filePath != widget.filePath) {
+      context.read<TestCubit>().parseEpub(widget.filePath);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: context.read<TestCubit>()..parseEpub(filePath),
+      value: context.read<TestCubit>(),
       child: const _EpubReaderContent(),
     );
   }
@@ -420,6 +433,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               currentAccountPicture: data.book.coverImage != null
                   ? Image.memory(data.book.coverImage!, fit: BoxFit.cover)
                   : const CircleAvatar(child: Icon(Icons.book)),
+              //NOTE: background nên dùng blurhash của ảnh bìa cuốn sách cho đep
               decoration: BoxDecoration(
                 color: context.colorScheme.primaryContainer,
               ),

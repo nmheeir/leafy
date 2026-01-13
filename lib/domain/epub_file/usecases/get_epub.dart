@@ -4,19 +4,18 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
-import 'package:leafy/domain/epub_cache/repositories/epub_cache_repository.dart';
-import 'package:leafy/domain/epub_cache/usecases/params/get_epub_param.dart';
+import 'package:leafy/domain/epub_file/repositories/epub_file_repository.dart';
+import 'package:leafy/domain/epub_file/usecases/params/get_epub_param.dart';
 
 @injectable
 class GetEpubUseCase implements UseCase<File, GetEpubParam> {
-  final EpubCacheRepository epubCacheRepository;
+  final EpubFileRepository epubFileRepository;
 
-  GetEpubUseCase(this.epubCacheRepository);
+  GetEpubUseCase(this.epubFileRepository);
 
-  // NOTE: cần trả về EpubMeta
   @override
   Future<Either<Failure, File>> call(GetEpubParam params) {
-    return epubCacheRepository.getEpub(
+    return epubFileRepository.getEpub(
       url: params.url,
       onProgress: params.onProgress,
       forceReload: params.forceReload,

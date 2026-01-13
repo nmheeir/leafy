@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:leafy/domain/epub_cache/entities/epub_cache.dart';
+import 'package:leafy/domain/epub_file/entities/epub_cache.dart';
 
 part 'epub_cache_model.freezed.dart';
 part 'epub_cache_model.g.dart';
@@ -20,7 +20,7 @@ abstract class EpubCacheModel with _$EpubCacheModel {
   const EpubCacheModel._();
 
   /// The function `toEntity` converts data into an `EpubCache` object.
-  /// 
+  ///
   /// Returns:
   ///   An instance of the `EpubCache` class is being returned with the specified properties `id`,
   /// `url`, `title`, `lastReadCfi`, and `progress` set to the values of the corresponding properties in

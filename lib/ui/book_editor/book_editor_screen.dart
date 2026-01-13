@@ -10,7 +10,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/data/models/book/book/book_model.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
@@ -163,11 +162,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       if (widget.args.downloadFileUrl != null) {
         print('BookEditorScreen - epubUrl: ${widget.args.downloadFileUrl}');
 
-        // context.bookActorCubit.addBook(
-        //   bookData,
-        //   coverBytes,
-        //   widget.args.downloadFileUrl!,
-        // );
+        context.bookActorCubit.addBook(
+          bookData,
+          coverBytes,
+          widget.args.downloadFileUrl,
+        );
       } else {
         // Trường hợp OpenLibrary hoặc nhập tay
         context.bookActorCubit.addBook(bookData, coverBytes);

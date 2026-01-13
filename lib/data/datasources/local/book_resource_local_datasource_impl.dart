@@ -69,6 +69,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return result.map((e) => BookResourceModel.fromJson(e)).toList();
   }
 
+  /// Trả về book resource dựa vào uuid
   @override
   Future<BookResourceModel?> getByUuid(String uuid) async {
     final db = await _db.database;
@@ -83,6 +84,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return BookResourceModel.fromJson(result.first);
   }
 
+  /// Trả về book resource đã được đọc gần nhất dựa vào book id
   @override
   Future<BookResourceModel?> getLastReadByBookId(int bookId) async {
     final db = await _db.database;
@@ -103,6 +105,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return BookResourceModel.fromJson(result.first);
   }
 
+  /// Trả về list book resource bị hỏng
   @override
   Future<List<BookResourceModel>> getBrokenResources() async {
     final db = await _db.database;

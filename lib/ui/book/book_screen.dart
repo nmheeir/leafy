@@ -18,6 +18,10 @@ import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 import 'package:leafy/ui/extensions/book_status_extension.dart';
 import 'package:leafy/ui/test/test_screen.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
+import 'package:leafy/di/injection.dart';
+import 'dart:io';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -37,9 +41,46 @@ class BookScreen extends StatelessWidget {
     int? rating;
 
     if (status == BookStatus.unfinished) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => TestEpubReaderScreen()));
+      final resourceCubit = context.read<BookResourceCubit>();
+      final state = resourceCubit.state;
+
+      // Check current resources
+      state.maybeWhen(
+        success: (resources) {
+          if (resources.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("No book content found")),
+            );
+            return;
+          }
+          // Simple logic: pick first resource
+          final resource = resources.first;
+          if (resource.filePath != null &&
+              resource.filePath!.isNotEmpty &&
+              File(resource.filePath!).existsSync()) {
+            // File exists -> Open Reader
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    TestEpubReaderScreen(filePath: resources[0].filePath!),
+              ),
+            );
+          } else if (resource.url != null) {
+            // Determine if we need to download
+            // Trigger download
+            resourceCubit.downloadResource(resource);
+          } else {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text("Cannot open book")));
+          }
+        },
+        orElse: () {
+          // Maybe try to load again?
+          if (book.id != null) resourceCubit.loadResources(book.id!);
+        },
+      );
+
       return;
     }
 
@@ -59,59 +100,124 @@ class BookScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
-    return BlocListener<BookActorCubit, BookActorState>(
-      listener: (context, actorState) {
-        actorState.maybeWhen(
-          success: (message, book) {
-            if (book != null) {
-              context.currentBookCubit.setBook(book);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = getIt<BookResourceCubit>();
+            final bookId = context.read<CurrentBookCubit>().state.id;
+            if (bookId != null) {
+              cubit.loadResources(bookId);
             }
+            return cubit;
+          },
+        ),
+      ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<CurrentBookCubit, Book>(
+            listenWhen: (previous, current) =>
+                previous.id != current.id && current.id != null,
+            listener: (context, state) {
+              context.read<BookResourceCubit>().loadResources(state.id!);
+            },
+          ),
+          BlocListener<BookActorCubit, BookActorState>(
+            listener: (context, actorState) {
+              actorState.maybeWhen(
+                success: (message, book) {
+                  if (book != null) {
+                    context.currentBookCubit.setBook(book);
+                  }
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
-          },
-          failure: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
-          },
-          orElse: () {},
-        );
-      },
-      child: SelectableRegion(
-        selectionControls: materialTextSelectionControls,
-        focusNode: FocusNode(),
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: const BookScreenAppBar(),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildCoverSpace(mediaQuery),
-                BlocBuilder<CurrentBookCubit, Book>(
-                  builder: (context, state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTitleDetail(state),
-                        _buildStatusDetail(state, context),
-                        _buildBookFormatDetail(state),
-                        _buildPublicationYearDetail(state),
-                        _buildPagesDetail(state),
-                        // _buildISBNDetail(state),
-                        // _buildOLIDDetail(state),
-                        const SizedBox(height: 50),
-                        _buildDescriptionDetail(state),
-                        _buildMyReviewDetail(state),
-                        _buildNotesDetail(state),
-                        _buildEditDates(state),
-                        const SizedBox(height: 100),
-                      ],
-                    );
-                  },
-                ),
-              ],
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(message)));
+                },
+                failure: (message) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                },
+                orElse: () {},
+              );
+            },
+          ),
+        ],
+        child: SelectableRegion(
+          selectionControls: materialTextSelectionControls,
+          focusNode: FocusNode(),
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: const BookScreenAppBar(),
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildCoverSpace(mediaQuery),
+                  BlocBuilder<CurrentBookCubit, Book>(
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTitleDetail(state),
+                          BlocBuilder<BookResourceCubit, BookResourceState>(
+                            builder: (context, resourceState) {
+                              double? downloadProgress;
+                              String? dynamicChangeStatusText;
+
+                              if (state.status == BookStatus.unfinished) {
+                                resourceState.maybeWhen(
+                                  downloading: (_, progress) {
+                                    downloadProgress = progress;
+                                  },
+                                  success: (resources) {
+                                    if (resources.isNotEmpty) {
+                                      final resource = resources.first;
+                                      final fileExists =
+                                          resource.filePath != null &&
+                                          File(resource.filePath!).existsSync();
+
+                                      if (fileExists) {
+                                        dynamicChangeStatusText =
+                                            "Start Reading";
+                                      } else if (resource.url != null) {
+                                        dynamicChangeStatusText = "Download";
+                                      }
+                                    }
+                                  },
+                                  orElse: () {},
+                                );
+                              }
+
+                              return _buildStatusDetail(
+                                state,
+                                context,
+                                downloadProgress: downloadProgress,
+                                overrideChangeStatusText:
+                                    dynamicChangeStatusText,
+                              );
+                            },
+                          ),
+                          _buildBookFormatDetail(state),
+                          _buildPublicationYearDetail(state),
+                          _buildPagesDetail(state),
+                          // _buildISBNDetail(state),
+                          // _buildOLIDDetail(state),
+                          const SizedBox(height: 50),
+                          _buildDescriptionDetail(state),
+                          _buildMyReviewDetail(state),
+                          _buildNotesDetail(state),
+                          _buildEditDates(state),
+                          const SizedBox(height: 100),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -201,7 +307,12 @@ class BookScreen extends StatelessWidget {
     );
   }
 
-  BookStatusDetail _buildStatusDetail(Book state, BuildContext context) {
+  BookStatusDetail _buildStatusDetail(
+    Book state,
+    BuildContext context, {
+    double? downloadProgress,
+    String? overrideChangeStatusText,
+  }) {
     return BookStatusDetail(
       book: state,
       statusIcon: state.status.icon,
@@ -211,11 +322,12 @@ class BookScreen extends StatelessWidget {
           (state.status == BookStatus.inProgress ||
           state.status == BookStatus.forLater ||
           state.status == BookStatus.unfinished),
-      changeStatusText: state.status.changeStatus,
+      changeStatusText: overrideChangeStatusText ?? state.status.changeStatus,
       changeStatusAction: () {
         _changeStatusAction(context, state.status, state);
       },
       showRatingAndLike: state.status == BookStatus.finished,
+      downloadProgress: downloadProgress,
     );
   }
 }

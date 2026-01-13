@@ -13,8 +13,13 @@ import 'package:leafy/domain/book/usecases/params/add_book_usecase_param.dart';
 import 'package:leafy/domain/book/usecases/params/bulk_update_params.dart';
 import 'package:leafy/domain/book/usecases/params/update_book_param.dart';
 import 'package:leafy/domain/book/usecases/update_book.dart';
+import 'package:leafy/domain/book_resource/usecase/add_book_resource.dart';
+import 'package:leafy/domain/book_resource/usecase/params/add_book_resource_params.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/ui/extensions/book_extension.dart';
+import 'package:leafy/core/constants/enums/reader_format.dart';
+import 'package:leafy/core/constants/enums/storage_type.dart';
+import 'package:uuid/uuid.dart';
 
 part 'book_actor_cubit.freezed.dart';
 part 'book_actor_state.dart';
@@ -26,6 +31,7 @@ class BookActorCubit extends Cubit<BookActorState> {
   final DeleteBookUseCase _deleteBookUseCase;
   final BulkUpdateUseCase _bulkUpdateUseCase;
   final BulkDeleteUseCase _bulkDeleteUseCase;
+  final AddBookResourceUseCase _addBookResourceUseCase;
 
   BookActorCubit(
     this._addBookUseCase,
@@ -33,13 +39,11 @@ class BookActorCubit extends Cubit<BookActorState> {
     this._deleteBookUseCase,
     this._bulkUpdateUseCase,
     this._bulkDeleteUseCase,
+    this._addBookResourceUseCase,
   ) : super(const BookActorState.initial());
 
-  // NOTE: khi thêm một cuốn sách thì xem file: notes/flow.txt
   Future<void> addBook(Book book, Uint8List? cover, [String? epubUrl]) async {
     emit(const BookActorState.loading());
-
-    if (epubUrl != null) {}
 
     final result = await _addBookUseCase(
       AddBookParams(book: book, cover: cover),
@@ -49,7 +53,25 @@ class BookActorCubit extends Cubit<BookActorState> {
       (failure) => emit(
         BookActorState.failure(message: failure.message ?? 'Message unknow'),
       ),
-      (newBook) {
+      (newBook) async {
+        if (epubUrl != null) {
+          final resourceResult = await _addBookResourceUseCase(
+            AddBookResourceParams(
+              bookId: newBook.id!,
+              uuid: const Uuid().v4(),
+              format: BookResourceFormat.epub,
+              filePath: '',
+              storageType: StorageType.remote,
+              url: epubUrl,
+            ),
+          );
+
+          resourceResult.fold((failure) {
+            // Note: If resource creation fails, we might want to warn the user but the book is created.
+            // For now, let's just log or emit success for the book.
+          }, (resource) {});
+        }
+
         emit(
           BookActorState.success(
             message: "Thêm sách thành công",

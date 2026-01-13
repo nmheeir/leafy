@@ -61,6 +61,7 @@ class EditBookCubit extends Cubit<Book> {
   void initBookFromGutendex({
     String? title,
     String? subtitle,
+    String? description,
     required List<GtdPerson> authors,
     required List<String> bookshelves,
     required List<String> subjects,
@@ -77,6 +78,7 @@ class EditBookCubit extends Cubit<Book> {
     final newBook = Book(
       title: title ?? 'Unknow title',
       author: newAuthor,
+      description: description,
       status: BookStatus.unfinished,
       readings: const [],
       tags: formattedTags,

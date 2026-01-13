@@ -296,6 +296,7 @@ class GtdBookScreen extends StatelessWidget {
 
     context.editBookCubit.initBookFromGutendex(
       title: book.title,
+      description: book.summaries.join("\n\n"),
       authors: book.authors,
       bookshelves: book.bookshelves,
       subjects: book.subjects,

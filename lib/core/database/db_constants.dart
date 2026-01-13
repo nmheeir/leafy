@@ -38,9 +38,9 @@ class DbConstants {
   // =====================================================
   static const createBookResoucesTable = '''
     CREATE TABLE book_resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      id INTEGER PRIMARY KEY AUTOINCREMENT, -- ID nội bộ (FK reference)
       uuid TEXT UNIQUE NOT NULL,            -- ID domain (nhận từ Gutendex hoặc tự gen)
-      book_id INTEGER NOT NULL,             
+      book_id INTEGER NOT NULL,             -- FK → books.id
       format TEXT NOT NULL,                 -- epub | pdf | audio
       
       storage_type TEXT DEFAULT 'local',    -- 'local' | 'remote'
