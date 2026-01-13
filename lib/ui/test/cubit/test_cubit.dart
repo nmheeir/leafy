@@ -2,11 +2,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/utils/helpers/epub_helper.dart';
-import 'package:leafy/domain/epub_file/usecases/get_epub.dart';
-import 'package:leafy/domain/epub_file/usecases/params/get_epub_param.dart';
 import 'package:leafy/domain/epub_file/usecases/parse_epub.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
+import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_path.dart';
 import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
 import 'package:logger/web.dart';
 
@@ -16,8 +15,8 @@ part 'test_cubit_state.dart';
 @lazySingleton
 class TestCubit extends Cubit<TestCubitState> {
   final ParseEpubUseCase _parseEpubUseCase;
-  final GetEpubUseCase _getEpubUseCase;
   final SaveReaderProgressByPathUseCase _saveReaderProgressByPathUseCase;
+  final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
@@ -25,39 +24,14 @@ class TestCubit extends Cubit<TestCubitState> {
   TestCubit(
     this._parseEpubUseCase,
     this._logger,
-    this._getEpubUseCase,
     this._saveReaderProgressByPathUseCase,
+    this._getReaderProgressByPathUseCase,
   ) : super(TestCubitState.initial());
 
   void selectChapter(int index) {
     state.mapOrNull(
       loaded: (value) {
         emit(value.copyWith(currentChapterIndex: index));
-      },
-    );
-  }
-
-  Future<void> loadEpubFile(String filePath) async {
-    _currentFilePath = filePath;
-    final result = await _getEpubUseCase(
-      GetEpubParam(
-        url: filePath,
-        forceReload: false,
-        onProgress: (progress) {
-          if (!isClosed) {
-            print('Download progress: $progress %');
-          }
-        },
-      ),
-    );
-
-    result.fold(
-      (failure) {
-        // emit(EpubViewState.error(message: failure.toString()));
-      },
-      (file) {
-        // TODO: Tại bước này, nếu có GetReaderProgressUseCase, hãy gọi nó để lấy `locator`
-        // Giả sử chưa có locator (null)
       },
     );
   }
@@ -79,28 +53,49 @@ class TestCubit extends Cubit<TestCubitState> {
 
         final flatItems = EpubHelper.flattenBook(epubBook);
 
-        // 2. Logic khôi phục vị trí (nâng cao)
-        // Nếu lưu theo % tổng: savedIndex = (percent * flatItems.length).toInt()
-        // final savedIndex = await (percent * flatItems.length).toInt()
+        // Logic khôi phục vị trí
+        int savedIndex = 0;
+        final savedProgress = await _getReaderProgressByPathUseCase(filePath);
+        if (savedProgress != null && savedProgress.locator.isNotEmpty) {
+          // Locator format: "item:{index}"
+          final parts = savedProgress.locator.split(':');
+          if (parts.length == 2 && parts[0] == 'item') {
+            savedIndex = int.tryParse(parts[1]) ?? 0;
+          }
+        }
+
+        // Ensure index is valid
+        if (savedIndex >= flatItems.length) savedIndex = 0;
+
+        // Find chapter index for the saved item
+        int chapterIndex = 0;
+        if (savedIndex < flatItems.length) {
+          chapterIndex = flatItems[savedIndex].chapterIndex;
+        }
 
         emit(
           TestCubitState.loaded(
             book: epubBook,
-            displayItems: flatItems, // Lưu list phẳng
-            currentChapterIndex: 0, // Sẽ tự update khi scroll
-            currentItemIndex: 20,
+            displayItems: flatItems,
+            currentChapterIndex: chapterIndex,
+            currentItemIndex: savedIndex,
           ),
         );
       },
     );
   }
 
-  void updateChapterIndexOnly(int newChapterIndex) {
+  void updateReadingPosition(int newChapterIndex, int newItemIndex) {
     state.mapOrNull(
       loaded: (data) {
-        // Chỉ emit state mới nếu index thực sự thay đổi để tránh rebuild dư thừa
-        if (data.currentChapterIndex != newChapterIndex) {
-          emit(data.copyWith(currentChapterIndex: newChapterIndex));
+        if (data.currentItemIndex != newItemIndex ||
+            data.currentChapterIndex != newChapterIndex) {
+          emit(
+            data.copyWith(
+              currentChapterIndex: newChapterIndex,
+              currentItemIndex: newItemIndex,
+            ),
+          );
         }
       },
     );

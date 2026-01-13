@@ -45,6 +45,7 @@ import '../data/repositories/epub_file_repository_impl.dart' as _i528;
 import '../data/repositories/epub_reader_repository_impl.dart' as _i608;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
+import '../data/repositories/reader_progress_repository_impl.dart' as _i919;
 import '../domain/book/repositories/book_repository.dart' as _i29;
 import '../domain/book/usecases/add_book.dart' as _i660;
 import '../domain/book/usecases/bulk_delete.dart' as _i909;
@@ -82,7 +83,11 @@ import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
 import '../domain/open_lib/repositories/open_lib_repository.dart' as _i751;
 import '../domain/open_lib/usecases/ol_get_work.dart' as _i138;
 import '../domain/open_lib/usecases/open_lib_search.dart' as _i14;
+import '../domain/reader_progress/repositories/reader_progress_repository.dart'
+    as _i23;
 import '../domain/reader_progress/usecases/clear_reader_progress.dart' as _i389;
+import '../domain/reader_progress/usecases/get_reader_progress_by_path.dart'
+    as _i709;
 import '../domain/reader_progress/usecases/save_reader_progress.dart' as _i860;
 import '../domain/reader_progress/usecases/save_reader_progress_by_path.dart'
     as _i615;
@@ -284,12 +289,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i750.GtdGetBooksUseCase>(
       () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
     );
-    gh.lazySingleton<_i650.TestCubit>(
-      () => _i650.TestCubit(
-        gh<_i880.ParseEpubUseCase>(),
-        gh<_i120.Logger>(),
-        gh<_i765.GetEpubUseCase>(),
-        gh<_i615.SaveReaderProgressByPathUseCase>(),
+    gh.lazySingleton<_i23.ReaderProgressRepository>(
+      () => _i919.ReaderProgressRepositoryImpl(
+        gh<_i770.ReaderProgressLocalDatasource>(),
       ),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
@@ -360,6 +362,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i23.BookDetailCubit>(
       () => _i23.BookDetailCubit(gh<_i137.GetBookUseCase>()),
     );
+    gh.lazySingleton<_i709.GetReaderProgressByPathUseCase>(
+      () => _i709.GetReaderProgressByPathUseCase(
+        gh<_i23.ReaderProgressRepository>(),
+        gh<_i1042.BookResourceRepository>(),
+      ),
+    );
     gh.factory<_i660.AddBookUseCase>(
       () => _i660.AddBookUseCase(gh<_i29.BookRepository>()),
     );
@@ -378,6 +386,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i151.DownloadOlCoverUseCase>(),
         gh<_i138.OlGetWorkUseCase>(),
         gh<_i466.DownloadGtdCoverUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i650.TestCubit>(
+      () => _i650.TestCubit(
+        gh<_i880.ParseEpubUseCase>(),
+        gh<_i120.Logger>(),
+        gh<_i615.SaveReaderProgressByPathUseCase>(),
+        gh<_i709.GetReaderProgressByPathUseCase>(),
       ),
     );
     gh.factory<_i724.EpubViewCubit>(

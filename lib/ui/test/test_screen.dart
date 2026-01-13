@@ -90,7 +90,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
 
     final currentItemIdx = first.index;
 
-    // --- SỬA LOGIC TÍNH % ---
+    // --- LOGIC TÍNH % ---
     // Nếu item cuối cùng của sách đang hiển thị VÀ đáy của nó đã nằm trong màn hình
     // (itemTrailingEdge <= 1.05 là cho phép sai số nhỏ để bắt dính đáy)
     if (last.index == _totalDisplayItems - 1 && last.itemTrailingEdge <= 1.05) {
@@ -115,9 +115,11 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       loaded: (data) {
         if (currentItemIdx < data.displayItems.length) {
           final currentDisplayItem = data.displayItems[currentItemIdx];
-          if (data.currentChapterIndex != currentDisplayItem.chapterIndex) {
-            context.read<TestCubit>().updateChapterIndexOnly(
+          if (data.currentItemIndex != currentItemIdx ||
+              data.currentChapterIndex != currentDisplayItem.chapterIndex) {
+            context.read<TestCubit>().updateReadingPosition(
               currentDisplayItem.chapterIndex,
+              currentItemIdx,
             );
           }
         }
@@ -219,6 +221,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                       return _buildContinuousReaderBody(
                         context,
                         data.displayItems,
+                        data.currentItemIndex,
                       );
                     },
                   ),
@@ -259,13 +262,14 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
   Widget _buildContinuousReaderBody(
     BuildContext context,
     List<EpubDisplayItem> items,
+    int initialIndex, // Add parameter
   ) {
     _totalDisplayItems = items.length;
 
     return GestureDetector(
       onTap: () => _toggleControls(),
-      // 1. Đổi từ .separated sang .builder thường để tránh lỗi Layout Cycle
       child: ScrollablePositionedList.builder(
+        initialScrollIndex: initialIndex, // Use it here
         itemCount: items.length,
         itemScrollController: _itemScrollController,
         itemPositionsListener: _itemPositionsListener,

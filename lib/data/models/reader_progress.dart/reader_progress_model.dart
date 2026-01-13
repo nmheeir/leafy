@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:leafy/core/utils/converters/int_to_datetime_coverter.dart';
+import 'package:leafy/domain/reader_progress/entities/reader_progress.dart';
 
 part 'reader_progress_model.freezed.dart';
 part 'reader_progress_model.g.dart';
@@ -28,4 +29,16 @@ abstract class ReaderProgressModel with _$ReaderProgressModel {
 
   factory ReaderProgressModel.fromJson(Map<String, dynamic> json) =>
       _$ReaderProgressModelFromJson(json);
+
+  const ReaderProgressModel._();
+
+  ReaderProgress toEntity() {
+    return ReaderProgress(
+      resourceId: resourceId
+          .toString(), // Entity uses String ID currently? Checked earlier.
+      locator: locator ?? '',
+      progressPct: progressPct,
+      lastReadAt: lastReadAt ?? DateTime.now(),
+    );
+  }
 }

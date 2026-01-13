@@ -30,4 +30,17 @@ class ReaderProgressLocalDatasourceImpl
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  @override
+  Future<ReaderProgressModel?> getByResourceId(int resourceId) async {
+    final db = await _db.database;
+    final maps = await db.query(
+      _table,
+      where: 'resource_id = ?',
+      whereArgs: [resourceId],
+    );
+
+    if (maps.isEmpty) return null;
+    return ReaderProgressModel.fromJson(maps.first);
+  }
 }

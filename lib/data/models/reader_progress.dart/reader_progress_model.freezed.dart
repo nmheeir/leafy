@@ -219,8 +219,8 @@ return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadA
 /// @nodoc
 @JsonSerializable()
 
-class _ReaderProgressModel implements ReaderProgressModel {
-  const _ReaderProgressModel({@JsonKey(name: 'resource_id') required this.resourceId, this.locator, @JsonKey(name: 'progress_pct') this.progressPct = 0.0, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') this.lastReadAt});
+class _ReaderProgressModel extends ReaderProgressModel {
+  const _ReaderProgressModel({@JsonKey(name: 'resource_id') required this.resourceId, this.locator, @JsonKey(name: 'progress_pct') this.progressPct = 0.0, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') this.lastReadAt}): super._();
   factory _ReaderProgressModel.fromJson(Map<String, dynamic> json) => _$ReaderProgressModelFromJson(json);
 
 /// FK → book_resources.id

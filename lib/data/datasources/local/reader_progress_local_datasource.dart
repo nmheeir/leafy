@@ -4,4 +4,6 @@ abstract class ReaderProgressLocalDatasource {
   Future<void> upsert(ReaderProgressModel model);
 
   Future<void> deleteByResourceId(int resourceId);
+
+  Future<ReaderProgressModel?> getByResourceId(int resourceId);
 }
