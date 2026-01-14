@@ -1,6 +1,7 @@
 # EPUB Reader – TODO
 
 ## 1. Data & Database
+
 - [ ] Chỉnh sửa dữ liệu của test screen cho khớp với schema trong database
 - [ ] Mapping dữ liệu EPUB (book, chapter, content) sang entity trong database
 - [x] Lưu trạng thái đọc (chapter hiện tại, scroll position / page)
@@ -8,6 +9,7 @@
 - [ ] Xử lý migration nếu thay đổi schema liên quan đến EPUB
 
 ## 2. EPUB Parsing & Content Handling
+
 - [x] Parse metadata của EPUB (title, author, cover)
 - [x] Parse danh sách chapter (TOC)
 - [ ] Chuẩn hóa HTML/CSS từ EPUB để render ổn định
@@ -15,6 +17,7 @@
 - [x] Cache nội dung chapter sau khi parse
 
 ## 3. Reader UI / Screen
+
 - [ ] Chỉnh sửa layout test screen cho đúng với flow đọc sách thực tế
 - [ ] Chỉnh sửa tiêu đề của mỗi chapter (font, size, weight)
 - [ ] Đồng bộ style chapter title với content
@@ -22,6 +25,7 @@
 - [ ] Hiển thị loading khi load chapter lớn
 
 ## 4. Reader Settings
+
 - [ ] Thêm màn hình setting cho EPUB Reader Screen
 - [ ] Thay đổi font chữ (serif / sans-serif / custom)
 - [ ] Thay đổi cỡ chữ
@@ -31,6 +35,7 @@
 - [ ] Áp dụng setting ngay lập tức khi thay đổi
 
 ## 5. Navigation & Interaction
+
 - [x] Chuyển chapter trước / sau
 - [ ] Chọn chapter từ danh sách TOC
 - [x] Hiển thị progress đọc (theo chapter hoặc %)
@@ -38,12 +43,14 @@
 - [x] Khôi phục progress khi quay lại screen
 
 ## 6. Performance & Stability
+
 - [ ] Tối ưu render nội dung chapter dài
 - [ ] Giới hạn recompose không cần thiết
 - [ ] Xử lý memory khi đọc EPUB dung lượng lớn
 - [ ] Test với EPUB nhiều chapter / nhiều định dạng khác nhau
 
 ## 7. Future Extensions (Optional)
+
 - [ ] Bookmark đoạn đang đọc
 - [ ] Highlight text
 - [ ] Ghi chú (note) cho đoạn được chọn

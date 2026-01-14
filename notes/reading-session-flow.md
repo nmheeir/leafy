@@ -38,8 +38,8 @@ Trước khi bắt đầu, hãy đọc và hiểu các thành phần hiện có:
 
 ### Luồng 3: Xử lý Gián đoạn & Timeout (Cleanup Flow)
 
-- **Auto-Close Session:** Cập nhật bản ghi session vào SQLite mỗi 30 giây hoặc sau mỗi lần lật trang (với `end_time` tạm thời) để tránh mất dữ liệu khi app bị kill đột ngột.
-- **Giới hạn Session:** Nếu một phiên kéo dài bất thường (>12 tiếng), tự động đóng phiên tại thời điểm tương tác cuối cùng.
+- **Auto-Close Session:** Cập nhật bản ghi session vào SQLite mỗi 30 giây (với `end_time` tạm thời) để tránh mất dữ liệu khi app bị kill đột ngột.
+- **Giới hạn Session:** Nếu một phiên kéo dài bất thường (>6 tiếng), tự động đóng phiên tại thời điểm tương tác cuối cùng.
 
 ### Luồng 4: Thống kê và Phân tích (Analytics)
 

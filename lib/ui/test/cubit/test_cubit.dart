@@ -32,9 +32,12 @@ class TestCubit extends Cubit<TestCubitState> {
 
   final Stopwatch _activeTimer = Stopwatch();
   Timer? _idleTimer;
+  Timer? _autoSaveTimer;
   bool _isPaused = false;
 
   static const _idleTimeout = Duration(minutes: 1);
+  static const _autoSaveDuration = Duration(seconds: 30);
+  static const _maxSessionDuration = Duration(hours: 6);
 
   TestCubit(
     this._parseEpubUseCase,
@@ -150,6 +153,9 @@ class TestCubit extends Cubit<TestCubitState> {
 
     // Start idle checking
     _resetIdleTimer();
+
+    // Start auto-save
+    _startAutoSaveTimer();
   }
 
   void onUserInteraction() {
@@ -170,7 +176,11 @@ class TestCubit extends Cubit<TestCubitState> {
     _isPaused = true;
     _activeTimer.stop();
     _idleTimer?.cancel();
+    _autoSaveTimer?.cancel();
     _logger.d('Paused session. Active duration: ${_activeTimer.elapsed}');
+
+    // Force one last update on pause to save latest state
+    _logSession(isFinal: false);
   }
 
   void resumeSession() {
@@ -182,6 +192,7 @@ class TestCubit extends Cubit<TestCubitState> {
     _isPaused = false;
     _activeTimer.start();
     _resetIdleTimer();
+    _startAutoSaveTimer();
     _logger.d('Resumed session');
   }
 
@@ -191,18 +202,46 @@ class TestCubit extends Cubit<TestCubitState> {
       if (_activeTimer.isRunning) {
         _activeTimer.stop();
         _logger.d('Session idle timeout. Paused timer.');
+        // Also pause auto-save when idle to avoid redundant writes
+        _autoSaveTimer?.cancel();
+
+        // Log current state
+        _logSession(isFinal: false);
       }
     });
   }
 
-  Future<void> endSession() async {
+  void _startAutoSaveTimer() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer.periodic(
+      _autoSaveDuration,
+      (_) => _onAutoSaveTick(),
+    );
+  }
+
+  void _onAutoSaveTick() {
+    if (_sessionId == null || _sessionStartTime == null) return;
+
+    // Check Max Duration
+    if (DateTime.now().difference(_sessionStartTime!) > _maxSessionDuration) {
+      _logger.w('Session exceeded max duration. Force closing.');
+      endSession();
+      return;
+    }
+
+    _logSession(isFinal: false);
+  }
+
+  /// Logs the current session state to DB.
+  /// [isFinal] determines if this is the final log (end session).
+  /// For ongoing sessions, we log with the current time/duration.
+  Future<void> _logSession({required bool isFinal}) async {
     if (_sessionId == null ||
         _currentFilePath == null ||
         _sessionStartTime == null) {
       return;
     }
 
-    _activeTimer.stop();
     final endTime = DateTime.now();
     final durationMs = _activeTimer.elapsedMilliseconds;
 
@@ -216,8 +255,6 @@ class TestCubit extends Cubit<TestCubitState> {
       },
     );
 
-    _logger.d('Ending session $_sessionId. Duration: ${durationMs}ms');
-
     try {
       await _logSessionUseCase(
         sessionId: _sessionId!,
@@ -229,14 +266,34 @@ class TestCubit extends Cubit<TestCubitState> {
         endLocator: endLocator,
         chapterIndex: currentChapter,
       );
+      if (isFinal) {
+        _logger.d(
+          'Logged FINAL session $_sessionId. Duration: ${durationMs}ms',
+        );
+      }
     } catch (e) {
-      _logger.e('Failed to log session: $e');
+      _logger.e('Failed to log session (isFinal=$isFinal): $e');
     }
+  }
+
+  Future<void> endSession() async {
+    if (_sessionId == null ||
+        _currentFilePath == null ||
+        _sessionStartTime == null) {
+      return;
+    }
+
+    _activeTimer.stop();
+    _autoSaveTimer?.cancel();
+    _idleTimer?.cancel();
+
+    await _logSession(isFinal: true);
 
     _sessionId = null;
     _sessionStartTime = null;
     _startLocator = null;
     _idleTimer?.cancel();
+    _autoSaveTimer?.cancel();
     _isPaused = false;
   }
 
