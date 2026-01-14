@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
@@ -28,7 +29,12 @@ class TestCubit extends Cubit<TestCubitState> {
   String? _sessionId;
   DateTime? _sessionStartTime;
   String? _startLocator;
+
   final Stopwatch _activeTimer = Stopwatch();
+  Timer? _idleTimer;
+  bool _isPaused = false;
+
+  static const _idleTimeout = Duration(minutes: 1);
 
   TestCubit(
     this._parseEpubUseCase,
@@ -141,6 +147,52 @@ class TestCubit extends Cubit<TestCubitState> {
     _activeTimer.start();
 
     _logger.d('Started session $_sessionId at $_sessionStartTime');
+
+    // Start idle checking
+    _resetIdleTimer();
+  }
+
+  void onUserInteraction() {
+    if (_sessionId == null) return;
+
+    // If was paused due to idle (but not explicit background pause), resume
+    if (!_activeTimer.isRunning && !_isPaused) {
+      _activeTimer.start();
+      _logger.d('Resumed session from idle');
+    }
+
+    _resetIdleTimer();
+  }
+
+  void pauseSession() {
+    if (_sessionId == null || !_activeTimer.isRunning) return;
+
+    _isPaused = true;
+    _activeTimer.stop();
+    _idleTimer?.cancel();
+    _logger.d('Paused session. Active duration: ${_activeTimer.elapsed}');
+  }
+
+  void resumeSession() {
+    if (_sessionId == null || _activeTimer.isRunning) {
+      _isPaused = false;
+      return;
+    }
+
+    _isPaused = false;
+    _activeTimer.start();
+    _resetIdleTimer();
+    _logger.d('Resumed session');
+  }
+
+  void _resetIdleTimer() {
+    _idleTimer?.cancel();
+    _idleTimer = Timer(_idleTimeout, () {
+      if (_activeTimer.isRunning) {
+        _activeTimer.stop();
+        _logger.d('Session idle timeout. Paused timer.');
+      }
+    });
   }
 
   Future<void> endSession() async {
@@ -184,6 +236,8 @@ class TestCubit extends Cubit<TestCubitState> {
     _sessionId = null;
     _sessionStartTime = null;
     _startLocator = null;
+    _idleTimer?.cancel();
+    _isPaused = false;
   }
 
   @override

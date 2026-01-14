@@ -50,7 +50,7 @@ class _EpubReaderContent extends StatefulWidget {
 }
 
 class _EpubReaderContentState extends State<_EpubReaderContent>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final ItemScrollController _itemScrollController = ItemScrollController();
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
@@ -74,6 +74,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       value: 1.0,
     );
 
+    WidgetsBinding.instance.addObserver(this);
     _itemPositionsListener.itemPositions.addListener(_onVisibleItemsChanged);
   }
 
@@ -191,7 +192,18 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     _chapterProgressNotifier.dispose();
     _controlsAnimController.dispose();
     _itemPositionsListener.itemPositions.removeListener(_onVisibleItemsChanged);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      context.read<TestCubit>().pauseSession();
+    } else if (state == AppLifecycleState.resumed) {
+      context.read<TestCubit>().resumeSession();
+    }
   }
 
   @override
@@ -213,47 +225,52 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             key: _scaffoldKey,
             drawer: _buildDrawer(context, state),
             body: SafeArea(
-              child: Stack(
-                children: [
-                  state.map(
-                    initial: (_) => const SizedBox.shrink(),
-                    loading: (data) => _buildLoading(data.progress),
-                    error: (data) => _buildError(data.message),
-                    loaded: (data) {
-                      _totalDisplayItems = data.displayItems.length;
-                      return _buildContinuousReaderBody(
-                        context,
-                        data.displayItems,
-                        data.currentItemIndex,
-                      );
-                    },
-                  ),
-
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: SizeTransition(
-                      sizeFactor: _controlsAnimController,
-                      axisAlignment: -1.0,
-                      child: _buildTopBar(context, state),
+              child: Listener(
+                onPointerDown: (_) =>
+                    context.read<TestCubit>().onUserInteraction(),
+                child: Stack(
+                  children: [
+                    state.map(
+                      initial: (_) => const SizedBox.shrink(),
+                      loading: (data) => _buildLoading(data.progress),
+                      error: (data) => _buildError(data.message),
+                      loaded: (data) {
+                        _totalDisplayItems = data.displayItems.length;
+                        return _buildContinuousReaderBody(
+                          context,
+                          data.displayItems,
+                          data.currentItemIndex,
+                        );
+                      },
                     ),
-                  ),
 
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: SizeTransition(
-                      sizeFactor: _controlsAnimController,
-                      axisAlignment: 1.0,
-                      child: state.maybeMap(
-                        loaded: (data) => _buildBottomControlBar(context, data),
-                        orElse: () => const SizedBox(),
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      child: SizeTransition(
+                        sizeFactor: _controlsAnimController,
+                        axisAlignment: -1.0,
+                        child: _buildTopBar(context, state),
                       ),
                     ),
-                  ),
-                ],
+
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: SizeTransition(
+                        sizeFactor: _controlsAnimController,
+                        axisAlignment: 1.0,
+                        child: state.maybeMap(
+                          loaded: (data) =>
+                              _buildBottomControlBar(context, data),
+                          orElse: () => const SizedBox(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
