@@ -368,7 +368,6 @@ class _Loaded implements TestCubitState {
   return EqualUnmodifiableListView(_displayItems);
 }
 
-// <--- THÊM MỚI
  final  int currentChapterIndex;
 @JsonKey() final  int currentItemIndex;
 

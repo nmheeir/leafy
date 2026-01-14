@@ -13,6 +13,8 @@ _ReadingSessionModel _$ReadingSessionModelFromJson(Map<String, dynamic> json) =>
       startTime: (json['start_time'] as num).toInt(),
       endTime: (json['end_time'] as num).toInt(),
       durationMs: (json['duration_ms'] as num).toInt(),
+      startLocator: json['start_locator'] as String?,
+      endLocator: json['end_locator'] as String?,
       chapterIndex: (json['chapter_index'] as num?)?.toInt(),
     );
 
@@ -24,5 +26,7 @@ Map<String, dynamic> _$ReadingSessionModelToJson(
   'start_time': instance.startTime,
   'end_time': instance.endTime,
   'duration_ms': instance.durationMs,
+  'start_locator': instance.startLocator,
+  'end_locator': instance.endLocator,
   'chapter_index': instance.chapterIndex,
 };

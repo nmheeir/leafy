@@ -6,7 +6,9 @@ class ReadingSession extends Equatable {
   final DateTime startTime;
   final DateTime endTime;
   final int durationMs;
-  final int chapterIndex;
+  final String? startLocator;
+  final String? endLocator;
+  final int? chapterIndex;
 
   const ReadingSession({
     required this.id,
@@ -14,7 +16,9 @@ class ReadingSession extends Equatable {
     required this.startTime,
     required this.endTime,
     required this.durationMs,
-    required this.chapterIndex,
+    this.startLocator,
+    this.endLocator,
+    this.chapterIndex,
   });
 
   @override
@@ -24,6 +28,8 @@ class ReadingSession extends Equatable {
     startTime,
     endTime,
     durationMs,
+    startLocator,
+    endLocator,
     chapterIndex,
   ];
 }

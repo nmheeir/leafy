@@ -7,7 +7,9 @@ import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
 import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_path.dart';
 import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
+import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_path.dart';
 import 'package:logger/web.dart';
+import 'package:uuid/uuid.dart';
 
 part 'test_cubit.freezed.dart';
 part 'test_cubit_state.dart';
@@ -17,15 +19,23 @@ class TestCubit extends Cubit<TestCubitState> {
   final ParseEpubUseCase _parseEpubUseCase;
   final SaveReaderProgressByPathUseCase _saveReaderProgressByPathUseCase;
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
+  final LogReadingSessionByPathUseCase _logSessionUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
+
+  // Session State
+  String? _sessionId;
+  DateTime? _sessionStartTime;
+  String? _startLocator;
+  final Stopwatch _activeTimer = Stopwatch();
 
   TestCubit(
     this._parseEpubUseCase,
     this._logger,
     this._saveReaderProgressByPathUseCase,
     this._getReaderProgressByPathUseCase,
+    this._logSessionUseCase,
   ) : super(TestCubitState.initial());
 
   void selectChapter(int index) {
@@ -81,6 +91,9 @@ class TestCubit extends Cubit<TestCubitState> {
             currentItemIndex: savedIndex,
           ),
         );
+
+        // Start new reading session
+        _startSession(filePath, 'item:$savedIndex');
       },
     );
   }
@@ -116,5 +129,66 @@ class TestCubit extends Cubit<TestCubitState> {
       progress: progress,
       lastReadAt: DateTime.now(),
     );
+  }
+
+  void _startSession(String filePath, String startLocator) {
+    endSession(); // Ensure any previous session is closed
+
+    _sessionId = const Uuid().v4();
+    _sessionStartTime = DateTime.now();
+    _startLocator = startLocator;
+    _activeTimer.reset();
+    _activeTimer.start();
+
+    _logger.d('Started session $_sessionId at $_sessionStartTime');
+  }
+
+  Future<void> endSession() async {
+    if (_sessionId == null ||
+        _currentFilePath == null ||
+        _sessionStartTime == null) {
+      return;
+    }
+
+    _activeTimer.stop();
+    final endTime = DateTime.now();
+    final durationMs = _activeTimer.elapsedMilliseconds;
+
+    // Get current locator from state
+    String? endLocator;
+    int? currentChapter;
+    state.mapOrNull(
+      loaded: (data) {
+        endLocator = 'item:${data.currentItemIndex}';
+        currentChapter = data.currentChapterIndex;
+      },
+    );
+
+    _logger.d('Ending session $_sessionId. Duration: ${durationMs}ms');
+
+    try {
+      await _logSessionUseCase(
+        sessionId: _sessionId!,
+        filePath: _currentFilePath!,
+        startTime: _sessionStartTime!,
+        endTime: endTime,
+        durationMs: durationMs,
+        startLocator: _startLocator,
+        endLocator: endLocator,
+        chapterIndex: currentChapter,
+      );
+    } catch (e) {
+      _logger.e('Failed to log session: $e');
+    }
+
+    _sessionId = null;
+    _sessionStartTime = null;
+    _startLocator = null;
+  }
+
+  @override
+  Future<void> close() {
+    endSession();
+    return super.close();
   }
 }

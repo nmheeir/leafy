@@ -206,6 +206,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               context.read<TestCubit>().saveProgress(
                 _chapterProgressNotifier.value,
               );
+              context.read<TestCubit>().endSession();
             }
           },
           child: Scaffold(

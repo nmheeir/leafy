@@ -65,8 +65,14 @@ class DbConstants {
       start_time INTEGER NOT NULL,           -- Thời điểm bắt đầu đọc (ms)
       end_time INTEGER NOT NULL,             -- Thời điểm kết thúc đọc (ms)
       duration_ms INTEGER NOT NULL,          -- Thời gian đọc thực tế
+
       chapter_index INTEGER,                -- Chương đang đọc (tham khảo)
-      FOREIGN KEY (resource_id) REFERENCES booksTable (id) ON DELETE CASCADE
+
+      -- Vị trí đọc
+      start_locator TEXT,                   -- Vị trí đọc lúc bắt đầu
+      end_locator TEXT,                     -- Vị trí đọc lúc kết thúc
+
+      FOREIGN KEY (resource_id) REFERENCES book_resources (id) ON DELETE CASCADE
     )
   ''';
 
