@@ -203,7 +203,9 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           onPopInvokedWithResult: (didPop, result) {
             // Lưu tiến trình khi thoát màn hình
             if (didPop) {
-              context.read<TestCubit>().saveProgress();
+              context.read<TestCubit>().saveProgress(
+                _chapterProgressNotifier.value,
+              );
             }
           },
           child: Scaffold(

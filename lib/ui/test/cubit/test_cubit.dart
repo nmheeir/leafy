@@ -101,18 +101,14 @@ class TestCubit extends Cubit<TestCubitState> {
     );
   }
 
-  Future<void> saveProgress() async {
+  Future<void> saveProgress(double progress) async {
     final currentState = state;
     _logger.d('currentFilePath: $_currentFilePath');
     if (currentState is! _Loaded || _currentFilePath == null) return;
 
     _logger.d('Saving progress for ${currentState.book.title}');
 
-    final flatItems = currentState.displayItems;
     final currentItemIndex = currentState.currentItemIndex;
-    final progress = flatItems.isEmpty
-        ? 0.0
-        : currentItemIndex / flatItems.length;
 
     await _saveReaderProgressByPathUseCase(
       filePath: _currentFilePath!,

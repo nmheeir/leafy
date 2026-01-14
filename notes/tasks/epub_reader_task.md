@@ -3,16 +3,16 @@
 ## 1. Data & Database
 - [ ] Chỉnh sửa dữ liệu của test screen cho khớp với schema trong database
 - [ ] Mapping dữ liệu EPUB (book, chapter, content) sang entity trong database
-- [ ] Lưu trạng thái đọc (chapter hiện tại, scroll position / page)
-- [ ] Load lại trạng thái đọc khi mở sách
+- [x] Lưu trạng thái đọc (chapter hiện tại, scroll position / page)
+- [x] Load lại trạng thái đọc khi mở sách
 - [ ] Xử lý migration nếu thay đổi schema liên quan đến EPUB
 
 ## 2. EPUB Parsing & Content Handling
-- [ ] Parse metadata của EPUB (title, author, cover)
-- [ ] Parse danh sách chapter (TOC)
+- [x] Parse metadata của EPUB (title, author, cover)
+- [x] Parse danh sách chapter (TOC)
 - [ ] Chuẩn hóa HTML/CSS từ EPUB để render ổn định
 - [ ] Xử lý các trường hợp chapter rỗng hoặc lỗi format
-- [ ] Cache nội dung chapter sau khi parse
+- [x] Cache nội dung chapter sau khi parse
 
 ## 3. Reader UI / Screen
 - [ ] Chỉnh sửa layout test screen cho đúng với flow đọc sách thực tế
@@ -34,8 +34,8 @@
 - [x] Chuyển chapter trước / sau
 - [ ] Chọn chapter từ danh sách TOC
 - [x] Hiển thị progress đọc (theo chapter hoặc %)
-- [ ] Tự động lưu progress khi người dùng rời screen
-- [ ] Khôi phục progress khi quay lại screen
+- [x] Tự động lưu progress khi người dùng rời screen
+- [x] Khôi phục progress khi quay lại screen
 
 ## 6. Performance & Stability
 - [ ] Tối ưu render nội dung chapter dài
