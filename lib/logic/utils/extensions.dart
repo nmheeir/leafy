@@ -9,6 +9,7 @@ import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
@@ -37,6 +38,8 @@ extension BlocExtensions on BuildContext {
 
   BookEditorActionCubit get bookEditorActionCubit =>
       read<BookEditorActionCubit>();
+
+  EpubReaderCubit get epubReaderCubit => read<EpubReaderCubit>();
 
   ///////////////////////////// BLOC /////////////////////////////
   LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();

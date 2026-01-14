@@ -17,7 +17,7 @@ import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 import 'package:leafy/ui/extensions/book_status_extension.dart';
-import 'package:leafy/ui/test/test_screen.dart';
+import 'package:leafy/ui/epub_reader/epub_reader_screen.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
 import 'package:leafy/di/injection.dart';
@@ -64,7 +64,7 @@ class BookScreen extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (context) =>
-                    TestEpubReaderScreen(filePath: resources[0].filePath!),
+                    EpubReaderScreen(filePath: resources[0].filePath!),
               ),
             );
           } else if (resource.url != null) {

@@ -1,42 +1,40 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/domain/epub_reader/entities/epub_chapter.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
-import 'package:leafy/domain/epub_reader/entities/epub_image.dart';
-import 'package:leafy/ui/test/cubit/test_cubit.dart';
+import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class TestEpubReaderScreen extends StatefulWidget {
+class EpubReaderScreen extends StatefulWidget {
   final String filePath;
 
-  const TestEpubReaderScreen({super.key, required this.filePath});
+  const EpubReaderScreen({super.key, required this.filePath});
 
   @override
-  State<TestEpubReaderScreen> createState() => _TestEpubReaderScreenState();
+  State<EpubReaderScreen> createState() => _EpubReaderScreenState();
 }
 
-class _TestEpubReaderScreenState extends State<TestEpubReaderScreen> {
+class _EpubReaderScreenState extends State<EpubReaderScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<TestCubit>().parseEpub(widget.filePath);
+    context.epubReaderCubit.parseEpub(widget.filePath);
   }
 
   @override
-  void didUpdateWidget(covariant TestEpubReaderScreen oldWidget) {
+  void didUpdateWidget(covariant EpubReaderScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.filePath != widget.filePath) {
-      context.read<TestCubit>().parseEpub(widget.filePath);
+      context.epubReaderCubit.parseEpub(widget.filePath);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
-      value: context.read<TestCubit>(),
+      value: context.epubReaderCubit,
       child: const _EpubReaderContent(),
     );
   }
@@ -111,14 +109,14 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     if (_isProgrammaticScroll) return;
 
     // 2. Cập nhật Chapter Index hiện tại (Giữ nguyên logic cũ của bạn)
-    final currentState = context.read<TestCubit>().state;
+    final currentState = context.epubReaderCubit.state;
     currentState.mapOrNull(
       loaded: (data) {
         if (currentItemIdx < data.displayItems.length) {
           final currentDisplayItem = data.displayItems[currentItemIdx];
           if (data.currentItemIndex != currentItemIdx ||
               data.currentChapterIndex != currentDisplayItem.chapterIndex) {
-            context.read<TestCubit>().updateReadingPosition(
+            context.epubReaderCubit.updateReadingPosition(
               currentDisplayItem.chapterIndex,
               currentItemIdx,
             );
@@ -200,25 +198,25 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.inactive) {
-      context.read<TestCubit>().pauseSession();
+      context.epubReaderCubit.pauseSession();
     } else if (state == AppLifecycleState.resumed) {
-      context.read<TestCubit>().resumeSession();
+      context.epubReaderCubit.resumeSession();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TestCubit, TestCubitState>(
+    return BlocBuilder<EpubReaderCubit, EpubReaderCubitState>(
       builder: (context, state) {
         return PopScope(
           canPop: true,
           onPopInvokedWithResult: (didPop, result) {
             // Lưu tiến trình khi thoát màn hình
             if (didPop) {
-              context.read<TestCubit>().saveProgress(
+              context.epubReaderCubit.saveProgress(
                 _chapterProgressNotifier.value,
               );
-              context.read<TestCubit>().endSession();
+              context.epubReaderCubit.endSession();
             }
           },
           child: Scaffold(
@@ -227,7 +225,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             body: SafeArea(
               child: Listener(
                 onPointerDown: (_) =>
-                    context.read<TestCubit>().onUserInteraction(),
+                    context.epubReaderCubit.onUserInteraction(),
                 child: Stack(
                   children: [
                     state.map(
@@ -289,7 +287,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     return GestureDetector(
       onTap: () => _toggleControls(),
       child: ScrollablePositionedList.builder(
-        initialScrollIndex: initialIndex, // Use it here
+        initialScrollIndex: initialIndex,
         itemCount: items.length,
         itemScrollController: _itemScrollController,
         itemPositionsListener: _itemPositionsListener,
@@ -376,7 +374,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     );
   }
 
-  Widget _buildTopBar(BuildContext context, TestCubitState state) {
+  Widget _buildTopBar(BuildContext context, EpubReaderCubitState state) {
     return Container(
       color: context.colorScheme.surface,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
@@ -400,7 +398,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             tooltip: "Mục lục",
             icon: const Icon(Icons.format_list_bulleted),
             onPressed: () {
-              // Mở Drawer bằng key
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
@@ -422,16 +419,14 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
         children: [
           // Slider lướt toàn bộ sách
           ValueListenableBuilder<double>(
-            valueListenable:
-                _chapterProgressNotifier, // Giá trị từ 0.0 -> 1.0 (Global)
+            valueListenable: _chapterProgressNotifier,
             builder: (context, value, child) {
               return Column(
                 children: [
-                  Text("${(value * 100).toInt()}%"), // Hiển thị VD: 48%
+                  Text("${(value * 100).toInt()}%"),
                   Slider(
                     value: value,
                     onChanged: (val) {
-                      // Nhảy tới vị trí % của file
                       final targetIndex = (val * totalItems).toInt();
                       _itemScrollController.jumpTo(index: targetIndex);
                     },
@@ -449,13 +444,12 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     );
   }
 
-  Widget _buildDrawer(BuildContext context, TestCubitState state) {
+  Widget _buildDrawer(BuildContext context, EpubReaderCubitState state) {
     return state.maybeMap(
       loaded: (data) => Drawer(
         width: MediaQuery.of(context).size.width * 0.85,
         child: Column(
           children: [
-            // Header Drawer: Hiển thị bìa sách (nếu có)
             UserAccountsDrawerHeader(
               accountName: Text(
                 data.book.title,
@@ -471,7 +465,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                 color: context.colorScheme.primaryContainer,
               ),
             ),
-            // Danh sách Chapter
             Expanded(
               child: ScrollablePositionedList.builder(
                 initialAlignment: 0.3,
@@ -499,17 +492,14 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                     selectedTileColor: context.colorScheme.primaryContainer
                         .withValues(alpha: 0.2),
                     onTap: () {
-                      Navigator.pop(context); // Đóng drawer
+                      Navigator.pop(context);
 
-                      // SỬA: Tìm vị trí thực tế của Header chương trong danh sách items phẳng
-                      // data.displayItems là danh sách chứa cả text và ảnh
                       final targetItemIndex = data.displayItems.indexWhere(
                         (item) =>
                             item is ChapterHeaderItem &&
                             item.chapterIndex == index,
                       );
 
-                      // Nhảy đến vị trí tìm được
                       if (targetItemIndex != -1) {
                         _jumpToTarget(targetItemIndex);
                       }
@@ -542,12 +532,11 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     return Center(child: Text("Lỗi: $message"));
   }
 
-  // Thay thế toàn bộ hàm _buildNavigationButtons cũ bằng hàm này
   Widget _buildNavigationButtons(
     BuildContext context,
     List<EpubDisplayItem> items,
   ) {
-    // SỬA: Dùng ValueListenableBuilder để lắng nghe vị trí cuộn theo thời gian thực
+    // Dùng ValueListenableBuilder để lắng nghe vị trí cuộn theo thời gian thực
     return ValueListenableBuilder<Iterable<ItemPosition>>(
       valueListenable: _itemPositionsListener.itemPositions,
       builder: (context, positions, child) {
@@ -626,255 +615,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           ],
         );
       },
-    );
-  }
-}
-
-extension StringExtension on String {
-  String take(int n) => length > n ? substring(0, n) : this;
-  bool get isNotBlank => trim().isNotEmpty;
-}
-
-class ImgEntry {
-  final String path;
-  final double? yrel;
-
-  ImgEntry(this.path, this.yrel);
-
-  static ImgEntry? fromXmlString(String text) {
-    // Regex khớp với format: <img src="path" yrel="1.5">
-    final RegExp regex = RegExp(r'<img\s+src="([^"]+)"\s+yrel="([^"]+)">');
-    final match = regex.firstMatch(text);
-
-    if (match != null) {
-      return ImgEntry(match.group(1)!, double.tryParse(match.group(2) ?? ''));
-    }
-    return null;
-  }
-}
-
-class ChapterContentItem extends StatelessWidget {
-  final EpubChapter chapter;
-  final List<EpubImage> images;
-  final int index;
-
-  const ChapterContentItem({
-    super.key,
-    required this.chapter,
-    required this.images,
-    required this.index,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // Logic Chunk Text
-    final List<String> paragraphs = chapter.body
-        .split('\n\n')
-        .where((s) => s.trim().isNotEmpty)
-        .toList();
-
-    final textStyle = TextStyle(
-      fontSize: 18,
-      height: 1.6,
-      color: context.colorScheme.onSurface.withValues(alpha: 0.88),
-      fontFamily: 'Georgia',
-    );
-
-    // Tiêu đề chương (được render ngay đầu mỗi chương)
-    final titleWidget = Padding(
-      padding: const EdgeInsets.only(bottom: 20, top: 10),
-      child: Text(
-        chapter.title,
-        style: textStyle.copyWith(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          height: 1.2,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (chapter.title.isNotEmpty) titleWidget,
-
-          ..._renderParagraphs(context, paragraphs, textStyle),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _renderParagraphs(
-    BuildContext context,
-    List<String> paragraphs,
-    TextStyle style,
-  ) {
-    final List<Widget> widgets = [];
-    final StringBuffer textBuffer = StringBuffer();
-
-    for (int i = 0; i < paragraphs.length; i++) {
-      final para = paragraphs[i];
-      final imgEntry = ImgEntry.fromXmlString(para);
-
-      if (imgEntry == null) {
-        textBuffer.write(para);
-        textBuffer.write("\n\n");
-      } else {
-        if (textBuffer.isNotEmpty) {
-          widgets.add(
-            Text(
-              textBuffer.toString().trimRight(),
-              style: style,
-              textAlign: TextAlign.justify,
-            ),
-          );
-          textBuffer.clear();
-        }
-
-        final imageEntity = images.firstWhereOrNull(
-          (img) =>
-              img.absPath.endsWith(imgEntry.path) ||
-              imgEntry.path.endsWith(img.absPath),
-        );
-
-        if (imageEntity != null) {
-          widgets.add(
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(imageEntity.image!, fit: BoxFit.contain),
-              ),
-            ),
-          );
-        }
-      }
-
-      if (i == paragraphs.length - 1 && textBuffer.isNotEmpty) {
-        widgets.add(
-          Text(
-            textBuffer.toString().trimRight(),
-            style: style,
-            textAlign: TextAlign.justify,
-          ),
-        );
-      }
-    }
-    return widgets;
-  }
-}
-
-class ReaderProgressWidget extends StatelessWidget {
-  final double progress; // Giá trị từ 0.0 đến 1.0
-  final int currentChapterIndex;
-  final int totalChapters;
-  final VoidCallback? onNext;
-  final VoidCallback? onPrev;
-
-  const ReaderProgressWidget({
-    super.key,
-    required this.progress,
-    required this.currentChapterIndex,
-    required this.totalChapters,
-    this.onNext,
-    this.onPrev,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-            width: 1,
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Dòng 1: Thông tin text + %
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Chương ${currentChapterIndex + 1} / $totalChapters",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                "${(progress * 100).toInt()}%",
-                style: TextStyle(
-                  fontSize: 12,
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          // Dòng 2: Thanh Progress Bar + Nút điều hướng nhỏ
-          Row(
-            children: [
-              // Nút lùi chương nhỏ gọn
-              IconButton(
-                onPressed: onPrev,
-                icon: const Icon(Icons.skip_previous_rounded),
-                iconSize: 20,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                color: context.colorScheme.primary,
-              ),
-
-              const SizedBox(width: 12),
-
-              // Thanh Progress Bar
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value: progress,
-                    minHeight: 6,
-                    backgroundColor:
-                        context.colorScheme.surfaceContainerHighest,
-                    color: context.colorScheme.primary,
-                  ),
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              // Nút tiến chương nhỏ gọn
-              IconButton(
-                onPressed: onNext,
-                icon: const Icon(Icons.skip_next_rounded),
-                iconSize: 20,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-                color: context.colorScheme.primary,
-              ),
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

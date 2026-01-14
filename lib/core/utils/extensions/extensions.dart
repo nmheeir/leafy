@@ -7,3 +7,8 @@ extension BuildContextExtensions on BuildContext {
   Size get deviceSize => MediaQuery.sizeOf(this);
   EdgeInsets get padding => MediaQuery.of(this).padding;
 }
+
+extension StringExtension on String {
+  String take(int n) => length > n ? substring(0, n) : this;
+  bool get isNotBlank => trim().isNotEmpty;
+}

@@ -34,7 +34,7 @@ import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 import 'package:leafy/router/router.dart';
-import 'package:leafy/ui/test/cubit/test_cubit.dart';
+import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 
 late Directory appDocumentsDirectory;
@@ -92,7 +92,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<BookActorCubit>()),
       BlocProvider(create: (context) => getIt<BookEditorActionCubit>()),
       BlocProvider(create: (context) => getIt<TrashBinCubit>()),
-      BlocProvider(create: (context) => getIt<TestCubit>()),
+      BlocProvider(create: (context) => getIt<EpubReaderCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

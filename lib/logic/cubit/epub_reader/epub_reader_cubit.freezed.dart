@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'test_cubit.dart';
+part of 'epub_reader_cubit.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -12,7 +12,7 @@ part of 'test_cubit.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$TestCubitState {
+mixin _$EpubReaderCubitState {
 
 
 
@@ -20,7 +20,7 @@ mixin _$TestCubitState {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TestCubitState);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EpubReaderCubitState);
 }
 
 
@@ -37,12 +37,12 @@ String toString() {
 
 /// @nodoc
 class $TestCubitStateCopyWith<$Res>  {
-$TestCubitStateCopyWith(TestCubitState _, $Res Function(TestCubitState) __);
+$TestCubitStateCopyWith(EpubReaderCubitState _, $Res Function(EpubReaderCubitState) __);
 }
 
 
-/// Adds pattern-matching-related methods to [TestCubitState].
-extension TestCubitStatePatterns on TestCubitState {
+/// Adds pattern-matching-related methods to [EpubReaderCubitState].
+extension TestCubitStatePatterns on EpubReaderCubitState {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -192,7 +192,7 @@ return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.curr
 /// @nodoc
 
 
-class _Initial implements TestCubitState {
+class _Initial implements EpubReaderCubitState {
   const _Initial();
   
 
@@ -224,7 +224,7 @@ String toString() {
 /// @nodoc
 
 
-class _Loading implements TestCubitState {
+class _Loading implements EpubReaderCubitState {
   const _Loading({required this.progress});
   
 
@@ -290,7 +290,7 @@ as double,
 /// @nodoc
 
 
-class _Error implements TestCubitState {
+class _Error implements EpubReaderCubitState {
   const _Error({required this.message});
   
 
@@ -356,7 +356,7 @@ as String,
 /// @nodoc
 
 
-class _Loaded implements TestCubitState {
+class _Loaded implements EpubReaderCubitState {
   const _Loaded({required this.book, required final  List<EpubDisplayItem> displayItems, required this.currentChapterIndex, this.currentItemIndex = 0}): _displayItems = displayItems;
   
 

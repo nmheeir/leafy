@@ -12,11 +12,11 @@ import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_pat
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
 
-part 'test_cubit.freezed.dart';
-part 'test_cubit_state.dart';
+part 'epub_reader_cubit.freezed.dart';
+part 'epub_reader_cubit_state.dart';
 
 @lazySingleton
-class TestCubit extends Cubit<TestCubitState> {
+class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final ParseEpubUseCase _parseEpubUseCase;
   final SaveReaderProgressByPathUseCase _saveReaderProgressByPathUseCase;
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
@@ -39,13 +39,13 @@ class TestCubit extends Cubit<TestCubitState> {
   static const _autoSaveDuration = Duration(seconds: 30);
   static const _maxSessionDuration = Duration(hours: 6);
 
-  TestCubit(
+  EpubReaderCubit(
     this._parseEpubUseCase,
     this._logger,
     this._saveReaderProgressByPathUseCase,
     this._getReaderProgressByPathUseCase,
     this._logSessionUseCase,
-  ) : super(TestCubitState.initial());
+  ) : super(EpubReaderCubitState.initial());
 
   void selectChapter(int index) {
     state.mapOrNull(
@@ -56,7 +56,7 @@ class TestCubit extends Cubit<TestCubitState> {
   }
 
   Future<void> parseEpub(String filePath) async {
-    emit(const TestCubitState.loading(progress: 0.0));
+    emit(const EpubReaderCubitState.loading(progress: 0.0));
     _currentFilePath = filePath;
 
     final result = await _parseEpubUseCase(filePath);
@@ -65,7 +65,7 @@ class TestCubit extends Cubit<TestCubitState> {
       (failure) {
         _logger.e(failure.message);
 
-        emit(TestCubitState.error(message: failure.toString()));
+        emit(EpubReaderCubitState.error(message: failure.toString()));
       },
       (epubBook) async {
         _logger.d('Parsed successfully: ${epubBook.title}');
@@ -93,7 +93,7 @@ class TestCubit extends Cubit<TestCubitState> {
         }
 
         emit(
-          TestCubitState.loaded(
+          EpubReaderCubitState.loaded(
             book: epubBook,
             displayItems: flatItems,
             currentChapterIndex: chapterIndex,

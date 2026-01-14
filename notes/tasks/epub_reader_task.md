@@ -18,7 +18,7 @@
 
 ## 3. Reader UI / Screen
 
-- [ ] Chỉnh sửa layout test screen cho đúng với flow đọc sách thực tế
+- [x] Chỉnh sửa layout test screen cho đúng với flow đọc sách thực tế
 - [ ] Chỉnh sửa tiêu đề của mỗi chapter (font, size, weight)
 - [ ] Đồng bộ style chapter title với content
 - [ ] Xử lý scroll mượt khi chuyển chapter
@@ -37,7 +37,7 @@
 ## 5. Navigation & Interaction
 
 - [x] Chuyển chapter trước / sau
-- [ ] Chọn chapter từ danh sách TOC
+- [x] Chọn chapter từ danh sách TOC
 - [x] Hiển thị progress đọc (theo chapter hoặc %)
 - [x] Tự động lưu progress khi người dùng rời screen
 - [x] Khôi phục progress khi quay lại screen
