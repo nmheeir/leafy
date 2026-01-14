@@ -246,6 +246,7 @@ abstract class  LocaleKeys {
   static const isbn_cannot_be_empty = 'isbn_cannot_be_empty';
   static const cover_not_found_in_ol = 'cover_not_found_in_ol';
   static const books_settings = 'books_settings';
+  static const downloading = 'downloading';
   static const download_missing_covers = 'download_missing_covers';
   static const download_missing_covers_explanation = 'download_missing_covers_explanation';
   static const downloaded_covers = 'downloaded_covers';

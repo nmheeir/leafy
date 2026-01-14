@@ -5,11 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 
 class LikeButton extends StatelessWidget {
-  const LikeButton({
-    super.key,
-    required this.isLiked,
-    required this.onTap,
-  });
+  const LikeButton({super.key, required this.isLiked, required this.onTap});
 
   final bool isLiked;
   final VoidCallback onTap;
@@ -31,10 +27,10 @@ class LikeButton extends StatelessWidget {
       child: FaIcon(
         FontAwesomeIcons.solidHeart,
         color: isLiked
-        //TODO: change color to primary
+            //TODO: change color to primary
             ? context.colorScheme.primaryContainer
             : context.colorScheme.surfaceContainerHighest,
-        size: 30,
+        size: 24,
       ),
     );
   }

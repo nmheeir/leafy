@@ -22,6 +22,7 @@ class BookStatusDetail extends StatelessWidget {
     this.changeStatusAction,
     this.showRatingAndLike = false,
     this.downloadProgress,
+    this.readingProgress,
   });
 
   final Book book;
@@ -33,165 +34,235 @@ class BookStatusDetail extends StatelessWidget {
   final VoidCallback? changeStatusAction;
   final bool showRatingAndLike;
   final double? downloadProgress;
+  final double? readingProgress;
 
   final dateFormat = DateFormat.yMMMMd();
 
   bool get isDownloading => downloadProgress != null;
+  bool get hasReadingProgress =>
+      readingProgress != null && readingProgress! > 0;
 
   @override
   Widget build(BuildContext context) {
+    // Sử dụng container bao ngoài để tạo không gian thoáng đãng
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Row 1: Status Badge & Favorite Button
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatusBox(context),
-              if (showChangeStatus) ...[
-                const SizedBox(width: 12),
-                _buildChangeStatusButton(context),
-              ],
+              _buildStatusBadge(context),
+              _buildFavoriteButton(context),
             ],
           ),
-          const SizedBox(height: 16),
-          _generateHowManyTimesRead(context),
-          ..._buildStartAndFinishDates(context),
-          if (showRatingAndLike) ...[
+
+          // Row 2: Action Button (Full width để tránh overflow)
+          if (showChangeStatus) ...[
             const SizedBox(height: 16),
-            _buildRatingAndLike(context),
+            _buildChangeStatusButton(context),
+          ],
+
+          // Row 3: History & Stats
+          if (book.readings.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildReadingHistory(context),
+          ],
+
+          // Row 4: Rating
+          if (showRatingAndLike) ...[
+            const SizedBox(height: 24),
+            _buildRatingSection(context),
           ],
         ],
       ),
     );
   }
 
-  Widget _buildStatusBox(BuildContext context) {
-    return Expanded(
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: context.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(16),
+  // Aesthetic: Status dạng "Badge" hoặc "Chip" thay vì Box to
+  Widget _buildStatusBadge(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.colorScheme.primaryContainer.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(
+          24,
+        ), // Bo tròn nhiều hơn (Pill shape)
+        border: Border.all(
+          color: context.colorScheme.primary.withValues(alpha: 0.1),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              statusIcon,
-              size: 20,
-              color: context.colorScheme.onPrimaryContainer,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon, size: 18, color: context.colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            statusText,
+            style: context.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: context.colorScheme.primary,
             ),
-            const SizedBox(width: 8),
-            Text(
-              statusText,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: context.colorScheme.onPrimaryContainer,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
+  // Aesthetic: Nút Action to, rõ ràng, full-width
   Widget _buildChangeStatusButton(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: isDownloading ? null : changeStatusAction,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            color: context.colorScheme.secondaryContainer,
-            border: isDownloading
-                ? Border.all(color: context.colorScheme.primary, width: 2)
-                : null,
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              if (isDownloading)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(
-                    14,
-                  ), // slightly less than container
-                  child: LinearProgressIndicator(
-                    value: downloadProgress,
-                    backgroundColor: Colors.transparent,
-                    color: context.colorScheme.primary.withValues(alpha: 0.1),
-                    minHeight: 50,
-                  ),
-                ),
+    // Chiều cao cố định cho nút Action để dễ bấm
+    const double buttonHeight = 56.0;
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (isDownloading) ...[
-                    SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        value: downloadProgress,
-                        color: context.colorScheme.onSecondaryContainer,
+    return Container(
+      height: buttonHeight,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        color: context.colorScheme.surfaceContainerHigh,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isDownloading ? null : changeStatusAction,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Layer 1: Progress Background
+                if (isDownloading || (hasReadingProgress && !isDownloading))
+                  Positioned.fill(
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: FractionallySizedBox(
+                        widthFactor: isDownloading
+                            ? downloadProgress
+                            : (readingProgress ?? 0),
+                        child: Container(
+                          color: isDownloading
+                              ? context.colorScheme.primary.withValues(
+                                  alpha: 0.15,
+                                )
+                              : context.colorScheme.tertiaryContainer
+                                    .withValues(alpha: 0.4),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                  ],
-
-                  Text(
-                    isDownloading
-                        ? "${(downloadProgress! * 100).toInt()}%"
-                        : (changeStatusText ?? ""),
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                      color: context.colorScheme.onSecondaryContainer,
-                    ),
-                    maxLines: 1,
                   ),
-                ],
-              ),
-            ],
+
+                // Layer 2: Content Text & Icon
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isDownloading) ...[
+                        SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            value: downloadProgress,
+                            color: context.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+
+                      Flexible(
+                        child: Text(
+                          _getActionButtonText(),
+                          style: context.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: isDownloading
+                                ? context.colorScheme.primary
+                                : context.colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildRatingAndLike(BuildContext context) {
+  String _getActionButtonText() {
+    if (isDownloading) {
+      return "${(downloadProgress! * 100).toInt()}% ${LocaleKeys.downloading.tr()}...";
+    }
+    if (hasReadingProgress) {
+      return "${(readingProgress! * 100).toInt()}%  ${changeStatusText ?? ""}";
+    }
+    return changeStatusText ?? "";
+  }
+
+  // Gom nhóm lịch sử đọc vào một khối gọn gàng hơn
+  Widget _buildReadingHistory(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Tiêu đề nhỏ nếu cần, hoặc giữ clean chỉ hiện list
+        _generateHowManyTimesRead(context),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Column(children: _buildStartAndFinishDates(context)),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRatingSection(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           LocaleKeys.your_rating.tr(),
-          style: context.textTheme.titleSmall?.copyWith(
+          style: context.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.bold,
+            color: context.colorScheme.onSurfaceVariant,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 12),
+        // Vì nút Like đã đưa lên trên cùng, ở đây chỉ hiển thị Rating bar
         Container(
-          padding: const EdgeInsets.all(12),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
           decoration: BoxDecoration(
-            color: context.colorScheme.surfaceContainerLow,
+            color: context.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.colorScheme.outlineVariant),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildRating(context),
-              LikeButton(isLiked: book.favorite, onTap: onLikeTap),
-            ],
-          ),
+          child: Center(child: _buildRating(context)),
         ),
       ],
     );
   }
+
+  // --- Các hàm con giữ nguyên logic, chỉ chỉnh style nhẹ ---
 
   Widget _buildRating(BuildContext context) {
     return BlocBuilder<RatingTypeBloc, RatingTypeState>(
@@ -200,32 +271,35 @@ class BookStatusDetail extends StatelessWidget {
           return RatingBar.builder(
             initialRating: (book.rating != null) ? book.rating! / 10 : 0,
             allowHalfRating: true,
-            unratedColor: context.colorScheme.outlineVariant,
+            unratedColor: context.colorScheme.outlineVariant.withValues(
+              alpha: 0.5,
+            ),
             glow: false,
-            itemSize: 28,
+            itemSize: 32, // To hơn một chút
             ignoreGestures: true,
-            itemPadding: const EdgeInsets.only(right: 4),
+            itemPadding: const EdgeInsets.symmetric(horizontal: 4),
             itemBuilder: (context, _) => FaIcon(
               FontAwesomeIcons.solidStar,
-              color: context.colorScheme.primary,
+              color: const Color(0xFFFFC107), // Màu vàng chuẩn cho sao
             ),
             onRatingUpdate: (_) {},
           );
         } else {
           return Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 (book.rating == null) ? '0' : '${(book.rating! / 10)}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                style: context.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: context.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
               FaIcon(
                 FontAwesomeIcons.solidStar,
-                color: context.colorScheme.primary,
-                size: 20,
+                color: const Color(0xFFFFC107),
+                size: 24,
               ),
             ],
           );
@@ -234,28 +308,38 @@ class BookStatusDetail extends StatelessWidget {
     );
   }
 
-  // Helper methods for Dates (kept mostly same but cleaned up)
-
   List<Widget> _buildStartAndFinishDates(BuildContext context) {
     if (book.readings.isEmpty) return [];
 
-    return book.readings.map((reading) {
+    return book.readings.asMap().entries.map((entry) {
+      final index = entry.key;
+      final reading = entry.value;
       final text = _getReadingDateText(reading, context);
+      final isLast = index == book.readings.length - 1;
+
       return Padding(
-        padding: const EdgeInsets.only(bottom: 4),
+        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
         child: Row(
           children: [
-            Icon(
-              Icons.calendar_today_outlined,
-              size: 14,
-              color: context.colorScheme.onSurfaceVariant,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.calendar_today_rounded,
+                size: 14,
+                color: context.colorScheme.primary,
+              ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 text,
-                style: context.textTheme.bodySmall?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurface,
+                  height: 1.4,
                 ),
               ),
             ),
@@ -268,14 +352,14 @@ class BookStatusDetail extends StatelessWidget {
   String _getReadingDateText(dynamic reading, BuildContext context) {
     final startDate = reading.startDate;
     final finishDate = reading.finishDate;
-    final readingTime = reading.readingTimeMs; // Assuming this logic exists
+    final readingTime = reading.readingTimeMs;
 
+    // Giả sử logic _generateReadingTime trả về string thời gian
     final timeStr = _generateReadingTime(
       startDate: startDate,
       finishDate: finishDate,
       context: context,
-      readingTime:
-          null, // passed null for now as per original code simplified logic
+      readingTime: null,
     );
 
     if (startDate != null && finishDate != null) {
@@ -297,36 +381,42 @@ class BookStatusDetail extends StatelessWidget {
     if (readingTime != null) return '($readingTime)';
     if (startDate == null || finishDate == null) return '';
     final diff = finishDate.difference(startDate).inDays + 1;
-    return '(${LocaleKeys.day.plural(diff).tr()})';
+    // Highlight số ngày đậm hơn một chút
+    return ' • ${LocaleKeys.day.plural(diff).tr()}';
   }
 
   Widget _generateHowManyTimesRead(BuildContext context) {
     int timesRead = book.readings.where((r) => r.finishDate != null).length;
     if (timesRead <= 1) return const SizedBox();
 
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.repeat, size: 14, color: context.colorScheme.secondary),
-            const SizedBox(width: 4),
-            Text(
-              LocaleKeys.read_x_times.plural(book.readings.length).tr(),
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: context.colorScheme.secondary,
-              ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.history, size: 16, color: context.colorScheme.secondary),
+          const SizedBox(width: 6),
+          Text(
+            LocaleKeys.read_x_times.plural(book.readings.length).tr(),
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.colorScheme.secondary,
+              fontWeight: FontWeight.bold,
             ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Divider(
-          color: context.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-        const SizedBox(height: 8),
-      ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteButton(BuildContext context) {
+    return Container(
+      height: 44,
+      width: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: LikeButton(isLiked: book.favorite, onTap: onLikeTap),
     );
   }
 }

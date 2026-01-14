@@ -22,6 +22,8 @@ import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
 import 'package:leafy/di/injection.dart';
 import 'dart:io';
+import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
+import 'package:leafy/logic/cubit/book_progress/book_progress_state.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -112,6 +114,7 @@ class BookScreen extends StatelessWidget {
             return cubit;
           },
         ),
+        BlocProvider(create: (_) => BookProgressCubit(getIt())),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -182,7 +185,11 @@ class BookScreen extends StatelessWidget {
 
                                       if (fileExists) {
                                         dynamicChangeStatusText =
-                                            "Start Reading";
+                                            "Start Reading"; // Default
+                                        // Load progress when file is confirmed existing
+                                        context
+                                            .read<BookProgressCubit>()
+                                            .loadProgress(resource.filePath!);
                                       } else if (resource.url != null) {
                                         dynamicChangeStatusText = "Download";
                                       }
@@ -190,14 +197,49 @@ class BookScreen extends StatelessWidget {
                                   },
                                   orElse: () {},
                                 );
+                              } else if (state.status ==
+                                  BookStatus.inProgress) {
+                                // Also load progress if in progress
+                                resourceState.maybeWhen(
+                                  success: (resources) {
+                                    if (resources.isNotEmpty) {
+                                      final resource = resources.first;
+                                      if (resource.filePath != null) {
+                                        context
+                                            .read<BookProgressCubit>()
+                                            .loadProgress(resource.filePath!);
+                                      }
+                                    }
+                                  },
+                                  orElse: () {},
+                                );
                               }
 
-                              return _buildStatusDetail(
-                                state,
-                                context,
-                                downloadProgress: downloadProgress,
-                                overrideChangeStatusText:
-                                    dynamicChangeStatusText,
+                              return BlocBuilder<
+                                BookProgressCubit,
+                                BookProgressState
+                              >(
+                                builder: (context, progressState) {
+                                  double? readingProgress;
+                                  if (progressState is BookProgressLoaded) {
+                                    readingProgress = progressState.progress;
+                                    // [User Context] Conditional Logic:
+                                    // If Reading (inProgress), show "Continue Reading"
+                                    if (state.status == BookStatus.inProgress) {
+                                      dynamicChangeStatusText =
+                                          "Continue Reading";
+                                    }
+                                  }
+
+                                  return _buildStatusDetail(
+                                    state,
+                                    context,
+                                    downloadProgress: downloadProgress,
+                                    readingProgress: readingProgress,
+                                    overrideChangeStatusText:
+                                        dynamicChangeStatusText,
+                                  );
+                                },
                               );
                             },
                           ),
@@ -311,6 +353,7 @@ class BookScreen extends StatelessWidget {
     Book state,
     BuildContext context, {
     double? downloadProgress,
+    double? readingProgress,
     String? overrideChangeStatusText,
   }) {
     return BookStatusDetail(
@@ -328,6 +371,7 @@ class BookScreen extends StatelessWidget {
       },
       showRatingAndLike: state.status == BookStatus.finished,
       downloadProgress: downloadProgress,
+      readingProgress: readingProgress,
     );
   }
 }
