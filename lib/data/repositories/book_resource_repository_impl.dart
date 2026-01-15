@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
@@ -48,16 +49,6 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
       final id = await _resourceDs.insert(model);
 
       return Right(model.copyWith(id: id).toEntity());
-    } catch (e) {
-      return Left(Failure.database(e.toString()));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Unit>> deleteResource(String resourceUuid) async {
-    try {
-      await _resourceDs.deleteByUuid(resourceUuid);
-      return right(unit);
     } catch (e) {
       return Left(Failure.database(e.toString()));
     }
@@ -220,6 +211,38 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
         size: newFileSize,
       );
       return right(unit);
+    } catch (e) {
+      return Left(Failure.database(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteResource(String uuid) async {
+    try {
+      // 1. Get resource to find path and ID
+      final resourceModel = await _resourceDs.getByUuid(uuid);
+
+      if (resourceModel == null) {
+        return const Left(Failure.notFound("Resource not found"));
+      }
+
+      // 2. Delete from DB
+      // Delete Reader Progress first
+      await _progressDs.deleteByResourceId(resourceModel.id!);
+
+      // Delete Resource Record
+      await _resourceDs.deleteByUuid(uuid);
+
+      // 3. Delete File
+      if (resourceModel.filePath != null &&
+          resourceModel.storageType == StorageType.local) {
+        final file = File(resourceModel.filePath!);
+        if (await file.exists()) {
+          await file.delete();
+        }
+      }
+
+      return const Right(unit);
     } catch (e) {
       return Left(Failure.database(e.toString()));
     }

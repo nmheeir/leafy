@@ -16,4 +16,6 @@ class BookResourceState with _$BookResourceState {
     String resourceUuid,
     double progress,
   ) = _Downloading;
+
+  const factory BookResourceState.importing() = _Importing;
 }

@@ -46,6 +46,8 @@ import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
 import '../data/file_import/services/file_picker_service_impl.dart' as _i328;
 import '../data/file_import/services/file_processing_service_impl.dart'
     as _i503;
+import '../data/file_import/services/metadata_extraction_service_impl.dart'
+    as _i804;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
 import '../data/repositories/epub_file_repository_impl.dart' as _i528;
@@ -75,6 +77,8 @@ import '../domain/book_resource/usecase/add_book_resource.dart' as _i693;
 import '../domain/book_resource/usecase/check_book_resource_exist_by_hash.dart'
     as _i336;
 import '../domain/book_resource/usecase/delete_book_resource.dart' as _i518;
+import '../domain/book_resource/usecase/delete_book_resource_use_case.dart'
+    as _i47;
 import '../domain/book_resource/usecase/get_book_resource_by_path.dart'
     as _i664;
 import '../domain/book_resource/usecase/get_book_resource_by_uuid.dart'
@@ -90,9 +94,13 @@ import '../domain/epub_reader/repositories/epub_reader_repository.dart'
     as _i925;
 import '../domain/file_import/services/file_picker_service.dart' as _i255;
 import '../domain/file_import/services/file_processing_service.dart' as _i119;
+import '../domain/file_import/services/metadata_extraction_service.dart'
+    as _i429;
 import '../domain/file_import/usecases/pick_local_files_use_case.dart' as _i568;
 import '../domain/file_import/usecases/process_local_files_use_case.dart'
     as _i390;
+import '../domain/file_import/usecases/save_imported_resource_use_case.dart'
+    as _i623;
 import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
 import '../domain/gutendex/usecases/gtd_get_book.dart' as _i433;
 import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
@@ -289,8 +297,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.lazySingleton<_i47.DeleteBookResourceUseCase>(
+      () => _i47.DeleteBookResourceUseCase(gh<_i1042.BookResourceRepository>()),
+    );
     gh.lazySingleton<_i664.GetBookResourceByPathUseCase>(
       () => _i664.GetBookResourceByPathUseCase(
+        gh<_i1042.BookResourceRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i623.SaveImportedResourceUseCase>(
+      () => _i623.SaveImportedResourceUseCase(
         gh<_i1042.BookResourceRepository>(),
       ),
     );
@@ -302,6 +318,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i880.ParseEpubUseCase>(
       () => _i880.ParseEpubUseCase(gh<_i925.EpubReaderRepository>()),
+    );
+    gh.lazySingleton<_i429.MetadataExtractionService>(
+      () => _i804.MetadataExtractionServiceImpl(
+        gh<_i722.EpubReaderLocalDataSource>(),
+      ),
     );
     gh.lazySingleton<_i911.OpenNetworkBookUseCase>(
       () => _i911.OpenNetworkBookUseCase(
@@ -470,13 +491,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
       () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
-    gh.factory<_i407.BookResourceCubit>(
-      () => _i407.BookResourceCubit(
-        gh<_i452.GetBookResourcesUseCase>(),
-        gh<_i1072.EpubFileRepository>(),
-        gh<_i589.UpdateBookResourceFileUseCase>(),
-      ),
-    );
     gh.factory<_i845.BookProgressCubit>(
       () => _i845.BookProgressCubit(gh<_i709.GetReaderProgressByPathUseCase>()),
     );
@@ -497,6 +511,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i709.GetReaderProgressByPathUseCase>(),
         gh<_i770.LogReadingSessionByPathUseCase>(),
         gh<_i838.MarkBookFinishedUseCase>(),
+      ),
+    );
+    gh.factory<_i407.BookResourceCubit>(
+      () => _i407.BookResourceCubit(
+        gh<_i452.GetBookResourcesUseCase>(),
+        gh<_i1072.EpubFileRepository>(),
+        gh<_i589.UpdateBookResourceFileUseCase>(),
+        gh<_i568.PickLocalFilesUseCase>(),
+        gh<_i390.ProcessLocalFilesUseCase>(),
+        gh<_i623.SaveImportedResourceUseCase>(),
+        gh<_i47.DeleteBookResourceUseCase>(),
       ),
     );
     return this;

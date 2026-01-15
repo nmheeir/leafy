@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
@@ -87,21 +88,21 @@ class FilePickerServiceImpl implements FilePickerService {
 
   Future<PermissionStatus> _checkPermission() async {
     if (Platform.isAndroid) {
-      // Using storage permission for broad file access on older Android.
-      // For Android 13+, file_picker usually handles access via ACTION_OPEN_DOCUMENT without raw storage permission.
-      // However, strictly following flow 8.1 "Step 1: Check Permissions".
-
-      // Optimization: If SDK >= 33, we *could* skip this if assuming file_picker does the right thing.
-      // But keeping it as requested.
-      final status = await Permission.storage.status;
-      // If status is restricted or denied, we might need request.
-      return status;
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        return PermissionStatus.granted;
+      }
+      return await Permission.storage.status;
     }
     return PermissionStatus.granted;
   }
 
   Future<PermissionStatus> _requestPermission() async {
     if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt >= 33) {
+        return PermissionStatus.granted;
+      }
       return await Permission.storage.request();
     }
     return PermissionStatus.granted;
