@@ -65,9 +65,15 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
   }
 
   @override
-  Future<Either<Failure, bool>> existsByFileHash(String fileHash) async {
+  Future<Either<Failure, bool>> existsByFileHash(
+    String fileHash, {
+    int? bookId,
+  }) async {
     try {
-      final exists = await _resourceDs.existsByFileHash(fileHash);
+      final exists = await _resourceDs.existsByFileHash(
+        fileHash,
+        bookId: bookId,
+      );
       return Right(exists);
     } catch (e) {
       return Left(Failure.database(e.toString()));

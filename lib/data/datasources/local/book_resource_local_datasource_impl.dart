@@ -27,13 +27,21 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
    * -------------------------------------------------- */
 
   @override
-  Future<bool> existsByFileHash(String hash) async {
+  Future<bool> existsByFileHash(String hash, {int? bookId}) async {
     final db = await _db.database;
+    final List<Object> whereArgs = [hash];
+    var whereClause = 'file_hash = ?';
+
+    if (bookId != null) {
+      whereClause += ' AND book_id = ?';
+      whereArgs.add(bookId);
+    }
+
     final result = await db.query(
       _table,
       columns: ['id'],
-      where: 'file_hash = ?',
-      whereArgs: [hash],
+      where: whereClause,
+      whereArgs: whereArgs,
       limit: 1,
     );
     return result.isNotEmpty;

@@ -6,8 +6,6 @@ import 'package:injectable/injectable.dart';
 
 import 'epub_file_local_datasource.dart';
 
-/// Datasource để thao tác với epub, không liên quan gì tới database.
-/// Các vấn đề liên quan tới database được xử lý trong book_resource_local_datasource
 @LazySingleton(as: EpubFileLocalDataSource)
 class EpubFileLocalDataSourceImpl implements EpubFileLocalDataSource {
   final Directory _documentsDir;

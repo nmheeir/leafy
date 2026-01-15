@@ -49,9 +49,8 @@ class BookScreen extends StatelessWidget {
       state.maybeWhen(
         success: (resources) async {
           if (resources.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("No book content found")),
-            );
+            // Trigger import if no resources
+            resourceCubit.importFiles();
             return;
           }
           // Simple logic: pick first resource
@@ -67,10 +66,6 @@ class BookScreen extends StatelessWidget {
                         EpubReaderScreen(filePath: resources[0].filePath!),
                   ),
                 );
-
-            final isJustFinished = result?['is_just_finished'];
-
-            print('is just finished: $isJustFinished');
 
             if (context.mounted &&
                 result != null &&
@@ -99,9 +94,8 @@ class BookScreen extends StatelessWidget {
             // Trigger download
             resourceCubit.downloadResource(resource);
           } else {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text("Cannot open book")));
+            // Resource exists but no valid file or URL -> Import backup
+            resourceCubit.importFiles();
           }
         },
         orElse: () {
@@ -191,11 +185,16 @@ class BookScreen extends StatelessWidget {
 
                               if (state.status == BookStatus.unfinished) {
                                 resourceState.maybeWhen(
+                                  importing: () {
+                                    dynamicChangeStatusText = "Importing...";
+                                  },
                                   downloading: (_, progress) {
                                     downloadProgress = progress;
                                   },
                                   success: (resources) {
-                                    if (resources.isNotEmpty) {
+                                    if (resources.isEmpty) {
+                                      dynamicChangeStatusText = "Import Book";
+                                    } else {
                                       final resource = resources.first;
                                       final fileExists =
                                           resource.filePath != null &&
@@ -210,6 +209,8 @@ class BookScreen extends StatelessWidget {
                                             .loadProgress(resource.filePath!);
                                       } else if (resource.url != null) {
                                         dynamicChangeStatusText = "Download";
+                                      } else {
+                                        dynamicChangeStatusText = "Import Book";
                                       }
                                     }
                                   },

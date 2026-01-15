@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:crypto/crypto.dart';
 import 'package:diacritic/diacritic.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/core/utils/helpers/file_helper.dart';
 import 'package:leafy/domain/book_resource/repositories/book_resource_repository.dart';
 import 'package:leafy/domain/file_import/entities/file_temporary_object.dart';
 import 'package:leafy/domain/file_import/entities/processed_file.dart';
@@ -20,8 +20,9 @@ class FileProcessingServiceImpl implements FileProcessingService {
 
   @override
   Future<Either<Failure, List<ProcessedFile>>> processFiles(
-    List<FileTemporaryObject> files,
-  ) async {
+    List<FileTemporaryObject> files, {
+    int? bookId,
+  }) async {
     final List<ProcessedFile> processedFiles = [];
 
     try {
@@ -34,14 +35,13 @@ class FileProcessingServiceImpl implements FileProcessingService {
           continue;
         }
 
-        // Hashing can be slow for large files. In PROD, might utilize isolates.
-        // For now, running on main thread as per requirement simplicity but keep in mind.
-        // Requirement says: "If file > 100MB, accept slow processing."
-
-        final hash = await _calculateMD5(ioFile);
+        final hash = await hashFile(ioFile);
 
         // 2. Duplicate Check
-        final existsResult = await _resourceRepository.existsByFileHash(hash);
+        final existsResult = await _resourceRepository.existsByFileHash(
+          hash,
+          bookId: bookId,
+        );
 
         // Handling Either:
         final exists = existsResult.getOrElse(
@@ -90,18 +90,6 @@ class FileProcessingServiceImpl implements FileProcessingService {
       return Right(processedFiles);
     } catch (e) {
       return Left(Failure.unexpected(e.toString()));
-    }
-  }
-
-  Future<String> _calculateMD5(File file) async {
-    try {
-      // Chunked reading for memory efficiency
-      final stream = file.openRead();
-      final digest = await md5.bind(stream).first;
-      return digest.toString();
-    } catch (e) {
-      // Fallback or rethrow
-      return '';
     }
   }
 

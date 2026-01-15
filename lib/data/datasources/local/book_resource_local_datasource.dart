@@ -15,7 +15,7 @@ abstract class BookResourceLocalDatasource {
   Future<void> deleteByUuid(String uuid);
 
   Future<bool> existsByUuid(String uuid);
-  Future<bool> existsByFileHash(String hash);
+  Future<bool> existsByFileHash(String hash, {int? bookId});
 
   Future<BookResourceModel?> findByPath(String path);
 

@@ -515,13 +515,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i407.BookResourceCubit>(
       () => _i407.BookResourceCubit(
+        gh<_i974.Logger>(),
         gh<_i452.GetBookResourcesUseCase>(),
-        gh<_i1072.EpubFileRepository>(),
         gh<_i589.UpdateBookResourceFileUseCase>(),
         gh<_i568.PickLocalFilesUseCase>(),
         gh<_i390.ProcessLocalFilesUseCase>(),
         gh<_i623.SaveImportedResourceUseCase>(),
         gh<_i47.DeleteBookResourceUseCase>(),
+        gh<_i765.GetEpubUseCase>(),
       ),
     );
     return this;

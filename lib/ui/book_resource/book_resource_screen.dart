@@ -2,9 +2,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/utils/helpers/file_helper.dart';
 import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 class BookResourceScreen extends StatelessWidget {
@@ -18,7 +21,7 @@ class BookResourceScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Book Resources')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          context.read<BookResourceCubit>().importFiles();
+          context.bookResourceCubit.importFiles();
         },
         label: const Text('Add Resource'),
         icon: const Icon(Symbols.add),
@@ -48,7 +51,7 @@ class BookResourceScreen extends StatelessWidget {
           return state.when(
             initial: () => const SizedBox(),
             loading: () => const Center(child: CircularProgressIndicator()),
-            downloading: (_, __) =>
+            downloading: (_, _) =>
                 const Center(child: CircularProgressIndicator()), // Or overlay
             importing: () =>
                 _buildImportingState(context), // Show Shimmer + Content?
@@ -76,7 +79,7 @@ class BookResourceScreen extends StatelessWidget {
     return ListView.builder(
       itemCount: 5,
       padding: const EdgeInsets.all(16),
-      itemBuilder: (_, __) => const _ShimmerCard(),
+      itemBuilder: (_, _) => const _ShimmerCard(),
     );
   }
 
@@ -85,13 +88,17 @@ class BookResourceScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Symbols.folder_open, size: 80, color: Colors.grey),
+          Icon(
+            Symbols.folder_open,
+            size: 80,
+            color: context.colorScheme.onSurface,
+          ),
           const SizedBox(height: 16),
           Text(
             'No resources found',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(color: Colors.grey),
+            style: context.textTheme.titleMedium?.copyWith(
+              color: context.colorScheme.onSurface,
+            ),
           ),
           const SizedBox(height: 8),
           const Text('Tap "+" to import files'),
@@ -104,7 +111,6 @@ class BookResourceScreen extends StatelessWidget {
     BuildContext context,
     List<BookResource> resources,
   ) {
-    final theme = Theme.of(context);
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: resources.length,
@@ -125,7 +131,7 @@ class BookResourceScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  _buildFormatIcon(resource.format, theme),
+                  _buildFormatIcon(resource.format, context),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -133,15 +139,15 @@ class BookResourceScreen extends StatelessWidget {
                       children: [
                         Text(
                           resource.filePath?.split('/').last ?? 'Unknown File',
-                          style: theme.textTheme.titleMedium,
+                          style: context.textTheme.titleMedium,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          _formatSize(resource.fileSize ?? 0),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: Colors.grey,
+                          formatSize(resource.fileSize ?? 0),
+                          style: context.textTheme.bodySmall?.copyWith(
+                            color: context.colorScheme.onSurface,
                           ),
                         ),
                       ],
@@ -150,14 +156,13 @@ class BookResourceScreen extends StatelessWidget {
                   if (resource.createdAt != null) ...[
                     Text(
                       DateFormat('MMM d').format(resource.createdAt!),
-                      style: theme.textTheme.labelSmall,
+                      style: context.textTheme.labelSmall,
                     ),
                     const SizedBox(width: 8),
                   ],
                   IconButton(
                     icon: const Icon(Symbols.delete, color: Colors.grey),
                     onPressed: () {
-                      final cubit = context.read<BookResourceCubit>();
                       showDialog(
                         context: context,
                         builder: (dialogContext) => AlertDialog(
@@ -173,7 +178,9 @@ class BookResourceScreen extends StatelessWidget {
                             TextButton(
                               onPressed: () {
                                 Navigator.pop(dialogContext);
-                                cubit.deleteResource(resource.uuid);
+                                context.bookResourceCubit.deleteResource(
+                                  resource.uuid,
+                                );
                               },
                               child: const Text(
                                 'Delete',
@@ -194,45 +201,39 @@ class BookResourceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFormatIcon(BookResourceFormat format, ThemeData theme) {
+  Widget _buildFormatIcon(BookResourceFormat format, BuildContext context) {
     IconData icon;
     Color color;
     switch (format) {
       case BookResourceFormat.epub:
         icon = Symbols.book;
-        color = Colors.orange;
+        color = context.colorScheme.primary;
         break;
       case BookResourceFormat.pdf:
         icon = Symbols.picture_as_pdf;
-        color = Colors.red;
+        color = context.colorScheme.primary;
         break;
       case BookResourceFormat.audio:
         icon = Symbols.audio_file;
-        color = Colors.blue;
+        color = context.colorScheme.primary;
         break;
       default:
         icon = Symbols.description;
-        color = theme.colorScheme.primary;
+        color = context.colorScheme.primary;
     }
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(icon, color: color),
     );
   }
-
-  String _formatSize(int bytes) {
-    if (bytes <= 0) return "0 B";
-    if (bytes < 1024) return "$bytes B";
-    if (bytes < 1024 * 1024) return "${(bytes / 1024).toStringAsFixed(1)} KB";
-    return "${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB";
-  }
 }
 
+//NOTE: Shimmer placeholder
 class _ShimmerCard extends StatelessWidget {
   const _ShimmerCard();
 
@@ -243,14 +244,10 @@ class _ShimmerCard extends StatelessWidget {
       height: 80,
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.1),
+        color: context.colorScheme.surface.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Center(child: CircularProgressIndicator.adaptive()),
-      // User asked for "Skeleton Shimmer" effect.
-      // If I don't have 'shimmer' package, I can't do real shimmer easily without code.
-      // I'll assume I can use a container with light grey as placeholder or usage simple animation.
-      // For now, static placeholder for "Shimmer Loading" logic.
     );
   }
 }

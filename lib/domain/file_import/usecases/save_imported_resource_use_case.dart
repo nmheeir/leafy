@@ -44,24 +44,13 @@ class SaveImportedResourceUseCase
         uuid: resourceUuid,
         format: format,
         filePath: file.savedPath,
-        storageType: StorageType.local, // Assuming StorageType.local exists
+        storageType: StorageType.local,
         fileHash: file.hash,
         fileSize: file.size,
-        // language: null, // could detect later
       );
 
       // Handling Either with fold or extensions
       if (addResult.isLeft()) {
-        // If one fails, do we stop or continue?
-        // Flow says: "Step 2: ... Execute INSERT ... ERROR Handling?"
-        // Usually continue or return partial.
-        // For atomic operation validation, we might want to return Left if any fails,
-        // or return list of successes.
-        // Flow 8.3 doesn't explicitly specify error strategy for batch DB insert failure.
-        // I will continue and log/ignore, or return failure for that item.
-        // The return type is Either<Failure, List<BookResource>>.
-        // If I encounter a DB failure, I'll log it (if I had a logger) and assume this file failed.
-        // If ALL fail, I return Left. If SOME succeed, I return Right(list).
         continue;
       }
 
@@ -70,25 +59,14 @@ class SaveImportedResourceUseCase
       ); // Should not throw due to isLeft check
 
       // 2. Insert into 'reader_progress' with 0% logic
-      final progressResult = await _repository.saveReaderProgress(
-        resourceUuid: resourceUuid,
-        locator: '', // Empty locator for start
-        progress: 0.0,
-        lastReadAt: DateTime.now(),
-      );
+      // final progressResult = await _repository.saveReaderProgress(
+      //   resourceUuid: resourceUuid,
+      //   locator: '', // Empty locator for start
+      //   progress: 0.0,
+      //   lastReadAt: DateTime.now(),
+      // );
 
-      if (progressResult.isRight()) {
-        addedResources.add(resource);
-      } else {
-        // If progress fails, we technically have an orphan resource (resource without progress).
-        // For "Safety", maybe delete resource?
-        // Flow 8.3 says "Step 2... Step 3... Step 4 Commit".
-        // Since we are not in a single DB Transaction block here (repository abstraction),
-        // we can't rollback easily without explicit delete.
-        // For MVP/feature-first, we accept this risk or add delete logic.
-        // I'll add the resource to list anyway as it IS added to DB.
-        addedResources.add(resource);
-      }
+      addedResources.add(resource);
     }
 
     if (addedResources.isEmpty && params.processedFiles.isNotEmpty) {
@@ -117,12 +95,6 @@ class SaveImportedResourceUseCase
       case 'wav':
         return BookResourceFormat.audio;
       default:
-        // Default fallback or throw?
-        // Flow 8.1 filtered allowed extensions.
-        // If unknown, fallback to epub or specific 'unknown'?
-        // Enum doesn't have unknown.
-        // Let's assume pdf or epub as safe default or error?
-        // Given filter, we should cover all.
         return BookResourceFormat.epub;
     }
   }

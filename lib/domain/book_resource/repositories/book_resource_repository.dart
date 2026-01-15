@@ -69,7 +69,10 @@ abstract class BookResourceRepository {
    * -------------------------------------------------- */
 
   /// Kiểm tra file đã tồn tại trong DB chưa (tránh duplicate)
-  Future<Either<Failure, bool>> existsByFileHash(String fileHash);
+  Future<Either<Failure, bool>> existsByFileHash(
+    String fileHash, {
+    int? bookId,
+  });
 
   /// Kiểm tra UUID đã tồn tại chưa
   Future<Either<Failure, bool>> existsByUuid(String uuid);

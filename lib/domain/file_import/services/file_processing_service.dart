@@ -5,6 +5,7 @@ import 'package:leafy/domain/file_import/entities/processed_file.dart';
 
 abstract class FileProcessingService {
   Future<Either<Failure, List<ProcessedFile>>> processFiles(
-    List<FileTemporaryObject> files,
-  );
+    List<FileTemporaryObject> files, {
+    int? bookId,
+  });
 }
