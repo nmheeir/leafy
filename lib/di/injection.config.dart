@@ -43,6 +43,9 @@ import '../data/datasources/remote/gutendex_remote_datasource/gutendex_remote_da
 import '../data/datasources/remote/network_file_datasource.dart' as _i798;
 import '../data/datasources/remote/network_file_datasource_impl.dart' as _i643;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
+import '../data/file_import/services/file_picker_service_impl.dart' as _i328;
+import '../data/file_import/services/file_processing_service_impl.dart'
+    as _i503;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
 import '../data/repositories/epub_file_repository_impl.dart' as _i528;
@@ -85,6 +88,11 @@ import '../domain/epub_file/usecases/open_network_book.dart' as _i911;
 import '../domain/epub_file/usecases/parse_epub.dart' as _i880;
 import '../domain/epub_reader/repositories/epub_reader_repository.dart'
     as _i925;
+import '../domain/file_import/services/file_picker_service.dart' as _i255;
+import '../domain/file_import/services/file_processing_service.dart' as _i119;
+import '../domain/file_import/usecases/pick_local_files_use_case.dart' as _i568;
+import '../domain/file_import/usecases/process_local_files_use_case.dart'
+    as _i390;
 import '../domain/gutendex/repositories/gutendex_repository.dart' as _i844;
 import '../domain/gutendex/usecases/gtd_get_book.dart' as _i433;
 import '../domain/gutendex/usecases/gtd_get_books.dart' as _i750;
@@ -203,6 +211,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
     );
+    gh.lazySingleton<_i255.FilePickerService>(
+      () => _i328.FilePickerServiceImpl(),
+    );
     gh.lazySingleton<_i722.EpubReaderLocalDataSource>(
       () => _i722.EpubReaderLocalDataSourceImpl(),
     );
@@ -230,6 +241,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i625.OpenLibraryService>(
       () => _i625.OpenLibraryService(gh<_i361.Dio>(), gh<_i974.Logger>()),
+    );
+    gh.lazySingleton<_i568.PickLocalFilesUseCase>(
+      () => _i568.PickLocalFilesUseCase(gh<_i255.FilePickerService>()),
     );
     gh.lazySingleton<_i925.EpubReaderRepository>(
       () => _i608.EpubBookRepositoryImpl(gh<_i722.EpubReaderLocalDataSource>()),
@@ -320,6 +334,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i919.ReaderProgressRepositoryImpl(
         gh<_i770.ReaderProgressLocalDatasource>(),
       ),
+    );
+    gh.lazySingleton<_i119.FileProcessingService>(
+      () =>
+          _i503.FileProcessingServiceImpl(gh<_i1042.BookResourceRepository>()),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),
@@ -448,6 +466,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i909.BulkDeleteUseCase>(),
         gh<_i693.AddBookResourceUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
+      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
     gh.factory<_i407.BookResourceCubit>(
       () => _i407.BookResourceCubit(
