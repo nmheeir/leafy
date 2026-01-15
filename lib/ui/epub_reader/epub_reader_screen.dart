@@ -234,10 +234,12 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                       error: (data) => _buildError(data.message),
                       loaded: (data) {
                         _totalDisplayItems = data.displayItems.length;
-                        return _buildContinuousReaderBody(
-                          context,
-                          data.displayItems,
-                          data.currentItemIndex,
+                        return Positioned.fill(
+                          child: _buildContinuousReaderBody(
+                            context,
+                            data.displayItems,
+                            data.currentItemIndex,
+                          ),
                         );
                       },
                     ),
