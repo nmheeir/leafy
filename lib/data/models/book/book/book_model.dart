@@ -82,7 +82,8 @@ abstract class BookModel with _$BookModel {
       status: entity.status,
       subtitle: entity.subtitle,
       tags: entity.tags,
-      // TODO: còn start date và finished date
+      startDate: entity.startDate,
+      finishDate: entity.finishDate,
     );
   }
 
@@ -111,6 +112,8 @@ abstract class BookModel with _$BookModel {
       // TODO: reading thành một bảng riêng. cần sửa lại book entity không nhận reading, thêm một entity mới là reading, ở đây sử dụng mảng rỗng để tránh lỗi
       readings: [],
       dateModified: dateModified,
+      startDate: startDate,
+      finishDate: finishDate,
     );
   }
 }

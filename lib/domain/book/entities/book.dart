@@ -29,6 +29,8 @@ class Book extends Equatable {
   final List<Reading> readings;
   final DateTime dateAdded;
   final DateTime dateModified;
+  final DateTime? startDate;
+  final DateTime? finishDate;
 
   // NOTE: cần xem xét lại việc viết factory empty ở đây có vi phạm clean architecture hay không, hiện tại dùng tạm
   factory Book.empty({DateTime? now}) {
@@ -56,7 +58,9 @@ class Book extends Equatable {
       hasCover: false,
       readings: const [],
       dateAdded: current,
-      dateModified: current,
+      dateModified: current, // fixed
+      startDate: null,
+      finishDate: null,
     );
   }
 
@@ -83,6 +87,8 @@ class Book extends Equatable {
     required this.readings,
     required this.dateAdded,
     required this.dateModified,
+    this.startDate,
+    this.finishDate,
   });
 
   Book copyWith({
@@ -108,6 +114,8 @@ class Book extends Equatable {
     List<Reading>? readings,
     DateTime? dateAdded,
     DateTime? dateModified,
+    DateTime? startDate,
+    DateTime? finishDate,
   }) {
     return Book(
       id: id ?? this.id,
@@ -132,6 +140,8 @@ class Book extends Equatable {
       readings: readings ?? this.readings,
       dateAdded: dateAdded ?? this.dateAdded,
       dateModified: dateModified ?? this.dateModified,
+      startDate: startDate ?? this.startDate,
+      finishDate: finishDate ?? this.finishDate,
     );
   }
 
@@ -159,5 +169,7 @@ class Book extends Equatable {
     readings,
     dateAdded,
     dateModified,
+    startDate,
+    finishDate,
   ];
 }

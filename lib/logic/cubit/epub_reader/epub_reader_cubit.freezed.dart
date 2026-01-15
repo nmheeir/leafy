@@ -29,20 +29,20 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'TestCubitState()';
+  return 'EpubReaderCubitState()';
 }
 
 
 }
 
 /// @nodoc
-class $TestCubitStateCopyWith<$Res>  {
-$TestCubitStateCopyWith(EpubReaderCubitState _, $Res Function(EpubReaderCubitState) __);
+class $EpubReaderCubitStateCopyWith<$Res>  {
+$EpubReaderCubitStateCopyWith(EpubReaderCubitState _, $Res Function(EpubReaderCubitState) __);
 }
 
 
 /// Adds pattern-matching-related methods to [EpubReaderCubitState].
-extension TestCubitStatePatterns on EpubReaderCubitState {
+extension EpubReaderCubitStatePatterns on EpubReaderCubitState {
 /// A variant of `map` that fallback to returning `orElse`.
 ///
 /// It is equivalent to doing:
@@ -212,7 +212,7 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'TestCubitState.initial()';
+  return 'EpubReaderCubitState.initial()';
 }
 
 
@@ -230,7 +230,7 @@ class _Loading implements EpubReaderCubitState {
 
  final  double progress;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -249,14 +249,14 @@ int get hashCode => Object.hash(runtimeType,progress);
 
 @override
 String toString() {
-  return 'TestCubitState.loading(progress: $progress)';
+  return 'EpubReaderCubitState.loading(progress: $progress)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$LoadingCopyWith<$Res> implements $TestCubitStateCopyWith<$Res> {
+abstract mixin class _$LoadingCopyWith<$Res> implements $EpubReaderCubitStateCopyWith<$Res> {
   factory _$LoadingCopyWith(_Loading value, $Res Function(_Loading) _then) = __$LoadingCopyWithImpl;
 @useResult
 $Res call({
@@ -275,7 +275,7 @@ class __$LoadingCopyWithImpl<$Res>
   final _Loading _self;
   final $Res Function(_Loading) _then;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? progress = null,}) {
   return _then(_Loading(
@@ -296,7 +296,7 @@ class _Error implements EpubReaderCubitState {
 
  final  String message;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -315,14 +315,14 @@ int get hashCode => Object.hash(runtimeType,message);
 
 @override
 String toString() {
-  return 'TestCubitState.error(message: $message)';
+  return 'EpubReaderCubitState.error(message: $message)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$ErrorCopyWith<$Res> implements $TestCubitStateCopyWith<$Res> {
+abstract mixin class _$ErrorCopyWith<$Res> implements $EpubReaderCubitStateCopyWith<$Res> {
   factory _$ErrorCopyWith(_Error value, $Res Function(_Error) _then) = __$ErrorCopyWithImpl;
 @useResult
 $Res call({
@@ -341,7 +341,7 @@ class __$ErrorCopyWithImpl<$Res>
   final _Error _self;
   final $Res Function(_Error) _then;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(_Error(
@@ -371,7 +371,7 @@ class _Loaded implements EpubReaderCubitState {
  final  int currentChapterIndex;
 @JsonKey() final  int currentItemIndex;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
@@ -390,14 +390,14 @@ int get hashCode => Object.hash(runtimeType,book,const DeepCollectionEquality().
 
 @override
 String toString() {
-  return 'TestCubitState.loaded(book: $book, displayItems: $displayItems, currentChapterIndex: $currentChapterIndex, currentItemIndex: $currentItemIndex)';
+  return 'EpubReaderCubitState.loaded(book: $book, displayItems: $displayItems, currentChapterIndex: $currentChapterIndex, currentItemIndex: $currentItemIndex)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$LoadedCopyWith<$Res> implements $TestCubitStateCopyWith<$Res> {
+abstract mixin class _$LoadedCopyWith<$Res> implements $EpubReaderCubitStateCopyWith<$Res> {
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
@@ -416,7 +416,7 @@ class __$LoadedCopyWithImpl<$Res>
   final _Loaded _self;
   final $Res Function(_Loaded) _then;
 
-/// Create a copy of TestCubitState
+/// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? book = null,Object? displayItems = null,Object? currentChapterIndex = null,Object? currentItemIndex = null,}) {
   return _then(_Loaded(

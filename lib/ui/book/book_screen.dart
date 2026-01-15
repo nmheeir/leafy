@@ -24,6 +24,7 @@ import 'package:leafy/di/injection.dart';
 import 'dart:io';
 import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
 import 'package:leafy/logic/cubit/book_progress/book_progress_state.dart';
+import 'package:leafy/ui/book/widgets/celebration_dialog.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -48,7 +49,7 @@ class BookScreen extends StatelessWidget {
 
       // Check current resources
       state.maybeWhen(
-        success: (resources) {
+        success: (resources) async {
           if (resources.isEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("No book content found")),
@@ -61,12 +62,26 @@ class BookScreen extends StatelessWidget {
               resource.filePath!.isNotEmpty &&
               File(resource.filePath!).existsSync()) {
             // File exists -> Open Reader
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) =>
-                    EpubReaderScreen(filePath: resources[0].filePath!),
-              ),
-            );
+            final result = await Navigator.of(context)
+                .push<Map<String, dynamic>>(
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        EpubReaderScreen(filePath: resources[0].filePath!),
+                  ),
+                );
+
+            final isJustFinished = result?['is_just_finished'];
+
+            print('is just finished: ${isJustFinished}');
+
+            if (context.mounted &&
+                result != null &&
+                result['is_just_finished'] == true) {
+              showDialog(
+                context: context,
+                builder: (context) => const CelebrationDialog(),
+              );
+            }
           } else if (resource.url != null) {
             // Determine if we need to download
             // Trigger download

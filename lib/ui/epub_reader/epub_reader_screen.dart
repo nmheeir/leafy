@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
 import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
@@ -59,6 +58,8 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
 
   bool _showControls = false;
   bool _isProgrammaticScroll = false;
+  bool _canPop = false;
+  bool _hasMarkedFinished = false;
   late AnimationController _controlsAnimController;
 
   int _totalDisplayItems = 1;
@@ -103,6 +104,11 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       } else {
         _chapterProgressNotifier.value = 1.0;
       }
+    }
+
+    if (_chapterProgressNotifier.value >= 1.0 && !_hasMarkedFinished) {
+      _hasMarkedFinished = true;
+      context.epubReaderCubit.markBookAsFinished();
     }
     // ------------------------
 
@@ -209,14 +215,22 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     return BlocBuilder<EpubReaderCubit, EpubReaderCubitState>(
       builder: (context, state) {
         return PopScope(
-          canPop: true,
-          onPopInvokedWithResult: (didPop, result) {
+          canPop: _canPop,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) return;
+
+            final progress = _chapterProgressNotifier.value;
             // Lưu tiến trình khi thoát màn hình
-            if (didPop) {
-              context.epubReaderCubit.saveProgress(
-                _chapterProgressNotifier.value,
-              );
-              context.epubReaderCubit.endSession();
+            await context.epubReaderCubit.saveProgress(progress);
+            await context.epubReaderCubit.endSession();
+
+            if (context.mounted) {
+              setState(() {
+                _canPop = true;
+              });
+              Navigator.of(
+                context,
+              ).pop({'is_just_finished': _hasMarkedFinished});
             }
           },
           child: Scaffold(
@@ -384,7 +398,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
+            onPressed: () => Navigator.of(context).maybePop(),
           ),
           Expanded(
             child: state.maybeMap(

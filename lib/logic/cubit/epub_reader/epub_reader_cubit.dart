@@ -9,6 +9,7 @@ import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
 import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_path.dart';
 import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
 import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_path.dart';
+import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
 
@@ -21,6 +22,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final SaveReaderProgressByPathUseCase _saveReaderProgressByPathUseCase;
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
   final LogReadingSessionByPathUseCase _logSessionUseCase;
+  final MarkBookFinishedUseCase _markBookFinishedUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
@@ -45,6 +47,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     this._saveReaderProgressByPathUseCase,
     this._getReaderProgressByPathUseCase,
     this._logSessionUseCase,
+    this._markBookFinishedUseCase,
   ) : super(EpubReaderCubitState.initial());
 
   void selectChapter(int index) {
@@ -132,11 +135,26 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
 
     final currentItemIndex = currentState.currentItemIndex;
 
+    // Auto mark as finished if progress is 1.0
+    if (progress >= 1.0) {
+      markBookAsFinished();
+    }
+
     await _saveReaderProgressByPathUseCase(
       filePath: _currentFilePath!,
       locator: 'item:$currentItemIndex',
       progress: progress,
       lastReadAt: DateTime.now(),
+    );
+  }
+
+  Future<void> markBookAsFinished() async {
+    if (_currentFilePath == null) return;
+    _logger.d('Marking book as finished...');
+    final result = await _markBookFinishedUseCase(_currentFilePath!);
+    result.fold(
+      (failure) => _logger.e('Failed to mark book as finished: $failure'),
+      (_) => _logger.i('Book marked as finished successfully'),
     );
   }
 
