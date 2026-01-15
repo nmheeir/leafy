@@ -157,24 +157,23 @@ class BookResourceScreen extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Symbols.delete, color: Colors.grey),
                     onPressed: () {
+                      final cubit = context.read<BookResourceCubit>();
                       showDialog(
                         context: context,
-                        builder: (context) => AlertDialog(
+                        builder: (dialogContext) => AlertDialog(
                           title: const Text('Delete Resource'),
                           content: const Text(
                             'Are you sure you want to delete this resource?',
                           ),
                           actions: [
                             TextButton(
-                              onPressed: () => Navigator.pop(context),
+                              onPressed: () => Navigator.pop(dialogContext),
                               child: const Text('Cancel'),
                             ),
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context);
-                                context
-                                    .read<BookResourceCubit>()
-                                    .deleteResource(resource.uuid);
+                                Navigator.pop(dialogContext);
+                                cubit.deleteResource(resource.uuid);
                               },
                               child: const Text(
                                 'Delete',
