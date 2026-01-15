@@ -18,6 +18,7 @@ import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.da
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
@@ -376,8 +377,15 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     _attachListeners();
 
     // 3. Xử lý logic Cover (Ảnh bìa)
+    // Cần initialize để clear dữ liệu cũ từ book trước đó (do Cubit được share ở level App)
+    context.read<EditBookCoverCubit>().initialize(
+      currentCover: args.localCoverBytes,
+      currentBlurHash: args.initialBook.blurHash,
+    );
+
     if (args.localCoverBytes != null) {
       // Ưu tiên 1: Dùng ảnh local (Edit mode hoặc Import file)
+      // Đã nạp qua initialize ở trên, nhưng gọi lại setCoverImage để trigger logic success/blurhash nếu cần
       context.editBookCoverCubit.setCoverImage(args.localCoverBytes);
       context.editBookCubit.setHasCover(true);
     } else if (args.remoteCoverUrl != null) {
@@ -386,9 +394,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
         source: args.remoteCoverUrl!,
         isGutenbergUrl: args.isGutenbergUrl,
       );
-    } else {
-      // Không có cover
-      context.editBookCoverCubit.setCoverImage(null);
     }
   }
 

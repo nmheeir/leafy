@@ -151,24 +151,8 @@ class _CoverViewEditState extends State<CoverViewEdit> {
   @override
   void initState() {
     super.initState();
-    // FIX LỖI CHỚP NHÁY:
-    // Lấy dữ liệu hiện tại từ EditBookCubit (đã có sẵn khi vào màn hình)
-    // và nạp ngay vào EditBookCoverCubit trước khi UI kịp vẽ frame đầu tiên.
-    final editBookState = context.editBookCubit.state;
-
-    // Lưu ý: Giả sử EditBookState có trường 'cover' (Uint8List?) lưu ảnh raw.
-    // Nếu EditBookState chỉ lưu đường dẫn file, bạn cần xử lý đọc file ở đây
-    // hoặc chỉ reset về null để tránh hiện ảnh cũ.
-    // Ở đây tôi giả định bạn muốn clear ảnh cũ đi để tránh hiện sai:
-
-    context.read<EditBookCoverCubit>().initialize(
-      currentCover: null,
-      currentBlurHash: editBookState.blurHash,
-    );
-
-    // NẾU EditBookCubit đã có sẵn bytes ảnh (ví dụ state.coverBytes), hãy truyền vào:
-    // currentCover: editBookState.coverBytes
-    // Để người dùng thấy ngay ảnh hiện tại mà không cần chờ load.
+    // Do not initialize EditBookCoverCubit here anymore.
+    // It is moved to BookEditorScreen.initState to happen exactly once.
   }
 
   @override
@@ -255,6 +239,13 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                               fit: BoxFit.contain,
                               width: double.infinity,
                               height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      color: Colors.red,
+                                    ),
+                                  ),
                             ),
                           ),
                         ),
