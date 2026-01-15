@@ -1,4 +1,13 @@
-enum BookStatus { finished, inProgress, forLater, unfinished }
+// TODO: Đổi tên enum thành BookReadingStatus
+enum BookStatus {
+  finished, // Đã đọc (progress = 100)
+
+  inProgress, // Đang đọc (progress > 0)
+
+  forLater, // Để đọc sau
+
+  unfinished, // Sách chưa được đọc (chưa tải hoặc progress = 0)
+}
 
 extension BookStatusExtension on BookStatus {
   int get value {

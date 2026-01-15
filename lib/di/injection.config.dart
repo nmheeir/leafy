@@ -165,7 +165,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i774.ThemeBloc>(() => _i774.ThemeBloc());
     gh.factory<_i66.BookListsOrderCubit>(() => _i66.BookListsOrderCubit());
     gh.factory<_i744.BookTabIndexCubit>(() => _i744.BookTabIndexCubit());
-    gh.factory<_i754.CurrentBookCubit>(() => _i754.CurrentBookCubit());
     gh.factory<_i185.DefaultBookFormatCubit>(
       () => _i185.DefaultBookFormatCubit(),
     );
@@ -278,11 +277,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i664.GetBookResourceByPathUseCase>(
       () => _i664.GetBookResourceByPathUseCase(
-        gh<_i1042.BookResourceRepository>(),
-      ),
-    );
-    gh.lazySingleton<_i615.SaveReaderProgressByPathUseCase>(
-      () => _i615.SaveReaderProgressByPathUseCase(
         gh<_i1042.BookResourceRepository>(),
       ),
     );
@@ -401,8 +395,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1042.BookResourceRepository>(),
       ),
     );
+    gh.lazySingleton<_i615.SaveReaderProgressByPathUseCase>(
+      () => _i615.SaveReaderProgressByPathUseCase(
+        gh<_i1042.BookResourceRepository>(),
+        gh<_i29.BookRepository>(),
+      ),
+    );
     gh.factory<_i660.AddBookUseCase>(
       () => _i660.AddBookUseCase(gh<_i29.BookRepository>()),
+    );
+    gh.factory<_i754.CurrentBookCubit>(
+      () => _i754.CurrentBookCubit(gh<_i29.BookRepository>()),
     );
     gh.lazySingleton<_i770.LogReadingSessionByPathUseCase>(
       () => _i770.LogReadingSessionByPathUseCase(

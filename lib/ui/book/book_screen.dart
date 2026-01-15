@@ -1,10 +1,17 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
+import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
+import 'package:leafy/logic/cubit/book_progress/book_progress_state.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
@@ -13,18 +20,11 @@ import 'package:leafy/ui/book/widgets/book_detailed_date_added_update.dart';
 import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
 import 'package:leafy/ui/book/widgets/book_status_detail.dart';
 import 'package:leafy/ui/book/widgets/book_title_detail.dart';
+import 'package:leafy/ui/book/widgets/celebration_dialog.dart';
 import 'package:leafy/ui/book/widgets/cover_view.dart';
-import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
+import 'package:leafy/ui/epub_reader/epub_reader_screen.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 import 'package:leafy/ui/extensions/book_status_extension.dart';
-import 'package:leafy/ui/epub_reader/epub_reader_screen.dart';
-import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
-import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
-import 'package:leafy/di/injection.dart';
-import 'dart:io';
-import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
-import 'package:leafy/logic/cubit/book_progress/book_progress_state.dart';
-import 'package:leafy/ui/book/widgets/celebration_dialog.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -41,9 +41,7 @@ class BookScreen extends StatelessWidget {
     BookStatus status,
     Book book,
   ) async {
-    int? rating;
-
-    if (status == BookStatus.unfinished) {
+    if (status == BookStatus.unfinished || status == BookStatus.inProgress) {
       final resourceCubit = context.read<BookResourceCubit>();
       final state = resourceCubit.state;
 
@@ -72,15 +70,29 @@ class BookScreen extends StatelessWidget {
 
             final isJustFinished = result?['is_just_finished'];
 
-            print('is just finished: ${isJustFinished}');
+            print('is just finished: $isJustFinished');
 
             if (context.mounted &&
                 result != null &&
                 result['is_just_finished'] == true) {
-              showDialog(
-                context: context,
-                builder: (context) => const CelebrationDialog(),
-              );
+              // Refresh book status
+              await context.read<CurrentBookCubit>().refreshBook();
+
+              if (context.mounted) {
+                showDialog(
+                  context: context,
+                  builder: (context) => const CelebrationDialog(),
+                );
+              }
+            } else {
+              // Refresh anyway to get partial progress or status updates
+              if (context.mounted) {
+                context.read<CurrentBookCubit>().refreshBook();
+                // Also refresh progress if needed
+                context.read<BookProgressCubit>().loadProgress(
+                  resource.filePath!,
+                );
+              }
             }
           } else if (resource.url != null) {
             // Determine if we need to download
@@ -101,16 +113,7 @@ class BookScreen extends StatelessWidget {
       return;
     }
 
-    if (status == BookStatus.inProgress) {
-      rating = await showDialog<int?>(
-        context: context,
-        builder: (_) => const QuickRatingDialog(),
-      );
-    }
-
     if (!context.mounted) return;
-
-    context.bookActorCubit.changeReadingStatus(book, rating: rating);
   }
 
   @override
