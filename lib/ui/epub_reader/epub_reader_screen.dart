@@ -106,10 +106,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       }
     }
 
-    if (_chapterProgressNotifier.value >= 1.0 && !_hasMarkedFinished) {
-      _hasMarkedFinished = true;
-      context.epubReaderCubit.markBookAsFinished();
-    }
+    // ------------------------
     // ------------------------
 
     if (_isProgrammaticScroll) return;
@@ -220,6 +217,37 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             if (didPop) return;
 
             final progress = _chapterProgressNotifier.value;
+
+            // Check if finished when popping
+            if (progress >= 1.0) {
+              final shouldMarkFinished = await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Hoàn thành sách?'),
+                  content: const Text(
+                    'Bạn đã đọc đến cuối sách. Bạn có muốn đánh dấu là đã đọc xong không?',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context, false),
+                      child: const Text('Chưa xong'),
+                    ),
+                    FilledButton(
+                      onPressed: () => Navigator.pop(context, true),
+                      child: const Text('Đã xong'),
+                    ),
+                  ],
+                ),
+              );
+
+              if (shouldMarkFinished != true) {
+                return;
+              }
+
+              await context.epubReaderCubit.markBookAsFinished();
+              _hasMarkedFinished = true;
+            }
+
             // Lưu tiến trình khi thoát màn hình
             await context.epubReaderCubit.saveProgress(progress);
             await context.epubReaderCubit.endSession();
