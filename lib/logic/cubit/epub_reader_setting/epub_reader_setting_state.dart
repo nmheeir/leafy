@@ -24,6 +24,11 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(0.0) double letterSpacing,
     @Default(TextAlign.center) TextAlign textAlignment,
     @Default(TextAlign.center) TextAlign chapterAlignment,
+    @Default(0.5) double scrollFraction,
+    @Default(1.0) double sensitivity,
+    @Default(true) bool pullAnimation,
+    @Default(true) bool visibilityAnimation,
+    @Default(false) bool cutoutMargin,
   }) = _EpubReaderSettingState;
 
   factory EpubReaderSettingState.fromJson(Map<String, dynamic> json) =>

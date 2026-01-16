@@ -46,6 +46,11 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   chapterAlignment:
       $enumDecodeNullable(_$TextAlignEnumMap, json['chapterAlignment']) ??
       TextAlign.center,
+  scrollFraction: (json['scrollFraction'] as num?)?.toDouble() ?? 0.5,
+  sensitivity: (json['sensitivity'] as num?)?.toDouble() ?? 1.0,
+  pullAnimation: json['pullAnimation'] as bool? ?? true,
+  visibilityAnimation: json['visibilityAnimation'] as bool? ?? true,
+  cutoutMargin: json['cutoutMargin'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
@@ -71,6 +76,11 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'letterSpacing': instance.letterSpacing,
   'textAlignment': _$TextAlignEnumMap[instance.textAlignment]!,
   'chapterAlignment': _$TextAlignEnumMap[instance.chapterAlignment]!,
+  'scrollFraction': instance.scrollFraction,
+  'sensitivity': instance.sensitivity,
+  'pullAnimation': instance.pullAnimation,
+  'visibilityAnimation': instance.visibilityAnimation,
+  'cutoutMargin': instance.cutoutMargin,
 };
 
 const _$HorizontalGestureModeEnumMap = {

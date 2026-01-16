@@ -49,7 +49,7 @@ class _EpubReaderSettingsSheetState extends State<EpubReaderSettingsSheet>
   @override
   Widget build(BuildContext context) {
     // Height ~ 45% screen
-    final height = MediaQuery.of(context).size.height * 0.45;
+    final height = MediaQuery.of(context).size.height * 0.7;
 
     return Container(
       height: height,

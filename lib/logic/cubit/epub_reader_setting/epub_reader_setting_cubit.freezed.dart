@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EpubReaderSettingState {
 
- HorizontalGestureMode get horizontalGestureMode; double get sideMargin; double get verticalMargin; double get bottomBarMargin; int get customBrightness; ScreenOrientation get screenOrientation; bool get fullScreen; bool get keepScreenOn; bool get hideBarOnFastScroll; bool get displayImage; bool get doubleClickTranslator; String get fontFamily; FontThickness get fontThickness; FontStyle get fontStyle; double get fontSize; double get lineHeight; double get letterSpacing; TextAlign get textAlignment; TextAlign get chapterAlignment;
+ HorizontalGestureMode get horizontalGestureMode; double get sideMargin; double get verticalMargin; double get bottomBarMargin; int get customBrightness; ScreenOrientation get screenOrientation; bool get fullScreen; bool get keepScreenOn; bool get hideBarOnFastScroll; bool get displayImage; bool get doubleClickTranslator; String get fontFamily; FontThickness get fontThickness; FontStyle get fontStyle; double get fontSize; double get lineHeight; double get letterSpacing; TextAlign get textAlignment; TextAlign get chapterAlignment; double get scrollFraction; double get sensitivity; bool get pullAnimation; bool get visibilityAnimation; bool get cutoutMargin;
 /// Create a copy of EpubReaderSettingState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $EpubReaderSettingStateCopyWith<EpubReaderSettingState> get copyWith => _$EpubRe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EpubReaderSettingState&&(identical(other.horizontalGestureMode, horizontalGestureMode) || other.horizontalGestureMode == horizontalGestureMode)&&(identical(other.sideMargin, sideMargin) || other.sideMargin == sideMargin)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.bottomBarMargin, bottomBarMargin) || other.bottomBarMargin == bottomBarMargin)&&(identical(other.customBrightness, customBrightness) || other.customBrightness == customBrightness)&&(identical(other.screenOrientation, screenOrientation) || other.screenOrientation == screenOrientation)&&(identical(other.fullScreen, fullScreen) || other.fullScreen == fullScreen)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.hideBarOnFastScroll, hideBarOnFastScroll) || other.hideBarOnFastScroll == hideBarOnFastScroll)&&(identical(other.displayImage, displayImage) || other.displayImage == displayImage)&&(identical(other.doubleClickTranslator, doubleClickTranslator) || other.doubleClickTranslator == doubleClickTranslator)&&(identical(other.fontFamily, fontFamily) || other.fontFamily == fontFamily)&&(identical(other.fontThickness, fontThickness) || other.fontThickness == fontThickness)&&(identical(other.fontStyle, fontStyle) || other.fontStyle == fontStyle)&&(identical(other.fontSize, fontSize) || other.fontSize == fontSize)&&(identical(other.lineHeight, lineHeight) || other.lineHeight == lineHeight)&&(identical(other.letterSpacing, letterSpacing) || other.letterSpacing == letterSpacing)&&(identical(other.textAlignment, textAlignment) || other.textAlignment == textAlignment)&&(identical(other.chapterAlignment, chapterAlignment) || other.chapterAlignment == chapterAlignment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EpubReaderSettingState&&(identical(other.horizontalGestureMode, horizontalGestureMode) || other.horizontalGestureMode == horizontalGestureMode)&&(identical(other.sideMargin, sideMargin) || other.sideMargin == sideMargin)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.bottomBarMargin, bottomBarMargin) || other.bottomBarMargin == bottomBarMargin)&&(identical(other.customBrightness, customBrightness) || other.customBrightness == customBrightness)&&(identical(other.screenOrientation, screenOrientation) || other.screenOrientation == screenOrientation)&&(identical(other.fullScreen, fullScreen) || other.fullScreen == fullScreen)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.hideBarOnFastScroll, hideBarOnFastScroll) || other.hideBarOnFastScroll == hideBarOnFastScroll)&&(identical(other.displayImage, displayImage) || other.displayImage == displayImage)&&(identical(other.doubleClickTranslator, doubleClickTranslator) || other.doubleClickTranslator == doubleClickTranslator)&&(identical(other.fontFamily, fontFamily) || other.fontFamily == fontFamily)&&(identical(other.fontThickness, fontThickness) || other.fontThickness == fontThickness)&&(identical(other.fontStyle, fontStyle) || other.fontStyle == fontStyle)&&(identical(other.fontSize, fontSize) || other.fontSize == fontSize)&&(identical(other.lineHeight, lineHeight) || other.lineHeight == lineHeight)&&(identical(other.letterSpacing, letterSpacing) || other.letterSpacing == letterSpacing)&&(identical(other.textAlignment, textAlignment) || other.textAlignment == textAlignment)&&(identical(other.chapterAlignment, chapterAlignment) || other.chapterAlignment == chapterAlignment)&&(identical(other.scrollFraction, scrollFraction) || other.scrollFraction == scrollFraction)&&(identical(other.sensitivity, sensitivity) || other.sensitivity == sensitivity)&&(identical(other.pullAnimation, pullAnimation) || other.pullAnimation == pullAnimation)&&(identical(other.visibilityAnimation, visibilityAnimation) || other.visibilityAnimation == visibilityAnimation)&&(identical(other.cutoutMargin, cutoutMargin) || other.cutoutMargin == cutoutMargin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,horizontalGestureMode,sideMargin,verticalMargin,bottomBarMargin,customBrightness,screenOrientation,fullScreen,keepScreenOn,hideBarOnFastScroll,displayImage,doubleClickTranslator,fontFamily,fontThickness,fontStyle,fontSize,lineHeight,letterSpacing,textAlignment,chapterAlignment]);
+int get hashCode => Object.hashAll([runtimeType,horizontalGestureMode,sideMargin,verticalMargin,bottomBarMargin,customBrightness,screenOrientation,fullScreen,keepScreenOn,hideBarOnFastScroll,displayImage,doubleClickTranslator,fontFamily,fontThickness,fontStyle,fontSize,lineHeight,letterSpacing,textAlignment,chapterAlignment,scrollFraction,sensitivity,pullAnimation,visibilityAnimation,cutoutMargin]);
 
 @override
 String toString() {
-  return 'EpubReaderSettingState(horizontalGestureMode: $horizontalGestureMode, sideMargin: $sideMargin, verticalMargin: $verticalMargin, bottomBarMargin: $bottomBarMargin, customBrightness: $customBrightness, screenOrientation: $screenOrientation, fullScreen: $fullScreen, keepScreenOn: $keepScreenOn, hideBarOnFastScroll: $hideBarOnFastScroll, displayImage: $displayImage, doubleClickTranslator: $doubleClickTranslator, fontFamily: $fontFamily, fontThickness: $fontThickness, fontStyle: $fontStyle, fontSize: $fontSize, lineHeight: $lineHeight, letterSpacing: $letterSpacing, textAlignment: $textAlignment, chapterAlignment: $chapterAlignment)';
+  return 'EpubReaderSettingState(horizontalGestureMode: $horizontalGestureMode, sideMargin: $sideMargin, verticalMargin: $verticalMargin, bottomBarMargin: $bottomBarMargin, customBrightness: $customBrightness, screenOrientation: $screenOrientation, fullScreen: $fullScreen, keepScreenOn: $keepScreenOn, hideBarOnFastScroll: $hideBarOnFastScroll, displayImage: $displayImage, doubleClickTranslator: $doubleClickTranslator, fontFamily: $fontFamily, fontThickness: $fontThickness, fontStyle: $fontStyle, fontSize: $fontSize, lineHeight: $lineHeight, letterSpacing: $letterSpacing, textAlignment: $textAlignment, chapterAlignment: $chapterAlignment, scrollFraction: $scrollFraction, sensitivity: $sensitivity, pullAnimation: $pullAnimation, visibilityAnimation: $visibilityAnimation, cutoutMargin: $cutoutMargin)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $EpubReaderSettingStateCopyWith<$Res>  {
   factory $EpubReaderSettingStateCopyWith(EpubReaderSettingState value, $Res Function(EpubReaderSettingState) _then) = _$EpubReaderSettingStateCopyWithImpl;
 @useResult
 $Res call({
- HorizontalGestureMode horizontalGestureMode, double sideMargin, double verticalMargin, double bottomBarMargin, int customBrightness, ScreenOrientation screenOrientation, bool fullScreen, bool keepScreenOn, bool hideBarOnFastScroll, bool displayImage, bool doubleClickTranslator, String fontFamily, FontThickness fontThickness, FontStyle fontStyle, double fontSize, double lineHeight, double letterSpacing, TextAlign textAlignment, TextAlign chapterAlignment
+ HorizontalGestureMode horizontalGestureMode, double sideMargin, double verticalMargin, double bottomBarMargin, int customBrightness, ScreenOrientation screenOrientation, bool fullScreen, bool keepScreenOn, bool hideBarOnFastScroll, bool displayImage, bool doubleClickTranslator, String fontFamily, FontThickness fontThickness, FontStyle fontStyle, double fontSize, double lineHeight, double letterSpacing, TextAlign textAlignment, TextAlign chapterAlignment, double scrollFraction, double sensitivity, bool pullAnimation, bool visibilityAnimation, bool cutoutMargin
 });
 
 
@@ -65,7 +65,7 @@ class _$EpubReaderSettingStateCopyWithImpl<$Res>
 
 /// Create a copy of EpubReaderSettingState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? horizontalGestureMode = null,Object? sideMargin = null,Object? verticalMargin = null,Object? bottomBarMargin = null,Object? customBrightness = null,Object? screenOrientation = null,Object? fullScreen = null,Object? keepScreenOn = null,Object? hideBarOnFastScroll = null,Object? displayImage = null,Object? doubleClickTranslator = null,Object? fontFamily = null,Object? fontThickness = null,Object? fontStyle = null,Object? fontSize = null,Object? lineHeight = null,Object? letterSpacing = null,Object? textAlignment = null,Object? chapterAlignment = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? horizontalGestureMode = null,Object? sideMargin = null,Object? verticalMargin = null,Object? bottomBarMargin = null,Object? customBrightness = null,Object? screenOrientation = null,Object? fullScreen = null,Object? keepScreenOn = null,Object? hideBarOnFastScroll = null,Object? displayImage = null,Object? doubleClickTranslator = null,Object? fontFamily = null,Object? fontThickness = null,Object? fontStyle = null,Object? fontSize = null,Object? lineHeight = null,Object? letterSpacing = null,Object? textAlignment = null,Object? chapterAlignment = null,Object? scrollFraction = null,Object? sensitivity = null,Object? pullAnimation = null,Object? visibilityAnimation = null,Object? cutoutMargin = null,}) {
   return _then(_self.copyWith(
 horizontalGestureMode: null == horizontalGestureMode ? _self.horizontalGestureMode : horizontalGestureMode // ignore: cast_nullable_to_non_nullable
 as HorizontalGestureMode,sideMargin: null == sideMargin ? _self.sideMargin : sideMargin // ignore: cast_nullable_to_non_nullable
@@ -86,7 +86,12 @@ as double,lineHeight: null == lineHeight ? _self.lineHeight : lineHeight // igno
 as double,letterSpacing: null == letterSpacing ? _self.letterSpacing : letterSpacing // ignore: cast_nullable_to_non_nullable
 as double,textAlignment: null == textAlignment ? _self.textAlignment : textAlignment // ignore: cast_nullable_to_non_nullable
 as TextAlign,chapterAlignment: null == chapterAlignment ? _self.chapterAlignment : chapterAlignment // ignore: cast_nullable_to_non_nullable
-as TextAlign,
+as TextAlign,scrollFraction: null == scrollFraction ? _self.scrollFraction : scrollFraction // ignore: cast_nullable_to_non_nullable
+as double,sensitivity: null == sensitivity ? _self.sensitivity : sensitivity // ignore: cast_nullable_to_non_nullable
+as double,pullAnimation: null == pullAnimation ? _self.pullAnimation : pullAnimation // ignore: cast_nullable_to_non_nullable
+as bool,visibilityAnimation: null == visibilityAnimation ? _self.visibilityAnimation : visibilityAnimation // ignore: cast_nullable_to_non_nullable
+as bool,cutoutMargin: null == cutoutMargin ? _self.cutoutMargin : cutoutMargin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -171,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment,  double scrollFraction,  double sensitivity,  bool pullAnimation,  bool visibilityAnimation,  bool cutoutMargin)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EpubReaderSettingState() when $default != null:
-return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment);case _:
+return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment,_that.scrollFraction,_that.sensitivity,_that.pullAnimation,_that.visibilityAnimation,_that.cutoutMargin);case _:
   return orElse();
 
 }
@@ -192,10 +197,10 @@ return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargi
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment,  double scrollFraction,  double sensitivity,  bool pullAnimation,  bool visibilityAnimation,  bool cutoutMargin)  $default,) {final _that = this;
 switch (_that) {
 case _EpubReaderSettingState():
-return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment);case _:
+return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment,_that.scrollFraction,_that.sensitivity,_that.pullAnimation,_that.visibilityAnimation,_that.cutoutMargin);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +217,10 @@ return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargi
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( HorizontalGestureMode horizontalGestureMode,  double sideMargin,  double verticalMargin,  double bottomBarMargin,  int customBrightness,  ScreenOrientation screenOrientation,  bool fullScreen,  bool keepScreenOn,  bool hideBarOnFastScroll,  bool displayImage,  bool doubleClickTranslator,  String fontFamily,  FontThickness fontThickness,  FontStyle fontStyle,  double fontSize,  double lineHeight,  double letterSpacing,  TextAlign textAlignment,  TextAlign chapterAlignment,  double scrollFraction,  double sensitivity,  bool pullAnimation,  bool visibilityAnimation,  bool cutoutMargin)?  $default,) {final _that = this;
 switch (_that) {
 case _EpubReaderSettingState() when $default != null:
-return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment);case _:
+return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargin,_that.bottomBarMargin,_that.customBrightness,_that.screenOrientation,_that.fullScreen,_that.keepScreenOn,_that.hideBarOnFastScroll,_that.displayImage,_that.doubleClickTranslator,_that.fontFamily,_that.fontThickness,_that.fontStyle,_that.fontSize,_that.lineHeight,_that.letterSpacing,_that.textAlignment,_that.chapterAlignment,_that.scrollFraction,_that.sensitivity,_that.pullAnimation,_that.visibilityAnimation,_that.cutoutMargin);case _:
   return null;
 
 }
@@ -227,7 +232,7 @@ return $default(_that.horizontalGestureMode,_that.sideMargin,_that.verticalMargi
 @JsonSerializable()
 
 class _EpubReaderSettingState implements EpubReaderSettingState {
-  const _EpubReaderSettingState({this.horizontalGestureMode = HorizontalGestureMode.off, this.sideMargin = 16.0, this.verticalMargin = 16.0, this.bottomBarMargin = 16.0, this.customBrightness = 50, this.screenOrientation = ScreenOrientation.defaultValue, this.fullScreen = false, this.keepScreenOn = false, this.hideBarOnFastScroll = false, this.displayImage = true, this.doubleClickTranslator = false, this.fontFamily = 'Serif', this.fontThickness = FontThickness.normal, this.fontStyle = FontStyle.normal, this.fontSize = 18.0, this.lineHeight = 1.5, this.letterSpacing = 0.0, this.textAlignment = TextAlign.center, this.chapterAlignment = TextAlign.center});
+  const _EpubReaderSettingState({this.horizontalGestureMode = HorizontalGestureMode.off, this.sideMargin = 16.0, this.verticalMargin = 16.0, this.bottomBarMargin = 16.0, this.customBrightness = 50, this.screenOrientation = ScreenOrientation.defaultValue, this.fullScreen = false, this.keepScreenOn = false, this.hideBarOnFastScroll = false, this.displayImage = true, this.doubleClickTranslator = false, this.fontFamily = 'Serif', this.fontThickness = FontThickness.normal, this.fontStyle = FontStyle.normal, this.fontSize = 18.0, this.lineHeight = 1.5, this.letterSpacing = 0.0, this.textAlignment = TextAlign.center, this.chapterAlignment = TextAlign.center, this.scrollFraction = 0.5, this.sensitivity = 1.0, this.pullAnimation = true, this.visibilityAnimation = true, this.cutoutMargin = false});
   factory _EpubReaderSettingState.fromJson(Map<String, dynamic> json) => _$EpubReaderSettingStateFromJson(json);
 
 @override@JsonKey() final  HorizontalGestureMode horizontalGestureMode;
@@ -249,6 +254,11 @@ class _EpubReaderSettingState implements EpubReaderSettingState {
 @override@JsonKey() final  double letterSpacing;
 @override@JsonKey() final  TextAlign textAlignment;
 @override@JsonKey() final  TextAlign chapterAlignment;
+@override@JsonKey() final  double scrollFraction;
+@override@JsonKey() final  double sensitivity;
+@override@JsonKey() final  bool pullAnimation;
+@override@JsonKey() final  bool visibilityAnimation;
+@override@JsonKey() final  bool cutoutMargin;
 
 /// Create a copy of EpubReaderSettingState
 /// with the given fields replaced by the non-null parameter values.
@@ -263,16 +273,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpubReaderSettingState&&(identical(other.horizontalGestureMode, horizontalGestureMode) || other.horizontalGestureMode == horizontalGestureMode)&&(identical(other.sideMargin, sideMargin) || other.sideMargin == sideMargin)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.bottomBarMargin, bottomBarMargin) || other.bottomBarMargin == bottomBarMargin)&&(identical(other.customBrightness, customBrightness) || other.customBrightness == customBrightness)&&(identical(other.screenOrientation, screenOrientation) || other.screenOrientation == screenOrientation)&&(identical(other.fullScreen, fullScreen) || other.fullScreen == fullScreen)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.hideBarOnFastScroll, hideBarOnFastScroll) || other.hideBarOnFastScroll == hideBarOnFastScroll)&&(identical(other.displayImage, displayImage) || other.displayImage == displayImage)&&(identical(other.doubleClickTranslator, doubleClickTranslator) || other.doubleClickTranslator == doubleClickTranslator)&&(identical(other.fontFamily, fontFamily) || other.fontFamily == fontFamily)&&(identical(other.fontThickness, fontThickness) || other.fontThickness == fontThickness)&&(identical(other.fontStyle, fontStyle) || other.fontStyle == fontStyle)&&(identical(other.fontSize, fontSize) || other.fontSize == fontSize)&&(identical(other.lineHeight, lineHeight) || other.lineHeight == lineHeight)&&(identical(other.letterSpacing, letterSpacing) || other.letterSpacing == letterSpacing)&&(identical(other.textAlignment, textAlignment) || other.textAlignment == textAlignment)&&(identical(other.chapterAlignment, chapterAlignment) || other.chapterAlignment == chapterAlignment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EpubReaderSettingState&&(identical(other.horizontalGestureMode, horizontalGestureMode) || other.horizontalGestureMode == horizontalGestureMode)&&(identical(other.sideMargin, sideMargin) || other.sideMargin == sideMargin)&&(identical(other.verticalMargin, verticalMargin) || other.verticalMargin == verticalMargin)&&(identical(other.bottomBarMargin, bottomBarMargin) || other.bottomBarMargin == bottomBarMargin)&&(identical(other.customBrightness, customBrightness) || other.customBrightness == customBrightness)&&(identical(other.screenOrientation, screenOrientation) || other.screenOrientation == screenOrientation)&&(identical(other.fullScreen, fullScreen) || other.fullScreen == fullScreen)&&(identical(other.keepScreenOn, keepScreenOn) || other.keepScreenOn == keepScreenOn)&&(identical(other.hideBarOnFastScroll, hideBarOnFastScroll) || other.hideBarOnFastScroll == hideBarOnFastScroll)&&(identical(other.displayImage, displayImage) || other.displayImage == displayImage)&&(identical(other.doubleClickTranslator, doubleClickTranslator) || other.doubleClickTranslator == doubleClickTranslator)&&(identical(other.fontFamily, fontFamily) || other.fontFamily == fontFamily)&&(identical(other.fontThickness, fontThickness) || other.fontThickness == fontThickness)&&(identical(other.fontStyle, fontStyle) || other.fontStyle == fontStyle)&&(identical(other.fontSize, fontSize) || other.fontSize == fontSize)&&(identical(other.lineHeight, lineHeight) || other.lineHeight == lineHeight)&&(identical(other.letterSpacing, letterSpacing) || other.letterSpacing == letterSpacing)&&(identical(other.textAlignment, textAlignment) || other.textAlignment == textAlignment)&&(identical(other.chapterAlignment, chapterAlignment) || other.chapterAlignment == chapterAlignment)&&(identical(other.scrollFraction, scrollFraction) || other.scrollFraction == scrollFraction)&&(identical(other.sensitivity, sensitivity) || other.sensitivity == sensitivity)&&(identical(other.pullAnimation, pullAnimation) || other.pullAnimation == pullAnimation)&&(identical(other.visibilityAnimation, visibilityAnimation) || other.visibilityAnimation == visibilityAnimation)&&(identical(other.cutoutMargin, cutoutMargin) || other.cutoutMargin == cutoutMargin));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,horizontalGestureMode,sideMargin,verticalMargin,bottomBarMargin,customBrightness,screenOrientation,fullScreen,keepScreenOn,hideBarOnFastScroll,displayImage,doubleClickTranslator,fontFamily,fontThickness,fontStyle,fontSize,lineHeight,letterSpacing,textAlignment,chapterAlignment]);
+int get hashCode => Object.hashAll([runtimeType,horizontalGestureMode,sideMargin,verticalMargin,bottomBarMargin,customBrightness,screenOrientation,fullScreen,keepScreenOn,hideBarOnFastScroll,displayImage,doubleClickTranslator,fontFamily,fontThickness,fontStyle,fontSize,lineHeight,letterSpacing,textAlignment,chapterAlignment,scrollFraction,sensitivity,pullAnimation,visibilityAnimation,cutoutMargin]);
 
 @override
 String toString() {
-  return 'EpubReaderSettingState(horizontalGestureMode: $horizontalGestureMode, sideMargin: $sideMargin, verticalMargin: $verticalMargin, bottomBarMargin: $bottomBarMargin, customBrightness: $customBrightness, screenOrientation: $screenOrientation, fullScreen: $fullScreen, keepScreenOn: $keepScreenOn, hideBarOnFastScroll: $hideBarOnFastScroll, displayImage: $displayImage, doubleClickTranslator: $doubleClickTranslator, fontFamily: $fontFamily, fontThickness: $fontThickness, fontStyle: $fontStyle, fontSize: $fontSize, lineHeight: $lineHeight, letterSpacing: $letterSpacing, textAlignment: $textAlignment, chapterAlignment: $chapterAlignment)';
+  return 'EpubReaderSettingState(horizontalGestureMode: $horizontalGestureMode, sideMargin: $sideMargin, verticalMargin: $verticalMargin, bottomBarMargin: $bottomBarMargin, customBrightness: $customBrightness, screenOrientation: $screenOrientation, fullScreen: $fullScreen, keepScreenOn: $keepScreenOn, hideBarOnFastScroll: $hideBarOnFastScroll, displayImage: $displayImage, doubleClickTranslator: $doubleClickTranslator, fontFamily: $fontFamily, fontThickness: $fontThickness, fontStyle: $fontStyle, fontSize: $fontSize, lineHeight: $lineHeight, letterSpacing: $letterSpacing, textAlignment: $textAlignment, chapterAlignment: $chapterAlignment, scrollFraction: $scrollFraction, sensitivity: $sensitivity, pullAnimation: $pullAnimation, visibilityAnimation: $visibilityAnimation, cutoutMargin: $cutoutMargin)';
 }
 
 
@@ -283,7 +293,7 @@ abstract mixin class _$EpubReaderSettingStateCopyWith<$Res> implements $EpubRead
   factory _$EpubReaderSettingStateCopyWith(_EpubReaderSettingState value, $Res Function(_EpubReaderSettingState) _then) = __$EpubReaderSettingStateCopyWithImpl;
 @override @useResult
 $Res call({
- HorizontalGestureMode horizontalGestureMode, double sideMargin, double verticalMargin, double bottomBarMargin, int customBrightness, ScreenOrientation screenOrientation, bool fullScreen, bool keepScreenOn, bool hideBarOnFastScroll, bool displayImage, bool doubleClickTranslator, String fontFamily, FontThickness fontThickness, FontStyle fontStyle, double fontSize, double lineHeight, double letterSpacing, TextAlign textAlignment, TextAlign chapterAlignment
+ HorizontalGestureMode horizontalGestureMode, double sideMargin, double verticalMargin, double bottomBarMargin, int customBrightness, ScreenOrientation screenOrientation, bool fullScreen, bool keepScreenOn, bool hideBarOnFastScroll, bool displayImage, bool doubleClickTranslator, String fontFamily, FontThickness fontThickness, FontStyle fontStyle, double fontSize, double lineHeight, double letterSpacing, TextAlign textAlignment, TextAlign chapterAlignment, double scrollFraction, double sensitivity, bool pullAnimation, bool visibilityAnimation, bool cutoutMargin
 });
 
 
@@ -300,7 +310,7 @@ class __$EpubReaderSettingStateCopyWithImpl<$Res>
 
 /// Create a copy of EpubReaderSettingState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? horizontalGestureMode = null,Object? sideMargin = null,Object? verticalMargin = null,Object? bottomBarMargin = null,Object? customBrightness = null,Object? screenOrientation = null,Object? fullScreen = null,Object? keepScreenOn = null,Object? hideBarOnFastScroll = null,Object? displayImage = null,Object? doubleClickTranslator = null,Object? fontFamily = null,Object? fontThickness = null,Object? fontStyle = null,Object? fontSize = null,Object? lineHeight = null,Object? letterSpacing = null,Object? textAlignment = null,Object? chapterAlignment = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? horizontalGestureMode = null,Object? sideMargin = null,Object? verticalMargin = null,Object? bottomBarMargin = null,Object? customBrightness = null,Object? screenOrientation = null,Object? fullScreen = null,Object? keepScreenOn = null,Object? hideBarOnFastScroll = null,Object? displayImage = null,Object? doubleClickTranslator = null,Object? fontFamily = null,Object? fontThickness = null,Object? fontStyle = null,Object? fontSize = null,Object? lineHeight = null,Object? letterSpacing = null,Object? textAlignment = null,Object? chapterAlignment = null,Object? scrollFraction = null,Object? sensitivity = null,Object? pullAnimation = null,Object? visibilityAnimation = null,Object? cutoutMargin = null,}) {
   return _then(_EpubReaderSettingState(
 horizontalGestureMode: null == horizontalGestureMode ? _self.horizontalGestureMode : horizontalGestureMode // ignore: cast_nullable_to_non_nullable
 as HorizontalGestureMode,sideMargin: null == sideMargin ? _self.sideMargin : sideMargin // ignore: cast_nullable_to_non_nullable
@@ -321,7 +331,12 @@ as double,lineHeight: null == lineHeight ? _self.lineHeight : lineHeight // igno
 as double,letterSpacing: null == letterSpacing ? _self.letterSpacing : letterSpacing // ignore: cast_nullable_to_non_nullable
 as double,textAlignment: null == textAlignment ? _self.textAlignment : textAlignment // ignore: cast_nullable_to_non_nullable
 as TextAlign,chapterAlignment: null == chapterAlignment ? _self.chapterAlignment : chapterAlignment // ignore: cast_nullable_to_non_nullable
-as TextAlign,
+as TextAlign,scrollFraction: null == scrollFraction ? _self.scrollFraction : scrollFraction // ignore: cast_nullable_to_non_nullable
+as double,sensitivity: null == sensitivity ? _self.sensitivity : sensitivity // ignore: cast_nullable_to_non_nullable
+as double,pullAnimation: null == pullAnimation ? _self.pullAnimation : pullAnimation // ignore: cast_nullable_to_non_nullable
+as bool,visibilityAnimation: null == visibilityAnimation ? _self.visibilityAnimation : visibilityAnimation // ignore: cast_nullable_to_non_nullable
+as bool,cutoutMargin: null == cutoutMargin ? _self.cutoutMargin : cutoutMargin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

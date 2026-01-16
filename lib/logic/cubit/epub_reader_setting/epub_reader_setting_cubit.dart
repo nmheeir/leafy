@@ -98,4 +98,24 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
   void updateChapterAlignment(TextAlign alignment) {
     emit(state.copyWith(chapterAlignment: alignment));
   }
+
+  void updateScrollFraction(double fraction) {
+    emit(state.copyWith(scrollFraction: fraction));
+  }
+
+  void updateSensitivity(double sensitivity) {
+    emit(state.copyWith(sensitivity: sensitivity));
+  }
+
+  void togglePullAnimation() {
+    emit(state.copyWith(pullAnimation: !state.pullAnimation));
+  }
+
+  void toggleVisibilityAnimation() {
+    emit(state.copyWith(visibilityAnimation: !state.visibilityAnimation));
+  }
+
+  void toggleCutoutMargin() {
+    emit(state.copyWith(cutoutMargin: !state.cutoutMargin));
+  }
 }
