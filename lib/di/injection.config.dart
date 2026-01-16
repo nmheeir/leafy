@@ -146,6 +146,8 @@ import '../logic/cubit/display_cubit.dart' as _i985;
 import '../logic/cubit/edit_book_cover/edit_book_cover_cubit.dart' as _i1064;
 import '../logic/cubit/edit_book_cubit.dart' as _i232;
 import '../logic/cubit/epub_reader/epub_reader_cubit.dart' as _i206;
+import '../logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart'
+    as _i1059;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
@@ -187,6 +189,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i260.DefaultBookTagCubit>(() => _i260.DefaultBookTagCubit());
     gh.factory<_i985.DisplayCubit>(() => _i985.DisplayCubit());
     gh.factory<_i232.EditBookCubit>(() => _i232.EditBookCubit());
+    gh.factory<_i1059.EpubReaderSettingCubit>(
+      () => _i1059.EpubReaderSettingCubit(),
+    );
     gh.factory<_i772.SelectedBooksCubit>(() => _i772.SelectedBooksCubit());
     await gh.singletonAsync<_i497.Directory>(
       () => storageModule.documentsDir,
