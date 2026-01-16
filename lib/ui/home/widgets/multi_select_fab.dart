@@ -247,8 +247,8 @@ class _MultiSelectFABState extends State<MultiSelectFAB> {
                   height: 5,
                   width: 40,
                   decoration: BoxDecoration(
-                    color: context.colorScheme.onSurfaceVariant.withOpacity(
-                      0.4,
+                    color: context.colorScheme.onSurfaceVariant.withValues(
+                      alpha: 0.4,
                     ),
                     borderRadius: BorderRadius.circular(50),
                   ),

@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_brace_in_string_interps
+
 import 'dart:io';
 import 'package:logger/logger.dart';
 
@@ -53,8 +55,8 @@ class PlatformConsolePrinter extends LogPrinter {
 
   String _levelChar(Level level) {
     switch (level) {
-      case Level.verbose:
-        return 'V';
+      case Level.trace:
+        return 'T';
       case Level.debug:
         return 'D';
       case Level.info:
@@ -72,7 +74,7 @@ class PlatformConsolePrinter extends LogPrinter {
 
   String _levelColor(Level level) {
     switch (level) {
-      case Level.verbose:
+      case Level.trace:
         return _gray;
       case Level.debug:
         return _blue;

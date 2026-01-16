@@ -25,10 +25,6 @@ class EditBookCubit extends Cubit<Book> {
     BookStatus? status,
     int? coverId,
   }) {
-    final String? isbn = (isbnList != null && isbnList.isNotEmpty)
-        ? isbnList.first
-        : null;
-    final String? cleanOlid = olidRaw?.replaceAll('/works/', '');
     final String? formattedTags = defaultTags.isNotEmpty
         ? defaultTags.join('|||||')
         : null;
@@ -41,8 +37,6 @@ class EditBookCubit extends Cubit<Book> {
       status: status ?? BookStatus.unfinished,
       favorite: false,
       pages: pages,
-      isbn: isbn,
-      olid: cleanOlid,
       publicationYear: publishYear,
       bookFormat: defaultFormat,
       readings: const [],
@@ -115,12 +109,6 @@ class EditBookCubit extends Cubit<Book> {
   void setDescription(String description) => emit(
     state.copyWith(description: description.isEmpty ? null : description),
   );
-
-  void setISBN(String isbn) =>
-      emit(state.copyWith(isbn: isbn.isEmpty ? null : isbn));
-
-  void setOLID(String olid) =>
-      emit(state.copyWith(olid: olid.isEmpty ? null : olid));
 
   void setPublicationYear(String year) => emit(
     state.copyWith(publicationYear: year.isEmpty ? null : int.parse(year)),

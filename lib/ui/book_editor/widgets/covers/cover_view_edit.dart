@@ -73,18 +73,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     context.editBookCoverCubit.deleteCover(context.editBookCubit.state.id);
   }
 
-  void _loadCoverFromOpenLibrary(BuildContext context) {
-    Navigator.of(context).pop();
-    final isbn = context.editBookCubit.state.isbn;
-
-    if (isbn == null || isbn.isEmpty) {
-      CoverViewEdit.showInfoSnackbar(LocaleKeys.isbn_cannot_be_empty.tr());
-      return;
-    }
-
-    context.editBookCoverCubit.loadFromOpenLibrary(isbn);
-  }
-
   void _showDuckDuckGoWarning(BuildContext context) {
     showDialog(
       context: context,
@@ -127,7 +115,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     final options = EditCoverOptions(
       loadCoverFromStorage: () => _pickAndCropImage(context),
       searchForCoverOnline: () => _searchForCoverOnline(context),
-      loadCoverFromOpenLibrary: () => _loadCoverFromOpenLibrary(context),
       editCurrentCover: () => _editCurrentCover(context, currentCover),
     );
 

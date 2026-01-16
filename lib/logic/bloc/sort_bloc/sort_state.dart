@@ -38,7 +38,7 @@ class SortState extends Equatable {
     return SortState(
       sortType: sortType ?? this.sortType,
       isAsc: isAsc ?? this.isAsc,
-      onlyFavorite: onlyFavourite ?? this.onlyFavorite,
+      onlyFavorite: onlyFavourite ?? onlyFavorite,
       years: resetYears ? null : years ?? this.years,
       tags: resetTags ? null : tags ?? this.tags,
       filterTagsAsAnd: filterTagsAsAnd ?? this.filterTagsAsAnd,
@@ -49,7 +49,7 @@ class SortState extends Equatable {
 
   factory SortState.fromJson(Map<String, dynamic> json) {
     final sortTypeInt = json['sort_type'] as int? ?? SortType.byTitle.index;
-    
+
     final isAsc = json['sort_order'] as bool? ?? true;
     final onlyFavourite = json['only_favourite'] as bool? ?? false;
     final years = json['years'] as String?;

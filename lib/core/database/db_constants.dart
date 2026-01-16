@@ -21,8 +21,6 @@ class DbConstants {
       finish_date TEXT,                     -- Ngày hoàn thành
       pages INTEGER,                        -- Tổng số trang (tham khảo)
       publication_year INTEGER,             -- Năm xuất bản
-      isbn TEXT,                            -- ISBN (nếu có)
-      olid TEXT,                            -- OpenLibrary ID
       tags TEXT,                            -- Tag người dùng
       my_review TEXT,                       -- Review cá nhân
       notes TEXT,                           -- Ghi chú chung về sách

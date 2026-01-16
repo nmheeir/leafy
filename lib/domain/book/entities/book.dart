@@ -15,10 +15,6 @@ class Book extends Equatable {
   final int? rating;
   final int? pages;
   final int? publicationYear;
-  @Deprecated('Will be removed in a future release.')
-  final String? isbn;
-  @Deprecated('Will be removed in a future release.')
-  final String? olid;
   final String? tags;
   final String? myReview;
   final String? notes;
@@ -48,8 +44,6 @@ class Book extends Equatable {
       rating: null,
       pages: null,
       publicationYear: null,
-      isbn: null,
-      olid: null,
       tags: null,
       myReview: null,
       notes: null,
@@ -76,8 +70,6 @@ class Book extends Equatable {
     this.rating,
     this.pages,
     this.publicationYear,
-    this.isbn,
-    this.olid,
     this.tags,
     this.myReview,
     this.notes,
@@ -103,8 +95,6 @@ class Book extends Equatable {
     int? rating,
     int? pages,
     int? publicationYear,
-    String? isbn,
-    String? olid,
     String? tags,
     String? myReview,
     String? notes,
@@ -129,8 +119,6 @@ class Book extends Equatable {
       rating: rating ?? this.rating,
       pages: pages ?? this.pages,
       publicationYear: publicationYear ?? this.publicationYear,
-      isbn: isbn ?? this.isbn,
-      olid: olid ?? this.olid,
       tags: tags ?? this.tags,
       myReview: myReview ?? this.myReview,
       notes: notes ?? this.notes,
@@ -158,8 +146,6 @@ class Book extends Equatable {
     rating,
     pages,
     publicationYear,
-    isbn,
-    olid,
     tags,
     myReview,
     notes,

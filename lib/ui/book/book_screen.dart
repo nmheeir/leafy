@@ -99,8 +99,6 @@ class BookScreen extends StatelessWidget {
                           _buildBookFormatDetail(state),
                           _buildPublicationYearDetail(state),
                           _buildPagesDetail(state),
-                          // _buildISBNDetail(state),
-                          // _buildOLIDDetail(state),
                           const SizedBox(height: 50),
                           _buildDescriptionDetail(state),
                           _buildMyReviewDetail(state),

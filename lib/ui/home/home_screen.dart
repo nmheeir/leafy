@@ -10,7 +10,6 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
-import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
@@ -259,9 +258,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _setEmptyBookForEditorScreen() {
-    final status = BookStatus.finished;
-    final bookFormat = context.read<DefaultBookFormatCubit>().state;
-
     context.read<EditBookCubit>().setBook(Book.empty());
   }
 
