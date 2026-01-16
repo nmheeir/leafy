@@ -4,6 +4,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
 import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/epub_reader/settings/epub_reader_settings_sheet.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class EpubReaderScreen extends StatefulWidget {
@@ -445,7 +446,12 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               _scaffoldKey.currentState?.openDrawer();
             },
           ),
-          IconButton(icon: const Icon(Icons.settings), onPressed: () {}),
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () {
+              EpubReaderSettingsSheet.show(context);
+            },
+          ),
         ],
       ),
     );
