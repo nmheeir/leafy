@@ -1,17 +1,13 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/core/constants/enums/index.dart';
+
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
-import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
-import 'package:leafy/logic/cubit/book_progress/book_progress_state.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
-import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
+
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
@@ -20,95 +16,16 @@ import 'package:leafy/ui/book/widgets/book_detailed_date_added_update.dart';
 import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
 import 'package:leafy/ui/book/widgets/book_status_detail.dart';
 import 'package:leafy/ui/book/widgets/book_title_detail.dart';
-import 'package:leafy/ui/book/widgets/celebration_dialog.dart';
+import 'package:leafy/ui/book/widgets/book_reader_launcher_button.dart';
+
 import 'package:leafy/ui/book/widgets/cover_view.dart';
-import 'package:leafy/ui/epub_reader/epub_reader_screen.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
-import 'package:leafy/ui/extensions/book_status_extension.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
   const BookScreen({super.key, required this.heroTag});
 
   final String heroTag;
-
-  void _onLikeTap(BuildContext context, Book book) {
-    context.bookActorCubit.toggleFavorite(book);
-  }
-
-  Future<void> _changeStatusAction(
-    BuildContext context,
-    BookStatus status,
-    Book book,
-  ) async {
-    if (status == BookStatus.unfinished || status == BookStatus.inProgress) {
-      final resourceCubit = context.read<BookResourceCubit>();
-      final state = resourceCubit.state;
-
-      // Check current resources
-      state.maybeWhen(
-        success: (resources) async {
-          if (resources.isEmpty) {
-            // Trigger import if no resources
-            resourceCubit.importFiles();
-            return;
-          }
-          // Simple logic: pick first resource
-          final resource = resources.first;
-          if (resource.filePath != null &&
-              resource.filePath!.isNotEmpty &&
-              File(resource.filePath!).existsSync()) {
-            // File exists -> Open Reader
-            final result = await Navigator.of(context)
-                .push<Map<String, dynamic>>(
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        EpubReaderScreen(filePath: resources[0].filePath!),
-                  ),
-                );
-
-            if (context.mounted &&
-                result != null &&
-                result['is_just_finished'] == true) {
-              // Refresh book status
-              await context.read<CurrentBookCubit>().refreshBook();
-
-              if (context.mounted) {
-                showDialog(
-                  context: context,
-                  builder: (context) => const CelebrationDialog(),
-                );
-              }
-            } else {
-              // Refresh anyway to get partial progress or status updates
-              if (context.mounted) {
-                context.read<CurrentBookCubit>().refreshBook();
-                // Also refresh progress if needed
-                context.read<BookProgressCubit>().loadProgress(
-                  resource.filePath!,
-                );
-              }
-            }
-          } else if (resource.url != null) {
-            // Determine if we need to download
-            // Trigger download
-            resourceCubit.downloadResource(resource);
-          } else {
-            // Resource exists but no valid file or URL -> Import backup
-            resourceCubit.importFiles();
-          }
-        },
-        orElse: () {
-          // Maybe try to load again?
-          if (book.id != null) resourceCubit.loadResources(book.id!);
-        },
-      );
-
-      return;
-    }
-
-    if (!context.mounted) return;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +43,6 @@ class BookScreen extends StatelessWidget {
             return cubit;
           },
         ),
-        BlocProvider(create: (_) => BookProgressCubit(getIt())),
       ],
       child: MultiBlocListener(
         listeners: [
@@ -178,90 +94,8 @@ class BookScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildTitleDetail(state),
-                          BlocBuilder<BookResourceCubit, BookResourceState>(
-                            builder: (context, resourceState) {
-                              double? downloadProgress;
-                              String? dynamicChangeStatusText;
-
-                              if (state.status == BookStatus.unfinished) {
-                                resourceState.maybeWhen(
-                                  importing: () {
-                                    dynamicChangeStatusText = "Importing...";
-                                  },
-                                  downloading: (_, progress) {
-                                    downloadProgress = progress;
-                                  },
-                                  success: (resources) {
-                                    if (resources.isEmpty) {
-                                      dynamicChangeStatusText = "Import Book";
-                                    } else {
-                                      final resource = resources.first;
-                                      final fileExists =
-                                          resource.filePath != null &&
-                                          File(resource.filePath!).existsSync();
-
-                                      if (fileExists) {
-                                        dynamicChangeStatusText =
-                                            "Start Reading"; // Default
-                                        // Load progress when file is confirmed existing
-                                        context
-                                            .read<BookProgressCubit>()
-                                            .loadProgress(resource.filePath!);
-                                      } else if (resource.url != null) {
-                                        dynamicChangeStatusText = "Download";
-                                      } else {
-                                        dynamicChangeStatusText = "Import Book";
-                                      }
-                                    }
-                                  },
-                                  orElse: () {},
-                                );
-                              } else if (state.status ==
-                                  BookStatus.inProgress) {
-                                // Also load progress if in progress
-                                resourceState.maybeWhen(
-                                  success: (resources) {
-                                    if (resources.isNotEmpty) {
-                                      final resource = resources.first;
-                                      if (resource.filePath != null) {
-                                        context
-                                            .read<BookProgressCubit>()
-                                            .loadProgress(resource.filePath!);
-                                      }
-                                    }
-                                  },
-                                  orElse: () {},
-                                );
-                              }
-
-                              return BlocBuilder<
-                                BookProgressCubit,
-                                BookProgressState
-                              >(
-                                builder: (context, progressState) {
-                                  double? readingProgress;
-                                  if (progressState is BookProgressLoaded) {
-                                    readingProgress = progressState.progress;
-                                    // [User Context] Conditional Logic:
-                                    // If Reading (inProgress), show "Continue Reading"
-                                    if (state.status == BookStatus.inProgress) {
-                                      dynamicChangeStatusText =
-                                          "Continue Reading";
-                                    }
-                                  }
-
-                                  return _buildStatusDetail(
-                                    state,
-                                    context,
-                                    downloadProgress: downloadProgress,
-                                    readingProgress: readingProgress,
-                                    overrideChangeStatusText:
-                                        dynamicChangeStatusText,
-                                  );
-                                },
-                              );
-                            },
-                          ),
+                          BookStatusDetail(book: state),
+                          BookReaderLauncherButton(book: state),
                           _buildBookFormatDetail(state),
                           _buildPublicationYearDetail(state),
                           _buildPagesDetail(state),
@@ -365,32 +199,6 @@ class BookScreen extends StatelessWidget {
       publicationYear: (state.publicationYear ?? "").toString(),
       tags: state.tags?.split('|||||'),
       bookType: state.bookFormat,
-    );
-  }
-
-  BookStatusDetail _buildStatusDetail(
-    Book state,
-    BuildContext context, {
-    double? downloadProgress,
-    double? readingProgress,
-    String? overrideChangeStatusText,
-  }) {
-    return BookStatusDetail(
-      book: state,
-      statusIcon: state.status.icon,
-      statusText: state.status.text,
-      onLikeTap: () => _onLikeTap(context, state),
-      showChangeStatus:
-          (state.status == BookStatus.inProgress ||
-          state.status == BookStatus.forLater ||
-          state.status == BookStatus.unfinished),
-      changeStatusText: overrideChangeStatusText ?? state.status.changeStatus,
-      changeStatusAction: () {
-        _changeStatusAction(context, state.status, state);
-      },
-      showRatingAndLike: state.status == BookStatus.finished,
-      downloadProgress: downloadProgress,
-      readingProgress: readingProgress,
     );
   }
 }

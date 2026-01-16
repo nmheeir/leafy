@@ -4,47 +4,37 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/data/models/book/reading_time/reading_time.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/ui/extensions/book_status_extension.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/ui/book/widgets/like_button.dart';
 
-class BookStatusDetail extends StatelessWidget {
-  BookStatusDetail({
-    super.key,
-    required this.book,
-    required this.statusIcon,
-    required this.statusText,
-    required this.onLikeTap,
-    this.showChangeStatus = false,
-    this.changeStatusText,
-    this.changeStatusAction,
-    this.showRatingAndLike = false,
-    this.downloadProgress,
-    this.readingProgress,
-  });
+class BookStatusDetail extends StatefulWidget {
+  const BookStatusDetail({super.key, required this.book});
 
   final Book book;
-  final IconData? statusIcon;
-  final String statusText;
-  final VoidCallback onLikeTap;
-  final bool showChangeStatus;
-  final String? changeStatusText;
-  final VoidCallback? changeStatusAction;
-  final bool showRatingAndLike;
-  final double? downloadProgress;
-  final double? readingProgress;
 
+  @override
+  State<BookStatusDetail> createState() => _BookStatusDetailState();
+}
+
+class _BookStatusDetailState extends State<BookStatusDetail> {
   final dateFormat = DateFormat.yMMMMd();
 
-  bool get isDownloading => downloadProgress != null;
-  bool get hasReadingProgress =>
-      readingProgress != null && readingProgress! > 0;
+  void _onLikeTap() {
+    context.bookActorCubit.toggleFavorite(widget.book);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Sử dụng container bao ngoài để tạo không gian thoáng đãng
+    final statusIcon = widget.book.status.icon;
+    final statusText = widget.book.status.text;
+    final showRatingAndLike = widget.book.status == BookStatus.finished;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Column(
@@ -54,19 +44,13 @@ class BookStatusDetail extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatusBadge(context),
+              _buildStatusBadge(context, statusIcon, statusText),
               _buildFavoriteButton(context),
             ],
           ),
 
-          // Row 2: Action Button (Full width để tránh overflow)
-          if (showChangeStatus) ...[
-            const SizedBox(height: 16),
-            _buildChangeStatusButton(context),
-          ],
-
           // Row 3: History & Stats
-          if (book.readings.isNotEmpty) ...[
+          if (widget.book.readings.isNotEmpty) ...[
             const SizedBox(height: 24),
             _buildReadingHistory(context),
           ],
@@ -82,7 +66,11 @@ class BookStatusDetail extends StatelessWidget {
   }
 
   // Aesthetic: Status dạng "Badge" hoặc "Chip" thay vì Box to
-  Widget _buildStatusBadge(BuildContext context) {
+  Widget _buildStatusBadge(
+    BuildContext context,
+    IconData? statusIcon,
+    String statusText,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
@@ -109,107 +97,6 @@ class BookStatusDetail extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // Aesthetic: Nút Action to, rõ ràng, full-width
-  Widget _buildChangeStatusButton(BuildContext context) {
-    // Chiều cao cố định cho nút Action để dễ bấm
-    const double buttonHeight = 56.0;
-
-    return Container(
-      height: buttonHeight,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: context.colorScheme.surfaceContainerHigh,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: isDownloading ? null : changeStatusAction,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Layer 1: Progress Background
-                if (isDownloading || (hasReadingProgress && !isDownloading))
-                  Positioned.fill(
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: FractionallySizedBox(
-                        widthFactor: isDownloading
-                            ? downloadProgress
-                            : (readingProgress ?? 0),
-                        child: Container(
-                          color: isDownloading
-                              ? context.colorScheme.primary.withValues(
-                                  alpha: 0.15,
-                                )
-                              : context.colorScheme.tertiaryContainer
-                                    .withValues(alpha: 0.4),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // Layer 2: Content Text & Icon
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (isDownloading) ...[
-                        SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            value: downloadProgress,
-                            color: context.colorScheme.primary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                      ],
-
-                      Flexible(
-                        child: Text(
-                          _getActionButtonText(),
-                          style: context.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: isDownloading
-                                ? context.colorScheme.primary
-                                : context.colorScheme.onSurface,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _getActionButtonText() {
-    if (isDownloading) {
-      return "${(downloadProgress! * 100).toInt()}% ${LocaleKeys.downloading.tr()}...";
-    }
-    if (hasReadingProgress) {
-      return "${(readingProgress! * 100).toInt()}%  ${changeStatusText ?? ""}";
-    }
-    return changeStatusText ?? "";
   }
 
   // Gom nhóm lịch sử đọc vào một khối gọn gàng hơn
@@ -269,7 +156,9 @@ class BookStatusDetail extends StatelessWidget {
       builder: (context, state) {
         if (state is RatingTypeBar) {
           return RatingBar.builder(
-            initialRating: (book.rating != null) ? book.rating! / 10 : 0,
+            initialRating: (widget.book.rating != null)
+                ? widget.book.rating! / 10
+                : 0,
             allowHalfRating: true,
             unratedColor: context.colorScheme.outlineVariant.withValues(
               alpha: 0.5,
@@ -289,7 +178,9 @@ class BookStatusDetail extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                (book.rating == null) ? '0' : '${(book.rating! / 10)}',
+                (widget.book.rating == null)
+                    ? '0'
+                    : '${(widget.book.rating! / 10)}',
                 style: context.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   color: context.colorScheme.onSurface,
@@ -309,13 +200,13 @@ class BookStatusDetail extends StatelessWidget {
   }
 
   List<Widget> _buildStartAndFinishDates(BuildContext context) {
-    if (book.readings.isEmpty) return [];
+    if (widget.book.readings.isEmpty) return [];
 
-    return book.readings.asMap().entries.map((entry) {
+    return widget.book.readings.asMap().entries.map((entry) {
       final index = entry.key;
       final reading = entry.value;
       final text = _getReadingDateText(reading, context);
-      final isLast = index == book.readings.length - 1;
+      final isLast = index == widget.book.readings.length - 1;
 
       return Padding(
         padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
@@ -386,7 +277,9 @@ class BookStatusDetail extends StatelessWidget {
   }
 
   Widget _generateHowManyTimesRead(BuildContext context) {
-    int timesRead = book.readings.where((r) => r.finishDate != null).length;
+    int timesRead = widget.book.readings
+        .where((r) => r.finishDate != null)
+        .length;
     if (timesRead <= 1) return const SizedBox();
 
     return Padding(
@@ -396,7 +289,7 @@ class BookStatusDetail extends StatelessWidget {
           Icon(Icons.history, size: 16, color: context.colorScheme.secondary),
           const SizedBox(width: 6),
           Text(
-            LocaleKeys.read_x_times.plural(book.readings.length).tr(),
+            LocaleKeys.read_x_times.plural(widget.book.readings.length).tr(),
             style: context.textTheme.labelMedium?.copyWith(
               color: context.colorScheme.secondary,
               fontWeight: FontWeight.bold,
@@ -416,7 +309,7 @@ class BookStatusDetail extends StatelessWidget {
         color: context.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
-      child: LikeButton(isLiked: book.favorite, onTap: onLikeTap),
+      child: LikeButton(isLiked: widget.book.favorite, onTap: _onLikeTap),
     );
   }
 }
