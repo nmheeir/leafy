@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
 import 'package:leafy/core/constants/enums/storage_type.dart';
@@ -14,6 +17,9 @@ abstract class BookResourceRepository {
 
   /// Lấy resource theo UUID (entry point cho reader, deep link)
   Future<Either<Failure, Option<BookResource>>> getResourceByUuid(String uuid);
+
+  /// Lấy resource theo đường dẫn file
+  Future<Either<Failure, Option<BookResource>>> getResourceByPath(String path);
 
   /// Lấy resource đang đọc gần nhất của một cuốn sách
   Future<Either<Failure, Option<BookResource>>> getLastReadResource(int bookId);
@@ -66,7 +72,10 @@ abstract class BookResourceRepository {
    * -------------------------------------------------- */
 
   /// Kiểm tra file đã tồn tại trong DB chưa (tránh duplicate)
-  Future<Either<Failure, bool>> existsByFileHash(String fileHash);
+  Future<Either<Failure, bool>> existsByFileHash(
+    String fileHash, {
+    int? bookId,
+  });
 
   /// Kiểm tra UUID đã tồn tại chưa
   Future<Either<Failure, bool>> existsByUuid(String uuid);
@@ -84,5 +93,17 @@ abstract class BookResourceRepository {
     required String locator,
     required double progress,
     required DateTime lastReadAt,
+  });
+
+  /* --------------------------------------------------
+   * 6. Download
+   * -------------------------------------------------- */
+
+  Future<Either<Failure, File>> downloadResource({
+    required String fileName,
+    required String url,
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
+    bool forceReload = true,
   });
 }

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +21,8 @@ import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
+import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
@@ -33,15 +33,10 @@ import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
-import 'package:leafy/router/router.dart';
-import 'package:leafy/ui/test/cubit/test_cubit.dart';
+import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 
-late Directory appDocumentsDirectory;
-late Directory appTempDirectory;
-late DateFormat dateFormat;
-late GlobalKey<ScaffoldMessengerState> snackbarKey;
-final _router = router();
+import 'package:leafy/core/utils/app_globals.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,14 +49,13 @@ void main() async {
 
   snackbarKey = GlobalKey<ScaffoldMessengerState>();
 
+  await initializeDateFormatting();
+  dateFormat = DateFormat.yMMMd();
+
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
-  // bookCubit = getIt<BookCubit>();
-
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: HydratedStorageDirectory(
-      (await getApplicationDocumentsDirectory()).path,
-    ),
+    storageDirectory: HydratedStorageDirectory(appDocumentsDirectory.path),
   );
 
   runApp(
@@ -92,7 +86,9 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<BookActorCubit>()),
       BlocProvider(create: (context) => getIt<BookEditorActionCubit>()),
       BlocProvider(create: (context) => getIt<TrashBinCubit>()),
-      BlocProvider(create: (context) => getIt<TestCubit>()),
+      BlocProvider(create: (context) => getIt<EpubReaderCubit>()),
+      BlocProvider(create: (context) => getIt<BookResourceCubit>()),
+      BlocProvider(create: (context) => getIt<BookProgressCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),
@@ -157,8 +153,6 @@ class LeafyApp extends StatefulWidget {
 class _LeafyAppState extends State<LeafyApp> {
   @override
   Widget build(BuildContext context) {
-    _initializeDateFormat();
-
     final localizationsDelegates = [...context.localizationDelegates];
 
     return DynamicColorBuilder(
@@ -247,7 +241,7 @@ class _LeafyAppState extends State<LeafyApp> {
                 : Brightness.dark,
           ),
           child: MaterialApp.router(
-            routerConfig: _router,
+            routerConfig: appRouter,
             title: Constants.appName,
             theme: lightTheme,
             darkTheme: darkTheme,
@@ -262,9 +256,4 @@ class _LeafyAppState extends State<LeafyApp> {
       },
     );
   }
-}
-
-Future _initializeDateFormat() async {
-  await initializeDateFormatting();
-  dateFormat = DateFormat.yMMMd();
 }

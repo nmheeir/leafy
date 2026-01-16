@@ -21,8 +21,6 @@ class DbConstants {
       finish_date TEXT,                     -- Ngày hoàn thành
       pages INTEGER,                        -- Tổng số trang (tham khảo)
       publication_year INTEGER,             -- Năm xuất bản
-      isbn TEXT,                            -- ISBN (nếu có)
-      olid TEXT,                            -- OpenLibrary ID
       tags TEXT,                            -- Tag người dùng
       my_review TEXT,                       -- Review cá nhân
       notes TEXT,                           -- Ghi chú chung về sách
@@ -38,9 +36,9 @@ class DbConstants {
   // =====================================================
   static const createBookResoucesTable = '''
     CREATE TABLE book_resources (
-      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      id INTEGER PRIMARY KEY AUTOINCREMENT, -- ID nội bộ (FK reference)
       uuid TEXT UNIQUE NOT NULL,            -- ID domain (nhận từ Gutendex hoặc tự gen)
-      book_id INTEGER NOT NULL,             
+      book_id INTEGER NOT NULL,             -- FK → books.id
       format TEXT NOT NULL,                 -- epub | pdf | audio
       
       storage_type TEXT DEFAULT 'local',    -- 'local' | 'remote'
@@ -65,8 +63,14 @@ class DbConstants {
       start_time INTEGER NOT NULL,           -- Thời điểm bắt đầu đọc (ms)
       end_time INTEGER NOT NULL,             -- Thời điểm kết thúc đọc (ms)
       duration_ms INTEGER NOT NULL,          -- Thời gian đọc thực tế
+
       chapter_index INTEGER,                -- Chương đang đọc (tham khảo)
-      FOREIGN KEY (resource_id) REFERENCES booksTable (id) ON DELETE CASCADE
+
+      -- Vị trí đọc
+      start_locator TEXT,                   -- Vị trí đọc lúc bắt đầu
+      end_locator TEXT,                     -- Vị trí đọc lúc kết thúc
+
+      FOREIGN KEY (resource_id) REFERENCES book_resources (id) ON DELETE CASCADE
     )
   ''';
 

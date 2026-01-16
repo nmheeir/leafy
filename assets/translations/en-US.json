@@ -251,6 +251,7 @@
   "isbn_cannot_be_empty": "ISBN cannot be empty",
   "cover_not_found_in_ol": "Cover not found in Open Library",
   "books_settings": "Books",
+  "downloading": "Downloading",
   "download_missing_covers": "Download missing covers",
   "download_missing_covers_explanation": "Download missing covers for books that have ISBN set",
   "downloaded_covers": "Downloaded covers:",

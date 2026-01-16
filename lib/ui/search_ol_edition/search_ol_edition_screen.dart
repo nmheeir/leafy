@@ -10,8 +10,6 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/ui/book_editor/book_editor_args.dart';
-import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/search_ol_edition/widgets/ol_editions_grid.dart';
 
 // NOTE: Khi thoát ra ngoài không cancel request tới API
@@ -64,12 +62,6 @@ class _SearchOLEditionsScreenState extends State<SearchOLEditionsScreen> {
       pages: result.numberOfPages,
       status: widget.status,
       favorite: false,
-      isbn: (result.isbn13 != null && result.isbn13!.isNotEmpty)
-          ? result.isbn13![0]
-          : (result.isbn10 != null && result.isbn10!.isNotEmpty)
-          ? result.isbn10![0]
-          : null,
-      olid: (result.key != null) ? result.key!.replaceAll('/books/', '') : null,
       publicationYear: widget.firstPublishYear,
       bookFormat: result.physicalFormat ?? defaultBookFormat,
       readings: List<Reading>.empty(growable: true),

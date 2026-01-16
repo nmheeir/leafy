@@ -1,1 +1,1 @@
-enum BookResourceFormat { epub, pdf, html }
+enum BookResourceFormat { epub, pdf, html, audio }

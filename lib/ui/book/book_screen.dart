@@ -1,10 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/core/constants/enums/index.dart';
+
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
+
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
@@ -13,11 +16,10 @@ import 'package:leafy/ui/book/widgets/book_detailed_date_added_update.dart';
 import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
 import 'package:leafy/ui/book/widgets/book_status_detail.dart';
 import 'package:leafy/ui/book/widgets/book_title_detail.dart';
+import 'package:leafy/ui/book/widgets/book_reader_launcher_button.dart';
+
 import 'package:leafy/ui/book/widgets/cover_view.dart';
-import 'package:leafy/ui/book/widgets/quick_rating_dialog.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
-import 'package:leafy/ui/extensions/book_status_extension.dart';
-import 'package:leafy/ui/test/test_screen.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -25,93 +27,90 @@ class BookScreen extends StatelessWidget {
 
   final String heroTag;
 
-  void _onLikeTap(BuildContext context, Book book) {
-    context.bookActorCubit.toggleFavorite(book);
-  }
-
-  Future<void> _changeStatusAction(
-    BuildContext context,
-    BookStatus status,
-    Book book,
-  ) async {
-    int? rating;
-
-    if (status == BookStatus.unfinished) {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute(builder: (context) => TestEpubReaderScreen()));
-      return;
-    }
-
-    if (status == BookStatus.inProgress) {
-      rating = await showDialog<int?>(
-        context: context,
-        builder: (_) => const QuickRatingDialog(),
-      );
-    }
-
-    if (!context.mounted) return;
-
-    context.bookActorCubit.changeReadingStatus(book, rating: rating);
-  }
-
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
 
-    return BlocListener<BookActorCubit, BookActorState>(
-      listener: (context, actorState) {
-        actorState.maybeWhen(
-          success: (message, book) {
-            if (book != null) {
-              context.currentBookCubit.setBook(book);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = getIt<BookResourceCubit>();
+            final bookId = context.read<CurrentBookCubit>().state.id;
+            if (bookId != null) {
+              cubit.loadResources(bookId);
             }
+            return cubit;
+          },
+        ),
+      ],
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<CurrentBookCubit, Book>(
+            listenWhen: (previous, current) =>
+                previous.id != current.id && current.id != null,
+            listener: (context, state) {
+              context.read<BookResourceCubit>().loadResources(state.id!);
+            },
+          ),
+          BlocListener<BookActorCubit, BookActorState>(
+            listener: (context, actorState) {
+              actorState.maybeWhen(
+                success: (message, book) {
+                  if (book != null) {
+                    context.currentBookCubit.setBook(book);
+                  }
 
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(message)));
-          },
-          failure: (message) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            );
-          },
-          orElse: () {},
-        );
-      },
-      child: SelectableRegion(
-        selectionControls: materialTextSelectionControls,
-        focusNode: FocusNode(),
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: const BookScreenAppBar(),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                _buildCoverSpace(mediaQuery),
-                BlocBuilder<CurrentBookCubit, Book>(
-                  builder: (context, state) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildTitleDetail(state),
-                        _buildStatusDetail(state, context),
-                        _buildBookFormatDetail(state),
-                        _buildPublicationYearDetail(state),
-                        _buildPagesDetail(state),
-                        // _buildISBNDetail(state),
-                        // _buildOLIDDetail(state),
-                        const SizedBox(height: 50),
-                        _buildDescriptionDetail(state),
-                        _buildMyReviewDetail(state),
-                        _buildNotesDetail(state),
-                        _buildEditDates(state),
-                        const SizedBox(height: 100),
-                      ],
-                    );
-                  },
-                ),
-              ],
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(message)));
+                },
+                failure: (message) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                },
+                orElse: () {},
+              );
+            },
+          ),
+        ],
+        child: SelectableRegion(
+          selectionControls: materialTextSelectionControls,
+          focusNode: FocusNode(),
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: const BookScreenAppBar(),
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildCoverSpace(mediaQuery),
+                  BlocBuilder<CurrentBookCubit, Book>(
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildTitleDetail(state),
+                          BookStatusDetail(book: state),
+                          BookReaderLauncherButton(book: state),
+                          _buildBookFormatDetail(state),
+                          _buildPublicationYearDetail(state),
+                          _buildPagesDetail(state),
+                          const SizedBox(height: 50),
+                          _buildDescriptionDetail(state),
+                          _buildMyReviewDetail(state),
+                          _buildNotesDetail(state),
+                          _buildEditDates(state),
+                          const SizedBox(height: 100),
+                        ],
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -198,24 +197,6 @@ class BookScreen extends StatelessWidget {
       publicationYear: (state.publicationYear ?? "").toString(),
       tags: state.tags?.split('|||||'),
       bookType: state.bookFormat,
-    );
-  }
-
-  BookStatusDetail _buildStatusDetail(Book state, BuildContext context) {
-    return BookStatusDetail(
-      book: state,
-      statusIcon: state.status.icon,
-      statusText: state.status.text,
-      onLikeTap: () => _onLikeTap(context, state),
-      showChangeStatus:
-          (state.status == BookStatus.inProgress ||
-          state.status == BookStatus.forLater ||
-          state.status == BookStatus.unfinished),
-      changeStatusText: state.status.changeStatus,
-      changeStatusAction: () {
-        _changeStatusAction(context, state.status, state);
-      },
-      showRatingAndLike: state.status == BookStatus.finished,
     );
   }
 }

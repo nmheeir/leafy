@@ -15,7 +15,7 @@ import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_placeholder.dart';
 import 'package:leafy/ui/book_editor/widgets/duck_duck_go_alert.dart';
 import 'package:leafy/ui/book_editor/widgets/edit_cover_options.dart';
@@ -73,18 +73,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     context.editBookCoverCubit.deleteCover(context.editBookCubit.state.id);
   }
 
-  void _loadCoverFromOpenLibrary(BuildContext context) {
-    Navigator.of(context).pop();
-    final isbn = context.editBookCubit.state.isbn;
-
-    if (isbn == null || isbn.isEmpty) {
-      CoverViewEdit.showInfoSnackbar(LocaleKeys.isbn_cannot_be_empty.tr());
-      return;
-    }
-
-    context.editBookCoverCubit.loadFromOpenLibrary(isbn);
-  }
-
   void _showDuckDuckGoWarning(BuildContext context) {
     showDialog(
       context: context,
@@ -127,7 +115,6 @@ class _CoverViewEditState extends State<CoverViewEdit> {
     final options = EditCoverOptions(
       loadCoverFromStorage: () => _pickAndCropImage(context),
       searchForCoverOnline: () => _searchForCoverOnline(context),
-      loadCoverFromOpenLibrary: () => _loadCoverFromOpenLibrary(context),
       editCurrentCover: () => _editCurrentCover(context, currentCover),
     );
 
@@ -151,24 +138,8 @@ class _CoverViewEditState extends State<CoverViewEdit> {
   @override
   void initState() {
     super.initState();
-    // FIX LỖI CHỚP NHÁY:
-    // Lấy dữ liệu hiện tại từ EditBookCubit (đã có sẵn khi vào màn hình)
-    // và nạp ngay vào EditBookCoverCubit trước khi UI kịp vẽ frame đầu tiên.
-    final editBookState = context.editBookCubit.state;
-
-    // Lưu ý: Giả sử EditBookState có trường 'cover' (Uint8List?) lưu ảnh raw.
-    // Nếu EditBookState chỉ lưu đường dẫn file, bạn cần xử lý đọc file ở đây
-    // hoặc chỉ reset về null để tránh hiện ảnh cũ.
-    // Ở đây tôi giả định bạn muốn clear ảnh cũ đi để tránh hiện sai:
-
-    context.read<EditBookCoverCubit>().initialize(
-      currentCover: null,
-      currentBlurHash: editBookState.blurHash,
-    );
-
-    // NẾU EditBookCubit đã có sẵn bytes ảnh (ví dụ state.coverBytes), hãy truyền vào:
-    // currentCover: editBookState.coverBytes
-    // Để người dùng thấy ngay ảnh hiện tại mà không cần chờ load.
+    // Do not initialize EditBookCoverCubit here anymore.
+    // It is moved to BookEditorScreen.initState to happen exactly once.
   }
 
   @override
@@ -255,6 +226,13 @@ class _CoverViewEditState extends State<CoverViewEdit> {
                               fit: BoxFit.contain,
                               width: double.infinity,
                               height: double.infinity,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Center(
+                                    child: Icon(
+                                      Icons.broken_image,
+                                      color: Colors.red,
+                                    ),
+                                  ),
                             ),
                           ),
                         ),

@@ -27,13 +27,21 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
    * -------------------------------------------------- */
 
   @override
-  Future<bool> existsByFileHash(String hash) async {
+  Future<bool> existsByFileHash(String hash, {int? bookId}) async {
     final db = await _db.database;
+    final List<Object> whereArgs = [hash];
+    var whereClause = 'file_hash = ?';
+
+    if (bookId != null) {
+      whereClause += ' AND book_id = ?';
+      whereArgs.add(bookId);
+    }
+
     final result = await db.query(
       _table,
       columns: ['id'],
-      where: 'file_hash = ?',
-      whereArgs: [hash],
+      where: whereClause,
+      whereArgs: whereArgs,
       limit: 1,
     );
     return result.isNotEmpty;
@@ -69,6 +77,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return result.map((e) => BookResourceModel.fromJson(e)).toList();
   }
 
+  /// Trả về book resource dựa vào uuid
   @override
   Future<BookResourceModel?> getByUuid(String uuid) async {
     final db = await _db.database;
@@ -83,6 +92,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return BookResourceModel.fromJson(result.first);
   }
 
+  /// Trả về book resource đã được đọc gần nhất dựa vào book id
   @override
   Future<BookResourceModel?> getLastReadByBookId(int bookId) async {
     final db = await _db.database;
@@ -103,6 +113,7 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     return BookResourceModel.fromJson(result.first);
   }
 
+  /// Trả về list book resource bị hỏng
   @override
   Future<List<BookResourceModel>> getBrokenResources() async {
     final db = await _db.database;
@@ -144,5 +155,19 @@ class BookResourceLocalDatasourceImpl implements BookResourceLocalDatasource {
     if (size != null) values['file_size'] = size;
 
     await db.update(_table, values, where: 'uuid = ?', whereArgs: [uuid]);
+  }
+
+  @override
+  Future<BookResourceModel?> findByPath(String path) async {
+    final db = await _db.database;
+    final result = await db.query(
+      _table,
+      where: 'file_path = ?',
+      whereArgs: [path],
+      limit: 1,
+    );
+
+    if (result.isEmpty) return null;
+    return BookResourceModel.fromJson(result.first);
   }
 }

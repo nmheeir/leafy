@@ -23,7 +23,7 @@ mixin _$ReaderProgressModel {
 /// - HTML: anchor
  String? get locator;/// % hoàn thành (0.0 – 1.0)
 @JsonKey(name: 'progress_pct') double get progressPct;/// Timestamp lần đọc cuối (millisecondsSinceEpoch)
-@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') int? get lastReadAt;
+@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') DateTime? get lastReadAt;
 /// Create a copy of ReaderProgressModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -56,7 +56,7 @@ abstract mixin class $ReaderProgressModelCopyWith<$Res>  {
   factory $ReaderProgressModelCopyWith(ReaderProgressModel value, $Res Function(ReaderProgressModel) _then) = _$ReaderProgressModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'resource_id') int resourceId, String? locator,@JsonKey(name: 'progress_pct') double progressPct,@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') int? lastReadAt
+@JsonKey(name: 'resource_id') int resourceId, String? locator,@JsonKey(name: 'progress_pct') double progressPct,@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') DateTime? lastReadAt
 });
 
 
@@ -79,7 +79,7 @@ resourceId: null == resourceId ? _self.resourceId : resourceId // ignore: cast_n
 as int,locator: freezed == locator ? _self.locator : locator // ignore: cast_nullable_to_non_nullable
 as String?,progressPct: null == progressPct ? _self.progressPct : progressPct // ignore: cast_nullable_to_non_nullable
 as double,lastReadAt: freezed == lastReadAt ? _self.lastReadAt : lastReadAt // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 
@@ -164,7 +164,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  int? lastReadAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  DateTime? lastReadAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReaderProgressModel() when $default != null:
 return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadAt);case _:
@@ -185,7 +185,7 @@ return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadA
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  int? lastReadAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  DateTime? lastReadAt)  $default,) {final _that = this;
 switch (_that) {
 case _ReaderProgressModel():
 return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadAt);case _:
@@ -205,7 +205,7 @@ return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadA
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  int? lastReadAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'resource_id')  int resourceId,  String? locator, @JsonKey(name: 'progress_pct')  double progressPct, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at')  DateTime? lastReadAt)?  $default,) {final _that = this;
 switch (_that) {
 case _ReaderProgressModel() when $default != null:
 return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadAt);case _:
@@ -219,8 +219,8 @@ return $default(_that.resourceId,_that.locator,_that.progressPct,_that.lastReadA
 /// @nodoc
 @JsonSerializable()
 
-class _ReaderProgressModel implements ReaderProgressModel {
-  const _ReaderProgressModel({@JsonKey(name: 'resource_id') required this.resourceId, this.locator, @JsonKey(name: 'progress_pct') this.progressPct = 0.0, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') this.lastReadAt});
+class _ReaderProgressModel extends ReaderProgressModel {
+  const _ReaderProgressModel({@JsonKey(name: 'resource_id') required this.resourceId, this.locator, @JsonKey(name: 'progress_pct') this.progressPct = 0.0, @IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') this.lastReadAt}): super._();
   factory _ReaderProgressModel.fromJson(Map<String, dynamic> json) => _$ReaderProgressModelFromJson(json);
 
 /// FK → book_resources.id
@@ -234,7 +234,7 @@ class _ReaderProgressModel implements ReaderProgressModel {
 /// % hoàn thành (0.0 – 1.0)
 @override@JsonKey(name: 'progress_pct') final  double progressPct;
 /// Timestamp lần đọc cuối (millisecondsSinceEpoch)
-@override@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') final  int? lastReadAt;
+@override@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') final  DateTime? lastReadAt;
 
 /// Create a copy of ReaderProgressModel
 /// with the given fields replaced by the non-null parameter values.
@@ -269,7 +269,7 @@ abstract mixin class _$ReaderProgressModelCopyWith<$Res> implements $ReaderProgr
   factory _$ReaderProgressModelCopyWith(_ReaderProgressModel value, $Res Function(_ReaderProgressModel) _then) = __$ReaderProgressModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'resource_id') int resourceId, String? locator,@JsonKey(name: 'progress_pct') double progressPct,@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') int? lastReadAt
+@JsonKey(name: 'resource_id') int resourceId, String? locator,@JsonKey(name: 'progress_pct') double progressPct,@IntToDatetimeCoverter()@JsonKey(name: 'last_read_at') DateTime? lastReadAt
 });
 
 
@@ -292,7 +292,7 @@ resourceId: null == resourceId ? _self.resourceId : resourceId // ignore: cast_n
 as int,locator: freezed == locator ? _self.locator : locator // ignore: cast_nullable_to_non_nullable
 as String?,progressPct: null == progressPct ? _self.progressPct : progressPct // ignore: cast_nullable_to_non_nullable
 as double,lastReadAt: freezed == lastReadAt ? _self.lastReadAt : lastReadAt // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 

@@ -87,8 +87,6 @@ class BookEditorActionCubit extends Cubit<BookEditorActionState> {
     emit(const BookEditorActionState()); // Emit state rỗng hoàn toàn
   }
 
-  Future<void> _downLoadCover() async {}
-
   Future<void> downloadBookFile(String url, String bookTitle) async {
     try {
       emit(

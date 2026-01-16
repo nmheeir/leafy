@@ -20,7 +20,9 @@ mixin _$ReadingSessionModel {
 @JsonKey(name: 'resource_id') int get resourceId;/// Thời điểm bắt đầu đọc (millisecondsSinceEpoch)
 @JsonKey(name: 'start_time') int get startTime;/// Thời điểm kết thúc đọc (millisecondsSinceEpoch)
 @JsonKey(name: 'end_time') int get endTime;/// Thời gian đọc thực tế (ms)
-@JsonKey(name: 'duration_ms') int get durationMs;/// Chương đang đọc (chỉ để tham khảo / thống kê)
+@JsonKey(name: 'duration_ms') int get durationMs;/// Vị trí đọc lúc bắt đầu
+@JsonKey(name: 'start_locator') String? get startLocator;/// Vị trí đọc lúc kết thúc
+@JsonKey(name: 'end_locator') String? get endLocator;/// Chương đang đọc (chỉ để tham khảo / thống kê)
 @JsonKey(name: 'chapter_index') int? get chapterIndex;
 /// Create a copy of ReadingSessionModel
 /// with the given fields replaced by the non-null parameter values.
@@ -34,16 +36,16 @@ $ReadingSessionModelCopyWith<ReadingSessionModel> get copyWith => _$ReadingSessi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingSessionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.resourceId, resourceId) || other.resourceId == resourceId)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.chapterIndex, chapterIndex) || other.chapterIndex == chapterIndex));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReadingSessionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.resourceId, resourceId) || other.resourceId == resourceId)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.startLocator, startLocator) || other.startLocator == startLocator)&&(identical(other.endLocator, endLocator) || other.endLocator == endLocator)&&(identical(other.chapterIndex, chapterIndex) || other.chapterIndex == chapterIndex));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,resourceId,startTime,endTime,durationMs,chapterIndex);
+int get hashCode => Object.hash(runtimeType,id,resourceId,startTime,endTime,durationMs,startLocator,endLocator,chapterIndex);
 
 @override
 String toString() {
-  return 'ReadingSessionModel(id: $id, resourceId: $resourceId, startTime: $startTime, endTime: $endTime, durationMs: $durationMs, chapterIndex: $chapterIndex)';
+  return 'ReadingSessionModel(id: $id, resourceId: $resourceId, startTime: $startTime, endTime: $endTime, durationMs: $durationMs, startLocator: $startLocator, endLocator: $endLocator, chapterIndex: $chapterIndex)';
 }
 
 
@@ -54,7 +56,7 @@ abstract mixin class $ReadingSessionModelCopyWith<$Res>  {
   factory $ReadingSessionModelCopyWith(ReadingSessionModel value, $Res Function(ReadingSessionModel) _then) = _$ReadingSessionModelCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'resource_id') int resourceId,@JsonKey(name: 'start_time') int startTime,@JsonKey(name: 'end_time') int endTime,@JsonKey(name: 'duration_ms') int durationMs,@JsonKey(name: 'chapter_index') int? chapterIndex
+ String id,@JsonKey(name: 'resource_id') int resourceId,@JsonKey(name: 'start_time') int startTime,@JsonKey(name: 'end_time') int endTime,@JsonKey(name: 'duration_ms') int durationMs,@JsonKey(name: 'start_locator') String? startLocator,@JsonKey(name: 'end_locator') String? endLocator,@JsonKey(name: 'chapter_index') int? chapterIndex
 });
 
 
@@ -71,14 +73,16 @@ class _$ReadingSessionModelCopyWithImpl<$Res>
 
 /// Create a copy of ReadingSessionModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? resourceId = null,Object? startTime = null,Object? endTime = null,Object? durationMs = null,Object? chapterIndex = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? resourceId = null,Object? startTime = null,Object? endTime = null,Object? durationMs = null,Object? startLocator = freezed,Object? endLocator = freezed,Object? chapterIndex = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,resourceId: null == resourceId ? _self.resourceId : resourceId // ignore: cast_nullable_to_non_nullable
 as int,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
 as int,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
 as int,durationMs: null == durationMs ? _self.durationMs : durationMs // ignore: cast_nullable_to_non_nullable
-as int,chapterIndex: freezed == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
+as int,startLocator: freezed == startLocator ? _self.startLocator : startLocator // ignore: cast_nullable_to_non_nullable
+as String?,endLocator: freezed == endLocator ? _self.endLocator : endLocator // ignore: cast_nullable_to_non_nullable
+as String?,chapterIndex: freezed == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }
@@ -164,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'chapter_index')  int? chapterIndex)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'start_locator')  String? startLocator, @JsonKey(name: 'end_locator')  String? endLocator, @JsonKey(name: 'chapter_index')  int? chapterIndex)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReadingSessionModel() when $default != null:
-return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.chapterIndex);case _:
+return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.startLocator,_that.endLocator,_that.chapterIndex);case _:
   return orElse();
 
 }
@@ -185,10 +189,10 @@ return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.du
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'chapter_index')  int? chapterIndex)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'start_locator')  String? startLocator, @JsonKey(name: 'end_locator')  String? endLocator, @JsonKey(name: 'chapter_index')  int? chapterIndex)  $default,) {final _that = this;
 switch (_that) {
 case _ReadingSessionModel():
-return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.chapterIndex);case _:
+return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.startLocator,_that.endLocator,_that.chapterIndex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +209,10 @@ return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.du
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'chapter_index')  int? chapterIndex)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'resource_id')  int resourceId, @JsonKey(name: 'start_time')  int startTime, @JsonKey(name: 'end_time')  int endTime, @JsonKey(name: 'duration_ms')  int durationMs, @JsonKey(name: 'start_locator')  String? startLocator, @JsonKey(name: 'end_locator')  String? endLocator, @JsonKey(name: 'chapter_index')  int? chapterIndex)?  $default,) {final _that = this;
 switch (_that) {
 case _ReadingSessionModel() when $default != null:
-return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.chapterIndex);case _:
+return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.durationMs,_that.startLocator,_that.endLocator,_that.chapterIndex);case _:
   return null;
 
 }
@@ -220,7 +224,7 @@ return $default(_that.id,_that.resourceId,_that.startTime,_that.endTime,_that.du
 @JsonSerializable()
 
 class _ReadingSessionModel implements ReadingSessionModel {
-  const _ReadingSessionModel({required this.id, @JsonKey(name: 'resource_id') required this.resourceId, @JsonKey(name: 'start_time') required this.startTime, @JsonKey(name: 'end_time') required this.endTime, @JsonKey(name: 'duration_ms') required this.durationMs, @JsonKey(name: 'chapter_index') this.chapterIndex});
+  const _ReadingSessionModel({required this.id, @JsonKey(name: 'resource_id') required this.resourceId, @JsonKey(name: 'start_time') required this.startTime, @JsonKey(name: 'end_time') required this.endTime, @JsonKey(name: 'duration_ms') required this.durationMs, @JsonKey(name: 'start_locator') this.startLocator, @JsonKey(name: 'end_locator') this.endLocator, @JsonKey(name: 'chapter_index') this.chapterIndex});
   factory _ReadingSessionModel.fromJson(Map<String, dynamic> json) => _$ReadingSessionModelFromJson(json);
 
 /// UUID của session đọc (PRIMARY KEY)
@@ -233,6 +237,10 @@ class _ReadingSessionModel implements ReadingSessionModel {
 @override@JsonKey(name: 'end_time') final  int endTime;
 /// Thời gian đọc thực tế (ms)
 @override@JsonKey(name: 'duration_ms') final  int durationMs;
+/// Vị trí đọc lúc bắt đầu
+@override@JsonKey(name: 'start_locator') final  String? startLocator;
+/// Vị trí đọc lúc kết thúc
+@override@JsonKey(name: 'end_locator') final  String? endLocator;
 /// Chương đang đọc (chỉ để tham khảo / thống kê)
 @override@JsonKey(name: 'chapter_index') final  int? chapterIndex;
 
@@ -249,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingSessionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.resourceId, resourceId) || other.resourceId == resourceId)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.chapterIndex, chapterIndex) || other.chapterIndex == chapterIndex));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReadingSessionModel&&(identical(other.id, id) || other.id == id)&&(identical(other.resourceId, resourceId) || other.resourceId == resourceId)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.durationMs, durationMs) || other.durationMs == durationMs)&&(identical(other.startLocator, startLocator) || other.startLocator == startLocator)&&(identical(other.endLocator, endLocator) || other.endLocator == endLocator)&&(identical(other.chapterIndex, chapterIndex) || other.chapterIndex == chapterIndex));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,resourceId,startTime,endTime,durationMs,chapterIndex);
+int get hashCode => Object.hash(runtimeType,id,resourceId,startTime,endTime,durationMs,startLocator,endLocator,chapterIndex);
 
 @override
 String toString() {
-  return 'ReadingSessionModel(id: $id, resourceId: $resourceId, startTime: $startTime, endTime: $endTime, durationMs: $durationMs, chapterIndex: $chapterIndex)';
+  return 'ReadingSessionModel(id: $id, resourceId: $resourceId, startTime: $startTime, endTime: $endTime, durationMs: $durationMs, startLocator: $startLocator, endLocator: $endLocator, chapterIndex: $chapterIndex)';
 }
 
 
@@ -269,7 +277,7 @@ abstract mixin class _$ReadingSessionModelCopyWith<$Res> implements $ReadingSess
   factory _$ReadingSessionModelCopyWith(_ReadingSessionModel value, $Res Function(_ReadingSessionModel) _then) = __$ReadingSessionModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'resource_id') int resourceId,@JsonKey(name: 'start_time') int startTime,@JsonKey(name: 'end_time') int endTime,@JsonKey(name: 'duration_ms') int durationMs,@JsonKey(name: 'chapter_index') int? chapterIndex
+ String id,@JsonKey(name: 'resource_id') int resourceId,@JsonKey(name: 'start_time') int startTime,@JsonKey(name: 'end_time') int endTime,@JsonKey(name: 'duration_ms') int durationMs,@JsonKey(name: 'start_locator') String? startLocator,@JsonKey(name: 'end_locator') String? endLocator,@JsonKey(name: 'chapter_index') int? chapterIndex
 });
 
 
@@ -286,14 +294,16 @@ class __$ReadingSessionModelCopyWithImpl<$Res>
 
 /// Create a copy of ReadingSessionModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? resourceId = null,Object? startTime = null,Object? endTime = null,Object? durationMs = null,Object? chapterIndex = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? resourceId = null,Object? startTime = null,Object? endTime = null,Object? durationMs = null,Object? startLocator = freezed,Object? endLocator = freezed,Object? chapterIndex = freezed,}) {
   return _then(_ReadingSessionModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,resourceId: null == resourceId ? _self.resourceId : resourceId // ignore: cast_nullable_to_non_nullable
 as int,startTime: null == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
 as int,endTime: null == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
 as int,durationMs: null == durationMs ? _self.durationMs : durationMs // ignore: cast_nullable_to_non_nullable
-as int,chapterIndex: freezed == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
+as int,startLocator: freezed == startLocator ? _self.startLocator : startLocator // ignore: cast_nullable_to_non_nullable
+as String?,endLocator: freezed == endLocator ? _self.endLocator : endLocator // ignore: cast_nullable_to_non_nullable
+as String?,chapterIndex: freezed == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int?,
   ));
 }

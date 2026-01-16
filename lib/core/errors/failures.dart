@@ -24,4 +24,7 @@ abstract class Failure with _$Failure {
 
   /// Lỗi parser
   const factory Failure.parse([String? message]) = _ParseFailure;
+
+  /// Lỗi quyền truy cập
+  const factory Failure.permission([String? message]) = _PermissionFailure;
 }

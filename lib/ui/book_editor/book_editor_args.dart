@@ -39,6 +39,7 @@ class BookEditorArgs {
         author: gtdBook.authors.firstOrNull?.name ?? 'Unknown',
         // Map logic kiểm tra EPUB ở đây luôn
         // hasFileAttached: format.applicationEpubZip != null,
+        description: gtdBook.summaries.join('\n\n'),
         tags: allTags,
         status: BookStatus.unfinished,
         readings: [],

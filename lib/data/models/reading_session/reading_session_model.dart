@@ -21,6 +21,12 @@ abstract class ReadingSessionModel with _$ReadingSessionModel {
     /// Thời gian đọc thực tế (ms)
     @JsonKey(name: 'duration_ms') required int durationMs,
 
+    /// Vị trí đọc lúc bắt đầu
+    @JsonKey(name: 'start_locator') String? startLocator,
+
+    /// Vị trí đọc lúc kết thúc
+    @JsonKey(name: 'end_locator') String? endLocator,
+
     /// Chương đang đọc (chỉ để tham khảo / thống kê)
     @JsonKey(name: 'chapter_index') int? chapterIndex,
   }) = _ReadingSessionModel;

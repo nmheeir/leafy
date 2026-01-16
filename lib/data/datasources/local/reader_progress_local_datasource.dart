@@ -1,10 +1,9 @@
+import 'package:leafy/data/models/reader_progress.dart/reader_progress_model.dart';
+
 abstract class ReaderProgressLocalDatasource {
-  Future<void> upsert({
-    required int resourceId,
-    required String locator,
-    required double progress,
-    required DateTime lastReadAt,
-  });
+  Future<void> upsert(ReaderProgressModel model);
 
   Future<void> deleteByResourceId(int resourceId);
+
+  Future<ReaderProgressModel?> getByResourceId(int resourceId);
 }

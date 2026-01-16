@@ -43,6 +43,8 @@ abstract class BookResourceModel with _$BookResourceModel {
 
   BookResource toEntity() {
     return BookResource(
+      id: id,
+      bookId: bookId,
       uuid: uuid,
       format: format,
       filePath: filePath,

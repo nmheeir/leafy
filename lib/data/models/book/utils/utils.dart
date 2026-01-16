@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 
 File? getCoverFile(int? id) {
   final fileExists = File('${appDocumentsDirectory.path}/$id.jpg').existsSync();

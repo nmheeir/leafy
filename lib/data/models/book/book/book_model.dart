@@ -42,8 +42,6 @@ abstract class BookModel with _$BookModel {
 
     @JsonKey(name: 'pages') int? pages,
     @JsonKey(name: 'publication_year') int? publicationYear,
-    @JsonKey(name: 'isbn') String? isbn,
-    @JsonKey(name: 'olid') String? olid,
     @JsonKey(name: 'tags') String? tags,
     @JsonKey(name: 'my_review') String? myReview,
     @JsonKey(name: 'notes') String? notes,
@@ -72,17 +70,16 @@ abstract class BookModel with _$BookModel {
       favorite: entity.favorite,
       hasCover: entity.hasCover,
       id: entity.id,
-      isbn: entity.isbn,
       myReview: entity.myReview,
       notes: entity.notes,
-      olid: entity.olid,
       pages: entity.pages,
       publicationYear: entity.publicationYear,
       rating: entity.rating,
       status: entity.status,
       subtitle: entity.subtitle,
       tags: entity.tags,
-      // TODO: còn start date và finished date
+      startDate: entity.startDate,
+      finishDate: entity.finishDate,
     );
   }
 
@@ -99,8 +96,6 @@ abstract class BookModel with _$BookModel {
       rating: rating,
       pages: pages,
       publicationYear: publicationYear,
-      isbn: isbn,
-      olid: olid,
       tags: tags,
       myReview: myReview,
       notes: notes,
@@ -111,6 +106,8 @@ abstract class BookModel with _$BookModel {
       // TODO: reading thành một bảng riêng. cần sửa lại book entity không nhận reading, thêm một entity mới là reading, ở đây sử dụng mảng rỗng để tránh lỗi
       readings: [],
       dateModified: dateModified,
+      startDate: startDate,
+      finishDate: finishDate,
     );
   }
 }

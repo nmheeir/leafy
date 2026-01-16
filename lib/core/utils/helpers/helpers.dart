@@ -5,7 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 
 Future<CroppedFile?> cropImage(BuildContext context, Uint8List cover) async {
   final colorScheme = Theme.of(context).colorScheme;

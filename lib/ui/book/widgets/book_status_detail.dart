@@ -3,186 +3,153 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:leafy/core/themes/app_theme.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/data/models/book/reading_time/reading_time.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/ui/extensions/book_status_extension.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
-import 'package:leafy/main.dart';
 import 'package:leafy/ui/book/widgets/like_button.dart';
 
 class BookStatusDetail extends StatefulWidget {
-  const BookStatusDetail({
-    super.key,
-    required this.book,
-    required this.statusIcon,
-    required this.statusText,
-    required this.onLikeTap,
-    this.showChangeStatus = false,
-    this.changeStatusText,
-    this.changeStatusAction,
-    this.showRatingAndLike = false,
-  });
+  const BookStatusDetail({super.key, required this.book});
 
   final Book book;
-  final IconData? statusIcon;
-  final String statusText;
-  final Function() onLikeTap;
-  final bool showChangeStatus;
-  final String? changeStatusText;
-  final Function()? changeStatusAction;
-  final bool showRatingAndLike;
 
   @override
   State<BookStatusDetail> createState() => _BookStatusDetailState();
 }
 
 class _BookStatusDetailState extends State<BookStatusDetail> {
-  String _generateReadingTime({
-    DateTime? startDate,
-    DateTime? finishDate,
-    required BuildContext context,
-    ReadingTime? readingTime,
-  }) {
-    if (readingTime != null) return '($readingTime)';
+  final dateFormat = DateFormat.yMMMMd();
 
-    if (startDate == null || finishDate == null) return '';
-
-    final diff = finishDate.difference(startDate).inDays + 1;
-
-    return '(${LocaleKeys.day.plural(diff).tr()})';
+  void _onLikeTap() {
+    context.bookActorCubit.toggleFavorite(widget.book);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(25, 0, 25, 50),
+    final statusIcon = widget.book.status.icon;
+    final statusText = widget.book.status.text;
+    final showRatingAndLike = widget.book.status == BookStatus.finished;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Row 1: Status Badge & Favorite Button
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatusBox(context),
-              SizedBox(width: (widget.showChangeStatus) ? 20 : 0),
-              (widget.showChangeStatus)
-                  ? _buildChangeStatusButton(context)
-                  : const SizedBox(),
+              _buildStatusBadge(context, statusIcon, statusText),
+              _buildFavoriteButton(context),
             ],
           ),
-          const SizedBox(height: 10),
-          _generateHowManyTimesRead(context),
-          ..._buildStartAndFinishDates(context),
-          SizedBox(height: (widget.showRatingAndLike) ? 20 : 0),
-          (widget.showRatingAndLike)
-              ? _buildRatingAndLike(context)
-              : const SizedBox(),
+
+          // Row 3: History & Stats
+          if (widget.book.readings.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            _buildReadingHistory(context),
+          ],
+
+          // Row 4: Rating
+          if (showRatingAndLike) ...[
+            const SizedBox(height: 24),
+            _buildRatingSection(context),
+          ],
         ],
       ),
     );
   }
 
-  Expanded _buildStatusBox(BuildContext context) {
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(10),
+  // Aesthetic: Status dạng "Badge" hoặc "Chip" thay vì Box to
+  Widget _buildStatusBadge(
+    BuildContext context,
+    IconData? statusIcon,
+    String statusText,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: context.colorScheme.primaryContainer.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(
+          24,
+        ), // Bo tròn nhiều hơn (Pill shape)
+        border: Border.all(
+          color: context.colorScheme.primary.withValues(alpha: 0.1),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Icon(
-                  widget.statusIcon,
-                  size: 20,
-                  color: context.colorScheme.onPrimaryContainer,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  widget.statusText,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: context.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-              ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(statusIcon, size: 18, color: context.colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            statusText,
+            style: context.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: context.colorScheme.primary,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildChangeStatusButton(BuildContext context) {
-    return InkWell(
-      onTap: widget.changeStatusAction,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: context.colorScheme.secondaryContainer,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const SizedBox(height: 22),
-                Text(
-                  widget.changeStatusText!,
-                  maxLines: 1,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: context.colorScheme.onSecondaryContainer,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Column _buildRatingAndLike(BuildContext context) {
+  // Gom nhóm lịch sử đọc vào một khối gọn gàng hơn
+  Widget _buildReadingHistory(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            Text(
-              LocaleKeys.your_rating.tr(),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                height: 0.5,
-              ),
+        // Tiêu đề nhỏ nếu cần, hoặc giữ clean chỉ hiện list
+        _generateHowManyTimesRead(context),
+
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: context.colorScheme.outlineVariant.withValues(alpha: 0.3),
             ),
-          ],
-        ),
-        Divider(color: context.colorScheme.onSurface.withAlpha(25)),
-        const SizedBox(height: 3),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [_buildRating(context)],
-            ),
-            LikeButton(isLiked: widget.book.favorite, onTap: widget.onLikeTap),
-          ],
+          ),
+          child: Column(children: _buildStartAndFinishDates(context)),
         ),
       ],
     );
   }
+
+  Widget _buildRatingSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          LocaleKeys.your_rating.tr(),
+          style: context.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: context.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Vì nút Like đã đưa lên trên cùng, ở đây chỉ hiển thị Rating bar
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          decoration: BoxDecoration(
+            color: context.colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.colorScheme.outlineVariant),
+          ),
+          child: Center(child: _buildRating(context)),
+        ),
+      ],
+    );
+  }
+
+  // --- Các hàm con giữ nguyên logic, chỉ chỉnh style nhẹ ---
 
   Widget _buildRating(BuildContext context) {
     return BlocBuilder<RatingTypeBloc, RatingTypeState>(
@@ -193,35 +160,37 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
                 ? widget.book.rating! / 10
                 : 0,
             allowHalfRating: true,
-            unratedColor: context.colorScheme.surfaceContainerLow,
+            unratedColor: context.colorScheme.outlineVariant.withValues(
+              alpha: 0.5,
+            ),
             glow: false,
-            itemSize: 34,
+            itemSize: 32, // To hơn một chút
             ignoreGestures: true,
-            itemPadding: const EdgeInsets.only(right: 3),
+            itemPadding: const EdgeInsets.symmetric(horizontal: 4),
             itemBuilder: (context, _) => FaIcon(
               FontAwesomeIcons.solidStar,
-              color: context.colorScheme.primary,
+              color: const Color(0xFFFFC107), // Màu vàng chuẩn cho sao
             ),
             onRatingUpdate: (_) {},
           );
         } else {
           return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 (widget.book.rating == null)
                     ? '0'
                     : '${(widget.book.rating! / 10)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                style: context.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: context.colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 8),
               FaIcon(
                 FontAwesomeIcons.solidStar,
-                color: context.colorScheme.primary,
-                size: 16,
+                color: const Color(0xFFFFC107),
+                size: 24,
               ),
             ],
           );
@@ -231,148 +200,116 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
   }
 
   List<Widget> _buildStartAndFinishDates(BuildContext context) {
-    final widgets = <Widget>[];
+    if (widget.book.readings.isEmpty) return [];
 
-    for (final reading in widget.book.readings) {
-      late Widget widget;
-      final startDate = reading.startDate;
-      final finishDate = reading.finishDate;
-      // TODO: xem lại chô reading time này
-      final readingTime = reading.readingTimeMs;
+    return widget.book.readings.asMap().entries.map((entry) {
+      final index = entry.key;
+      final reading = entry.value;
+      final text = _getReadingDateText(reading, context);
+      final isLast = index == widget.book.readings.length - 1;
 
-      if (startDate != null && finishDate != null) {
-        widget = _buildStartAndFinishDate(
-          startDate,
-          finishDate,
-          null, // Here
-          context,
-        );
-      } else if (startDate == null && finishDate != null) {
-        widget = _buildOnlyFinishDate(finishDate, null, context);
-      } else if (startDate != null && finishDate == null) {
-        widget = _buildOnlyStartDate(startDate, context);
-      } else {
-        widget = const SizedBox();
-      }
-
-      widgets.add(
-        Padding(
-          padding: const EdgeInsets.only(bottom: 3),
-          child: Row(children: [Expanded(child: widget)]),
+      return Padding(
+        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.colorScheme.surface,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.calendar_today_rounded,
+                size: 14,
+                color: context.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                text,
+                style: context.textTheme.bodyMedium?.copyWith(
+                  color: context.colorScheme.onSurface,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
         ),
       );
+    }).toList();
+  }
+
+  String _getReadingDateText(dynamic reading, BuildContext context) {
+    final startDate = reading.startDate;
+    final finishDate = reading.finishDate;
+    final readingTime = reading.readingTimeMs;
+
+    // Giả sử logic _generateReadingTime trả về string thời gian
+    final timeStr = _generateReadingTime(
+      startDate: startDate,
+      finishDate: finishDate,
+      context: context,
+      readingTime: null,
+    );
+
+    if (startDate != null && finishDate != null) {
+      return '${dateFormat.format(startDate)} - ${dateFormat.format(finishDate)} $timeStr';
+    } else if (finishDate != null) {
+      return '${LocaleKeys.finished_on_date.tr()} ${dateFormat.format(finishDate)} $timeStr';
+    } else if (startDate != null) {
+      return '${LocaleKeys.started_on_date.tr()} ${dateFormat.format(startDate)}';
     }
-
-    return widgets;
+    return "";
   }
 
-  Widget _buildStartAndFinishDate(
-    DateTime startDate,
-    DateTime finishDate,
+  String _generateReadingTime({
+    DateTime? startDate,
+    DateTime? finishDate,
+    required BuildContext context,
     ReadingTime? readingTime,
-    BuildContext context,
-  ) {
-    final readingTimeText =
-        ' ${_generateReadingTime(startDate: startDate, finishDate: finishDate, context: context, readingTime: readingTime)}';
-
-    return RichText(
-      selectionRegistrar: SelectionContainer.maybeOf(context),
-      selectionColor: ThemeGetters.getSelectionColor(context),
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 13,
-          color: context.colorScheme.onSurface.withAlpha(180),
-        ),
-        children: [
-          TextSpan(
-            text:
-                '${dateFormat.format(startDate)} - ${dateFormat.format(finishDate)}',
-          ),
-          TextSpan(text: readingTimeText),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOnlyFinishDate(
-    DateTime finishDate,
-    ReadingTime? readingTime,
-    BuildContext context,
-  ) {
-    final readingTimeText =
-        ' ${_generateReadingTime(startDate: null, finishDate: null, context: context, readingTime: readingTime)}';
-
-    return RichText(
-      selectionRegistrar: SelectionContainer.maybeOf(context),
-      selectionColor: ThemeGetters.getSelectionColor(context),
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 13,
-          color: context.colorScheme.onSurface.withAlpha(180),
-        ),
-        children: [
-          TextSpan(
-            text:
-                '${LocaleKeys.finished_on_date.tr()} ${dateFormat.format(finishDate)}',
-          ),
-          TextSpan(text: readingTimeText),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOnlyStartDate(DateTime startDate, BuildContext context) {
-    return RichText(
-      selectionRegistrar: SelectionContainer.maybeOf(context),
-      selectionColor: ThemeGetters.getSelectionColor(context),
-      text: TextSpan(
-        style: TextStyle(
-          fontSize: 13,
-          color: context.colorScheme.onSurface.withAlpha(180),
-        ),
-        children: [
-          TextSpan(
-            text:
-                '${LocaleKeys.started_on_date.tr()} ${dateFormat.format(startDate)}',
-          ),
-        ],
-      ),
-    );
+  }) {
+    if (readingTime != null) return '($readingTime)';
+    if (startDate == null || finishDate == null) return '';
+    final diff = finishDate.difference(startDate).inDays + 1;
+    // Highlight số ngày đậm hơn một chút
+    return ' • ${LocaleKeys.day.plural(diff).tr()}';
   }
 
   Widget _generateHowManyTimesRead(BuildContext context) {
-    int timesRead = 0;
+    int timesRead = widget.book.readings
+        .where((r) => r.finishDate != null)
+        .length;
+    if (timesRead <= 1) return const SizedBox();
 
-    for (final reading in widget.book.readings) {
-      if (reading.finishDate != null) {
-        timesRead++;
-      }
-    }
-
-    return timesRead > 1
-        ? Padding(
-            padding: const EdgeInsets.only(bottom: 5, top: 10),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      LocaleKeys.read_x_times
-                          .plural(widget.book.readings.length)
-                          .tr(),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: context.colorScheme.onSurface.withAlpha(220),
-                        height: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(color: context.colorScheme.onSurface.withAlpha(25)),
-              ],
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Icon(Icons.history, size: 16, color: context.colorScheme.secondary),
+          const SizedBox(width: 6),
+          Text(
+            LocaleKeys.read_x_times.plural(widget.book.readings.length).tr(),
+            style: context.textTheme.labelMedium?.copyWith(
+              color: context.colorScheme.secondary,
+              fontWeight: FontWeight.bold,
             ),
-          )
-        : const SizedBox();
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFavoriteButton(BuildContext context) {
+    return Container(
+      height: 44,
+      width: 44,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.colorScheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: LikeButton(isLiked: widget.book.favorite, onTap: _onLikeTap),
+    );
   }
 }

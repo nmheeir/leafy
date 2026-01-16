@@ -2,6 +2,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 
 class CoverPlaceholder extends StatelessWidget {
@@ -22,7 +23,7 @@ class CoverPlaceholder extends StatelessWidget {
         options: RoundedRectDottedBorderOptions(
           radius: Radius.circular(cornerRadius),
           dashPattern: const [10, 8],
-          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+          color: context.colorScheme.onSurface.withValues(alpha: 0.3),
           strokeWidth: 2,
           padding: EdgeInsets.zero,
         ),
@@ -37,7 +38,7 @@ class CoverPlaceholder extends StatelessWidget {
               height: defaultHeight + 40,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(cornerRadius),
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                color: context.colorScheme.primary.withValues(alpha: 0.1),
               ),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -51,7 +52,7 @@ class CoverPlaceholder extends StatelessWidget {
                       Icon(
                         Icons.image,
                         size: 24,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: context.colorScheme.primary,
                       ),
                       const SizedBox(width: 15),
                       Text(LocaleKeys.click_to_add_cover.tr()),

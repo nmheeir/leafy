@@ -5,7 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/data/datasources/local/database_service.dart';
 import 'package:leafy/data/models/book/book/book_model.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'book_local_datasource.dart';

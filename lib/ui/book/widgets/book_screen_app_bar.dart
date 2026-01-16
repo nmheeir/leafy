@@ -11,7 +11,9 @@ import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
+import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
+import 'package:leafy/ui/book_resource/book_resource_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BookScreenAppBar({super.key});
@@ -144,6 +146,37 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
           actions: [
             BlocBuilder<CurrentBookCubit, Book>(
               builder: (context, state) {
+                // Add Resource Folder Button
+                final resourceInfo = IconButton(
+                  onPressed: () {
+                    if (state.id != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context
+                                .read<
+                                  BookResourceCubit
+                                >(), // Reuse existing cubit? Or create new?
+                            // BookScreen creates one. We can reuse or pass ID.
+                            // BookScreen uses BlocProvider(create: ...).
+                            // If we are in child, context.read works.
+                            // But wait, BookScreenAppBar is in Scaffold appbar.
+                            // Scaffold is child of MultiBlocProvider in BookScreen.
+                            // So context.read<BookResourceCubit>() works.
+                            // BUT BookResourceScreen likely needs the Cubit.
+                            // We can wrap BookResourceScreen with BlocProvider.value.
+                            // Or BookResourceScreen can create its own if we pass ID?
+                            // Reuse is better to keep state synced.
+                            child: BookResourceScreen(bookId: state.id!),
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.folder_open_outlined),
+                  tooltip: 'Resources',
+                );
+
                 if (moreButtonOptions.length == 2) {
                   if (state.deleted == true) {
                     moreButtonOptions.add(LocaleKeys.restore_book.tr());
@@ -153,83 +186,91 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                   }
                 }
 
-                return PopupMenuButton<String>(
-                  onSelected: (_) {},
-                  itemBuilder: (_) {
-                    return moreButtonOptions.map((String choice) {
-                      return PopupMenuItem<String>(
-                        value: choice,
-                        child: Text(choice),
-                        onTap: () async {
-                          context.read<EditBookCubit>().setBook(state);
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    resourceInfo,
+                    PopupMenuButton<String>(
+                      onSelected: (_) {},
+                      itemBuilder: (_) {
+                        return moreButtonOptions.map((String choice) {
+                          return PopupMenuItem<String>(
+                            value: choice,
+                            child: Text(choice),
+                            onTap: () async {
+                              context.read<EditBookCubit>().setBook(state);
 
-                          await Future.delayed(const Duration(milliseconds: 0));
-                          if (!context.mounted) return;
+                              await Future.delayed(
+                                const Duration(milliseconds: 0),
+                              );
+                              if (!context.mounted) return;
 
-                          if (choice == moreButtonOptions[0]) {
-                            final cover = await getCoverBytes(state.id);
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => BookEditorScreen(
-                                  args: BookEditorArgs.fromLocal(
-                                    state,
-                                    // NOTE: nếu lỗi cover thì kiểm tra lại chỗ này
-                                    cover,
+                              if (choice == moreButtonOptions[0]) {
+                                final cover = await getCoverBytes(state.id);
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => BookEditorScreen(
+                                      args: BookEditorArgs.fromLocal(
+                                        state,
+                                        // NOTE: nếu lỗi cover thì kiểm tra lại chỗ này
+                                        cover,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            );
-                          } else if (choice == moreButtonOptions[1]) {
-                            final cover = await getCoverBytes(state.id);
+                                );
+                              } else if (choice == moreButtonOptions[1]) {
+                                final cover = await getCoverBytes(state.id);
 
-                            context.editBookCoverCubit.setCoverImage(cover);
+                                context.editBookCoverCubit.setCoverImage(cover);
 
-                            final newBook = state.copyWith(
-                              title:
-                                  '${state.title} ${LocaleKeys.copy_book.tr()}',
-                              readings: [],
-                              rating: 0,
-                              id: null,
-                            );
+                                final newBook = state.copyWith(
+                                  title:
+                                      '${state.title} ${LocaleKeys.copy_book.tr()}',
+                                  readings: [],
+                                  rating: 0,
+                                  id: null,
+                                );
 
-                            context.read<EditBookCubit>().setBook(newBook);
-                            context.read<EditBookCubit>().setHasCover(true);
+                                context.read<EditBookCubit>().setBook(newBook);
+                                context.read<EditBookCubit>().setHasCover(true);
 
-                            // Navigator.of(context).push(
-                            //   MaterialPageRoute(
-                            //     builder: (_) => const BookEditorScreen(
-                            //       duplicatingBook: true,
-                            //     ),
-                            //   ),
-                            // );
-                          } else if (choice == moreButtonOptions[2]) {
-                            if (state.deleted == false) {
-                              _showDeleteRestoreDialog(
-                                context,
-                                true,
-                                null,
-                                state,
-                              );
-                            } else {
-                              _showDeleteRestoreDialog(
-                                context,
-                                false,
-                                null,
-                                state,
-                              );
-                            }
-                          } else if (choice == moreButtonOptions[3]) {
-                            _showDeleteRestoreDialog(
-                              context,
-                              true,
-                              true,
-                              state,
-                            );
-                          }
-                        },
-                      );
-                    }).toList();
-                  },
+                                // Navigator.of(context).push(
+                                //   MaterialPageRoute(
+                                //     builder: (_) => const BookEditorScreen(
+                                //       duplicatingBook: true,
+                                //     ),
+                                //   ),
+                                // );
+                              } else if (choice == moreButtonOptions[2]) {
+                                if (state.deleted == false) {
+                                  _showDeleteRestoreDialog(
+                                    context,
+                                    true,
+                                    null,
+                                    state,
+                                  );
+                                } else {
+                                  _showDeleteRestoreDialog(
+                                    context,
+                                    false,
+                                    null,
+                                    state,
+                                  );
+                                }
+                              } else if (choice == moreButtonOptions[3]) {
+                                _showDeleteRestoreDialog(
+                                  context,
+                                  true,
+                                  true,
+                                  state,
+                                );
+                              }
+                            },
+                          );
+                        }).toList();
+                      },
+                    ),
+                  ],
                 );
               },
             ),

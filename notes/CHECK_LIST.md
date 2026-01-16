@@ -1,0 +1,1 @@
+- [ ] Nên làm thêm check xem cuốn sách nào đã được thêm vào trong ứng dụng khi tìm kiếm trong SearchGtdScreen
