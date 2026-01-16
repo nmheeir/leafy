@@ -1,15 +1,16 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/usecase/usecase.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/file_helper.dart';
 import 'package:leafy/domain/book_resource/entities/book_resource.dart';
 import 'package:leafy/domain/book_resource/usecase/delete_book_resource_use_case.dart';
+import 'package:leafy/domain/book_resource/usecase/download_resource.dart';
 import 'package:leafy/domain/book_resource/usecase/get_book_resources.dart';
+import 'package:leafy/domain/book_resource/usecase/params/download_resource_params.dart';
 import 'package:leafy/domain/book_resource/usecase/params/get_book_resources_params.dart';
 import 'package:leafy/domain/book_resource/usecase/params/update_book_resource_file_params.dart';
 import 'package:leafy/domain/book_resource/usecase/update_book_resource_file.dart';
-import 'package:leafy/domain/epub_file/usecases/get_epub.dart';
-import 'package:leafy/domain/epub_file/usecases/params/get_epub_param.dart';
 import 'package:leafy/domain/file_import/usecases/params/process_local_files_params.dart';
 import 'package:leafy/domain/file_import/usecases/pick_local_files_use_case.dart';
 import 'package:leafy/domain/file_import/usecases/process_local_files_use_case.dart';
@@ -25,7 +26,7 @@ class BookResourceCubit extends Cubit<BookResourceState> {
   final ProcessLocalFilesUseCase _processLocalFilesUseCase;
   final DeleteBookResourceUseCase _deleteBookResourceUseCase;
   final SaveImportedResourceUseCase _saveImportedResourceUseCase;
-  final GetEpubUseCase _getEpubUseCase;
+  final DownloadResourceUseCase _downloadResourceUseCase;
   final Logger _logger;
 
   BookResourceCubit(
@@ -36,7 +37,7 @@ class BookResourceCubit extends Cubit<BookResourceState> {
     this._processLocalFilesUseCase,
     this._saveImportedResourceUseCase,
     this._deleteBookResourceUseCase,
-    this._getEpubUseCase,
+    this._downloadResourceUseCase,
   ) : super(const BookResourceState.initial());
 
   int? _bookId;
@@ -64,8 +65,9 @@ class BookResourceCubit extends Cubit<BookResourceState> {
     emit(BookResourceState.downloading(resource.uuid, 0.0));
 
     // 1. Download file
-    final downloadResult = await _getEpubUseCase(
-      GetEpubParam(
+    final downloadResult = await _downloadResourceUseCase(
+      DownloadResourceParams(
+        fileName: resource.uuid.take(6),
         url: resource.url!,
         onProgress: (progress) {
           _logger.d("Download progress: $progress");
@@ -81,7 +83,7 @@ class BookResourceCubit extends Cubit<BookResourceState> {
         if (_bookId != null) loadResources(_bookId!);
       },
       (file) async {
-        final hash = await hashFile(file);
+        final hash = await FileHelper.hashFile(file);
         // 2. Update resource in DB
         final updateResult = await _updateBookResourceFileUseCase(
           UpdateBookResourceFileParams(

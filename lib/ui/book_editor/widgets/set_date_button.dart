@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 
 class SetDateButton extends StatefulWidget {
   const SetDateButton({

@@ -1,6 +1,5 @@
 import 'package:go_router/go_router.dart';
 import 'package:leafy/router/routes.dart';
-import 'package:leafy/ui/epub_view/epub_view_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
 import 'package:leafy/ui/search_gtd/search_gtd_screen.dart';
@@ -61,10 +60,6 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.searchGutendex,
       builder: (context, state) => SearchGtdScreen(),
-    ),
-    GoRoute(
-      path: Routes.epubView,
-      builder: (context, state) => EpubViewScreen(),
     ),
   ],
   // redirect: (context, state) {

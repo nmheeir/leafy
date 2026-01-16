@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart' show CancelToken;
 import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
 import 'package:leafy/core/constants/enums/storage_type.dart';
@@ -90,5 +93,17 @@ abstract class BookResourceRepository {
     required String locator,
     required double progress,
     required DateTime lastReadAt,
+  });
+
+  /* --------------------------------------------------
+   * 6. Download
+   * -------------------------------------------------- */
+
+  Future<Either<Failure, File>> downloadResource({
+    required String fileName,
+    required String url,
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
+    bool forceReload = true,
   });
 }

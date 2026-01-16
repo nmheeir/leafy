@@ -11,7 +11,7 @@ import 'package:leafy/domain/book/repositories/book_repository.dart';
 import 'package:leafy/domain/book/usecases/params/add_book_usecase_param.dart';
 import 'package:leafy/domain/book/usecases/params/bulk_update_params.dart';
 import 'package:leafy/domain/book/usecases/params/update_book_param.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 import 'package:logger/logger.dart';
 import 'package:rxdart/rxdart.dart';
 

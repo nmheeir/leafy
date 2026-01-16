@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/utils/helpers/epub_helper.dart';
-import 'package:leafy/domain/epub_file/usecases/parse_epub.dart';
+import 'package:leafy/domain/epub_reader/usecases/parse_epub.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
 import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_path.dart';

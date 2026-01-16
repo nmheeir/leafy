@@ -9,7 +9,7 @@ import 'package:leafy/core/constants/enums/ol_cover_type.dart';
 import 'package:leafy/core/utils/helpers/blurhash_util.dart';
 import 'package:leafy/domain/book/usecases/download_ol_cover.dart';
 import 'package:leafy/domain/book/usecases/params/download_cover_params.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 
 part 'edit_book_cover_state.dart';
 part 'edit_book_cover_cubit.freezed.dart';

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:diacritic/diacritic.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
@@ -35,7 +34,7 @@ class FileProcessingServiceImpl implements FileProcessingService {
           continue;
         }
 
-        final hash = await hashFile(ioFile);
+        final hash = await FileHelper.hashFile(ioFile);
 
         // 2. Duplicate Check
         final existsResult = await _resourceRepository.existsByFileHash(
@@ -58,11 +57,7 @@ class FileProcessingServiceImpl implements FileProcessingService {
           continue;
         }
 
-        // 3. Sanitization
-        final sanitizedName = _sanitizeFilename(file.name);
-        // Requirement: "Input: Tên Sách #1 (Full).epub -> Output: ten_sach_1_full_171000123.epub"
-
-        final targetPath = p.join(appDocDir.path, sanitizedName);
+        final targetPath = FileHelper.generateEpubFilePath(file.name);
 
         // 4. Persistence
         try {
@@ -91,29 +86,5 @@ class FileProcessingServiceImpl implements FileProcessingService {
     } catch (e) {
       return Left(Failure.unexpected(e.toString()));
     }
-  }
-
-  String _sanitizeFilename(String originalName) {
-    // 1. Remove extension for processing name part
-    final extension = p.extension(originalName); // .epub
-    final nameWithoutExt = p.basenameWithoutExtension(originalName);
-
-    // 2. Remove special chars, replace space with underscore, lowercase
-    // Vietnamese handling: "Tên Sách" -> "Ten Sach" -> "ten_sach"
-    String clean = removeDiacritics(nameWithoutExt).toLowerCase();
-
-    // Replace non-alphanumeric characters with underscore
-    clean = clean.replaceAll(RegExp(r'[^a-z0-9]+'), '_');
-
-    // Remote duplicate underscores if any
-    clean = clean.replaceAll(RegExp(r'_+'), '_');
-
-    // Remove leading/trailing underscores
-    clean = clean.trim().replaceAll(RegExp(r'^_|_$'), '');
-
-    // 3. Timestamp suffix
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-
-    return '${clean}_$timestamp$extension';
   }
 }

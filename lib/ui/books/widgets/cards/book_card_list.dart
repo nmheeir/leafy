@@ -17,7 +17,7 @@ import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 
 class BookCardList extends StatelessWidget {
   const BookCardList({

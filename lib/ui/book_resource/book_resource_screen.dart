@@ -145,7 +145,7 @@ class BookResourceScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          formatSize(resource.fileSize ?? 0),
+                          FileHelper.formatSize(resource.fileSize ?? 0),
                           style: context.textTheme.bodySmall?.copyWith(
                             color: context.colorScheme.onSurface,
                           ),

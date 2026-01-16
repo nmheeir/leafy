@@ -1,11 +1,16 @@
 import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
 import 'package:leafy/core/constants/enums/storage_type.dart';
 import 'package:leafy/core/errors/failures.dart';
+import 'package:leafy/core/utils/helpers/file_helper.dart';
 import 'package:leafy/data/datasources/local/book_resource_local_datasource.dart';
+import 'package:leafy/data/datasources/local/epub_file_local_datasource.dart';
 import 'package:leafy/data/datasources/local/reader_progress_local_datasource.dart';
+import 'package:leafy/data/datasources/remote/network_file_datasource.dart';
 import 'package:leafy/data/models/book_resource/book_resource_model.dart';
 import 'package:leafy/data/models/reader_progress.dart/reader_progress_model.dart';
 import 'package:leafy/domain/book_resource/entities/book_resource.dart';
@@ -16,9 +21,17 @@ import 'package:logger/logger.dart';
 class BookResourceRepositoryImpl implements BookResourceRepository {
   final BookResourceLocalDatasource _resourceDs;
   final ReaderProgressLocalDatasource _progressDs;
+  final NetworkFileDataSource _networkDs;
+  final EpubFileLocalDataSource _epubFileLocalDataSource;
   final Logger _logger;
 
-  BookResourceRepositoryImpl(this._resourceDs, this._progressDs, this._logger);
+  BookResourceRepositoryImpl(
+    this._resourceDs,
+    this._progressDs,
+    this._networkDs,
+    this._epubFileLocalDataSource,
+    this._logger,
+  );
 
   @override
   Future<Either<Failure, BookResource>> addResource({
@@ -267,6 +280,45 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
       return const Right(unit);
     } catch (e) {
       return Left(Failure.database(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, File>> downloadResource({
+    required String url,
+    required String fileName,
+    bool forceReload = true,
+    void Function(double progress)? onProgress,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      final file = await _networkDs.downloadToFile(
+        url: url,
+        savePath: FileHelper.generateEpubFilePath(fileName),
+        cancelToken: cancelToken,
+        onReceiveProgress: (received, total) {
+          if (total > 0) {
+            onProgress?.call((received / total).clamp(0.0, 1.0));
+          }
+        },
+      );
+
+      // 4. Validate lại file sau khi tải xong
+      if (!await _epubFileLocalDataSource.isValidEpub(file)) {
+        // Nếu tải xong mà file lỗi -> Xóa đi để tránh lỗi lần sau
+        if (await file.exists()) await file.delete();
+        return Left(Failure.unexpected('File downloaded but corrupted'));
+      }
+
+      return Right(file);
+    } on DioException catch (e) {
+      // Xử lý lỗi mạng cụ thể nếu cần
+      if (CancelToken.isCancel(e)) {
+        return Left(Failure.unexpected('Download cancelled'));
+      }
+      return Left(Failure.unexpected(e.message ?? 'Network error'));
+    } catch (e) {
+      return Left(Failure.unexpected(e.toString()));
     }
   }
 }

@@ -15,7 +15,7 @@ import 'package:leafy/core/utils/helpers/helpers.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/main.dart';
+import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_placeholder.dart';
 import 'package:leafy/ui/book_editor/widgets/duck_duck_go_alert.dart';
 import 'package:leafy/ui/book_editor/widgets/edit_cover_options.dart';
