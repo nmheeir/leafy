@@ -1,5 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/ui/settings/epub_reader/appearance/colors/color_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/chapters/chapters_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/font/font_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/image/image_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/misc/misc_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/padding/padding_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/progress/progress_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/reading_mode/reading_mode_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/reading_speed/reading_speed_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/system/system_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/text/text_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/translator/translator_subcategory.dart';
 
 class EpubReaderSettingsSheet extends StatefulWidget {
   const EpubReaderSettingsSheet({super.key});
@@ -94,7 +106,25 @@ class _GeneralTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("General Settings (Coming soon)"));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          ReadingModeSubcategory(),
+          Divider(height: 32),
+          PaddingSubcategory(),
+          Divider(height: 32),
+          SystemSubcategory(),
+          Divider(height: 32),
+          ReadingSpeedSubcategory(),
+          Divider(height: 32),
+          MiscSubcategory(),
+          SizedBox(height: 32),
+        ],
+      ),
+    );
   }
 }
 
@@ -103,7 +133,27 @@ class _ReaderTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Reader Settings (Coming soon)"));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      physics: const BouncingScrollPhysics(),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          FontSubcategory(),
+          Divider(height: 32),
+          TextSubcategory(),
+          Divider(height: 32),
+          ImageSubcategory(),
+          Divider(height: 32),
+          ChaptersSubcategory(),
+          Divider(height: 32),
+          ProgressSubcategory(),
+          Divider(height: 32),
+          TranslatorSubcategory(),
+          SizedBox(height: 32),
+        ],
+      ),
+    );
   }
 }
 
@@ -112,6 +162,10 @@ class _ColorTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text("Color Settings (Coming soon)"));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      physics: const BouncingScrollPhysics(),
+      child: const ColorSubcategory(),
+    );
   }
 }

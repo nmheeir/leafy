@@ -1,0 +1,102 @@
+import 'package:flutter/material.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+
+class TranslatorSubcategory extends StatelessWidget {
+  const TranslatorSubcategory({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text(
+            "Translator",
+            style: context.textTheme.titleSmall?.copyWith(
+              color: context.colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const _TargetLanguageSelector(),
+        const Divider(indent: 16, endIndent: 16, height: 24),
+        const _AutoDetectToggle(),
+      ],
+    );
+  }
+}
+
+class _TargetLanguageSelector extends StatefulWidget {
+  const _TargetLanguageSelector();
+
+  @override
+  State<_TargetLanguageSelector> createState() =>
+      _TargetLanguageSelectorState();
+}
+
+class _TargetLanguageSelectorState extends State<_TargetLanguageSelector> {
+  String _selectedLanguage = "Vietnamese";
+  final List<String> _languages = [
+    "Vietnamese",
+    "English",
+    "French",
+    "Japanese",
+    "Korean",
+    "Chinese",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: const Text("Translate to"),
+      subtitle: Text(
+        _selectedLanguage,
+        style: TextStyle(color: context.colorScheme.primary),
+      ),
+      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          builder: (context) => ListView.builder(
+            itemCount: _languages.length,
+            itemBuilder: (context, index) {
+              final language = _languages[index];
+              return ListTile(
+                title: Text(language),
+                trailing: language == _selectedLanguage
+                    ? Icon(Icons.check, color: context.colorScheme.primary)
+                    : null,
+                onTap: () {
+                  setState(() => _selectedLanguage = language);
+                  Navigator.pop(context);
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AutoDetectToggle extends StatefulWidget {
+  const _AutoDetectToggle();
+
+  @override
+  State<_AutoDetectToggle> createState() => _AutoDetectToggleState();
+}
+
+class _AutoDetectToggleState extends State<_AutoDetectToggle> {
+  bool _isAutoDetect = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile(
+      title: const Text("Auto-detect Source Language"),
+      value: _isAutoDetect,
+      onChanged: (value) => setState(() => _isAutoDetect = value),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+    );
+  }
+}
