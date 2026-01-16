@@ -9,9 +9,12 @@ part of 'epub_reader_setting_cubit.dart';
 _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   Map<String, dynamic> json,
 ) => _EpubReaderSettingState(
-  readingMode:
-      $enumDecodeNullable(_$ReadingModeEnumMap, json['readingMode']) ??
-      ReadingMode.off,
+  horizontalGestureMode:
+      $enumDecodeNullable(
+        _$HorizontalGestureModeEnumMap,
+        json['horizontalGestureMode'],
+      ) ??
+      HorizontalGestureMode.off,
   sideMargin: (json['sideMargin'] as num?)?.toDouble() ?? 16.0,
   verticalMargin: (json['verticalMargin'] as num?)?.toDouble() ?? 16.0,
   bottomBarMargin: (json['bottomBarMargin'] as num?)?.toDouble() ?? 16.0,
@@ -48,7 +51,8 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
   _EpubReaderSettingState instance,
 ) => <String, dynamic>{
-  'readingMode': _$ReadingModeEnumMap[instance.readingMode]!,
+  'horizontalGestureMode':
+      _$HorizontalGestureModeEnumMap[instance.horizontalGestureMode]!,
   'sideMargin': instance.sideMargin,
   'verticalMargin': instance.verticalMargin,
   'bottomBarMargin': instance.bottomBarMargin,
@@ -69,10 +73,10 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'chapterAlignment': _$TextAlignEnumMap[instance.chapterAlignment]!,
 };
 
-const _$ReadingModeEnumMap = {
-  ReadingMode.off: 'off',
-  ReadingMode.on: 'on',
-  ReadingMode.toggle: 'toggle',
+const _$HorizontalGestureModeEnumMap = {
+  HorizontalGestureMode.off: 'off',
+  HorizontalGestureMode.on: 'on',
+  HorizontalGestureMode.inverse: 'inverse',
 };
 
 const _$ScreenOrientationEnumMap = {

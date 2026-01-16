@@ -23,8 +23,8 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     return state.toJson();
   }
 
-  void updateReadingMode(ReadingMode mode) {
-    emit(state.copyWith(readingMode: mode));
+  void updateHorizontalGestureMode(HorizontalGestureMode mode) {
+    emit(state.copyWith(horizontalGestureMode: mode));
   }
 
   void updateSideMargin(double margin) {

@@ -5,6 +5,6 @@ export 'display_type.dart';
 export 'ol_search_type.dart';
 export 'sort_type.dart';
 export 'rating_type.dart';
-export 'epub_reader_setting/reading_mode.dart';
 export 'epub_reader_setting/screen_orientation.dart';
 export 'epub_reader_setting/font_thickness.dart';
+export 'epub_reader_setting/horizontal_gesture_mode.dart';

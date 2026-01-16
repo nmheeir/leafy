@@ -3,7 +3,8 @@ part of 'epub_reader_setting_cubit.dart';
 @freezed
 abstract class EpubReaderSettingState with _$EpubReaderSettingState {
   const factory EpubReaderSettingState({
-    @Default(ReadingMode.off) ReadingMode readingMode,
+    @Default(HorizontalGestureMode.off)
+    HorizontalGestureMode horizontalGestureMode,
     @Default(16.0) double sideMargin,
     @Default(16.0) double verticalMargin,
     @Default(16.0) double bottomBarMargin,
