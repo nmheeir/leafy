@@ -86,7 +86,23 @@ class BookResourceRepositoryImpl implements BookResourceRepository {
   ) async {
     try {
       final list = await _resourceDs.getByBookId(bookId);
-      return Right(list.map((e) => e.toEntity()).toList());
+
+      final result = <BookResource>[];
+      for (final model in list) {
+        if (model.id == null) {
+          result.add(model.toEntity());
+          continue;
+        }
+
+        final progress = await _progressDs.getByResourceId(model.id!);
+        // We use copyWith on the ENTITY to injecting the progress data
+        // keeping the Model clean.
+        result.add(
+          model.toEntity().copyWith(readProgress: progress?.progressPct),
+        );
+      }
+
+      return Right(result);
     } catch (e) {
       return Left(Failure.database(e.toString()));
     }

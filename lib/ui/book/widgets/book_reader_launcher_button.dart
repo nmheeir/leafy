@@ -25,21 +25,12 @@ class BookReaderLauncherButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Only show actions for relevant statuses
-    if (book.status == BookStatus.finished) {
-      return const SizedBox.shrink();
-    }
-
     return MultiBlocListener(
       listeners: [
         BlocListener<BookResourceCubit, BookResourceState>(
           listener: (context, state) {
             state.maybeWhen(
               success: (resources) {
-                // Auto load progress if we have exactly one valid local file
-                // and we are simply updating state.
-                // However, for optimization, we might defer this until viewed.
-                // But keeping previous behavior:
                 if (resources.length == 1) {
                   final resource = resources.first;
                   if (resource.filePath != null &&
@@ -103,8 +94,15 @@ class BookReaderLauncherButton extends StatelessWidget {
     List<BookResource> resources,
     BookProgressState progressState,
   ) {
+    final isFinished = book.status == BookStatus.finished;
+
     // Case 0: No resources
     if (resources.isEmpty) {
+      if (isFinished) {
+        return const SizedBox.shrink(); // No point in importing if finished?
+      }
+      // Actually, if it's finished but somehow resources are lost, maybe still show import.
+      // But usually finished books have at least one resource.
       return _buildActionButton(
         context,
         text: "Import Book",
@@ -120,11 +118,11 @@ class BookReaderLauncherButton extends StatelessWidget {
           resource.filePath != null && File(resource.filePath!).existsSync();
 
       if (fileExists) {
-        String text = "Start Reading";
+        String text = isFinished ? "Read Again" : "Start Reading";
         double? progress;
 
         if (progressState is BookProgressLoaded) {
-          if (progressState.progress > 0) {
+          if (progressState.progress > 0 && !isFinished) {
             text = "Continue Reading";
             progress = progressState.progress;
           }
@@ -146,7 +144,7 @@ class BookReaderLauncherButton extends StatelessWidget {
       } else {
         return _buildActionButton(
           context,
-          text: "Import Book", // Fallback for invalid single resource
+          text: "Import Book",
           icon: Icons.upload_file,
           onTap: () => context.bookResourceCubit.importFiles(),
         );
@@ -156,8 +154,8 @@ class BookReaderLauncherButton extends StatelessWidget {
     // Case > 1: Multiple Resources
     return _buildActionButton(
       context,
-      text: "Start Reading",
-      icon: Icons.expand_more, // Indicate selection
+      text: isFinished ? "Read Again" : "Start Reading",
+      icon: Icons.expand_more,
       onTap: () => _showResourceSelectionSheet(context, resources),
     );
   }
@@ -195,7 +193,21 @@ class BookReaderLauncherButton extends StatelessWidget {
                     File(resource.filePath!).existsSync();
 
                 String subtitle = "";
-                if (fileExists) {
+                // Logic hiển thị subtitle
+                if (resource.readProgress != null) {
+                  if (resource.readProgress! >= 1.0) {
+                    subtitle = "Finished";
+                  } else if (resource.readProgress! > 0) {
+                    subtitle =
+                        "${(resource.readProgress! * 100).toInt()}% read";
+                  } else if (fileExists) {
+                    subtitle = "Available locally";
+                  } else if (resource.url != null) {
+                    subtitle = "Tap to download";
+                  } else {
+                    subtitle = "Missing file";
+                  }
+                } else if (fileExists) {
                   subtitle = "Available locally";
                 } else if (resource.url != null) {
                   subtitle = "Tap to download";
@@ -223,7 +235,7 @@ class BookReaderLauncherButton extends StatelessWidget {
                     vertical: 4,
                   ),
                   onTap: () {
-                    Navigator.pop(sheetContext); // Close sheet
+                    Navigator.pop(sheetContext);
                     if (fileExists) {
                       _openReader(context, resource);
                     } else if (resource.url != null) {
@@ -272,6 +284,7 @@ class BookReaderLauncherButton extends StatelessWidget {
           );
         }
       } else {
+        await context.bookResourceCubit.loadResources(book.id ?? 0);
         context.currentBookCubit.refreshBook();
         context.bookProgressCubit.loadProgress(resource.filePath!);
       }

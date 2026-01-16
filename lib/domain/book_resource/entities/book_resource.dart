@@ -25,8 +25,39 @@ class BookResource extends Equatable {
     this.createdAt,
     this.storageType = StorageType.local,
     this.url,
+    this.readProgress,
   });
 
+  final double? readProgress;
+
+  BookResource copyWith({
+    int? id,
+    int? bookId,
+    String? uuid,
+    BookResourceFormat? format,
+    String? filePath,
+    int? fileSize,
+    String? language,
+    DateTime? createdAt,
+    StorageType? storageType,
+    String? url,
+    double? readProgress,
+  }) {
+    return BookResource(
+      id: id ?? this.id,
+      bookId: bookId ?? this.bookId,
+      uuid: uuid ?? this.uuid,
+      format: format ?? this.format,
+      filePath: filePath ?? this.filePath,
+      fileSize: fileSize ?? this.fileSize,
+      language: language ?? this.language,
+      createdAt: createdAt ?? this.createdAt,
+      storageType: storageType ?? this.storageType,
+      url: url ?? this.url,
+      readProgress: readProgress ?? this.readProgress,
+    );
+  }
+
   @override
-  List<Object?> get props => [id, bookId, uuid, format, filePath];
+  List<Object?> get props => [id, bookId, uuid, format, filePath, readProgress];
 }
