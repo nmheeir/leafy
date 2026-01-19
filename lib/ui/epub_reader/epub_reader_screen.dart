@@ -485,7 +485,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                 child: Text(
                   item.title,
                   style: TextStyle(
-                    fontSize: settings.fontSize * 1.5, // Header bigger
+                    fontSize: settings.fontSize * 1.5,
                     fontWeight: FontWeight.bold,
                     fontFamily: settings.fontFamily,
                   ),
@@ -504,6 +504,8 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                         fontSize: settings.fontSize,
                         height: settings.lineHeight,
                         fontFamily: settings.fontFamily,
+                        fontStyle: settings.fontStyle,
+                        fontWeight: settings.fontThickness.weight,
                         letterSpacing: settings.letterSpacing,
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.9,
@@ -637,7 +639,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       padding: EdgeInsets.only(
         left: 16,
         right: 16,
-        top: 16 + settings.bottomBarMargin, // Apply bottom margin adjustment
+        top: 16 + settings.bottomBarMargin,
         bottom: 16 + settings.bottomBarMargin,
       ),
       child: Column(
@@ -650,11 +652,16 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               builder: (context, value, child) {
                 return Column(
                   children: [
-                    Text("${(value * 100).toInt()}%"),
+                    if (settings.progressCountType ==
+                        ProgressCountType.percentage)
+                      Text("${(value * 100).toInt()}%")
+                    else
+                      Text(
+                        "${(value * (totalItems - 1)).toInt() + 1}/$totalItems",
+                      ),
+                    const SizedBox(height: 16),
                     SizedBox(
-                      height:
-                          settings.progressBarHeight *
-                          10, // Just scaling it a bit for touch target or visual
+                      height: 10,
                       child: Slider(
                         value: value,
                         activeColor: Color(
@@ -670,7 +677,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                 );
               },
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 18),
 
           // 2. Chèn bộ nút Navigation vừa tạo vào đây
           _buildNavigationButtons(context, items),

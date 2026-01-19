@@ -192,9 +192,8 @@ class _FontThicknessOption extends StatelessWidget {
                     color: isSelected
                         ? context.colorScheme.primary
                         : context.colorScheme.onSurface,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
+                    //NOTE: font weight not working
+                    fontWeight: thickness.weight,
                   ),
                   onSelected: (selected) {
                     if (selected) {

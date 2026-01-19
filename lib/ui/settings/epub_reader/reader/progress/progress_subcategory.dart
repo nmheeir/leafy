@@ -7,7 +7,6 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class ProgressSubcategory extends StatelessWidget {
   const ProgressSubcategory({super.key});
@@ -49,9 +48,6 @@ class ProgressSubcategory extends StatelessWidget {
                           color: Color(state.progressBarColor),
                         ),
                         const SizedBox(height: 16),
-                        _ProgressBarHeightSlider(
-                          height: state.progressBarHeight,
-                        ),
                         const SizedBox(height: 16),
                       ],
                     )
@@ -178,25 +174,6 @@ class _ProgressBarColorPicker extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _ProgressBarHeightSlider extends StatelessWidget {
-  final double height;
-  const _ProgressBarHeightSlider({required this.height});
-
-  @override
-  Widget build(BuildContext context) {
-    return SliderListTile(
-      title: LocaleKeys.epub_reader_progress_bar_height.tr(),
-      value: height,
-      min: 1.0,
-      max: 24.0,
-      divisions: 23, // 1.0 increments roughly
-      label: "${height.toInt()} pt",
-      onChanged: (value) =>
-          context.epubReaderSettingCubit.updateProgressBarHeight(value),
     );
   }
 }

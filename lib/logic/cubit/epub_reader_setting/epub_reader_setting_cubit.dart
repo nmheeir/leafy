@@ -9,6 +9,7 @@ import 'package:leafy/domain/device/usecases/brightness/set_brightness.dart';
 import 'package:leafy/domain/device/usecases/orientation/set_orientation.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/usecase/usecase.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 part 'epub_reader_setting_state.dart';
 part 'epub_reader_setting_cubit.freezed.dart';
@@ -82,6 +83,7 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
 
   void toggleKeepScreenOn() {
     emit(state.copyWith(keepScreenOn: !state.keepScreenOn));
+    WakelockPlus.toggle(enable: state.keepScreenOn);
   }
 
   void toggleHideBarOnFastScroll() {
@@ -206,10 +208,6 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
 
   void updateProgressBarColor(int color) {
     emit(state.copyWith(progressBarColor: color));
-  }
-
-  void updateProgressBarHeight(double height) {
-    emit(state.copyWith(progressBarHeight: height));
   }
 
   void updateTabIndex(int index) {

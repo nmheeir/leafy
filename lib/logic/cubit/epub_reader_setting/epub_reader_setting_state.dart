@@ -35,7 +35,6 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(ProgressCountType.percentage) ProgressCountType progressCountType,
     @Default(true) bool showProgressBar,
     @Default(0xFF2196F3) int progressBarColor,
-    @Default(4.0) double progressBarHeight,
     @Default(0.5) double scrollFraction,
     @Default(1.0) double sensitivity,
     @Default(true) bool pullAnimation,
