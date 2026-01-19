@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/settings/epub_reader/appearance/colors/color_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/chapters/chapters_subcategory.dart';
-import 'package:leafy/ui/settings/epub_reader/reader/typography/typography_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/image/image_subcategory.dart';
-import 'package:leafy/ui/settings/epub_reader/reader/misc/misc_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/layout/layout_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/misc/misc_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/progress/progress_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/reading_mode/reading_mode_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/reading_speed/reading_speed_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/system/system_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/text/text_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/translator/translator_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/typography/typography_subcategory.dart';
 
 class EpubReaderSettingsSheet extends StatefulWidget {
   const EpubReaderSettingsSheet({super.key});
@@ -37,11 +38,23 @@ class _EpubReaderSettingsSheetState extends State<EpubReaderSettingsSheet>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    final initialIndex = context.epubReaderSettingCubit.state.currentTabIndex;
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: initialIndex,
+    );
+    _tabController.addListener(_onTabChanged);
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging) return;
+    context.epubReaderSettingCubit.updateTabIndex(_tabController.index);
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_onTabChanged);
     _tabController.dispose();
     super.dispose();
   }

@@ -6,6 +6,9 @@ import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/epub_reader/widgets/epub_reader_settings_sheet.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/core/constants/enums/index.dart';
+import 'package:flutter/services.dart';
 
 class EpubReaderScreen extends StatefulWidget {
   final String filePath;
@@ -208,115 +211,254 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     }
   }
 
+  void _handleHorizontalDrag(
+    DragEndDetails details,
+    HorizontalGestureMode mode,
+  ) {
+    if (mode == HorizontalGestureMode.off) return;
+
+    // Sensitivity threshold
+    if (details.primaryVelocity == null || details.primaryVelocity!.abs() < 200)
+      return;
+
+    final isSwipeRight = details.primaryVelocity! > 0;
+    // Swipe Right -> Prev Page (if logic is: move content to right, shows left content)
+    // Swipe Left -> Next Page
+
+    // mode: scroll vs swift
+    // For now we just implement simple next/prev chapter or page flip simulation logic
+    // But since this is a vertical scroll reader, "Horizontal Navigation" usually implies changing chapters.
+
+    if (isSwipeRight) {
+      // Swipe Right -> Go to Previous
+      final items = context.epubReaderCubit.state.maybeMap(
+        loaded: (data) => data.displayItems,
+        orElse: () => <EpubDisplayItem>[],
+      );
+      if (items.isEmpty) return;
+      // Find current index
+      final positions = _itemPositionsListener.itemPositions.value;
+      if (positions.isNotEmpty) {
+        final currentIdx = positions.first.index;
+        final target = _findPrevChapterHeaderIndex(currentIdx, items);
+        _jumpToTarget(target);
+      }
+    } else {
+      // Swipe Left -> Go to Next
+      final items = context.epubReaderCubit.state.maybeMap(
+        loaded: (data) => data.displayItems,
+        orElse: () => <EpubDisplayItem>[],
+      );
+      if (items.isEmpty) return;
+      final positions = _itemPositionsListener.itemPositions.value;
+      if (positions.isNotEmpty) {
+        final currentIdx = positions.first.index;
+        final target = _findNextChapterHeaderIndex(currentIdx, items);
+        if (target != -1) _jumpToTarget(target);
+      }
+    }
+  }
+
+  void _onKeyEvent(KeyEvent event) {
+    // Only handle Key down
+    if (event is! KeyDownEvent) return;
+
+    // Only handle if volume navigation is enabled in state
+    // We need access to state here, so we might need to look it up or rely on the builder
+    // Ideally this listener should be added/removed based on state, or check state inside.
+    final state = context.read<EpubReaderSettingCubit>().state;
+    if (!state.volumeKeyNavigation) return;
+
+    if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp) {
+      // Prev
+      final items = context.epubReaderCubit.state.maybeMap(
+        loaded: (data) => data.displayItems,
+        orElse: () => <EpubDisplayItem>[],
+      );
+      if (items.isNotEmpty) {
+        final positions = _itemPositionsListener.itemPositions.value;
+        if (positions.isNotEmpty) {
+          _jumpToTarget(
+            _findPrevChapterHeaderIndex(positions.first.index, items),
+          );
+        }
+      }
+    } else if (event.logicalKey == LogicalKeyboardKey.audioVolumeDown) {
+      // Next
+      final items = context.epubReaderCubit.state.maybeMap(
+        loaded: (data) => data.displayItems,
+        orElse: () => <EpubDisplayItem>[],
+      );
+      if (items.isNotEmpty) {
+        final positions = _itemPositionsListener.itemPositions.value;
+        if (positions.isNotEmpty) {
+          final target = _findNextChapterHeaderIndex(
+            positions.first.index,
+            items,
+          );
+          if (target != -1) _jumpToTarget(target);
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<EpubReaderCubit, EpubReaderCubitState>(
-      builder: (context, state) {
-        return PopScope(
-          canPop: _canPop,
-          onPopInvokedWithResult: (didPop, result) async {
-            if (didPop) return;
+      builder: (context, epubState) {
+        return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+          builder: (context, settingState) {
+            // Apply brightness overlay if needed or SystemChrome
+            // For now we will wrap body with an opacity layer if custom brightness is enabled
 
-            final progress = _chapterProgressNotifier.value;
+            return KeyboardListener(
+              focusNode: FocusNode(),
+              autofocus: true,
+              onKeyEvent: _onKeyEvent,
+              child: PopScope(
+                canPop: _canPop,
+                onPopInvokedWithResult: (didPop, result) async {
+                  if (didPop) return;
 
-            // Check if finished when popping
-            if (progress >= 1.0) {
-              final shouldMarkFinished = await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Hoàn thành sách?'),
-                  content: const Text(
-                    'Bạn đã đọc đến cuối sách. Bạn có muốn đánh dấu là đã đọc xong không?',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context, false),
-                      child: const Text('Chưa xong'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(context, true),
-                      child: const Text('Đã xong'),
-                    ),
-                  ],
-                ),
-              );
+                  final progress = _chapterProgressNotifier.value;
 
-              if (shouldMarkFinished != true) {
-                return;
-              }
-
-              await context.epubReaderCubit.markBookAsFinished();
-              _hasMarkedFinished = true;
-            }
-
-            // Lưu tiến trình khi thoát màn hình
-            await context.epubReaderCubit.saveProgress(progress);
-            await context.epubReaderCubit.endSession();
-
-            if (context.mounted) {
-              setState(() {
-                _canPop = true;
-              });
-              Navigator.of(
-                context,
-              ).pop({'is_just_finished': _hasMarkedFinished});
-            }
-          },
-          child: Scaffold(
-            key: _scaffoldKey,
-            drawer: _buildDrawer(context, state),
-            body: SafeArea(
-              child: Listener(
-                onPointerDown: (_) =>
-                    context.epubReaderCubit.onUserInteraction(),
-                child: Stack(
-                  children: [
-                    state.map(
-                      initial: (_) => const SizedBox.shrink(),
-                      loading: (data) => _buildLoading(data.progress),
-                      error: (data) => _buildError(data.message),
-                      loaded: (data) {
-                        _totalDisplayItems = data.displayItems.length;
-                        return Positioned.fill(
-                          child: _buildContinuousReaderBody(
-                            context,
-                            data.displayItems,
-                            data.currentItemIndex,
-                          ),
-                        );
-                      },
-                    ),
-
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: SizeTransition(
-                        sizeFactor: _controlsAnimController,
-                        axisAlignment: -1.0,
-                        child: _buildTopBar(context, state),
-                      ),
-                    ),
-
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: SizeTransition(
-                        sizeFactor: _controlsAnimController,
-                        axisAlignment: 1.0,
-                        child: state.maybeMap(
-                          loaded: (data) =>
-                              _buildBottomControlBar(context, data),
-                          orElse: () => const SizedBox(),
+                  // Check if finished when popping
+                  if (progress >= 1.0) {
+                    final shouldMarkFinished = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Hoàn thành sách?'),
+                        content: const Text(
+                          'Bạn đã đọc đến cuối sách. Bạn có muốn đánh dấu là đã đọc xong không?',
                         ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context, false),
+                            child: const Text('Chưa xong'),
+                          ),
+                          FilledButton(
+                            onPressed: () => Navigator.pop(context, true),
+                            child: const Text('Đã xong'),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (shouldMarkFinished != true) {
+                      return;
+                    }
+
+                    await context.epubReaderCubit.markBookAsFinished();
+                    _hasMarkedFinished = true;
+                  }
+
+                  // Lưu tiến trình khi thoát màn hình
+                  await context.epubReaderCubit.saveProgress(progress);
+                  await context.epubReaderCubit.endSession();
+
+                  if (context.mounted) {
+                    setState(() {
+                      _canPop = true;
+                    });
+                    Navigator.of(
+                      context,
+                    ).pop({'is_just_finished': _hasMarkedFinished});
+                  }
+                },
+                child: Scaffold(
+                  key: _scaffoldKey,
+                  backgroundColor: settingState.customBrightnessEnabled
+                      ? Colors.white
+                      : null, // Base color
+                  drawer: _buildDrawer(context, epubState),
+                  body: SafeArea(
+                    top: !settingState.cutoutMargin,
+                    bottom: !settingState.cutoutMargin,
+                    left: !settingState.cutoutMargin,
+                    right: !settingState.cutoutMargin,
+                    child: Listener(
+                      onPointerDown: (_) =>
+                          context.epubReaderCubit.onUserInteraction(),
+                      child: Stack(
+                        children: [
+                          // Main Content
+                          epubState.map(
+                            initial: (_) => const SizedBox.shrink(),
+                            loading: (data) => _buildLoading(data.progress),
+                            error: (data) => _buildError(data.message),
+                            loaded: (data) {
+                              _totalDisplayItems = data.displayItems.length;
+                              return Positioned.fill(
+                                child: GestureDetector(
+                                  onHorizontalDragEnd: (details) =>
+                                      _handleHorizontalDrag(
+                                        details,
+                                        settingState.horizontalGestureMode,
+                                      ),
+                                  onDoubleTap: settingState.doubleTapTranslate
+                                      ? () {
+                                          // Toggle translate or similar action
+                                        }
+                                      : null,
+                                  child: _buildContinuousReaderBody(
+                                    context,
+                                    data.displayItems,
+                                    data.currentItemIndex,
+                                    settingState,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          // Brightness Overlay
+                          if (settingState.customBrightnessEnabled)
+                            IgnorePointer(
+                              child: Container(
+                                color: Colors.black.withValues(
+                                  alpha:
+                                      1.0 -
+                                      (settingState.customBrightness / 100),
+                                ),
+                              ),
+                            ),
+
+                          Positioned(
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            child: SizeTransition(
+                              sizeFactor: _controlsAnimController,
+                              axisAlignment: -1.0,
+                              child: _buildTopBar(context, epubState),
+                            ),
+                          ),
+
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: SizeTransition(
+                              sizeFactor: _controlsAnimController,
+                              axisAlignment: 1.0,
+                              child: epubState.maybeMap(
+                                loaded: (data) => _buildBottomControlBar(
+                                  context,
+                                  data,
+                                  settingState,
+                                ),
+                                orElse: () => const SizedBox(),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -326,95 +468,132 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     BuildContext context,
     List<EpubDisplayItem> items,
     int initialIndex, // Add parameter
+    EpubReaderSettingState settings,
   ) {
     _totalDisplayItems = items.length;
 
     return GestureDetector(
       onTap: () => _toggleControls(),
-      child: ScrollablePositionedList.builder(
-        initialScrollIndex: initialIndex,
-        itemCount: items.length,
-        itemScrollController: _itemScrollController,
-        itemPositionsListener: _itemPositionsListener,
-        padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: settings.sideMargin,
+          vertical: settings.verticalMargin,
+        ),
+        child: ScrollablePositionedList.builder(
+          initialScrollIndex: initialIndex,
+          itemCount: items.length,
+          itemScrollController: _itemScrollController,
+          itemPositionsListener: _itemPositionsListener,
 
-        itemBuilder: (context, index) {
-          final item = items[index];
+          // padding: const EdgeInsets.symmetric(vertical: 24), // Use container padding instead
+          itemBuilder: (context, index) {
+            final item = items[index];
 
-          // A. Xây dựng Widget chính (Nội dung)
-          Widget content;
-          if (item is ChapterHeaderItem) {
-            content = Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24),
-              child: Text(
-                item.title,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Georgia',
+            // A. Xây dựng Widget chính (Nội dung)
+            Widget content;
+            if (item is ChapterHeaderItem) {
+              content = Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
+                child: Text(
+                  item.title,
+                  style: TextStyle(
+                    fontSize: settings.fontSize * 1.5, // Header bigger
+                    fontWeight: FontWeight.bold,
+                    fontFamily: settings.fontFamily,
+                  ),
+                  textAlign: settings.chapterAlignment,
                 ),
-                textAlign: TextAlign.center,
-              ),
-            );
-          } else if (item is ParagraphItem) {
-            content = Text(
-              item.content,
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                fontSize: 18,
-                height: 1.6,
-                fontFamily: 'Georgia',
-                color: context.colorScheme.onSurface.withValues(alpha: 0.9),
-              ),
-            );
-          } else if (item is ImageItem) {
-            content = Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.memory(item.imageBytes, fit: BoxFit.contain),
-              ),
-            );
-          } else {
-            content = const SizedBox.shrink();
-          }
-
-          // B. Xây dựng Separator (Đường kẻ) ngay bên trong Item
-          Widget bottomSpacing = const SizedBox.shrink();
-
-          // Kiểm tra xem có phải phần tử cuối cùng không
-          if (index < items.length - 1) {
-            final nextItem = items[index + 1];
-
-            // Logic cũ: So sánh chapterIndex
-            if (item.chapterIndex != nextItem.chapterIndex) {
-              // KHÁC NHAU -> Vẽ "Hết chương"
-              bottomSpacing = Column(
-                children: [
-                  const SizedBox(height: 40),
-                  Divider(
-                    color: context.colorScheme.primary.withValues(alpha: 0.2),
-                  ),
-                  Text(
-                    "Hết chương ${item.chapterIndex + 1}",
-                    style: const TextStyle(fontSize: 10, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 40),
-                ],
               );
+            } else if (item is ParagraphItem) {
+              content = RichText(
+                textAlign: settings.textAlignment,
+                text: TextSpan(
+                  children: [
+                    WidgetSpan(child: SizedBox(width: settings.indent)),
+                    TextSpan(
+                      text: item.content,
+                      style: TextStyle(
+                        fontSize: settings.fontSize,
+                        height: settings.lineHeight,
+                        fontFamily: settings.fontFamily,
+                        letterSpacing: settings.letterSpacing,
+                        color: context.colorScheme.onSurface.withValues(
+                          alpha: 0.9,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            } else if (item is ImageItem) {
+              if (!settings.displayImage) {
+                content = const SizedBox.shrink();
+              } else {
+                content = Align(
+                  alignment: settings.imageAlignment == ImageAlignment.center
+                      ? Alignment.center
+                      : settings.imageAlignment == ImageAlignment.start
+                      ? Alignment.centerLeft
+                      : Alignment.centerRight,
+                  child: Container(
+                    width:
+                        (settings.imageSizeMultiplier / 100) *
+                        MediaQuery.of(context).size.width,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(
+                        settings.imageCornerRadius,
+                      ),
+                      child: Image.memory(item.imageBytes, fit: BoxFit.contain),
+                    ),
+                  ),
+                );
+              }
             } else {
-              // GIỐNG NHAU -> Khoảng cách giãn dòng
-              bottomSpacing = const SizedBox(height: 16);
+              content = const SizedBox.shrink();
             }
-          }
 
-          // C. Gộp Content và Spacing vào 1 Column duy nhất
-          // Điều này giúp ScrollablePositionedList tính toán layout dễ hơn hẳn
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [content, bottomSpacing],
-          );
-        },
+            // B. Xây dựng Separator (Đường kẻ) ngay bên trong Item
+            Widget bottomSpacing = const SizedBox.shrink();
+
+            // Kiểm tra xem có phải phần tử cuối cùng không
+            if (index < items.length - 1) {
+              final nextItem = items[index + 1];
+
+              // Logic cũ: So sánh chapterIndex
+              if (item.chapterIndex != nextItem.chapterIndex) {
+                // KHÁC NHAU -> Vẽ "Hết chương"
+                bottomSpacing = Column(
+                  children: [
+                    const SizedBox(height: 40),
+                    Divider(
+                      color: context.colorScheme.primary.withValues(alpha: 0.2),
+                    ),
+                    Text(
+                      "Hết chương ${item.chapterIndex + 1}",
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                );
+              } else {
+                // GIỐNG NHAU -> Khoảng cách giãn dòng
+                bottomSpacing = SizedBox(
+                  height: settings.paragraphSpacing > 0
+                      ? settings.paragraphSpacing
+                      : 16,
+                );
+              }
+            }
+
+            // C. Gộp Content và Spacing vào 1 Column duy nhất
+            // Điều này giúp ScrollablePositionedList tính toán layout dễ hơn hẳn
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [content, bottomSpacing],
+            );
+          },
+        ),
       ),
     );
   }
@@ -457,34 +636,52 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     );
   }
 
-  Widget _buildBottomControlBar(BuildContext context, dynamic data) {
+  Widget _buildBottomControlBar(
+    BuildContext context,
+    dynamic data,
+    EpubReaderSettingState settings,
+  ) {
     final items = data.displayItems as List<EpubDisplayItem>;
     final totalItems = items.length;
 
     return Container(
       color: context.colorScheme.surface,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16 + settings.bottomBarMargin, // Apply bottom margin adjustment
+        bottom: 16 + settings.bottomBarMargin,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Slider lướt toàn bộ sách
-          ValueListenableBuilder<double>(
-            valueListenable: _chapterProgressNotifier,
-            builder: (context, value, child) {
-              return Column(
-                children: [
-                  Text("${(value * 100).toInt()}%"),
-                  Slider(
-                    value: value,
-                    onChanged: (val) {
-                      final targetIndex = (val * totalItems).toInt();
-                      _itemScrollController.jumpTo(index: targetIndex);
-                    },
-                  ),
-                ],
-              );
-            },
-          ),
+          if (settings.showProgressBar)
+            ValueListenableBuilder<double>(
+              valueListenable: _chapterProgressNotifier,
+              builder: (context, value, child) {
+                return Column(
+                  children: [
+                    Text("${(value * 100).toInt()}%"),
+                    SizedBox(
+                      height:
+                          settings.progressBarHeight *
+                          10, // Just scaling it a bit for touch target or visual
+                      child: Slider(
+                        value: value,
+                        activeColor: Color(
+                          settings.progressBarColor,
+                        ).withValues(alpha: 1.0),
+                        onChanged: (val) {
+                          final targetIndex = (val * totalItems).toInt();
+                          _itemScrollController.jumpTo(index: targetIndex);
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
           const SizedBox(height: 4),
 
           // 2. Chèn bộ nút Navigation vừa tạo vào đây

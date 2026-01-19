@@ -188,4 +188,8 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
   void updateProgressBarHeight(double height) {
     emit(state.copyWith(progressBarHeight: height));
   }
+
+  void updateTabIndex(int index) {
+    emit(state.copyWith(currentTabIndex: index));
+  }
 }

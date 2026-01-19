@@ -46,6 +46,7 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(1.0) double highlightThickness,
     @Default(0.0) double lineSideMargin,
     @Default(0.0) double lineSideThickness,
+    @Default(0) int currentTabIndex,
   }) = _EpubReaderSettingState;
 
   factory EpubReaderSettingState.fromJson(Map<String, dynamic> json) =>

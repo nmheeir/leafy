@@ -81,6 +81,7 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   highlightThickness: (json['highlightThickness'] as num?)?.toDouble() ?? 1.0,
   lineSideMargin: (json['lineSideMargin'] as num?)?.toDouble() ?? 0.0,
   lineSideThickness: (json['lineSideThickness'] as num?)?.toDouble() ?? 0.0,
+  currentTabIndex: (json['currentTabIndex'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
@@ -128,6 +129,7 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'highlightThickness': instance.highlightThickness,
   'lineSideMargin': instance.lineSideMargin,
   'lineSideThickness': instance.lineSideThickness,
+  'currentTabIndex': instance.currentTabIndex,
 };
 
 const _$HorizontalGestureModeEnumMap = {
