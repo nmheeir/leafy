@@ -26,8 +26,8 @@ import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
 import '../data/datasources/local/book_resource_local_datasource.dart' as _i880;
 import '../data/datasources/local/book_resource_local_datasource_impl.dart'
     as _i612;
-import '../data/datasources/local/brightness_local_datasource.dart' as _i514;
 import '../data/datasources/local/database_service.dart' as _i328;
+import '../data/datasources/local/device_local_datasource.dart' as _i689;
 import '../data/datasources/local/epub_file_local_datasource.dart' as _i620;
 import '../data/datasources/local/epub_file_local_datasource_impl.dart'
     as _i536;
@@ -52,9 +52,8 @@ import '../data/file_import/services/metadata_extraction_service_impl.dart'
     as _i804;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
+import '../data/repositories/device/device_repository_impl.dart' as _i938;
 import '../data/repositories/epub_file_repository_impl.dart' as _i528;
-import '../data/repositories/epub_reader/brightness_repository_impl.dart'
-    as _i248;
 import '../data/repositories/epub_reader_repository_impl.dart' as _i608;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
@@ -91,16 +90,16 @@ import '../domain/book_resource/usecase/get_book_resource_by_uuid.dart'
 import '../domain/book_resource/usecase/get_book_resources.dart' as _i452;
 import '../domain/book_resource/usecase/update_book_resource_file.dart'
     as _i589;
+import '../domain/device/repositories/device_repository.dart' as _i70;
+import '../domain/device/usecases/brightness/get_brightness.dart' as _i585;
+import '../domain/device/usecases/brightness/reset_brightness.dart' as _i517;
+import '../domain/device/usecases/brightness/set_brightness.dart' as _i430;
+import '../domain/device/usecases/orientation/set_orientation.dart' as _i737;
 import '../domain/epub_file/repositories/epub_file_repository.dart' as _i1072;
 import '../domain/epub_file/usecases/get_epub.dart' as _i765;
 import '../domain/epub_file/usecases/open_network_book.dart' as _i911;
-import '../domain/epub_reader/repositories/brightness_repository.dart' as _i986;
 import '../domain/epub_reader/repositories/epub_reader_repository.dart'
     as _i925;
-import '../domain/epub_reader/usecases/brightness/get_brightness.dart' as _i111;
-import '../domain/epub_reader/usecases/brightness/reset_brightness.dart'
-    as _i748;
-import '../domain/epub_reader/usecases/brightness/set_brightness.dart' as _i46;
 import '../domain/epub_reader/usecases/parse_epub.dart' as _i748;
 import '../domain/file_import/services/file_picker_service.dart' as _i255;
 import '../domain/file_import/services/file_processing_service.dart' as _i119;
@@ -223,9 +222,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i780.StatsBloc>(
       () => _i780.StatsBloc(gh<_i800.StatsCalculator>()),
     );
-    gh.lazySingleton<_i514.BrightnessLocalDataSource>(
-      () => _i514.BrightnessLocalDataSourceImpl(gh<_i108.ScreenBrightness>()),
-    );
     gh.lazySingleton<_i620.EpubFileLocalDataSource>(
       () => _i536.EpubFileLocalDataSourceImpl(gh<_i497.Directory>()),
     );
@@ -250,6 +246,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
         gh<_i497.Directory>(),
       ),
+    );
+    gh.lazySingleton<_i689.DeviceLocalDataSource>(
+      () => _i689.DeviceLocalDataSourceImpl(gh<_i108.ScreenBrightness>()),
     );
     gh.lazySingleton<_i880.BookResourceLocalDatasource>(
       () => _i612.BookResourceLocalDatasourceImpl(gh<_i328.DatabaseService>()),
@@ -292,10 +291,6 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1030.ReaderProgressLocalDatasourceImpl(gh<_i328.DatabaseService>()),
     );
-    gh.lazySingleton<_i986.BrightnessRepository>(
-      () =>
-          _i248.BrightnessRepositoryImpl(gh<_i514.BrightnessLocalDataSource>()),
-    );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
@@ -313,17 +308,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.lazySingleton<_i70.DeviceRepository>(
+      () => _i938.DeviceRepositoryImpl(gh<_i689.DeviceLocalDataSource>()),
+    );
     gh.factory<_i765.GetEpubUseCase>(
       () => _i765.GetEpubUseCase(gh<_i1072.EpubFileRepository>()),
-    );
-    gh.lazySingleton<_i111.GetBrightness>(
-      () => _i111.GetBrightness(gh<_i986.BrightnessRepository>()),
-    );
-    gh.lazySingleton<_i748.ResetBrightnessUseCase>(
-      () => _i748.ResetBrightnessUseCase(gh<_i986.BrightnessRepository>()),
-    );
-    gh.lazySingleton<_i46.SetBrightness>(
-      () => _i46.SetBrightness(gh<_i986.BrightnessRepository>()),
     );
     gh.factory<_i1064.EditBookCoverCubit>(
       () => _i1064.EditBookCoverCubit(gh<_i151.DownloadOlCoverUseCase>()),
@@ -431,6 +420,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1042.BookResourceRepository>(),
       ),
     );
+    gh.lazySingleton<_i585.GetBrightness>(
+      () => _i585.GetBrightness(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i517.ResetBrightnessUseCase>(
+      () => _i517.ResetBrightnessUseCase(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i430.SetBrightness>(
+      () => _i430.SetBrightness(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i737.SetOrientation>(
+      () => _i737.SetOrientation(gh<_i70.DeviceRepository>()),
+    );
     gh.factory<_i821.TrashBinCubit>(
       () => _i821.TrashBinCubit(
         gh<_i974.Logger>(),
@@ -446,13 +447,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i151.DownloadOlCoverUseCase>(),
         gh<_i138.OlGetWorkUseCase>(),
         gh<_i466.DownloadGtdCoverUseCase>(),
-      ),
-    );
-    gh.factory<_i1059.EpubReaderSettingCubit>(
-      () => _i1059.EpubReaderSettingCubit(
-        gh<_i111.GetBrightness>(),
-        gh<_i46.SetBrightness>(),
-        gh<_i748.ResetBrightnessUseCase>(),
       ),
     );
     gh.lazySingleton<_i47.DeleteBookResourceUseCase>(
@@ -485,6 +479,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i365.LocalSearchBloc>(
       () => _i365.LocalSearchBloc(gh<_i755.SearchBooksUseCase>()),
+    );
+    gh.factory<_i1059.EpubReaderSettingCubit>(
+      () => _i1059.EpubReaderSettingCubit(
+        gh<_i585.GetBrightness>(),
+        gh<_i430.SetBrightness>(),
+        gh<_i517.ResetBrightnessUseCase>(),
+        gh<_i737.SetOrientation>(),
+      ),
     );
     gh.lazySingleton<_i119.FileProcessingService>(
       () =>

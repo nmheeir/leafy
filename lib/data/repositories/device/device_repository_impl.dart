@@ -1,14 +1,15 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/epub_reader_setting/screen_orientation.dart';
 import 'package:leafy/core/errors/failures.dart';
-import 'package:leafy/data/datasources/local/brightness_local_datasource.dart';
-import 'package:leafy/domain/epub_reader/repositories/brightness_repository.dart';
+import 'package:leafy/data/datasources/local/device_local_datasource.dart';
+import 'package:leafy/domain/device/repositories/device_repository.dart';
 
-@LazySingleton(as: BrightnessRepository)
-class BrightnessRepositoryImpl implements BrightnessRepository {
-  final BrightnessLocalDataSource _localDataSource;
+@LazySingleton(as: DeviceRepository)
+class DeviceRepositoryImpl implements DeviceRepository {
+  final DeviceLocalDataSource _localDataSource;
 
-  BrightnessRepositoryImpl(this._localDataSource);
+  DeviceRepositoryImpl(this._localDataSource);
 
   @override
   Future<Either<Failure, double>> getBrightness() async {
@@ -34,6 +35,18 @@ class BrightnessRepositoryImpl implements BrightnessRepository {
   Future<Either<Failure, Unit>> resetBrightness() async {
     try {
       await _localDataSource.resetBrightness();
+      return const Right(unit);
+    } catch (e) {
+      return Left(Failure.cache(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> setOrientation(
+    ScreenOrientation orientation,
+  ) async {
+    try {
+      await _localDataSource.setOrientation(orientation);
       return const Right(unit);
     } catch (e) {
       return Left(Failure.cache(e.toString()));

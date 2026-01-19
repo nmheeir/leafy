@@ -2,11 +2,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
-import 'package:leafy/domain/epub_reader/repositories/brightness_repository.dart';
+import 'package:leafy/domain/device/repositories/device_repository.dart';
 
 @lazySingleton
 class GetBrightness implements UseCase<double, NoParams> {
-  final BrightnessRepository _repository;
+  final DeviceRepository _repository;
 
   GetBrightness(this._repository);
 

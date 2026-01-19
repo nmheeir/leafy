@@ -3,9 +3,10 @@ import 'dart:ui';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:leafy/domain/epub_reader/usecases/brightness/get_brightness.dart';
-import 'package:leafy/domain/epub_reader/usecases/brightness/reset_brightness.dart';
-import 'package:leafy/domain/epub_reader/usecases/brightness/set_brightness.dart';
+import 'package:leafy/domain/device/usecases/brightness/get_brightness.dart';
+import 'package:leafy/domain/device/usecases/brightness/reset_brightness.dart';
+import 'package:leafy/domain/device/usecases/brightness/set_brightness.dart';
+import 'package:leafy/domain/device/usecases/orientation/set_orientation.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 
@@ -18,11 +19,13 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
   final GetBrightness _getBrightness;
   final SetBrightness _setBrightness;
   final ResetBrightnessUseCase _resetBrightness;
+  final SetOrientation _setOrientation;
 
   EpubReaderSettingCubit(
     this._getBrightness,
     this._setBrightness,
     this._resetBrightness,
+    this._setOrientation,
   ) : super(const EpubReaderSettingState());
 
   @override
@@ -68,8 +71,9 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     }
   }
 
-  void updateScreenOrientation(ScreenOrientation orientation) {
+  Future<void> updateScreenOrientation(ScreenOrientation orientation) async {
     emit(state.copyWith(screenOrientation: orientation));
+    await _setOrientation(orientation);
   }
 
   void toggleVolumeKeyNavigation() {
