@@ -101,6 +101,14 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     emit(state.copyWith(lineHeight: height));
   }
 
+  void updateParagraphSpacing(double spacing) {
+    emit(state.copyWith(paragraphSpacing: spacing));
+  }
+
+  void updateIndent(double indent) {
+    emit(state.copyWith(indent: indent));
+  }
+
   void updateChapterAlignment(TextAlign alignment) {
     emit(state.copyWith(chapterAlignment: alignment));
   }
@@ -143,5 +151,41 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
 
   void updateLineSideThickness(double thickness) {
     emit(state.copyWith(lineSideThickness: thickness));
+  }
+
+  void toggleShowImageCaption() {
+    emit(state.copyWith(showImageCaption: !state.showImageCaption));
+  }
+
+  void updateImageColorEffect(ImageColorEffect effect) {
+    emit(state.copyWith(imageColorEffect: effect));
+  }
+
+  void updateImageCornerRadius(double radius) {
+    emit(state.copyWith(imageCornerRadius: radius));
+  }
+
+  void updateImageAlignment(ImageAlignment alignment) {
+    emit(state.copyWith(imageAlignment: alignment));
+  }
+
+  void updateImageSizeMultiplier(double multiplier) {
+    emit(state.copyWith(imageSizeMultiplier: multiplier));
+  }
+
+  void updateProgressCountType(ProgressCountType type) {
+    emit(state.copyWith(progressCountType: type));
+  }
+
+  void toggleShowProgressBar() {
+    emit(state.copyWith(showProgressBar: !state.showProgressBar));
+  }
+
+  void updateProgressBarColor(int color) {
+    emit(state.copyWith(progressBarColor: color));
+  }
+
+  void updateProgressBarHeight(double height) {
+    emit(state.copyWith(progressBarHeight: height));
   }
 }

@@ -1,28 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 
 class TranslatorSubcategory extends StatelessWidget {
   const TranslatorSubcategory({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            "Translator",
-            style: context.textTheme.titleSmall?.copyWith(
-              color: context.colorScheme.primary,
-              fontWeight: FontWeight.bold,
+    return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                "Translator",
+                style: context.textTheme.titleSmall?.copyWith(
+                  color: context.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
-        ),
-        const _TargetLanguageSelector(),
-        const Divider(indent: 16, endIndent: 16, height: 24),
-        const _AutoDetectToggle(),
-      ],
+            const _TargetLanguageSelector(),
+            const Divider(indent: 16, endIndent: 16, height: 24),
+            const _AutoDetectToggle(),
+            const Divider(indent: 16, endIndent: 16, height: 24),
+            SwitchListTile(
+              title: const Text("Double Click Translation"),
+              subtitle: const Text("Chạm hai lần để dịch nhanh cụm từ"),
+              value: state.doubleTapTranslate,
+              onChanged: (_) {
+                context
+                    .read<EpubReaderSettingCubit>()
+                    .toggleDoubleTapTranslate();
+              },
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            ),
+          ],
+        );
+      },
     );
   }
 }

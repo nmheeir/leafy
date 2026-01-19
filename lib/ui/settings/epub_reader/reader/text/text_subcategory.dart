@@ -1,48 +1,68 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class TextSubcategory extends StatelessWidget {
   const TextSubcategory({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text(
-            "Text Layout",
-            style: context.textTheme.titleSmall?.copyWith(
-              color: context.colorScheme.primary,
-              fontWeight: FontWeight.bold,
+    return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Text(
+                "Text Layout",
+                style: context.textTheme.titleSmall?.copyWith(
+                  color: context.colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
-          ),
-        ),
-        const _TextAlignSelector(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _LineHeightSlider(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _ParagraphSpacingSlider(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _ParagraphIndentationSlider(),
-      ],
+            _TextAlignSelector(currentAlignment: state.textAlignment),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _LineHeightSlider(lineHeight: state.lineHeight),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _ParagraphSpacingSlider(spacing: state.paragraphSpacing),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _IndentSlider(indent: state.indent),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
   }
 }
 
-class _TextAlignSelector extends StatefulWidget {
-  const _TextAlignSelector();
-
-  @override
-  State<_TextAlignSelector> createState() => _TextAlignSelectorState();
-}
-
-class _TextAlignSelectorState extends State<_TextAlignSelector> {
-  int _selectedIndex = 2; // 0: Left, 1: Center, 2: Justify
+class _TextAlignSelector extends StatelessWidget {
+  final TextAlign currentAlignment;
+  const _TextAlignSelector({required this.currentAlignment});
 
   @override
   Widget build(BuildContext context) {
+    final List<TextAlign> alignments = [
+      TextAlign.start,
+      TextAlign.justify,
+      TextAlign.center,
+      TextAlign.end,
+    ];
+
+    final List<IconData> icons = [
+      Icons.format_align_left,
+      Icons.format_align_justify,
+      Icons.format_align_center,
+      Icons.format_align_right,
+    ];
+
+    final List<bool> isSelected = alignments
+        .map((align) => align == currentAlignment)
+        .toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -52,19 +72,23 @@ class _TextAlignSelectorState extends State<_TextAlignSelector> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SegmentedButton<int>(
-            segments: const [
-              ButtonSegment(value: 0, icon: Icon(Icons.format_align_left)),
-              ButtonSegment(value: 1, icon: Icon(Icons.format_align_center)),
-              ButtonSegment(value: 2, icon: Icon(Icons.format_align_justify)),
-            ],
-            selected: {_selectedIndex},
-            onSelectionChanged: (Set<int> newSelection) {
-              setState(() {
-                _selectedIndex = newSelection.first;
-              });
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return ToggleButtons(
+                isSelected: isSelected,
+                onPressed: (index) {
+                  context.read<EpubReaderSettingCubit>().updateTextAlignment(
+                    alignments[index],
+                  );
+                },
+                borderRadius: BorderRadius.circular(8),
+                constraints: BoxConstraints(
+                  minWidth: (constraints.maxWidth - 24) / 4,
+                  minHeight: 40,
+                ),
+                children: icons.map((icon) => Icon(icon)).toList(),
+              );
             },
-            showSelectedIcon: false,
           ),
         ),
       ],
@@ -72,134 +96,59 @@ class _TextAlignSelectorState extends State<_TextAlignSelector> {
   }
 }
 
-class _LineHeightSlider extends StatefulWidget {
-  const _LineHeightSlider();
-
-  @override
-  State<_LineHeightSlider> createState() => _LineHeightSliderState();
-}
-
-class _LineHeightSliderState extends State<_LineHeightSlider> {
-  double _value = 1.5;
+class _LineHeightSlider extends StatelessWidget {
+  final double lineHeight;
+  const _LineHeightSlider({required this.lineHeight});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Line Height", style: context.textTheme.labelLarge),
-              Text(
-                _value.toStringAsFixed(1),
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Slider(
-          value: _value,
-          min: 1.0,
-          max: 2.5,
-          divisions: 15,
-          onChanged: (value) => setState(() => _value = value),
-        ),
-      ],
+    return SliderListTile(
+      title: "Line Height",
+      value: lineHeight,
+      min: 1.0,
+      max: 3.0,
+      divisions: 20, // 0.1 increments
+      label: lineHeight.toStringAsFixed(1),
+      onChanged: (value) =>
+          context.read<EpubReaderSettingCubit>().updateLineHeight(value),
     );
   }
 }
 
-class _ParagraphSpacingSlider extends StatefulWidget {
-  const _ParagraphSpacingSlider();
-
-  @override
-  State<_ParagraphSpacingSlider> createState() =>
-      _ParagraphSpacingSliderState();
-}
-
-class _ParagraphSpacingSliderState extends State<_ParagraphSpacingSlider> {
-  double _value = 10;
+class _ParagraphSpacingSlider extends StatelessWidget {
+  final double spacing;
+  const _ParagraphSpacingSlider({required this.spacing});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Paragraph Spacing", style: context.textTheme.labelLarge),
-              Text(
-                "${_value.round()} px",
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Slider(
-          value: _value,
-          min: 0,
-          max: 30,
-          divisions: 6,
-          onChanged: (value) => setState(() => _value = value),
-        ),
-      ],
+    return SliderListTile(
+      title: "Paragraph Spacing",
+      value: spacing,
+      min: 0.0,
+      max: 24.0,
+      divisions: 24, // 1.0 increments
+      label: "${spacing.toInt()} pt",
+      onChanged: (value) =>
+          context.read<EpubReaderSettingCubit>().updateParagraphSpacing(value),
     );
   }
 }
 
-class _ParagraphIndentationSlider extends StatefulWidget {
-  const _ParagraphIndentationSlider();
-
-  @override
-  State<_ParagraphIndentationSlider> createState() =>
-      _ParagraphIndentationSliderState();
-}
-
-class _ParagraphIndentationSliderState
-    extends State<_ParagraphIndentationSlider> {
-  double _value = 20;
+class _IndentSlider extends StatelessWidget {
+  final double indent;
+  const _IndentSlider({required this.indent});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Indentation", style: context.textTheme.labelLarge),
-              Text(
-                "${_value.round()} px",
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Slider(
-          value: _value,
-          min: 0,
-          max: 50,
-          divisions: 10,
-          onChanged: (value) => setState(() => _value = value),
-        ),
-      ],
+    return SliderListTile(
+      title: "Indentation",
+      value: indent,
+      min: 0.0,
+      max: 24.0,
+      divisions: 24, // 1.0 increments
+      label: "${indent.toInt()} pt",
+      onChanged: (value) =>
+          context.read<EpubReaderSettingCubit>().updateIndent(value),
     );
   }
 }

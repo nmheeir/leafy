@@ -30,6 +30,19 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   keepScreenOn: json['keepScreenOn'] as bool? ?? false,
   hideBarOnFastScroll: json['hideBarOnFastScroll'] as bool? ?? false,
   displayImage: json['displayImage'] as bool? ?? true,
+  showImageCaption: json['showImageCaption'] as bool? ?? true,
+  imageColorEffect:
+      $enumDecodeNullable(
+        _$ImageColorEffectEnumMap,
+        json['imageColorEffect'],
+      ) ??
+      ImageColorEffect.off,
+  imageCornerRadius: (json['imageCornerRadius'] as num?)?.toDouble() ?? 0.0,
+  imageAlignment:
+      $enumDecodeNullable(_$ImageAlignmentEnumMap, json['imageAlignment']) ??
+      ImageAlignment.center,
+  imageSizeMultiplier:
+      (json['imageSizeMultiplier'] as num?)?.toDouble() ?? 100.0,
   doubleTapTranslate: json['doubleTapTranslate'] as bool? ?? false,
   fontFamily: json['fontFamily'] as String? ?? 'Serif',
   fontThickness:
@@ -38,8 +51,10 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   fontStyle:
       $enumDecodeNullable(_$FontStyleEnumMap, json['fontStyle']) ??
       FontStyle.normal,
-  fontSize: (json['fontSize'] as num?)?.toDouble() ?? 18.0,
-  lineHeight: (json['lineHeight'] as num?)?.toDouble() ?? 1.5,
+  fontSize: (json['fontSize'] as num?)?.toDouble() ?? 16.0,
+  lineHeight: (json['lineHeight'] as num?)?.toDouble() ?? 1.2,
+  paragraphSpacing: (json['paragraphSpacing'] as num?)?.toDouble() ?? 0.0,
+  indent: (json['indent'] as num?)?.toDouble() ?? 0.0,
   letterSpacing: (json['letterSpacing'] as num?)?.toDouble() ?? 0.0,
   textAlignment:
       $enumDecodeNullable(_$TextAlignEnumMap, json['textAlignment']) ??
@@ -47,6 +62,15 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   chapterAlignment:
       $enumDecodeNullable(_$TextAlignEnumMap, json['chapterAlignment']) ??
       TextAlign.center,
+  progressCountType:
+      $enumDecodeNullable(
+        _$ProgressCountTypeEnumMap,
+        json['progressCountType'],
+      ) ??
+      ProgressCountType.percentage,
+  showProgressBar: json['showProgressBar'] as bool? ?? true,
+  progressBarColor: (json['progressBarColor'] as num?)?.toInt() ?? 0xFF2196F3,
+  progressBarHeight: (json['progressBarHeight'] as num?)?.toDouble() ?? 4.0,
   scrollFraction: (json['scrollFraction'] as num?)?.toDouble() ?? 0.5,
   sensitivity: (json['sensitivity'] as num?)?.toDouble() ?? 1.0,
   pullAnimation: json['pullAnimation'] as bool? ?? true,
@@ -74,15 +98,26 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'keepScreenOn': instance.keepScreenOn,
   'hideBarOnFastScroll': instance.hideBarOnFastScroll,
   'displayImage': instance.displayImage,
+  'showImageCaption': instance.showImageCaption,
+  'imageColorEffect': _$ImageColorEffectEnumMap[instance.imageColorEffect]!,
+  'imageCornerRadius': instance.imageCornerRadius,
+  'imageAlignment': _$ImageAlignmentEnumMap[instance.imageAlignment]!,
+  'imageSizeMultiplier': instance.imageSizeMultiplier,
   'doubleTapTranslate': instance.doubleTapTranslate,
   'fontFamily': instance.fontFamily,
   'fontThickness': _$FontThicknessEnumMap[instance.fontThickness]!,
   'fontStyle': _$FontStyleEnumMap[instance.fontStyle]!,
   'fontSize': instance.fontSize,
   'lineHeight': instance.lineHeight,
+  'paragraphSpacing': instance.paragraphSpacing,
+  'indent': instance.indent,
   'letterSpacing': instance.letterSpacing,
   'textAlignment': _$TextAlignEnumMap[instance.textAlignment]!,
   'chapterAlignment': _$TextAlignEnumMap[instance.chapterAlignment]!,
+  'progressCountType': _$ProgressCountTypeEnumMap[instance.progressCountType]!,
+  'showProgressBar': instance.showProgressBar,
+  'progressBarColor': instance.progressBarColor,
+  'progressBarHeight': instance.progressBarHeight,
   'scrollFraction': instance.scrollFraction,
   'sensitivity': instance.sensitivity,
   'pullAnimation': instance.pullAnimation,
@@ -110,6 +145,19 @@ const _$ScreenOrientationEnumMap = {
   ScreenOrientation.lockedLandscape: 'lockedLandscape',
 };
 
+const _$ImageColorEffectEnumMap = {
+  ImageColorEffect.off: 'off',
+  ImageColorEffect.grayscale: 'grayscale',
+  ImageColorEffect.fontColor: 'fontColor',
+  ImageColorEffect.backgroundColor: 'backgroundColor',
+};
+
+const _$ImageAlignmentEnumMap = {
+  ImageAlignment.start: 'start',
+  ImageAlignment.center: 'center',
+  ImageAlignment.end: 'end',
+};
+
 const _$FontThicknessEnumMap = {
   FontThickness.thin: 'thin',
   FontThickness.extraLight: 'extraLight',
@@ -130,4 +178,9 @@ const _$TextAlignEnumMap = {
   TextAlign.justify: 'justify',
   TextAlign.start: 'start',
   TextAlign.end: 'end',
+};
+
+const _$ProgressCountTypeEnumMap = {
+  ProgressCountType.percentage: 'percentage',
+  ProgressCountType.quantity: 'quantity',
 };

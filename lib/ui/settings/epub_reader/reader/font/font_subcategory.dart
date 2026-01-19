@@ -1,26 +1,35 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leafy/core/constants/enums/epub_reader_setting/font_thickness.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class FontSubcategory extends StatelessWidget {
   const FontSubcategory({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const _SectionHeader(title: "Typography"),
-        const _FontFamilySelector(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _FontSizeSelector(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _FontWeightSelector(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _FontStyleToggle(),
-        const Divider(indent: 16, endIndent: 16, height: 32),
-        const _LetterSpacingSelector(),
-        const SizedBox(height: 16),
-      ],
+    return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+      builder: (context, state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _SectionHeader(title: "Typography"),
+            _FontChoiceOption(selectedFont: state.fontFamily),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _FontSizeOption(fontSize: state.fontSize),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _FontThicknessOption(selectedThickness: state.fontThickness),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _FontStyleOption(fontStyle: state.fontStyle),
+            const Divider(indent: 16, endIndent: 16, height: 32),
+            _LetterSpacingOption(spacing: state.letterSpacing),
+            const SizedBox(height: 16),
+          ],
+        );
+      },
     );
   }
 }
@@ -45,25 +54,21 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _FontFamilySelector extends StatefulWidget {
-  const _FontFamilySelector();
-
-  @override
-  State<_FontFamilySelector> createState() => _FontFamilySelectorState();
-}
-
-class _FontFamilySelectorState extends State<_FontFamilySelector> {
-  String selectedFont = "Serif";
-  final List<String> fonts = [
-    "Serif",
-    "Sans-serif",
-    "Monospace",
-    "Literata",
-    "Montserrat",
-  ];
+class _FontChoiceOption extends StatelessWidget {
+  final String selectedFont;
+  const _FontChoiceOption({required this.selectedFont});
 
   @override
   Widget build(BuildContext context) {
+    final List<String> fonts = [
+      "Serif",
+      "Sans-serif",
+      "Monospace",
+      "Nunito",
+      "Literata",
+      "Montserrat",
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,26 +76,25 @@ class _FontFamilySelectorState extends State<_FontFamilySelector> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text("Font Family", style: context.textTheme.labelLarge),
         ),
-        SizedBox(
-          height: 48,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: fonts.length,
-            itemBuilder: (context, index) {
-              final font = fonts[index];
-              final isSelected = selectedFont == font;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: ChoiceChip(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              ...fonts.map((font) {
+                final isSelected = selectedFont == font;
+                return ChoiceChip(
                   label: Text(font),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
-                      setState(() => selectedFont = font);
+                      context.read<EpubReaderSettingCubit>().updateFontFamily(
+                        font,
+                      );
                     }
                   },
-                  selectedColor: context.colorScheme.primaryContainer,
+                  selectedColor: context.colorScheme.secondaryContainer,
                   labelStyle: TextStyle(
                     color: isSelected
                         ? context.colorScheme.primary
@@ -99,194 +103,151 @@ class _FontFamilySelectorState extends State<_FontFamilySelector> {
                         ? FontWeight.bold
                         : FontWeight.normal,
                   ),
-                ),
-              );
+                );
+              }),
+              ActionChip(
+                avatar: const Icon(Icons.upload_file, size: 18),
+                label: const Text("Upload Font"),
+                onPressed: () async {
+                  FilePickerResult? result = await FilePicker.platform
+                      .pickFiles(
+                        type: FileType.custom,
+                        allowedExtensions: ['ttf', 'otf'],
+                      );
+
+                  if (result != null && context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Selected: ${result.files.single.name}"),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FontSizeOption extends StatelessWidget {
+  final double fontSize;
+  const _FontSizeOption({required this.fontSize});
+
+  @override
+  Widget build(BuildContext context) {
+    return SliderListTile(
+      title: "Font Size",
+      value: fontSize,
+      min: 10.0,
+      max: 35.0,
+      divisions: 25,
+      label: "${fontSize.toInt()} pt",
+      onChanged: (value) =>
+          context.read<EpubReaderSettingCubit>().updateFontSize(value),
+    );
+  }
+}
+
+class _FontThicknessOption extends StatelessWidget {
+  final FontThickness selectedThickness;
+  const _FontThicknessOption({required this.selectedThickness});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Text("Font Thickness", style: context.textTheme.labelLarge),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Wrap(
+            spacing: 8,
+            // runSpacing: 8,
+            children: [
+              ...FontThickness.values.map((thickness) {
+                final isSelected = selectedThickness == thickness;
+                return ChoiceChip(
+                  label: Text(thickness.name.capitalize()),
+                  selected: isSelected,
+                  selectedColor: context.colorScheme.secondaryContainer,
+                  labelStyle: TextStyle(
+                    color: isSelected
+                        ? context.colorScheme.primary
+                        : context.colorScheme.onSurface,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                  ),
+                  onSelected: (selected) {
+                    if (selected) {
+                      context
+                          .read<EpubReaderSettingCubit>()
+                          .updateFontThickness(thickness);
+                    }
+                  },
+                );
+              }),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FontStyleOption extends StatelessWidget {
+  final FontStyle fontStyle;
+  const _FontStyleOption({required this.fontStyle});
+
+  @override
+  Widget build(BuildContext context) {
+    final isItalic = fontStyle == FontStyle.italic;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("Font Style", style: context.textTheme.bodyMedium),
+          ToggleButtons(
+            isSelected: [!isItalic, isItalic],
+            onPressed: (index) {
+              final newStyle = index == 0 ? FontStyle.normal : FontStyle.italic;
+              context.read<EpubReaderSettingCubit>().updateFontStyle(newStyle);
             },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _FontSizeSelector extends StatefulWidget {
-  const _FontSizeSelector();
-
-  @override
-  State<_FontSizeSelector> createState() => _FontSizeSelectorState();
-}
-
-class _FontSizeSelectorState extends State<_FontSizeSelector> {
-  double fontSize = 18;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Font Size", style: context.textTheme.labelLarge),
-              Text(
-                "${fontSize.toInt()} sp",
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            borderRadius: BorderRadius.circular(8),
+            constraints: const BoxConstraints(minWidth: 80, minHeight: 40),
+            children: const [
+              Text("Normal"),
+              Text("Italic", style: TextStyle(fontStyle: FontStyle.italic)),
             ],
           ),
-        ),
-        Row(
-          children: [
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.remove),
-              onPressed: fontSize > 12
-                  ? () => setState(() => fontSize--)
-                  : null,
-            ),
-            Expanded(
-              child: Slider(
-                value: fontSize,
-                min: 12,
-                max: 40,
-                divisions: 28,
-                onChanged: (value) => setState(() => fontSize = value),
-              ),
-            ),
-            IconButton(
-              icon: const Icon(Icons.add),
-              onPressed: fontSize < 40
-                  ? () => setState(() => fontSize++)
-                  : null,
-            ),
-            const SizedBox(width: 8),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _FontWeightSelector extends StatefulWidget {
-  const _FontWeightSelector();
-
-  @override
-  State<_FontWeightSelector> createState() => _FontWeightSelectorState();
-}
-
-class _FontWeightSelectorState extends State<_FontWeightSelector> {
-  double thickness = 400; // Normal
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Font Thickness", style: context.textTheme.labelLarge),
-              Text(
-                _getWeightLabel(thickness),
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Slider(
-          value: thickness,
-          min: 100,
-          max: 900,
-          divisions: 8,
-          onChanged: (value) => setState(() => thickness = value),
-        ),
-      ],
-    );
-  }
-
-  String _getWeightLabel(double value) {
-    if (value <= 200) return "Light";
-    if (value <= 400) return "Normal";
-    if (value <= 600) return "Medium";
-    if (value <= 700) return "Bold";
-    return "Extra Bold";
-  }
-}
-
-class _FontStyleToggle extends StatefulWidget {
-  const _FontStyleToggle();
-
-  @override
-  State<_FontStyleToggle> createState() => _FontStyleToggleState();
-}
-
-class _FontStyleToggleState extends State<_FontStyleToggle> {
-  bool isItalic = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return SwitchListTile(
-      title: const Text("Italic Style"),
-      subtitle: const Text("Apply italic style to text"),
-      value: isItalic,
-      onChanged: (value) => setState(() => isItalic = value),
-      secondary: Icon(
-        Icons.format_italic,
-        color: isItalic ? context.colorScheme.primary : null,
+        ],
       ),
     );
   }
 }
 
-class _LetterSpacingSelector extends StatefulWidget {
-  const _LetterSpacingSelector();
-
-  @override
-  State<_LetterSpacingSelector> createState() => _LetterSpacingSelectorState();
-}
-
-class _LetterSpacingSelectorState extends State<_LetterSpacingSelector> {
-  double spacing = 0.0;
+class _LetterSpacingOption extends StatelessWidget {
+  final double spacing;
+  const _LetterSpacingOption({required this.spacing});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Letter Spacing", style: context.textTheme.labelLarge),
-              Text(
-                spacing.toStringAsFixed(1),
-                style: context.textTheme.labelLarge?.copyWith(
-                  color: context.colorScheme.primary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Slider(
-          value: spacing,
-          min: -2.0,
-          max: 10.0,
-          divisions: 60,
-          onChanged: (value) => setState(() => spacing = value),
-        ),
-      ],
+    return SliderListTile(
+      title: "Letter Spacing",
+      value: spacing,
+      min: -8.0,
+      max: 16.0,
+      divisions: 48, // 0.5 increments
+      label: spacing.toStringAsFixed(1),
+      onChanged: (value) =>
+          context.read<EpubReaderSettingCubit>().updateLetterSpacing(value),
     );
   }
 }
