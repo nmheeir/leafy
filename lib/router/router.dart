@@ -9,6 +9,7 @@ import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_default_book_tag_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
+import 'package:leafy/ui/settings/screens/setting_epub_reader_screen.dart';
 import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
 import 'package:leafy/ui/trash_screen/trash_screen.dart';
@@ -45,6 +46,10 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.settingAccentColor,
       builder: (context, state) => SettingAccentColorScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingEpubReader,
+      builder: (context, state) => SettingEpubReaderScreen(),
     ),
     GoRoute(
       path: Routes.searchOl,

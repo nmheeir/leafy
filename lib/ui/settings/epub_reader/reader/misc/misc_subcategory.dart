@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 
 class MiscSubcategory extends StatelessWidget {
   const MiscSubcategory({super.key});
@@ -16,7 +19,7 @@ class MiscSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Miscellaneous",
+                LocaleKeys.epub_reader_misc_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -24,22 +27,27 @@ class MiscSubcategory extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: const Text("Volume Key Navigation"),
-              subtitle: const Text("Sử dụng phím âm lượng để chuyển trang"),
+              title: Text(
+                LocaleKeys.epub_reader_misc_volume_key_navigation.tr(),
+              ),
+              subtitle: Text(
+                LocaleKeys.epub_reader_misc_volume_key_navigation_description
+                    .tr(),
+              ),
               value: state.volumeKeyNavigation,
               secondary: Icon(
                 Icons.volume_up_outlined,
                 color: context.colorScheme.onSurfaceVariant,
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              onChanged: (value) => context
-                  .read<EpubReaderSettingCubit>()
-                  .toggleVolumeKeyNavigation(),
+              onChanged: (value) =>
+                  context.epubReaderSettingCubit.toggleVolumeKeyNavigation(),
             ),
-            const Divider(indent: 56, height: 1),
             SwitchListTile(
-              title: const Text("Keep Screen On"),
-              subtitle: const Text("Ngăn màn hình tự động tắt khi đang đọc"),
+              title: Text(LocaleKeys.epub_reader_misc_keep_screen_on.tr()),
+              subtitle: Text(
+                LocaleKeys.epub_reader_misc_keep_screen_on_description.tr(),
+              ),
               value: state.keepScreenOn,
               secondary: Icon(
                 Icons.screen_lock_portrait_outlined,
@@ -47,21 +55,24 @@ class MiscSubcategory extends StatelessWidget {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               onChanged: (value) =>
-                  context.read<EpubReaderSettingCubit>().toggleKeepScreenOn(),
+                  context.epubReaderSettingCubit.toggleKeepScreenOn(),
             ),
-            const Divider(indent: 56, height: 1),
             SwitchListTile(
-              title: const Text("Double Tap Translate"),
-              subtitle: const Text("Chạm hai lần vào từ để dịch nhanh"),
+              title: Text(
+                LocaleKeys.epub_reader_misc_double_tap_translate.tr(),
+              ),
+              subtitle: Text(
+                LocaleKeys.epub_reader_misc_double_tap_translate_description
+                    .tr(),
+              ),
               value: state.doubleTapTranslate,
               secondary: Icon(
                 Icons.translate_outlined,
                 color: context.colorScheme.onSurfaceVariant,
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-              onChanged: (value) => context
-                  .read<EpubReaderSettingCubit>()
-                  .toggleDoubleTapTranslate(),
+              onChanged: (value) =>
+                  context.epubReaderSettingCubit.toggleDoubleTapTranslate(),
             ),
           ],
         );

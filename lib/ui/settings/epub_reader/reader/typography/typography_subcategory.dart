@@ -1,13 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/epub_reader_setting/font_thickness.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/common/slider_list_tile.dart';
 
-class FontSubcategory extends StatelessWidget {
-  const FontSubcategory({super.key});
+class TypographySubcategory extends StatelessWidget {
+  const TypographySubcategory({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,15 +19,15 @@ class FontSubcategory extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const _SectionHeader(title: "Typography"),
+            _SectionHeader(title: LocaleKeys.epub_reader_typography_title.tr()),
             _FontChoiceOption(selectedFont: state.fontFamily),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 16),
             _FontSizeOption(fontSize: state.fontSize),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 16),
             _FontThicknessOption(selectedThickness: state.fontThickness),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 16),
             _FontStyleOption(fontStyle: state.fontStyle),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 16),
             _LetterSpacingOption(spacing: state.letterSpacing),
             const SizedBox(height: 16),
           ],
@@ -74,7 +77,10 @@ class _FontChoiceOption extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Font Family", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_typography_font_family.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -107,7 +113,7 @@ class _FontChoiceOption extends StatelessWidget {
               }),
               ActionChip(
                 avatar: const Icon(Icons.upload_file, size: 18),
-                label: const Text("Upload Font"),
+                label: Text(LocaleKeys.epub_reader_typography_upload_font.tr()),
                 onPressed: () async {
                   FilePickerResult? result = await FilePicker.platform
                       .pickFiles(
@@ -118,7 +124,10 @@ class _FontChoiceOption extends StatelessWidget {
                   if (result != null && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text("Selected: ${result.files.single.name}"),
+                        content: Text(
+                          LocaleKeys.epub_reader_typography_upload_font_selected
+                              .tr(args: [result.files.single.name]),
+                        ),
                       ),
                     );
                   }
@@ -139,7 +148,7 @@ class _FontSizeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Font Size",
+      title: LocaleKeys.epub_reader_typography_font_size.tr(),
       value: fontSize,
       min: 10.0,
       max: 35.0,
@@ -162,13 +171,16 @@ class _FontThicknessOption extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Font Thickness", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_typography_font_thickness.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Wrap(
             spacing: 8,
-            // runSpacing: 8,
+            runSpacing: 8,
             children: [
               ...FontThickness.values.map((thickness) {
                 final isSelected = selectedThickness == thickness;
@@ -186,9 +198,9 @@ class _FontThicknessOption extends StatelessWidget {
                   ),
                   onSelected: (selected) {
                     if (selected) {
-                      context
-                          .read<EpubReaderSettingCubit>()
-                          .updateFontThickness(thickness);
+                      context.epubReaderSettingCubit.updateFontThickness(
+                        thickness,
+                      );
                     }
                   },
                 );
@@ -213,12 +225,15 @@ class _FontStyleOption extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("Font Style", style: context.textTheme.bodyMedium),
+          Text(
+            LocaleKeys.epub_reader_typography_font_style.tr(),
+            style: context.textTheme.bodyMedium,
+          ),
           ToggleButtons(
             isSelected: [!isItalic, isItalic],
             onPressed: (index) {
               final newStyle = index == 0 ? FontStyle.normal : FontStyle.italic;
-              context.read<EpubReaderSettingCubit>().updateFontStyle(newStyle);
+              context.epubReaderSettingCubit.updateFontStyle(newStyle);
             },
             borderRadius: BorderRadius.circular(8),
             constraints: const BoxConstraints(minWidth: 80, minHeight: 40),
@@ -240,14 +255,14 @@ class _LetterSpacingOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Letter Spacing",
+      title: LocaleKeys.epub_reader_typography_letter_spacing.tr(),
       value: spacing,
       min: -8.0,
       max: 16.0,
       divisions: 48, // 0.5 increments
       label: spacing.toStringAsFixed(1),
       onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateLetterSpacing(value),
+          context.epubReaderSettingCubit.updateLetterSpacing(value),
     );
   }
 }

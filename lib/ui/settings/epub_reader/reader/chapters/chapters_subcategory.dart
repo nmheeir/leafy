@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 
 class ChaptersSubcategory extends StatelessWidget {
   const ChaptersSubcategory({super.key});
@@ -16,7 +19,7 @@ class ChaptersSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Chapters",
+                LocaleKeys.epub_reader_chapter_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -62,7 +65,7 @@ class _ChapterAlignmentSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            "Chapter Title Alignment",
+            LocaleKeys.epub_reader_chapter_title_alignment.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),
@@ -73,7 +76,7 @@ class _ChapterAlignmentSelector extends StatelessWidget {
               return ToggleButtons(
                 isSelected: isSelected,
                 onPressed: (index) {
-                  context.read<EpubReaderSettingCubit>().updateChapterAlignment(
+                  context.epubReaderSettingCubit.updateChapterAlignment(
                     alignments[index],
                   );
                 },

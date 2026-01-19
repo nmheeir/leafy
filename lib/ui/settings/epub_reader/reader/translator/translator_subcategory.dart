@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 
 class TranslatorSubcategory extends StatelessWidget {
   const TranslatorSubcategory({super.key});
@@ -16,7 +19,7 @@ class TranslatorSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Translator",
+                LocaleKeys.epub_reader_translator_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -24,17 +27,21 @@ class TranslatorSubcategory extends StatelessWidget {
               ),
             ),
             const _TargetLanguageSelector(),
-            const Divider(indent: 16, endIndent: 16, height: 24),
+            const SizedBox(height: 16),
             const _AutoDetectToggle(),
-            const Divider(indent: 16, endIndent: 16, height: 24),
+            const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text("Double Click Translation"),
-              subtitle: const Text("Chạm hai lần để dịch nhanh cụm từ"),
+              title: Text(
+                LocaleKeys.epub_reader_translator_double_click_translation.tr(),
+              ),
+              subtitle: Text(
+                LocaleKeys
+                    .epub_reader_translator_double_click_translation_description
+                    .tr(),
+              ),
               value: state.doubleTapTranslate,
               onChanged: (_) {
-                context
-                    .read<EpubReaderSettingCubit>()
-                    .toggleDoubleTapTranslate();
+                context.epubReaderSettingCubit.toggleDoubleTapTranslate();
               },
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
@@ -75,6 +82,7 @@ class _TargetLanguageSelectorState extends State<_TargetLanguageSelector> {
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: () {
         showModalBottomSheet(
+          showDragHandle: true,
           context: context,
           builder: (context) => ListView.builder(
             itemCount: _languages.length,
@@ -111,7 +119,9 @@ class _AutoDetectToggleState extends State<_AutoDetectToggle> {
   @override
   Widget build(BuildContext context) {
     return SwitchListTile(
-      title: const Text("Auto-detect Source Language"),
+      title: Text(
+        LocaleKeys.epub_reader_translator_auto_detect_source_language.tr(),
+      ),
       value: _isAutoDetect,
       onChanged: (value) => setState(() => _isAutoDetect = value),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),

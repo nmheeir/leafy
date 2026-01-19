@@ -1,10 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/epub_reader_setting/image_alignment.dart';
 import 'package:leafy/core/constants/enums/epub_reader_setting/image_color_effect.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/common/slider_list_tile.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 
 class ImageSubcategory extends StatelessWidget {
   const ImageSubcategory({super.key});
@@ -19,7 +22,7 @@ class ImageSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Images",
+                LocaleKeys.epub_reader_image_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -27,10 +30,10 @@ class ImageSubcategory extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: const Text("Display Images"),
+              title: Text(LocaleKeys.epub_reader_image_display_images.tr()),
               value: state.displayImage,
               onChanged: (_) {
-                context.read<EpubReaderSettingCubit>().toggleDisplayImage();
+                context.epubReaderSettingCubit.toggleDisplayImage();
               },
             ),
             AnimatedSize(
@@ -40,29 +43,29 @@ class ImageSubcategory extends StatelessWidget {
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Divider(indent: 16, endIndent: 16, height: 32),
                         SwitchListTile(
-                          title: const Text("Show Caption"),
+                          title: Text(
+                            LocaleKeys.epub_reader_image_show_caption.tr(),
+                          ),
                           value: state.showImageCaption,
                           onChanged: (_) {
-                            context
-                                .read<EpubReaderSettingCubit>()
+                            context.epubReaderSettingCubit
                                 .toggleShowImageCaption();
                           },
                         ),
-                        const Divider(indent: 16, endIndent: 16, height: 32),
+                        const SizedBox(height: 16),
                         _ColorEffectSelector(
                           selectedEffect: state.imageColorEffect,
                         ),
-                        const Divider(indent: 16, endIndent: 16, height: 32),
+                        const SizedBox(height: 16),
                         _CornerRadiusSlider(
                           cornerRadius: state.imageCornerRadius,
                         ),
-                        const Divider(indent: 16, endIndent: 16, height: 32),
+                        const SizedBox(height: 16),
                         _AlignmentSelector(
                           currentAlignment: state.imageAlignment,
                         ),
-                        const Divider(indent: 16, endIndent: 16, height: 32),
+                        const SizedBox(height: 16),
                         _SizeSlider(multiplier: state.imageSizeMultiplier),
                         const SizedBox(height: 16),
                       ],
@@ -87,7 +90,10 @@ class _ColorEffectSelector extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Color Effect", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_image_color_effect.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         SizedBox(
           height: 48,
@@ -95,19 +101,15 @@ class _ColorEffectSelector extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             itemCount: ImageColorEffect.values.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            separatorBuilder: (_, _) => const SizedBox(width: 8),
             itemBuilder: (context, index) {
               final effect = ImageColorEffect.values[index];
               final isSelected = selectedEffect == effect;
               return ChoiceChip(
-                label: Text(_getEffectLabel(effect)),
+                label: Text(effect.label),
                 selected: isSelected,
-                onSelected: (selected) {
-                  if (selected) {
-                    context
-                        .read<EpubReaderSettingCubit>()
-                        .updateImageColorEffect(effect);
-                  }
+                onSelected: (_) {
+                  context.epubReaderSettingCubit.updateImageColorEffect(effect);
                 },
               );
             },
@@ -115,19 +117,6 @@ class _ColorEffectSelector extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  String _getEffectLabel(ImageColorEffect effect) {
-    switch (effect) {
-      case ImageColorEffect.off:
-        return "Off";
-      case ImageColorEffect.grayscale:
-        return "Grayscale";
-      case ImageColorEffect.fontColor:
-        return "Font Color";
-      case ImageColorEffect.backgroundColor:
-        return "Background";
-    }
   }
 }
 
@@ -138,14 +127,14 @@ class _CornerRadiusSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Corner Radius",
+      title: LocaleKeys.epub_reader_image_corner_radius.tr(),
       value: cornerRadius,
       min: 0.0,
       max: 24.0,
       divisions: 24,
       label: "${cornerRadius.toInt()} pt",
       onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateImageCornerRadius(value),
+          context.epubReaderSettingCubit.updateImageCornerRadius(value),
     );
   }
 }
@@ -177,7 +166,10 @@ class _AlignmentSelector extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Alignment", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_image_alignment.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -186,7 +178,7 @@ class _AlignmentSelector extends StatelessWidget {
               return ToggleButtons(
                 isSelected: isSelected,
                 onPressed: (index) {
-                  context.read<EpubReaderSettingCubit>().updateImageAlignment(
+                  context.epubReaderSettingCubit.updateImageAlignment(
                     alignments[index],
                   );
                 },
@@ -212,15 +204,14 @@ class _SizeSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Size",
+      title: LocaleKeys.epub_reader_image_size.tr(),
       value: multiplier,
       min: 0.0,
       max: 100.0,
       divisions: 100,
       label: "${multiplier.toInt()}%",
-      onChanged: (value) => context
-          .read<EpubReaderSettingCubit>()
-          .updateImageSizeMultiplier(value),
+      onChanged: (value) =>
+          context.epubReaderSettingCubit.updateImageSizeMultiplier(value),
     );
   }
 }

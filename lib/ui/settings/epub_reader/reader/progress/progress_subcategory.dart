@@ -1,9 +1,12 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/epub_reader_setting/progress_count_type.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class ProgressSubcategory extends StatelessWidget {
@@ -19,7 +22,7 @@ class ProgressSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Reading Progress",
+                LocaleKeys.epub_reader_progress_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -27,12 +30,12 @@ class ProgressSubcategory extends StatelessWidget {
               ),
             ),
             _ProgressCountSelector(currentType: state.progressCountType),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 16),
             SwitchListTile(
-              title: const Text("Show Bottom Progress Bar"),
+              title: Text(LocaleKeys.epub_reader_progress_show_bar.tr()),
               value: state.showProgressBar,
               onChanged: (_) {
-                context.read<EpubReaderSettingCubit>().toggleShowProgressBar();
+                context.epubReaderSettingCubit.toggleShowProgressBar();
               },
             ),
             AnimatedSize(
@@ -41,11 +44,11 @@ class ProgressSubcategory extends StatelessWidget {
               child: state.showProgressBar
                   ? Column(
                       children: [
-                        const Divider(indent: 16, endIndent: 16, height: 16),
+                        const SizedBox(height: 16),
                         _ProgressBarColorPicker(
                           color: Color(state.progressBarColor),
                         ),
-                        const Divider(indent: 16, endIndent: 16, height: 16),
+                        const SizedBox(height: 16),
                         _ProgressBarHeightSlider(
                           height: state.progressBarHeight,
                         ),
@@ -72,7 +75,10 @@ class _ProgressCountSelector extends StatelessWidget {
       ProgressCountType.quantity,
     ];
 
-    final List<String> labels = ["Percentage (%)", "Page / Total"];
+    final List<String> labels = [
+      LocaleKeys.epub_reader_progress_count_percentage.tr(),
+      LocaleKeys.epub_reader_progress_count_quantity.tr(),
+    ];
     final List<bool> isSelected = types
         .map((type) => type == currentType)
         .toList();
@@ -82,7 +88,10 @@ class _ProgressCountSelector extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Progress Count", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_progress_count.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -91,9 +100,9 @@ class _ProgressCountSelector extends StatelessWidget {
               return ToggleButtons(
                 isSelected: isSelected,
                 onPressed: (index) {
-                  context
-                      .read<EpubReaderSettingCubit>()
-                      .updateProgressCountType(types[index]);
+                  context.epubReaderSettingCubit.updateProgressCountType(
+                    types[index],
+                  );
                 },
                 borderRadius: BorderRadius.circular(8),
                 constraints: BoxConstraints(
@@ -124,13 +133,16 @@ class _ProgressBarColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: const Text("Progress Bar Color"),
+      title: Text(LocaleKeys.epub_reader_progress_bar_color.tr()),
       trailing: GestureDetector(
         onTap: () async {
           final Color newColor = await showColorPickerDialog(
             context,
             color,
-            title: Text('Select Color', style: context.textTheme.titleLarge),
+            title: Text(
+              LocaleKeys.epub_reader_progress_bar_color.tr(),
+              style: context.textTheme.titleLarge,
+            ),
             width: 40,
             height: 40,
             spacing: 0,
@@ -149,7 +161,7 @@ class _ProgressBarColorPicker extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 480, minWidth: 320),
           );
           if (context.mounted) {
-            context.read<EpubReaderSettingCubit>().updateProgressBarColor(
+            context.epubReaderSettingCubit.updateProgressBarColor(
               newColor.toARGB32(),
             );
           }
@@ -177,14 +189,14 @@ class _ProgressBarHeightSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Progress Bar Height",
+      title: LocaleKeys.epub_reader_progress_bar_height.tr(),
       value: height,
       min: 1.0,
       max: 24.0,
       divisions: 23, // 1.0 increments roughly
       label: "${height.toInt()} pt",
       onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateProgressBarHeight(value),
+          context.epubReaderSettingCubit.updateProgressBarHeight(value),
     );
   }
 }

@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class ReadingSpeedSubcategory extends StatelessWidget {
@@ -20,7 +23,7 @@ class ReadingSpeedSubcategory extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "TTS Speed",
+                    LocaleKeys.epub_reader_reading_speed_title.tr(),
                     style: context.textTheme.titleSmall?.copyWith(
                       color: context.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -31,11 +34,13 @@ class ReadingSpeedSubcategory extends StatelessWidget {
               ),
             ),
             const _SpeedSlider(),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 32),
 
             // Highlight Words
             SwitchListTile(
-              title: const Text("Highlight Words"),
+              title: Text(
+                LocaleKeys.epub_reader_reading_speed_highlight_words.tr(),
+              ),
               subtitle: const Text("Highlight words as they are spoken"),
               value: state.highlightWords,
               onChanged: (value) =>
@@ -46,7 +51,9 @@ class ReadingSpeedSubcategory extends StatelessWidget {
               duration: const Duration(milliseconds: 300),
               child: state.highlightWords
                   ? SliderListTile(
-                      title: "Highlight Thickness",
+                      title: LocaleKeys
+                          .epub_reader_reading_speed_highlight_thickness
+                          .tr(),
                       value: state.highlightThickness,
                       min: 1.0,
                       max: 3.0,
@@ -63,12 +70,17 @@ class ReadingSpeedSubcategory extends StatelessWidget {
 
             // Perception Expander
             SwitchListTile(
-              title: const Text("Perception Expander"),
-              subtitle: const Text("Expand your peripheral vision"),
+              title: Text(
+                LocaleKeys.epub_reader_reading_speed_perception_expander.tr(),
+              ),
+              subtitle: Text(
+                LocaleKeys
+                    .epub_reader_reading_speed_perception_expander_description
+                    .tr(),
+              ),
               value: state.perceptionExpander,
-              onChanged: (value) => context
-                  .read<EpubReaderSettingCubit>()
-                  .togglePerceptionExpander(),
+              onChanged: (value) =>
+                  context.epubReaderSettingCubit.togglePerceptionExpander(),
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             ),
             AnimatedSize(
@@ -77,25 +89,27 @@ class ReadingSpeedSubcategory extends StatelessWidget {
                   ? Column(
                       children: [
                         SliderListTile(
-                          title: "Line Side Margin",
+                          title: LocaleKeys
+                              .epub_reader_reading_speed_line_side_margin
+                              .tr(),
                           value: state.lineSideMargin,
                           min: 0.0,
                           max: 24.0,
                           divisions: 24,
                           label: "${state.lineSideMargin.toInt()} pt",
-                          onChanged: (val) => context
-                              .read<EpubReaderSettingCubit>()
+                          onChanged: (val) => context.epubReaderSettingCubit
                               .updateLineSideMargin(val),
                         ),
                         SliderListTile(
-                          title: "Line Side Thickness",
+                          title: LocaleKeys
+                              .epub_reader_reading_speed_line_side_thickness
+                              .tr(),
                           value: state.lineSideThickness,
                           min: 0.0,
                           max: 12.0,
                           divisions: 12,
                           label: "${state.lineSideThickness.toInt()} pt",
-                          onChanged: (val) => context
-                              .read<EpubReaderSettingCubit>()
+                          onChanged: (val) => context.epubReaderSettingCubit
                               .updateLineSideThickness(val),
                         ),
                       ],
@@ -149,13 +163,13 @@ class _SpeedSliderState extends State<_SpeedSlider> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "Slow",
+                LocaleKeys.epub_reader_reading_speed_slow.tr(),
                 style: context.textTheme.labelMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
-                "Fast",
+                LocaleKeys.epub_reader_reading_speed_fast.tr(),
                 style: context.textTheme.labelMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),

@@ -1,7 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/epub_reader_setting/screen_orientation.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 
@@ -18,7 +20,7 @@ class SystemSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "System",
+                LocaleKeys.epub_reader_system_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -26,7 +28,7 @@ class SystemSubcategory extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: const Text("Custom Brightness"),
+              title: Text(LocaleKeys.epub_reader_system_custom_brightness.tr()),
               value: state.customBrightnessEnabled,
               onChanged: (value) {
                 context.epubReaderSettingCubit.toggleCustomBrightness();
@@ -70,14 +72,13 @@ class SystemSubcategory extends StatelessWidget {
                     )
                   : const SizedBox.shrink(),
             ),
-            const Divider(indent: 16, endIndent: 16, height: 32),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Screen Orientation",
+                    LocaleKeys.epub_reader_system_screen_orientation.tr(),
                     style: context.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 8),
@@ -89,8 +90,7 @@ class SystemSubcategory extends StatelessWidget {
                         selected: state.screenOrientation == orientation,
                         onSelected: (selected) {
                           if (selected) {
-                            context
-                                .read<EpubReaderSettingCubit>()
+                            context.epubReaderSettingCubit
                                 .updateScreenOrientation(orientation);
                           }
                         },

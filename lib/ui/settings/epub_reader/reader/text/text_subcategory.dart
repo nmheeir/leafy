@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/common/slider_list_tile.dart';
 
 class TextSubcategory extends StatelessWidget {
@@ -17,7 +20,7 @@ class TextSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                "Text Layout",
+                LocaleKeys.epub_reader_text_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -25,11 +28,11 @@ class TextSubcategory extends StatelessWidget {
               ),
             ),
             _TextAlignSelector(currentAlignment: state.textAlignment),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 32),
             _LineHeightSlider(lineHeight: state.lineHeight),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 32),
             _ParagraphSpacingSlider(spacing: state.paragraphSpacing),
-            const Divider(indent: 16, endIndent: 16, height: 32),
+            const SizedBox(height: 32),
             _IndentSlider(indent: state.indent),
             const SizedBox(height: 16),
           ],
@@ -68,7 +71,10 @@ class _TextAlignSelector extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Text("Alignment", style: context.textTheme.labelLarge),
+          child: Text(
+            LocaleKeys.epub_reader_text_alignment.tr(),
+            style: context.textTheme.labelLarge,
+          ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -103,14 +109,14 @@ class _LineHeightSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Line Height",
+      title: LocaleKeys.epub_reader_text_line_height.tr(),
       value: lineHeight,
       min: 1.0,
       max: 3.0,
       divisions: 20, // 0.1 increments
       label: lineHeight.toStringAsFixed(1),
       onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateLineHeight(value),
+          context.epubReaderSettingCubit.updateLineHeight(value),
     );
   }
 }
@@ -122,14 +128,14 @@ class _ParagraphSpacingSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Paragraph Spacing",
+      title: LocaleKeys.epub_reader_text_paragraph_spacing.tr(),
       value: spacing,
       min: 0.0,
       max: 24.0,
       divisions: 24, // 1.0 increments
       label: "${spacing.toInt()} pt",
       onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateParagraphSpacing(value),
+          context.epubReaderSettingCubit.updateParagraphSpacing(value),
     );
   }
 }
@@ -141,14 +147,13 @@ class _IndentSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: "Indentation",
+      title: LocaleKeys.epub_reader_text_indentation.tr(),
       value: indent,
       min: 0.0,
       max: 24.0,
       divisions: 24, // 1.0 increments
       label: "${indent.toInt()} pt",
-      onChanged: (value) =>
-          context.read<EpubReaderSettingCubit>().updateIndent(value),
+      onChanged: (value) => context.epubReaderSettingCubit.updateIndent(value),
     );
   }
 }

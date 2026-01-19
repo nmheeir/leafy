@@ -1,10 +1,13 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 
-class PaddingSubcategory extends StatelessWidget {
-  const PaddingSubcategory({super.key});
+class LayoutSubcategory extends StatelessWidget {
+  const LayoutSubcategory({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +22,14 @@ class PaddingSubcategory extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Layout",
+                    LocaleKeys.epub_reader_layout_title.tr(),
                     style: context.textTheme.titleSmall?.copyWith(
                       color: context.colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "Requires re-layout",
+                    LocaleKeys.epub_reader_layout_requires_re_layout.tr(),
                     style: context.textTheme.labelSmall?.copyWith(
                       color: context.colorScheme.tertiary,
                       fontStyle: FontStyle.italic,
@@ -37,30 +40,29 @@ class PaddingSubcategory extends StatelessWidget {
             ),
             _buildSliderTile(
               context: context,
-              title: "Side Margin",
+              title: LocaleKeys.epub_reader_layout_side_margin.tr(),
               value: state.sideMargin,
               min: 0,
               max: 60,
               divisions: 12,
               onChanged: (val) =>
-                  context.read<EpubReaderSettingCubit>().updateSideMargin(val),
+                  context.epubReaderSettingCubit.updateSideMargin(val),
             ),
             _buildSliderTile(
               context: context,
-              title: "Vertical Margin",
+              title: LocaleKeys.epub_reader_layout_vertical_margin.tr(),
               value: state.verticalMargin,
               min: 0,
               max: 60,
               divisions: 12,
-              onChanged: (val) => context
-                  .read<EpubReaderSettingCubit>()
-                  .updateVerticalMargin(val),
+              onChanged: (val) =>
+                  context.epubReaderSettingCubit.updateVerticalMargin(val),
             ),
             SwitchListTile(
-              title: const Text("Cutout Margin"),
+              title: Text(LocaleKeys.epub_reader_layout_cutout_margin.tr()),
               value: state.cutoutMargin,
               onChanged: (_) =>
-                  context.read<EpubReaderSettingCubit>().toggleCutoutMargin(),
+                  context.epubReaderSettingCubit.toggleCutoutMargin(),
               secondary: Icon(
                 Icons.edgesensor_high,
                 color: context.colorScheme.primary,
@@ -68,14 +70,13 @@ class PaddingSubcategory extends StatelessWidget {
             ),
             _buildSliderTile(
               context: context,
-              title: "Bottom Bar Margin",
+              title: LocaleKeys.epub_reader_layout_bottom_bar_margin.tr(),
               value: state.bottomBarMargin,
               min: 0,
               max: 100,
               divisions: 20,
-              onChanged: (val) => context
-                  .read<EpubReaderSettingCubit>()
-                  .updateBottomBarMargin(val),
+              onChanged: (val) =>
+                  context.epubReaderSettingCubit.updateBottomBarMargin(val),
             ),
           ],
         );

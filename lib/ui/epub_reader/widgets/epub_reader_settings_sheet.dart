@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/ui/settings/epub_reader/appearance/colors/color_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/chapters/chapters_subcategory.dart';
-import 'package:leafy/ui/settings/epub_reader/reader/font/font_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/typography/typography_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/image/image_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/misc/misc_subcategory.dart';
-import 'package:leafy/ui/settings/epub_reader/reader/padding/padding_subcategory.dart';
+import 'package:leafy/ui/settings/epub_reader/reader/layout/layout_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/progress/progress_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/reading_mode/reading_mode_subcategory.dart';
 import 'package:leafy/ui/settings/epub_reader/reader/reading_speed/reading_speed_subcategory.dart';
@@ -114,7 +114,7 @@ class _GeneralTab extends StatelessWidget {
         children: const [
           ReadingModeSubcategory(),
           Divider(height: 32),
-          PaddingSubcategory(),
+          LayoutSubcategory(),
           Divider(height: 32),
           SystemSubcategory(),
           Divider(height: 32),
@@ -139,7 +139,7 @@ class _ReaderTab extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: const [
-          FontSubcategory(),
+          TypographySubcategory(),
           Divider(height: 32),
           TextSubcategory(),
           Divider(height: 32),
