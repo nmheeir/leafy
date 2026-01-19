@@ -8,14 +8,15 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(16.0) double sideMargin,
     @Default(16.0) double verticalMargin,
     @Default(16.0) double bottomBarMargin,
+    @Default(true) bool customBrightnessEnabled,
     @Default(50) int customBrightness,
     @Default(ScreenOrientation.defaultValue)
     ScreenOrientation screenOrientation,
-    @Default(false) bool fullScreen,
+    @Default(false) bool volumeKeyNavigation,
     @Default(false) bool keepScreenOn,
     @Default(false) bool hideBarOnFastScroll,
     @Default(true) bool displayImage,
-    @Default(false) bool doubleClickTranslator,
+    @Default(false) bool doubleTapTranslate,
     @Default('Serif') String fontFamily,
     @Default(FontThickness.normal) FontThickness fontThickness,
     @Default(FontStyle.normal) FontStyle fontStyle,
@@ -29,6 +30,11 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(true) bool pullAnimation,
     @Default(true) bool visibilityAnimation,
     @Default(false) bool cutoutMargin,
+    @Default(false) bool highlightWords,
+    @Default(false) bool perceptionExpander,
+    @Default(1.0) double highlightThickness,
+    @Default(0.0) double lineSideMargin,
+    @Default(0.0) double lineSideThickness,
   }) = _EpubReaderSettingState;
 
   factory EpubReaderSettingState.fromJson(Map<String, dynamic> json) =>

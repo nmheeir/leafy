@@ -43,12 +43,18 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     emit(state.copyWith(customBrightness: brightness));
   }
 
+  void toggleCustomBrightness() {
+    emit(
+      state.copyWith(customBrightnessEnabled: !state.customBrightnessEnabled),
+    );
+  }
+
   void updateScreenOrientation(ScreenOrientation orientation) {
     emit(state.copyWith(screenOrientation: orientation));
   }
 
-  void toggleFullScreen() {
-    emit(state.copyWith(fullScreen: !state.fullScreen));
+  void toggleVolumeKeyNavigation() {
+    emit(state.copyWith(volumeKeyNavigation: !state.volumeKeyNavigation));
   }
 
   void toggleKeepScreenOn() {
@@ -63,8 +69,8 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     emit(state.copyWith(displayImage: !state.displayImage));
   }
 
-  void toggleDoubleClickTranslator() {
-    emit(state.copyWith(doubleClickTranslator: !state.doubleClickTranslator));
+  void toggleDoubleTapTranslate() {
+    emit(state.copyWith(doubleTapTranslate: !state.doubleTapTranslate));
   }
 
   void updateFontFamily(String fontFamily) {
@@ -117,5 +123,25 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
 
   void toggleCutoutMargin() {
     emit(state.copyWith(cutoutMargin: !state.cutoutMargin));
+  }
+
+  void toggleHighlightWords() {
+    emit(state.copyWith(highlightWords: !state.highlightWords));
+  }
+
+  void togglePerceptionExpander() {
+    emit(state.copyWith(perceptionExpander: !state.perceptionExpander));
+  }
+
+  void updateHighlightThickness(double thickness) {
+    emit(state.copyWith(highlightThickness: thickness));
+  }
+
+  void updateLineSideMargin(double margin) {
+    emit(state.copyWith(lineSideMargin: margin));
+  }
+
+  void updateLineSideThickness(double thickness) {
+    emit(state.copyWith(lineSideThickness: thickness));
   }
 }

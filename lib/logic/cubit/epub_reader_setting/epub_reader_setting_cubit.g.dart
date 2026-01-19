@@ -18,6 +18,7 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   sideMargin: (json['sideMargin'] as num?)?.toDouble() ?? 16.0,
   verticalMargin: (json['verticalMargin'] as num?)?.toDouble() ?? 16.0,
   bottomBarMargin: (json['bottomBarMargin'] as num?)?.toDouble() ?? 16.0,
+  customBrightnessEnabled: json['customBrightnessEnabled'] as bool? ?? true,
   customBrightness: (json['customBrightness'] as num?)?.toInt() ?? 50,
   screenOrientation:
       $enumDecodeNullable(
@@ -25,11 +26,11 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
         json['screenOrientation'],
       ) ??
       ScreenOrientation.defaultValue,
-  fullScreen: json['fullScreen'] as bool? ?? false,
+  volumeKeyNavigation: json['volumeKeyNavigation'] as bool? ?? false,
   keepScreenOn: json['keepScreenOn'] as bool? ?? false,
   hideBarOnFastScroll: json['hideBarOnFastScroll'] as bool? ?? false,
   displayImage: json['displayImage'] as bool? ?? true,
-  doubleClickTranslator: json['doubleClickTranslator'] as bool? ?? false,
+  doubleTapTranslate: json['doubleTapTranslate'] as bool? ?? false,
   fontFamily: json['fontFamily'] as String? ?? 'Serif',
   fontThickness:
       $enumDecodeNullable(_$FontThicknessEnumMap, json['fontThickness']) ??
@@ -51,6 +52,11 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   pullAnimation: json['pullAnimation'] as bool? ?? true,
   visibilityAnimation: json['visibilityAnimation'] as bool? ?? true,
   cutoutMargin: json['cutoutMargin'] as bool? ?? false,
+  highlightWords: json['highlightWords'] as bool? ?? false,
+  perceptionExpander: json['perceptionExpander'] as bool? ?? false,
+  highlightThickness: (json['highlightThickness'] as num?)?.toDouble() ?? 1.0,
+  lineSideMargin: (json['lineSideMargin'] as num?)?.toDouble() ?? 0.0,
+  lineSideThickness: (json['lineSideThickness'] as num?)?.toDouble() ?? 0.0,
 );
 
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
@@ -61,13 +67,14 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'sideMargin': instance.sideMargin,
   'verticalMargin': instance.verticalMargin,
   'bottomBarMargin': instance.bottomBarMargin,
+  'customBrightnessEnabled': instance.customBrightnessEnabled,
   'customBrightness': instance.customBrightness,
   'screenOrientation': _$ScreenOrientationEnumMap[instance.screenOrientation]!,
-  'fullScreen': instance.fullScreen,
+  'volumeKeyNavigation': instance.volumeKeyNavigation,
   'keepScreenOn': instance.keepScreenOn,
   'hideBarOnFastScroll': instance.hideBarOnFastScroll,
   'displayImage': instance.displayImage,
-  'doubleClickTranslator': instance.doubleClickTranslator,
+  'doubleTapTranslate': instance.doubleTapTranslate,
   'fontFamily': instance.fontFamily,
   'fontThickness': _$FontThicknessEnumMap[instance.fontThickness]!,
   'fontStyle': _$FontStyleEnumMap[instance.fontStyle]!,
@@ -81,6 +88,11 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'pullAnimation': instance.pullAnimation,
   'visibilityAnimation': instance.visibilityAnimation,
   'cutoutMargin': instance.cutoutMargin,
+  'highlightWords': instance.highlightWords,
+  'perceptionExpander': instance.perceptionExpander,
+  'highlightThickness': instance.highlightThickness,
+  'lineSideMargin': instance.lineSideMargin,
+  'lineSideThickness': instance.lineSideThickness,
 };
 
 const _$HorizontalGestureModeEnumMap = {
