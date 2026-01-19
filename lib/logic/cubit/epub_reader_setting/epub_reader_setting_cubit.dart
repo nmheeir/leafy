@@ -3,7 +3,11 @@ import 'dart:ui';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/domain/epub_reader/usecases/brightness/get_brightness.dart';
+import 'package:leafy/domain/epub_reader/usecases/brightness/reset_brightness.dart';
+import 'package:leafy/domain/epub_reader/usecases/brightness/set_brightness.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/usecase/usecase.dart';
 
 part 'epub_reader_setting_state.dart';
 part 'epub_reader_setting_cubit.freezed.dart';
@@ -11,7 +15,15 @@ part 'epub_reader_setting_cubit.g.dart';
 
 @injectable
 class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
-  EpubReaderSettingCubit() : super(const EpubReaderSettingState());
+  final GetBrightness _getBrightness;
+  final SetBrightness _setBrightness;
+  final ResetBrightnessUseCase _resetBrightness;
+
+  EpubReaderSettingCubit(
+    this._getBrightness,
+    this._setBrightness,
+    this._resetBrightness,
+  ) : super(const EpubReaderSettingState());
 
   @override
   EpubReaderSettingState? fromJson(Map<String, dynamic> json) {
@@ -39,14 +51,21 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
     emit(state.copyWith(bottomBarMargin: margin));
   }
 
-  void updateCustomBrightness(int brightness) {
+  Future<void> updateCustomBrightness(int brightness) async {
     emit(state.copyWith(customBrightness: brightness));
+    if (state.customBrightnessEnabled) {
+      await _setBrightness(brightness / 100.0);
+    }
   }
 
-  void toggleCustomBrightness() {
-    emit(
-      state.copyWith(customBrightnessEnabled: !state.customBrightnessEnabled),
-    );
+  Future<void> toggleCustomBrightness() async {
+    final newState = !state.customBrightnessEnabled;
+    emit(state.copyWith(customBrightnessEnabled: newState));
+    if (newState) {
+      await _setBrightness(state.customBrightness / 100.0);
+    } else {
+      await _resetBrightness(const NoParams());
+    }
   }
 
   void updateScreenOrientation(ScreenOrientation orientation) {

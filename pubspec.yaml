@@ -76,6 +76,7 @@ dependencies:
   just_audio: ^0.10.5
   pdfrx: ^2.2.24
   device_info_plus: ^12.3.0
+  screen_brightness: ^2.1.7
 
 dev_dependencies:
   flutter_test:

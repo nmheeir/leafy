@@ -411,18 +411,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                             },
                           ),
 
-                          // Brightness Overlay
-                          if (settingState.customBrightnessEnabled)
-                            IgnorePointer(
-                              child: Container(
-                                color: Colors.black.withValues(
-                                  alpha:
-                                      1.0 -
-                                      (settingState.customBrightness / 100),
-                                ),
-                              ),
-                            ),
-
                           Positioned(
                             top: 0,
                             left: 0,
