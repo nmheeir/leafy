@@ -91,6 +91,37 @@ class DbConstants {
     );
   ''';
 
+  static const createEpubTranslationsTable = '''
+    CREATE TABLE epub_translations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      file_hash TEXT NOT NULL,                 -- MD5 của file EPUB (Thay cho resource_id)
+      chapter_index INTEGER NOT NULL,          -- Định danh chương
+      target_lang TEXT NOT NULL,               -- Ví dụ: 'vi', 'en'
+      translated_content TEXT,                 -- Chuỗi JSON của List<String> (các đoạn văn)
+      last_updated INTEGER,                    -- Dấu thời gian (Timestamp)
+      UNIQUE(file_hash, chapter_index, target_lang)
+    );
+  ''';
+
+  static const createEpubTranslationIndex = '''
+    CREATE INDEX idx_epub_translations ON epub_translations (file_hash, chapter_index, target_lang);
+  ''';
+
+  static const createEpubSummaryTable = '''
+    CREATE TABLE epub_summary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      file_hash TEXT NOT NULL,                 -- MD5 của file EPUB
+      chapter_index INTEGER NOT NULL,          -- Định danh chương
+      summary_content TEXT,                    -- Chuỗi JSON của List<String> (các đoạn văn)
+      last_updated INTEGER,                    -- Dấu thời gian (Timestamp)
+      UNIQUE(file_hash, chapter_index)
+    );
+  ''';
+
+  static const createEpubSummaryIndex = '''
+    CREATE INDEX idx_epub_summary ON epub_summary (file_hash, chapter_index);
+  ''';
+
   // =====================================================
   // Migration placeholder
   // =====================================================

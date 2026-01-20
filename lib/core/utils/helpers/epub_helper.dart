@@ -34,7 +34,7 @@ class EpubHelper {
 
         if (imgEntry == null) {
           // Là văn bản
-          items.add(ParagraphItem(i, para));
+          items.add(ParagraphItem(i, para, ''));
         } else {
           // Là hình ảnh -> Tìm bytes trong list images
           final imageEntity = book.images.firstWhereOrNull(
