@@ -9,6 +9,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:flutter/services.dart';
+import 'package:extended_image/extended_image.dart';
 
 class EpubReaderScreen extends StatefulWidget {
   final String filePath;
@@ -480,65 +481,18 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             // A. Xây dựng Widget chính (Nội dung)
             Widget content;
             if (item is ChapterHeaderItem) {
-              content = Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24),
-                child: Text(
-                  item.title,
-                  style: TextStyle(
-                    fontSize: settings.fontSize * 1.5,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: settings.fontFamily,
-                  ),
-                  textAlign: settings.chapterAlignment,
-                ),
+              content = _ChapterHeaderItemWidget(
+                item: item,
+                settings: settings,
               );
             } else if (item is ParagraphItem) {
-              content = RichText(
-                textAlign: settings.textAlignment,
-                text: TextSpan(
-                  children: [
-                    WidgetSpan(child: SizedBox(width: settings.indent)),
-                    TextSpan(
-                      text: item.content,
-                      style: TextStyle(
-                        fontSize: settings.fontSize,
-                        height: settings.lineHeight,
-                        fontFamily: settings.fontFamily,
-                        fontStyle: settings.fontStyle,
-                        fontWeight: settings.fontThickness.weight,
-                        letterSpacing: settings.letterSpacing,
-                        color: context.colorScheme.onSurface.withValues(
-                          alpha: 0.9,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+              content = _ParagraphItemWidget(
+                item: item,
+                settings: settings,
+                onTap: _toggleControls,
               );
             } else if (item is ImageItem) {
-              if (!settings.displayImage) {
-                content = const SizedBox.shrink();
-              } else {
-                content = Align(
-                  alignment: settings.imageAlignment == ImageAlignment.center
-                      ? Alignment.center
-                      : settings.imageAlignment == ImageAlignment.start
-                      ? Alignment.centerLeft
-                      : Alignment.centerRight,
-                  child: Container(
-                    width:
-                        (settings.imageSizeMultiplier / 100) *
-                        MediaQuery.of(context).size.width,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        settings.imageCornerRadius,
-                      ),
-                      child: Image.memory(item.imageBytes, fit: BoxFit.contain),
-                    ),
-                  ),
-                );
-              }
+              content = _ImageItemWidget(item: item, settings: settings);
             } else {
               content = const SizedBox.shrink();
             }
@@ -549,31 +503,13 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             // Kiểm tra xem có phải phần tử cuối cùng không
             if (index < items.length - 1) {
               final nextItem = items[index + 1];
+              final isEndOfChapter = item.chapterIndex != nextItem.chapterIndex;
 
-              // Logic cũ: So sánh chapterIndex
-              if (item.chapterIndex != nextItem.chapterIndex) {
-                // KHÁC NHAU -> Vẽ "Hết chương"
-                bottomSpacing = Column(
-                  children: [
-                    const SizedBox(height: 40),
-                    Divider(
-                      color: context.colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                    Text(
-                      "Hết chương ${item.chapterIndex + 1}",
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                    ),
-                    const SizedBox(height: 40),
-                  ],
-                );
-              } else {
-                // GIỐNG NHAU -> Khoảng cách giãn dòng
-                bottomSpacing = SizedBox(
-                  height: settings.paragraphSpacing > 0
-                      ? settings.paragraphSpacing
-                      : 16,
-                );
-              }
+              bottomSpacing = _EpubItemSeparator(
+                isEndOfChapter: isEndOfChapter,
+                nextChapterIndex: item.chapterIndex + 1,
+                settings: settings,
+              );
             }
 
             // C. Gộp Content và Spacing vào 1 Column duy nhất
@@ -858,5 +794,268 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
         );
       },
     );
+  }
+}
+
+class _ChapterHeaderItemWidget extends StatelessWidget {
+  final ChapterHeaderItem item;
+  final EpubReaderSettingState settings;
+
+  const _ChapterHeaderItemWidget({required this.item, required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Text(
+        item.title,
+        style: TextStyle(
+          fontSize: settings.fontSize * 1.5,
+          fontWeight: FontWeight.bold,
+          fontFamily: settings.fontFamily,
+        ),
+        textAlign: settings.chapterAlignment,
+      ),
+    );
+  }
+}
+
+class _ParagraphItemWidget extends StatefulWidget {
+  final ParagraphItem item;
+  final EpubReaderSettingState settings;
+  final VoidCallback onTap;
+
+  const _ParagraphItemWidget({
+    required this.item,
+    required this.settings,
+    required this.onTap,
+  });
+
+  @override
+  State<_ParagraphItemWidget> createState() => _ParagraphItemWidgetState();
+}
+
+class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return SelectableText.rich(
+      TextSpan(
+        children: [
+          WidgetSpan(child: SizedBox(width: widget.settings.indent)),
+          TextSpan(
+            text: widget.item.content,
+            style: TextStyle(
+              fontSize: widget.settings.fontSize,
+              height: widget.settings.lineHeight,
+              fontFamily: widget.settings.fontFamily,
+              fontStyle: widget.settings.fontStyle,
+              fontWeight: widget.settings.fontThickness.weight,
+              letterSpacing: widget.settings.letterSpacing,
+              color: context.colorScheme.onSurface.withValues(alpha: 0.9),
+            ),
+          ),
+        ],
+      ),
+      textAlign: widget.settings.textAlignment,
+      onTap: widget.onTap,
+      contextMenuBuilder: (context, editableTextState) {
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          anchors: editableTextState.contextMenuAnchors,
+          buttonItems: [
+            ...editableTextState.contextMenuButtonItems,
+            ContextMenuButtonItem(
+              label: 'Dịch',
+              onPressed: () {
+                editableTextState.hideToolbar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Tính năng dịch đang phát triển'),
+                  ),
+                );
+              },
+            ),
+            ContextMenuButtonItem(
+              label: 'Đọc',
+              onPressed: () {
+                editableTextState.hideToolbar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Đang đọc đoạn văn...')),
+                );
+                // TODO: Implement TTS here
+              },
+            ),
+            ContextMenuButtonItem(
+              label: 'Highlight',
+              onPressed: () {
+                editableTextState.hideToolbar();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Đã highlight đoạn văn')),
+                );
+                // TODO: Implement Highlight logic
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ImageItemWidget extends StatelessWidget {
+  final ImageItem item;
+  final EpubReaderSettingState settings;
+
+  const _ImageItemWidget({required this.item, required this.settings});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!settings.displayImage) {
+      return const SizedBox.shrink();
+    }
+    return Align(
+      alignment: settings.imageAlignment == ImageAlignment.center
+          ? Alignment.center
+          : settings.imageAlignment == ImageAlignment.start
+          ? Alignment.centerLeft
+          : Alignment.centerRight,
+      child: Container(
+        width:
+            (settings.imageSizeMultiplier / 100) *
+            MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                opaque: false,
+                barrierColor: Colors.black,
+                pageBuilder: (_, _, _) => _FullScreenImageViewer(item: item),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+              ),
+            );
+          },
+          child: Hero(
+            tag: item.hashCode,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(settings.imageCornerRadius),
+              child: Image.memory(
+                item.imageBytes,
+                fit: BoxFit.contain,
+                errorBuilder: (_, _, _) => const Icon(Icons.broken_image),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FullScreenImageViewer extends StatelessWidget {
+  final ImageItem item;
+
+  const _FullScreenImageViewer({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: ExtendedImage.memory(
+              item.imageBytes,
+              fit: BoxFit.contain,
+              mode: ExtendedImageMode.gesture,
+              heroBuilderForSlidingPage: (widget) {
+                return Hero(
+                  tag: item.hashCode,
+                  child: widget,
+                  flightShuttleBuilder:
+                      (
+                        flightContext,
+                        animation,
+                        flightDirection,
+                        fromHeroContext,
+                        toHeroContext,
+                      ) {
+                        final Hero hero =
+                            (flightDirection == HeroFlightDirection.pop
+                                    ? fromHeroContext.widget
+                                    : toHeroContext.widget)
+                                as Hero;
+                        return hero.child;
+                      },
+                );
+              },
+              initGestureConfigHandler: (state) {
+                return GestureConfig(
+                  minScale: 0.9,
+                  animationMinScale: 0.7,
+                  maxScale: 4.0,
+                  animationMaxScale: 4.5,
+                  speed: 1.0,
+                  inertialSpeed: 100.0,
+                  initialScale: 1.0,
+                  inPageView: false,
+                );
+              },
+            ),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            right: 16,
+            child: IconButton(
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.close, color: Colors.white, size: 30),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withValues(alpha: 0.3),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _EpubItemSeparator extends StatelessWidget {
+  final bool isEndOfChapter;
+  final int nextChapterIndex;
+  final EpubReaderSettingState settings;
+
+  const _EpubItemSeparator({
+    required this.isEndOfChapter,
+    required this.nextChapterIndex,
+    required this.settings,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isEndOfChapter) {
+      return Column(
+        children: [
+          const SizedBox(height: 40),
+          Divider(color: context.colorScheme.primary.withValues(alpha: 0.2)),
+          Text(
+            "Hết chương $nextChapterIndex",
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
+          ),
+          const SizedBox(height: 40),
+        ],
+      );
+    } else {
+      return SizedBox(
+        height: settings.paragraphSpacing > 0 ? settings.paragraphSpacing : 16,
+      );
+    }
   }
 }
