@@ -11,4 +11,5 @@ extension BuildContextExtensions on BuildContext {
 extension StringExtension on String {
   String take(int n) => length > n ? substring(0, n) : this;
   bool get isNotBlank => trim().isNotEmpty;
+  String capitalize() => "${this[0].toUpperCase()}${substring(1)}";
 }

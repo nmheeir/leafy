@@ -17,6 +17,7 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:logger/logger.dart' as _i974;
 import 'package:logger/web.dart' as _i120;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
+import 'package:screen_brightness/screen_brightness.dart' as _i108;
 
 import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
@@ -26,6 +27,7 @@ import '../data/datasources/local/book_resource_local_datasource.dart' as _i880;
 import '../data/datasources/local/book_resource_local_datasource_impl.dart'
     as _i612;
 import '../data/datasources/local/database_service.dart' as _i328;
+import '../data/datasources/local/device_local_datasource.dart' as _i689;
 import '../data/datasources/local/epub_file_local_datasource.dart' as _i620;
 import '../data/datasources/local/epub_file_local_datasource_impl.dart'
     as _i536;
@@ -50,6 +52,7 @@ import '../data/file_import/services/metadata_extraction_service_impl.dart'
     as _i804;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
+import '../data/repositories/device/device_repository_impl.dart' as _i938;
 import '../data/repositories/epub_file_repository_impl.dart' as _i528;
 import '../data/repositories/epub_reader_repository_impl.dart' as _i608;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
@@ -87,6 +90,11 @@ import '../domain/book_resource/usecase/get_book_resource_by_uuid.dart'
 import '../domain/book_resource/usecase/get_book_resources.dart' as _i452;
 import '../domain/book_resource/usecase/update_book_resource_file.dart'
     as _i589;
+import '../domain/device/repositories/device_repository.dart' as _i70;
+import '../domain/device/usecases/brightness/get_brightness.dart' as _i585;
+import '../domain/device/usecases/brightness/reset_brightness.dart' as _i517;
+import '../domain/device/usecases/brightness/set_brightness.dart' as _i430;
+import '../domain/device/usecases/orientation/set_orientation.dart' as _i737;
 import '../domain/epub_file/repositories/epub_file_repository.dart' as _i1072;
 import '../domain/epub_file/usecases/get_epub.dart' as _i765;
 import '../domain/epub_file/usecases/open_network_book.dart' as _i911;
@@ -146,9 +154,12 @@ import '../logic/cubit/display_cubit.dart' as _i985;
 import '../logic/cubit/edit_book_cover/edit_book_cover_cubit.dart' as _i1064;
 import '../logic/cubit/edit_book_cubit.dart' as _i232;
 import '../logic/cubit/epub_reader/epub_reader_cubit.dart' as _i206;
+import '../logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart'
+    as _i1059;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
+import 'module/device_module.dart' as _i195;
 import 'module/logger_module.dart' as _i454;
 import 'module/network_module.dart' as _i881;
 import 'module/storage_module.dart' as _i847;
@@ -161,6 +172,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) async {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final storageModule = _$StorageModule();
+    final deviceModule = _$DeviceModule();
     final loggerModule = _$LoggerModule();
     final networkModule = _$NetworkModule();
     gh.factory<_i800.StatsCalculator>(() => _i800.StatsCalculator());
@@ -196,6 +208,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i786.ConnectivityService(),
     );
     gh.lazySingleton<_i328.DatabaseService>(() => _i328.DatabaseService());
+    gh.lazySingleton<_i108.ScreenBrightness>(
+      () => deviceModule.screenBrightness,
+    );
     gh.lazySingleton<_i120.Logger>(() => loggerModule.logger);
     gh.lazySingleton<_i528.PrettyDioLogger>(() => networkModule.logger);
     gh.lazySingleton<_i361.Dio>(
@@ -231,6 +246,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
         gh<_i497.Directory>(),
       ),
+    );
+    gh.lazySingleton<_i689.DeviceLocalDataSource>(
+      () => _i689.DeviceLocalDataSourceImpl(gh<_i108.ScreenBrightness>()),
     );
     gh.lazySingleton<_i880.BookResourceLocalDatasource>(
       () => _i612.BookResourceLocalDatasourceImpl(gh<_i328.DatabaseService>()),
@@ -289,6 +307,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i758.BookLocalDataSource>(
       () => _i689.BookLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i70.DeviceRepository>(
+      () => _i938.DeviceRepositoryImpl(gh<_i689.DeviceLocalDataSource>()),
     );
     gh.factory<_i765.GetEpubUseCase>(
       () => _i765.GetEpubUseCase(gh<_i1072.EpubFileRepository>()),
@@ -399,6 +420,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1042.BookResourceRepository>(),
       ),
     );
+    gh.lazySingleton<_i585.GetBrightness>(
+      () => _i585.GetBrightness(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i517.ResetBrightnessUseCase>(
+      () => _i517.ResetBrightnessUseCase(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i430.SetBrightness>(
+      () => _i430.SetBrightness(gh<_i70.DeviceRepository>()),
+    );
+    gh.lazySingleton<_i737.SetOrientation>(
+      () => _i737.SetOrientation(gh<_i70.DeviceRepository>()),
+    );
     gh.factory<_i821.TrashBinCubit>(
       () => _i821.TrashBinCubit(
         gh<_i974.Logger>(),
@@ -446,6 +479,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i365.LocalSearchBloc>(
       () => _i365.LocalSearchBloc(gh<_i755.SearchBooksUseCase>()),
+    );
+    gh.factory<_i1059.EpubReaderSettingCubit>(
+      () => _i1059.EpubReaderSettingCubit(
+        gh<_i585.GetBrightness>(),
+        gh<_i430.SetBrightness>(),
+        gh<_i517.ResetBrightnessUseCase>(),
+        gh<_i737.SetOrientation>(),
+      ),
     );
     gh.lazySingleton<_i119.FileProcessingService>(
       () =>
@@ -526,6 +567,8 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$StorageModule extends _i847.StorageModule {}
+
+class _$DeviceModule extends _i195.DeviceModule {}
 
 class _$LoggerModule extends _i454.LoggerModule {}
 

@@ -1,0 +1,1 @@
+enum ProgressCountType { percentage, quantity }

@@ -7,6 +7,7 @@
     <!-- Android 13+ permissions for media (optional if picking via system picker, but good safely) -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" tools:ignore="ProtectedPermissions"/>
 
     <application
         android:name="${applicationName}"

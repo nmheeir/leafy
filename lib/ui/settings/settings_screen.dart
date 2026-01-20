@@ -88,6 +88,17 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   SettingsSection(
                     title: Text(
+                      LocaleKeys.epub_reader_title.tr(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
+                    tiles: [_buildEpubReaderSetting(context)],
+                  ),
+                  SettingsSection(
+                    title: Text(
                       LocaleKeys.about.tr(),
                       style: TextStyle(
                         fontSize: 16,
@@ -327,6 +338,17 @@ class SettingsScreen extends StatelessWidget {
       title: Text(LocaleKeys.apperance.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.palette),
       onPressed: (context) => context.push(Routes.settingAppearance),
+    );
+  }
+
+  SettingsTile _buildEpubReaderSetting(BuildContext context) {
+    return SettingsTile.navigation(
+      title: Text(
+        LocaleKeys.epub_reader_title.tr(),
+        style: TextStyle(fontSize: 16),
+      ),
+      leading: const Icon(Icons.book),
+      onPressed: (context) => context.push(Routes.settingEpubReader),
     );
   }
 

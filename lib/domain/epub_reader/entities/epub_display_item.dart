@@ -14,7 +14,8 @@ class ChapterHeaderItem extends EpubDisplayItem {
 // 2. Đoạn văn bản
 class ParagraphItem extends EpubDisplayItem {
   final String content;
-  ParagraphItem(super.chapterIndex, this.content);
+  final String? translatedContent;
+  ParagraphItem(super.chapterIndex, this.content, this.translatedContent);
 }
 
 // 3. Hình ảnh

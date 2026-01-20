@@ -302,5 +302,109 @@
     "no_error_return": "No error return",
     "database": "Database error",
     "not_found": "Not found"
+  },
+  "epub_reader": {
+    "title": "EPUB Reader",
+    "description": "EPUB Reader Settings",
+    "chapter": {
+      "title": "Chapter",
+      "title_alignment": "Chapter Title Alignment"
+    },
+    "typography": {
+      "title": "Typography",
+      "font_family": "Font Family",
+      "font_style": "Font Style",
+      "font_size": "Font Size",
+      "font_thickness": "Font Thickness",
+      "upload_font": "Upload Font",
+      "upload_font_selected": "Selected: {}",
+      "letter_spacing": "Letter Spacing"
+    },
+    "layout": {
+      "title": "Layout",
+      "requires_re_layout": "Requires re-layout",
+      "side_margin": "Side Margin",
+      "vertical_margin": "Vertical Margin",
+      "cutout_margin": "Cutout Margin",
+      "bottom_bar_margin": "Bottom Bar Margin"
+    },
+    "image": {
+      "title": "Image",
+      "color_effect": "Image Color Effect",
+      "display_images": "Display Images",
+      "show_caption": "Show Image Caption",
+      "corner_radius": "Corner Radius",
+      "alignment": "Image Alignment",
+      "size": "Size"
+    },
+    "progress": {
+      "title": "Progress",
+      "count": "Progress Count",
+      "bar_color": "Progress Bar Color",
+      "bar_height": "Progress Bar Height",
+      "bar_height_description": "Progress Bar Height",
+      "show_bar": "Show Bottom Progress Bar",
+      "count_percentage": "Percentage (%)",
+      "count_quantity": "Page / Total"
+    },
+    "misc": {
+      "title": "Misc",
+      "volume_key_navigation": "Volume Key Navigation",
+      "volume_key_navigation_description": "Use volume keys to navigate",
+      "keep_screen_on": "Keep Screen On",
+      "keep_screen_on_description": "Keep screen on while reading",
+      "double_tap_translate": "Double Tap Translate",
+      "double_tap_translate_description": "Double tap to translate"
+    },
+    "system": {
+      "title": "System",
+      "custom_brightness": "Custom Brightness",
+      "screen_orientation": "Screen Orientation",
+      "custom_brightness_description": "Custom Brightness",
+      "screen_orientation_description": "Screen Orientation"
+    },
+    "reading_mode": {
+      "title": "Reading Mode",
+      "horizontal_gestures": "Horizontal Gestures",
+      "scroll_fraction": "Scroll Fraction",
+      "sensitivity": "Sensitivity",
+      "pull_animation": "Pull Animation",
+      "visibility_animation": "Visibility Animation"
+    },
+    "reading_speed": {
+      "title": "Reading Speed",
+      "highlight_words": "Highlight Words",
+      "highlight_thickness": "Highlight Thickness",
+      "highlight_color": "Highlight Color",
+      "highlight_color_description": "Highlight Color",
+      "perception_expander": "Perception Expander",
+      "perception_expander_description": "Expand your peripheral vision",
+      "line_side_margin": "Line Side Margin",
+      "line_side_thickness": "Line Side Thickness",
+      "slow": "Slow",
+      "fast": "Fast"
+    },
+    "text": {
+      "title": "Text",
+      "alignment": "Text Alignment",
+      "indentation": "Text Indentation",
+      "font_size": "Font Size",
+      "font_thickness": "Font Thickness",
+      "font_color": "Font Color",
+      "font_color_description": "Font Color",
+      "font_style": "Font Style",
+      "line_height": "Line Height",
+      "line_height_description": "Line Height",
+      "line_spacing": "Line Spacing",
+      "line_spacing_description": "Line Spacing",
+      "paragraph_spacing": "Paragraph Spacing",
+      "paragraph_spacing_description": "Paragraph Spacing"
+    },
+    "translator": {
+      "title": "Translator",
+      "double_click_translation": "Double Click Translation",
+      "double_click_translation_description": "Double Click Translation",
+      "auto_detect_source_language": "Auto-detect Source Language"
+    }
   }
 }

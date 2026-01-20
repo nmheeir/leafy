@@ -44,23 +44,28 @@ class DatabaseService {
     await db.execute(DbConstants.createBookResoucesTable);
     await db.execute(DbConstants.createReaderProgressTable);
     await db.execute(DbConstants.createReadingSessionsTable);
-    await db.execute(DbConstants.createSessionTimeIndex);
+    await db.execute(DbConstants.createEpubTranslationsTable);
+    await db.execute(DbConstants.createEpubSummaryTable);
 
-    // if (version >= 2) {
-    //   for (final script in DbConstants.migrationV1toV2) {
-    //     await db.execute(script);
-    //   }
-    // }
+    await db.execute(DbConstants.createEpubTranslationIndex);
+    await db.execute(DbConstants.createSessionTimeIndex);
+    await db.execute(DbConstants.createEpubSummaryIndex);
+
+    if (version >= 2) {
+      for (final script in DbConstants.migrateV1toV2) {
+        await db.execute(script);
+      }
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     final batch = db.batch();
 
-    // if (oldVersion < 2) {
-    //   for (final script in DbConstants.migrationV1toV2) {
-    //     batch.execute(script);
-    //   }
-    // }
+    if (oldVersion < 2) {
+      for (final script in DbConstants.migrateV1toV2) {
+        batch.execute(script);
+      }
+    }
 
     await batch.commit(noResult: true);
   }
