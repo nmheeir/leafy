@@ -128,13 +128,13 @@ return loaded(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( String message)?  error,TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)?  loaded,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function( double progress)?  loading,TResult Function( String message)?  error,TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex,  String? fileHash,  Map<int, Map<String, String>> translationMaps,  Map<int, TranslationStatus> translationStatuses,  bool isBilingual)?  loaded,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.progress);case _Error() when error != null:
 return error(_that.message);case _Loaded() when loaded != null:
-return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex,_that.fileHash,_that.translationMaps,_that.translationStatuses,_that.isBilingual);case _:
   return orElse();
 
 }
@@ -152,13 +152,13 @@ return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.curr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( String message)  error,required TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)  loaded,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function( double progress)  loading,required TResult Function( String message)  error,required TResult Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex,  String? fileHash,  Map<int, Map<String, String>> translationMaps,  Map<int, TranslationStatus> translationStatuses,  bool isBilingual)  loaded,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading(_that.progress);case _Error():
 return error(_that.message);case _Loaded():
-return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex,_that.fileHash,_that.translationMaps,_that.translationStatuses,_that.isBilingual);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -175,13 +175,13 @@ return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.curr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( String message)?  error,TResult? Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex)?  loaded,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function( double progress)?  loading,TResult? Function( String message)?  error,TResult? Function( EpubBook book,  List<EpubDisplayItem> displayItems,  int currentChapterIndex,  int currentItemIndex,  String? fileHash,  Map<int, Map<String, String>> translationMaps,  Map<int, TranslationStatus> translationStatuses,  bool isBilingual)?  loaded,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading(_that.progress);case _Error() when error != null:
 return error(_that.message);case _Loaded() when loaded != null:
-return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex);case _:
+return loaded(_that.book,_that.displayItems,_that.currentChapterIndex,_that.currentItemIndex,_that.fileHash,_that.translationMaps,_that.translationStatuses,_that.isBilingual);case _:
   return null;
 
 }
@@ -357,7 +357,7 @@ as String,
 
 
 class _Loaded implements EpubReaderCubitState {
-  const _Loaded({required this.book, required final  List<EpubDisplayItem> displayItems, required this.currentChapterIndex, this.currentItemIndex = 0}): _displayItems = displayItems;
+  const _Loaded({required this.book, required final  List<EpubDisplayItem> displayItems, required this.currentChapterIndex, this.currentItemIndex = 0, this.fileHash, final  Map<int, Map<String, String>> translationMaps = const {}, final  Map<int, TranslationStatus> translationStatuses = const {}, this.isBilingual = false}): _displayItems = displayItems,_translationMaps = translationMaps,_translationStatuses = translationStatuses;
   
 
  final  EpubBook book;
@@ -370,6 +370,22 @@ class _Loaded implements EpubReaderCubitState {
 
  final  int currentChapterIndex;
 @JsonKey() final  int currentItemIndex;
+ final  String? fileHash;
+ final  Map<int, Map<String, String>> _translationMaps;
+@JsonKey() Map<int, Map<String, String>> get translationMaps {
+  if (_translationMaps is EqualUnmodifiableMapView) return _translationMaps;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_translationMaps);
+}
+
+ final  Map<int, TranslationStatus> _translationStatuses;
+@JsonKey() Map<int, TranslationStatus> get translationStatuses {
+  if (_translationStatuses is EqualUnmodifiableMapView) return _translationStatuses;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_translationStatuses);
+}
+
+@JsonKey() final  bool isBilingual;
 
 /// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
@@ -381,16 +397,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.book, book) || other.book == book)&&const DeepCollectionEquality().equals(other._displayItems, _displayItems)&&(identical(other.currentChapterIndex, currentChapterIndex) || other.currentChapterIndex == currentChapterIndex)&&(identical(other.currentItemIndex, currentItemIndex) || other.currentItemIndex == currentItemIndex));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.book, book) || other.book == book)&&const DeepCollectionEquality().equals(other._displayItems, _displayItems)&&(identical(other.currentChapterIndex, currentChapterIndex) || other.currentChapterIndex == currentChapterIndex)&&(identical(other.currentItemIndex, currentItemIndex) || other.currentItemIndex == currentItemIndex)&&(identical(other.fileHash, fileHash) || other.fileHash == fileHash)&&const DeepCollectionEquality().equals(other._translationMaps, _translationMaps)&&const DeepCollectionEquality().equals(other._translationStatuses, _translationStatuses)&&(identical(other.isBilingual, isBilingual) || other.isBilingual == isBilingual));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,book,const DeepCollectionEquality().hash(_displayItems),currentChapterIndex,currentItemIndex);
+int get hashCode => Object.hash(runtimeType,book,const DeepCollectionEquality().hash(_displayItems),currentChapterIndex,currentItemIndex,fileHash,const DeepCollectionEquality().hash(_translationMaps),const DeepCollectionEquality().hash(_translationStatuses),isBilingual);
 
 @override
 String toString() {
-  return 'EpubReaderCubitState.loaded(book: $book, displayItems: $displayItems, currentChapterIndex: $currentChapterIndex, currentItemIndex: $currentItemIndex)';
+  return 'EpubReaderCubitState.loaded(book: $book, displayItems: $displayItems, currentChapterIndex: $currentChapterIndex, currentItemIndex: $currentItemIndex, fileHash: $fileHash, translationMaps: $translationMaps, translationStatuses: $translationStatuses, isBilingual: $isBilingual)';
 }
 
 
@@ -401,7 +417,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $EpubReaderCubitStateCopy
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- EpubBook book, List<EpubDisplayItem> displayItems, int currentChapterIndex, int currentItemIndex
+ EpubBook book, List<EpubDisplayItem> displayItems, int currentChapterIndex, int currentItemIndex, String? fileHash, Map<int, Map<String, String>> translationMaps, Map<int, TranslationStatus> translationStatuses, bool isBilingual
 });
 
 
@@ -418,13 +434,17 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of EpubReaderCubitState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? book = null,Object? displayItems = null,Object? currentChapterIndex = null,Object? currentItemIndex = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? book = null,Object? displayItems = null,Object? currentChapterIndex = null,Object? currentItemIndex = null,Object? fileHash = freezed,Object? translationMaps = null,Object? translationStatuses = null,Object? isBilingual = null,}) {
   return _then(_Loaded(
 book: null == book ? _self.book : book // ignore: cast_nullable_to_non_nullable
 as EpubBook,displayItems: null == displayItems ? _self._displayItems : displayItems // ignore: cast_nullable_to_non_nullable
 as List<EpubDisplayItem>,currentChapterIndex: null == currentChapterIndex ? _self.currentChapterIndex : currentChapterIndex // ignore: cast_nullable_to_non_nullable
 as int,currentItemIndex: null == currentItemIndex ? _self.currentItemIndex : currentItemIndex // ignore: cast_nullable_to_non_nullable
-as int,
+as int,fileHash: freezed == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
+as String?,translationMaps: null == translationMaps ? _self._translationMaps : translationMaps // ignore: cast_nullable_to_non_nullable
+as Map<int, Map<String, String>>,translationStatuses: null == translationStatuses ? _self._translationStatuses : translationStatuses // ignore: cast_nullable_to_non_nullable
+as Map<int, TranslationStatus>,isBilingual: null == isBilingual ? _self.isBilingual : isBilingual // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

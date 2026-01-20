@@ -12,6 +12,8 @@ import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_pat
 import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
+import 'package:leafy/domain/translation/usecases/get_translated_chapter.dart';
+import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 
 part 'epub_reader_cubit.freezed.dart';
 part 'epub_reader_cubit_state.dart';
@@ -23,6 +25,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
   final LogReadingSessionByPathUseCase _logSessionUseCase;
   final MarkBookFinishedUseCase _markBookFinishedUseCase;
+  final GetTranslatedChapterUseCase _getTranslatedChapterUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
@@ -48,12 +51,101 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     this._getReaderProgressByPathUseCase,
     this._logSessionUseCase,
     this._markBookFinishedUseCase,
+    this._getTranslatedChapterUseCase,
   ) : super(EpubReaderCubitState.initial());
 
   void selectChapter(int index) {
     state.mapOrNull(
       loaded: (value) {
         emit(value.copyWith(currentChapterIndex: index));
+      },
+    );
+  }
+
+  Future<void> translateChapter(int chapterIndex) async {
+    final loadedState = state.mapOrNull(loaded: (s) => s);
+    if (loadedState == null ||
+        _currentFilePath == null ||
+        loadedState.fileHash == null) {
+      return;
+    }
+
+    // Check if already translating or successful
+    final currentStatus = loadedState.translationStatuses[chapterIndex];
+    if (currentStatus == TranslationStatus.translating ||
+        currentStatus == TranslationStatus.success) {
+      return;
+    }
+
+    // Update Status: Loading
+    final newStatuses = Map<int, TranslationStatus>.from(
+      loadedState.translationStatuses,
+    );
+    newStatuses[chapterIndex] = TranslationStatus.translating;
+    emit(loadedState.copyWith(translationStatuses: newStatuses));
+
+    try {
+      final originalParagraphs = EpubHelper.splitToParagraphs(
+        loadedState.book.chapters[chapterIndex].body,
+      );
+
+      final result = await _getTranslatedChapterUseCase(
+        filePath: _currentFilePath!,
+        chapterIndex: chapterIndex,
+        originalContent: originalParagraphs,
+      );
+
+      result.fold(
+        (failure) {
+          _logger.e('Translate error: $failure');
+          final errorStatuses = Map<int, TranslationStatus>.from(
+            loadedState.translationStatuses,
+          );
+          errorStatuses[chapterIndex] = TranslationStatus.error;
+          emit(loadedState.copyWith(translationStatuses: errorStatuses));
+        },
+        (translation) {
+          final successStatuses = Map<int, TranslationStatus>.from(
+            loadedState.translationStatuses,
+          );
+          successStatuses[chapterIndex] = TranslationStatus.success;
+
+          final newTranslationMaps = Map<int, Map<String, String>>.from(
+            loadedState.translationMaps,
+          );
+          newTranslationMaps[chapterIndex] = translation.translatedContent;
+
+          // Re-flatten to update UI items if bilingual is on or off (data is available now)
+          // Ideally we only re-flatten if we want to show it immediately.
+          // Yes, update display items.
+          final newDisplayItems = EpubHelper.flattenBook(
+            loadedState.book,
+            translationMaps: newTranslationMaps,
+          );
+
+          emit(
+            loadedState.copyWith(
+              translationStatuses: successStatuses,
+              translationMaps: newTranslationMaps,
+              displayItems: newDisplayItems,
+            ),
+          );
+        },
+      );
+    } catch (e) {
+      _logger.e('Unexpected translation error: $e');
+      final errorStatuses = Map<int, TranslationStatus>.from(
+        loadedState.translationStatuses,
+      );
+      errorStatuses[chapterIndex] = TranslationStatus.error;
+      emit(loadedState.copyWith(translationStatuses: errorStatuses));
+    }
+  }
+
+  void toggleBilingualMode() {
+    state.mapOrNull(
+      loaded: (loadedState) {
+        emit(loadedState.copyWith(isBilingual: !loadedState.isBilingual));
       },
     );
   }
@@ -72,6 +164,14 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       },
       (epubBook) async {
         _logger.d('Parsed successfully: ${epubBook.title}');
+
+        // Compute/Get File Hash
+        String? fileHash;
+        try {
+          fileHash = await CryptoUtils.getFileMd5(filePath);
+        } catch (e) {
+          _logger.e('Failed to calculate file hash: $e');
+        }
 
         final flatItems = EpubHelper.flattenBook(epubBook);
 
@@ -101,6 +201,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
             displayItems: flatItems,
             currentChapterIndex: chapterIndex,
             currentItemIndex: savedIndex,
+            fileHash: fileHash,
           ),
         );
 

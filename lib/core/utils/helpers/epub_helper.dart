@@ -12,8 +12,19 @@ class _ImgEntry {
   }
 }
 
-class EpubHelper {
-  static List<EpubDisplayItem> flattenBook(EpubBook book) {
+abstract final class EpubHelper {
+  /// Chuẩn hóa logic tách đoạn văn để dùng chung cho cả UI và Translation Service.
+  /// Điều này đảm bảo index gửi đi dịch và index hiển thị luôn khớp nhau.
+  static List<String> splitToParagraphs(String body) {
+    return body.split('\n\n').where((s) => s.trim().isNotEmpty).toList();
+  }
+
+  /// Chuyển đổi sách thành danh sách hiển thị phẳng.
+  /// [translationMaps]: Map<ChapterIndex, Map<ParagraphIndex (String), TranslatedText>>
+  static List<EpubDisplayItem> flattenBook(
+    EpubBook book, {
+    Map<int, Map<String, String>>? translationMaps,
+  }) {
     final List<EpubDisplayItem> items = [];
 
     for (int i = 0; i < book.chapters.length; i++) {
@@ -24,17 +35,23 @@ class EpubHelper {
         items.add(ChapterHeaderItem(i, chapter.title));
       }
 
-      // 2. Tách body thành các đoạn văn
-      final paragraphs = chapter.body
-          .split('\n\n')
-          .where((s) => s.trim().isNotEmpty);
+      // 2. Tách body thành các đoạn văn sử dụng hàm chuẩn hóa
+      final rawParagraphs = splitToParagraphs(chapter.body);
 
-      for (var para in paragraphs) {
+      // Lấy map dịch của chương hiện tại (nếu có)
+      final chapterTranslation = translationMaps?[i];
+
+      int paragraphIndex = 0;
+      for (var para in rawParagraphs) {
         final imgEntry = _ImgEntry.fromXml(para);
 
         if (imgEntry == null) {
           // Là văn bản
-          items.add(ParagraphItem(i, para, ''));
+          // Tìm bản dịch tương ứng với index hiện tại
+          final translatedText = chapterTranslation?[paragraphIndex.toString()];
+
+          items.add(ParagraphItem(i, para, translatedText));
+          paragraphIndex++; // Chỉ tăng index đếm cho văn bản
         } else {
           // Là hình ảnh -> Tìm bytes trong list images
           final imageEntity = book.images.firstWhereOrNull(

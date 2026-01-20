@@ -567,8 +567,18 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     dynamic data,
     EpubReaderSettingState settings,
   ) {
+    // data comes from loaded() callback, so it has all the fields of the loaded state.
+    // However, since it is passed as dynamic due to freezed internal types, we simply access the properties dynamically
+    // or we could cast it to the specific 'Loaded' interface if it was exported.
+    // For now, dynamic access is safe enough as we know the source.
     final items = data.displayItems as List<EpubDisplayItem>;
     final totalItems = items.length;
+    final int currentChapter = data.currentChapterIndex as int;
+    final Map<int, TranslationStatus> statuses =
+        data.translationStatuses as Map<int, TranslationStatus>;
+    final TranslationStatus translationStatus =
+        statuses[currentChapter] ?? TranslationStatus.initial;
+    final bool isBilingual = data.isBilingual as bool;
 
     return Container(
       color: context.colorScheme.surface,
@@ -581,38 +591,66 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Slider lướt toàn bộ sách
-          if (settings.showProgressBar)
-            ValueListenableBuilder<double>(
-              valueListenable: _chapterProgressNotifier,
-              builder: (context, value, child) {
-                return Column(
+          Row(
+            children: [
+              Expanded(
+                child: Column(
                   children: [
-                    if (settings.progressCountType ==
-                        ProgressCountType.percentage)
-                      Text("${(value * 100).toInt()}%")
-                    else
-                      Text(
-                        "${(value * (totalItems - 1)).toInt() + 1}/$totalItems",
-                      ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      height: 10,
-                      child: Slider(
-                        value: value,
-                        activeColor: Color(
-                          settings.progressBarColor,
-                        ).withValues(alpha: 1.0),
-                        onChanged: (val) {
-                          final targetIndex = (val * totalItems).toInt();
-                          _itemScrollController.jumpTo(index: targetIndex);
+                    if (settings.showProgressBar)
+                      ValueListenableBuilder<double>(
+                        valueListenable: _chapterProgressNotifier,
+                        builder: (context, value, child) {
+                          return Column(
+                            children: [
+                              if (settings.progressCountType ==
+                                  ProgressCountType.percentage)
+                                Text("${(value * 100).toInt()}%")
+                              else
+                                Text(
+                                  "${(value * (totalItems - 1)).toInt() + 1}/$totalItems",
+                                ),
+                              const SizedBox(height: 16),
+                              SizedBox(
+                                height: 10,
+                                child: Slider(
+                                  value: value,
+                                  activeColor: Color(
+                                    settings.progressBarColor,
+                                  ).withValues(alpha: 1.0),
+                                  onChanged: (val) {
+                                    final targetIndex = (val * totalItems)
+                                        .toInt();
+                                    _itemScrollController.jumpTo(
+                                      index: targetIndex,
+                                    );
+                                  },
+                                ),
+                              ),
+                            ],
+                          );
                         },
                       ),
-                    ),
                   ],
-                );
-              },
-            ),
+                ),
+              ),
+              // Bilingual Toggle Button
+              IconButton.filledTonal(
+                tooltip: "Chế độ song ngữ",
+                onPressed: () {
+                  if (translationStatus == TranslationStatus.initial ||
+                      translationStatus == TranslationStatus.error) {
+                    // If not translated yet, trigger translation
+                    context.read<EpubReaderCubit>().translateChapter(
+                      currentChapter,
+                    );
+                  }
+                  context.read<EpubReaderCubit>().toggleBilingualMode();
+                },
+                icon: _buildTranslationIcon(translationStatus, isBilingual),
+              ),
+            ],
+          ),
+
           const SizedBox(height: 18),
 
           // 2. Chèn bộ nút Navigation vừa tạo vào đây
@@ -620,6 +658,25 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
         ],
       ),
     );
+  }
+
+  Widget _buildTranslationIcon(TranslationStatus status, bool isBilingual) {
+    switch (status) {
+      case TranslationStatus.loadingContext:
+      case TranslationStatus.translating:
+      case TranslationStatus.finalizing:
+        return const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        );
+      case TranslationStatus.success:
+        return Icon(Icons.translate, color: isBilingual ? null : Colors.grey);
+      case TranslationStatus.error:
+        return const Icon(Icons.error_outline, color: Colors.red);
+      case TranslationStatus.initial:
+        return const Icon(Icons.translate, color: Colors.grey);
+    }
   }
 
   Widget _buildDrawer(BuildContext context, EpubReaderCubitState state) {
@@ -843,7 +900,19 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return SelectableText.rich(
+    final cubitState = context.watch<EpubReaderCubit>().state;
+    final isBilingual = cubitState.map(
+      initial: (_) => false,
+      loading: (_) => false,
+      error: (_) => false,
+      loaded: (s) => s.isBilingual,
+    );
+
+    final translatedText = widget.item.translatedContent;
+    final hasTranslation = translatedText != null && translatedText.isNotEmpty;
+
+    // Original Text Widget
+    final originalWidget = SelectableText.rich(
       TextSpan(
         children: [
           WidgetSpan(child: SizedBox(width: widget.settings.indent)),
@@ -869,13 +938,14 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
           buttonItems: [
             ...editableTextState.contextMenuButtonItems,
             ContextMenuButtonItem(
-              label: 'Dịch',
+              label: 'Dịch chương này',
               onPressed: () {
                 editableTextState.hideToolbar();
+                context.read<EpubReaderCubit>().translateChapter(
+                  widget.item.chapterIndex,
+                );
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Tính năng dịch đang phát triển'),
-                  ),
+                  const SnackBar(content: Text('Đang bắt đầu dịch chương...')),
                 );
               },
             ),
@@ -883,26 +953,55 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
               label: 'Đọc',
               onPressed: () {
                 editableTextState.hideToolbar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đang đọc đoạn văn...')),
-                );
                 // TODO: Implement TTS here
-              },
-            ),
-            ContextMenuButtonItem(
-              label: 'Highlight',
-              onPressed: () {
-                editableTextState.hideToolbar();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đã highlight đoạn văn')),
-                );
-                // TODO: Implement Highlight logic
               },
             ),
           ],
         );
       },
     );
+
+    if (isBilingual && hasTranslation) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          originalWidget,
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.only(
+              left: 12,
+              right: 8,
+              top: 4,
+              bottom: 4,
+            ),
+            decoration: BoxDecoration(
+              border: Border(
+                left: BorderSide(
+                  color: context.colorScheme.primary.withValues(alpha: 0.5),
+                  width: 3,
+                ),
+              ),
+              color: context.colorScheme.surfaceContainerHighest.withValues(
+                alpha: 0.3,
+              ),
+            ),
+            child: SelectableText(
+              translatedText,
+              style: TextStyle(
+                fontSize: widget.settings.fontSize * 0.9,
+                height: widget.settings.lineHeight,
+                fontFamily: widget.settings.fontFamily,
+                color: context.colorScheme.onSurface,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: widget.settings.textAlignment,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return originalWidget;
   }
 }
 
