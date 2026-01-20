@@ -13,6 +13,7 @@ import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
 import 'package:leafy/domain/translation/usecases/get_translated_chapter.dart';
+import 'package:leafy/domain/translation/usecases/generate_chapter_summary.dart';
 import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 
 part 'epub_reader_cubit.freezed.dart';
@@ -26,6 +27,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final LogReadingSessionByPathUseCase _logSessionUseCase;
   final MarkBookFinishedUseCase _markBookFinishedUseCase;
   final GetTranslatedChapterUseCase _getTranslatedChapterUseCase;
+  final GenerateChapterSummaryUseCase _generateChapterSummaryUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
@@ -52,6 +54,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     this._logSessionUseCase,
     this._markBookFinishedUseCase,
     this._getTranslatedChapterUseCase,
+    this._generateChapterSummaryUseCase,
   ) : super(EpubReaderCubitState.initial());
 
   void selectChapter(int index) {
@@ -59,6 +62,23 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       loaded: (value) {
         emit(value.copyWith(currentChapterIndex: index));
       },
+    );
+  }
+
+  Future<void> _generateSummary(int chapterIndex, String content) async {
+    if (_currentFilePath == null) return;
+
+    _logger.i('Generating summary for chapter $chapterIndex...');
+    final result = await _generateChapterSummaryUseCase(
+      filePath: _currentFilePath!,
+      chapterIndex: chapterIndex,
+      content: content,
+    );
+
+    result.fold(
+      (failure) => _logger.e('Failed to generate summary: $failure'),
+      (summary) =>
+          _logger.i('Summary for chapter $chapterIndex generated and saved.'),
     );
   }
 
@@ -129,6 +149,12 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
               translationMaps: newTranslationMaps,
               displayItems: newDisplayItems,
             ),
+          );
+
+          // Background summarization to build context for future translations
+          _generateSummary(
+            chapterIndex,
+            loadedState.book.chapters[chapterIndex].body,
           );
         },
       );

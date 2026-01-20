@@ -101,6 +101,29 @@ class TranslationRepositoryImpl implements TranslationRepository {
   }
 
   @override
+  Future<Either<Failure, String>> generateAndSaveSummary({
+    required String fileHash,
+    required int chapterIndex,
+    required String content,
+  }) async {
+    try {
+      final summary = await _remoteDataSource.summarizeContent(
+        content: content,
+      );
+
+      await saveSummary(
+        fileHash: fileHash,
+        chapterIndex: chapterIndex,
+        content: summary,
+      );
+
+      return Right(summary);
+    } catch (e) {
+      return Left(Failure.server(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> saveSummary({
     required String fileHash,
     required int chapterIndex,

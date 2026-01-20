@@ -1,4 +1,9 @@
+import 'dart:convert';
+import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/config/app_config.dart';
+import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
+import 'package:logger/logger.dart';
 
 abstract class TranslationRemoteDataSource {
   /// Translates a list of paragraphs.
@@ -15,10 +20,20 @@ abstract class TranslationRemoteDataSource {
 
 @LazySingleton(as: TranslationRemoteDataSource)
 class GeminiTranslationDataSource implements TranslationRemoteDataSource {
-  // TODO: Add Dio or Gemini client injection here
-  // final Dio _dio;
+  final AppConfig _appConfig;
+  final Logger _logger;
 
-  GeminiTranslationDataSource();
+  GeminiTranslationDataSource(this._appConfig, this._logger);
+
+  Future<GoogleAIClient> _getClient() async {
+    final apiKey = await _appConfig.getGeminiApiKey();
+    if (apiKey == null || apiKey.isEmpty) {
+      throw Exception('GEMINI_API_KEY_MISSING');
+    }
+    return GoogleAIClient(
+      config: GoogleAIConfig(authProvider: ApiKeyProvider(apiKey)),
+    );
+  }
 
   @override
   Future<Map<String, String>> translateChapter({
@@ -26,26 +41,72 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
     required String context,
     required String targetLang,
   }) async {
-    // TODO: Implement actual API call to Gemini/OpenAI
-    // Steps:
-    // 1. Construct prompt with System Instruction (Role, Context, JSON requirement)
-    // 2. Format input as Indexed List: [{"i": 0, "t": "..."}]
-    // 3. Call API
-    // 4. Parse JSON output to Map<String, String>
+    try {
+      _logger.i(
+        'Gemini: Starting translation for ${originalParagraphs.length} paragraphs to $targetLang',
+      );
+      final client = await _getClient();
 
-    // Mock implementation for now to unblock Repository
-    await Future.delayed(const Duration(seconds: 2));
-    final mockResult = <String, String>{};
-    for (int i = 0; i < originalParagraphs.length; i++) {
-      mockResult[i.toString()] = '[Dịch] ${originalParagraphs[i]}';
+      final prompt = GeminiPrompts.translateChapter(
+        targetLang: targetLang,
+        context: context,
+        paragraphs: originalParagraphs,
+      );
+
+      _logger.d('Gemini Prompt: $prompt');
+
+      final response = await client.models.generateContent(
+        model: 'gemini-3-flash-preview',
+        request: GenerateContentRequest(
+          contents: [Content.text(prompt)],
+          generationConfig: const GenerationConfig(
+            responseMimeType: 'application/json',
+          ),
+        ),
+      );
+
+      final text = response.text;
+
+      if (text == null) {
+        throw Exception('Empty response from Gemini');
+      }
+
+      _logger.i('Gemini: Translation successful');
+      _logger.d('Gemini Response: $text');
+
+      final Map<String, dynamic> rawMap = jsonDecode(text);
+      return rawMap.map((key, value) => MapEntry(key, value.toString()));
+    } catch (e, stackTrace) {
+      _logger.e('Gemini: Translation failed', error: e, stackTrace: stackTrace);
+      rethrow;
     }
-    return mockResult;
   }
 
   @override
   Future<String> summarizeContent({required String content}) async {
-    // TODO: Implement actual API call
-    await Future.delayed(const Duration(seconds: 1));
-    return 'Bản tóm tắt nội dung...';
+    try {
+      _logger.i('Gemini: Starting content summarization');
+      final client = await _getClient();
+
+      final prompt = GeminiPrompts.summarizeContent(content);
+
+      final response = await client.models.generateContent(
+        model: 'gemini-3-flash-preview',
+        request: GenerateContentRequest(contents: [Content.text(prompt)]),
+      );
+
+      final result = response.text ?? '';
+      _logger.i('Gemini: Summarization successful');
+      _logger.d('Gemini Summary: $result');
+
+      return result;
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Gemini: Summarization failed',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
   }
 }

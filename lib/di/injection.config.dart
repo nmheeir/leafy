@@ -12,6 +12,7 @@
 import 'dart:io' as _i497;
 
 import 'package:dio/dio.dart' as _i361;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:logger/logger.dart' as _i974;
@@ -19,6 +20,7 @@ import 'package:logger/web.dart' as _i120;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
 import 'package:screen_brightness/screen_brightness.dart' as _i108;
 
+import '../core/config/app_config.dart' as _i221;
 import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
@@ -131,6 +133,7 @@ import '../domain/reading_session/usecases/log_reading_session_by_path.dart'
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
+import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
@@ -214,6 +217,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i120.Logger>(() => loggerModule.logger);
     gh.lazySingleton<_i528.PrettyDioLogger>(() => networkModule.logger);
+    gh.lazySingleton<_i558.FlutterSecureStorage>(
+      () => storageModule.secureStorage,
+    );
     gh.lazySingleton<_i361.Dio>(
       () => networkModule.dio(gh<_i528.PrettyDioLogger>()),
     );
@@ -243,9 +249,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i722.EpubReaderLocalDataSource>(
       () => _i722.EpubReaderLocalDataSourceImpl(),
-    );
-    gh.lazySingleton<_i120.TranslationRemoteDataSource>(
-      () => _i120.GeminiTranslationDataSource(),
     );
     gh.lazySingleton<_i689.DeviceLocalDataSource>(
       () => _i689.DeviceLocalDataSourceImpl(gh<_i108.ScreenBrightness>()),
@@ -291,6 +294,9 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1030.ReaderProgressLocalDatasourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.lazySingleton<_i221.AppConfig>(
+      () => _i221.AppConfigImpl(gh<_i558.FlutterSecureStorage>()),
+    );
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
@@ -310,12 +316,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i748.ParseEpubUseCase>(
       () => _i748.ParseEpubUseCase(gh<_i925.EpubReaderRepository>()),
-    );
-    gh.lazySingleton<_i499.TranslationRepository>(
-      () => _i965.TranslationRepositoryImpl(
-        gh<_i890.TranslationLocalDataSource>(),
-        gh<_i120.TranslationRemoteDataSource>(),
-      ),
     );
     gh.lazySingleton<_i429.MetadataExtractionService>(
       () => _i804.MetadataExtractionServiceImpl(
@@ -340,6 +340,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i23.ReaderProgressRepository>(
       () => _i919.ReaderProgressRepositoryImpl(
         gh<_i770.ReaderProgressLocalDatasource>(),
+      ),
+    );
+    gh.lazySingleton<_i120.TranslationRemoteDataSource>(
+      () => _i120.GeminiTranslationDataSource(
+        gh<_i221.AppConfig>(),
+        gh<_i974.Logger>(),
       ),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
@@ -440,10 +446,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i466.DownloadGtdCoverUseCase>(),
       ),
     );
-    gh.lazySingleton<_i533.GetTranslatedChapterUseCase>(
-      () =>
-          _i533.GetTranslatedChapterUseCase(gh<_i499.TranslationRepository>()),
-    );
     gh.lazySingleton<_i47.DeleteBookResourceUseCase>(
       () => _i47.DeleteBookResourceUseCase(gh<_i1042.BookResourceRepository>()),
     );
@@ -455,6 +457,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i623.SaveImportedResourceUseCase>(
       () => _i623.SaveImportedResourceUseCase(
         gh<_i1042.BookResourceRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i499.TranslationRepository>(
+      () => _i965.TranslationRepositoryImpl(
+        gh<_i890.TranslationLocalDataSource>(),
+        gh<_i120.TranslationRemoteDataSource>(),
       ),
     );
     gh.factory<_i845.BookProgressCubit>(
@@ -522,16 +530,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i860.SaveReaderProgress>(
       () => _i860.SaveReaderProgress(gh<_i1042.BookResourceRepository>()),
     );
-    gh.lazySingleton<_i206.EpubReaderCubit>(
-      () => _i206.EpubReaderCubit(
-        gh<_i748.ParseEpubUseCase>(),
-        gh<_i120.Logger>(),
-        gh<_i615.SaveReaderProgressByPathUseCase>(),
-        gh<_i709.GetReaderProgressByPathUseCase>(),
-        gh<_i770.LogReadingSessionByPathUseCase>(),
-        gh<_i838.MarkBookFinishedUseCase>(),
-        gh<_i533.GetTranslatedChapterUseCase>(),
+    gh.lazySingleton<_i431.GenerateChapterSummaryUseCase>(
+      () => _i431.GenerateChapterSummaryUseCase(
+        gh<_i499.TranslationRepository>(),
       ),
+    );
+    gh.lazySingleton<_i533.GetTranslatedChapterUseCase>(
+      () =>
+          _i533.GetTranslatedChapterUseCase(gh<_i499.TranslationRepository>()),
     );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(
@@ -545,6 +551,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
       () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
+    );
+    gh.lazySingleton<_i206.EpubReaderCubit>(
+      () => _i206.EpubReaderCubit(
+        gh<_i748.ParseEpubUseCase>(),
+        gh<_i120.Logger>(),
+        gh<_i615.SaveReaderProgressByPathUseCase>(),
+        gh<_i709.GetReaderProgressByPathUseCase>(),
+        gh<_i770.LogReadingSessionByPathUseCase>(),
+        gh<_i838.MarkBookFinishedUseCase>(),
+        gh<_i533.GetTranslatedChapterUseCase>(),
+        gh<_i431.GenerateChapterSummaryUseCase>(),
+      ),
     );
     gh.factory<_i407.BookResourceCubit>(
       () => _i407.BookResourceCubit(

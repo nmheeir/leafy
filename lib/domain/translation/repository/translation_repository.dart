@@ -17,6 +17,12 @@ abstract class TranslationRepository {
     required int windowSize,
   });
 
+  Future<Either<Failure, String>> generateAndSaveSummary({
+    required String fileHash,
+    required int chapterIndex,
+    required String content,
+  });
+
   Future<Either<Failure, void>> saveSummary({
     required String fileHash,
     required int chapterIndex,
