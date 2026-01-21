@@ -5,6 +5,9 @@ abstract class TranslationRemoteDataSource {
     required List<String> originalParagraphs,
     required String context,
     required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
   });
 
   /// Summarizes a chapter or a range of chapters.

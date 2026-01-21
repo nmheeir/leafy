@@ -1,38 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get_it/get_it.dart';
 import 'package:leafy/logic/cubit/setting_gemini/setting_gemini_cubit.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingGeminiApiScreen extends StatelessWidget {
+class SettingGeminiApiScreen extends StatefulWidget {
   const SettingGeminiApiScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => GetIt.I<SettingGeminiCubit>(),
-      child: const _SettingGeminiApiView(),
-    );
-  }
+  State<SettingGeminiApiScreen> createState() => _SettingGeminiApiScreenState();
 }
 
-class _SettingGeminiApiView extends StatefulWidget {
-  const _SettingGeminiApiView();
-
-  @override
-  State<_SettingGeminiApiView> createState() => _SettingGeminiApiViewState();
-}
-
-class _SettingGeminiApiViewState extends State<_SettingGeminiApiView> {
+class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _isObscure = true;
 
   @override
   void initState() {
     super.initState();
-    // Pre-fill controller with current key from state when widget builds or via listener
-    // But since state might not be emitted immediately, we rely on BlocListener or BlocBuilder
   }
 
   @override

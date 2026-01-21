@@ -9,6 +9,9 @@ abstract class TranslationRepository {
     required int chapterIndex,
     required List<String> originalContent,
     required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
   });
 
   Future<Either<Failure, List<SummaryModel>>> getContextSummaries({

@@ -567,10 +567,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     dynamic data,
     EpubReaderSettingState settings,
   ) {
-    // data comes from loaded() callback, so it has all the fields of the loaded state.
-    // However, since it is passed as dynamic due to freezed internal types, we simply access the properties dynamically
-    // or we could cast it to the specific 'Loaded' interface if it was exported.
-    // For now, dynamic access is safe enough as we know the source.
     final items = data.displayItems as List<EpubDisplayItem>;
     final totalItems = items.length;
     final int currentChapter = data.currentChapterIndex as int;

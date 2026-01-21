@@ -15,6 +15,9 @@ class GetTranslatedChapterUseCase {
     required String filePath, // needed to compute hash
     required int chapterIndex,
     required List<String> originalContent,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
     String targetLang = 'vi',
   }) async {
     // 1. Compute File Hash from filePath (or file content if needed, but path usually implies file identity in this app scope)
@@ -37,6 +40,9 @@ class GetTranslatedChapterUseCase {
         chapterIndex: chapterIndex,
         originalContent: originalContent,
         targetLang: targetLang,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
       );
     } catch (e) {
       return Left(Failure.cache('Could not compute file hash: $e'));

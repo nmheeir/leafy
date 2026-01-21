@@ -28,6 +28,9 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
     required List<String> originalParagraphs,
     required String context,
     required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
   }) async {
     try {
       _logger.i(
@@ -37,7 +40,10 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
 
       final prompt = GeminiPrompts.translateChapter(
         targetLang: targetLang,
-        context: context,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
+        chapterContext: context,
         paragraphs: originalParagraphs,
       );
 
@@ -56,14 +62,14 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
         ),
       );
 
-      final text = response.text;
+      final text = _cleanResponse(response.text ?? '');
 
-      if (text == null) {
+      if (text.isEmpty) {
         throw Exception('Empty response from Gemini');
       }
 
       _logger.i('Gemini: Translation successful');
-      _logger.d('Gemini Response: $text');
+      _logger.d('Gemini Response (cleaned): $text');
 
       final Map<String, dynamic> rawMap = jsonDecode(text);
       return rawMap.map((key, value) => MapEntry(key, value.toString()));
@@ -84,16 +90,19 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
       final model =
           await _appConfig.getSelectedModel() ?? 'gemini-3-flash-preview';
 
+      _logger.d('Gemini Prompt: $prompt, Model: $model');
+
       final response = await client.models.generateContent(
         model: model,
         request: GenerateContentRequest(contents: [Content.text(prompt)]),
       );
 
-      final result = response.text ?? '';
-      _logger.i('Gemini: Summarization successful');
-      _logger.d('Gemini Summary: $result');
+      final text = _cleanResponse(response.text ?? '');
 
-      return result;
+      _logger.i('Gemini: Summarization successful');
+      _logger.d('Gemini Summary: $text');
+
+      return text;
     } catch (e, stackTrace) {
       _logger.e(
         'Gemini: Summarization failed',
@@ -102,5 +111,26 @@ class GeminiTranslationDataSource implements TranslationRemoteDataSource {
       );
       rethrow;
     }
+  }
+
+  String _cleanResponse(String rawResponse) {
+    String result = rawResponse.trim();
+    final RegExp jsonRegex = RegExp(r'\{[\s\S]*\}', multiLine: true);
+
+    final match = jsonRegex.stringMatch(result);
+
+    if (match != null) {
+      return match.trim();
+    }
+
+    // 3. Dự phòng: Nếu không tìm thấy cặp {}, thử xóa Markdown theo cách cũ
+    if (result.startsWith("```json")) {
+      result = result.replaceFirst("```json", "");
+    }
+    if (result.endsWith("```")) {
+      result = result.substring(0, result.length - 3);
+    }
+
+    return result.trim();
   }
 }

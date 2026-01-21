@@ -1,10 +1,12 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
 import 'package:leafy/domain/services/gemini_service.dart';
 
 part 'setting_gemini_state.dart';
+part 'setting_gemini_cubit.freezed.dart';
+part 'setting_gemini_cubit.g.dart';
 
 @injectable
 class SettingGeminiCubit extends HydratedCubit<SettingGeminiState> {
@@ -21,7 +23,6 @@ class SettingGeminiCubit extends HydratedCubit<SettingGeminiState> {
     final selectedModel = await _appConfig.getSelectedModel();
     if (apiKey != null && apiKey.isNotEmpty) {
       emit(state.copyWith(apiKey: apiKey, selectedModel: selectedModel));
-      // Optionally verify/load models if we have a key
       await loadModels(apiKey);
     }
   }
@@ -50,23 +51,35 @@ class SettingGeminiCubit extends HydratedCubit<SettingGeminiState> {
   }
 
   Future<void> selectModel(String model) async {
-    await _appConfig.saveSelectedModel(model);
+    // Optimistic update: Update UI immediately
     emit(state.copyWith(selectedModel: model));
+    try {
+      await _appConfig.saveSelectedModel(model);
+    } catch (e) {
+      // Revert if save fails (optional, or just log)
+      // For now, assuming save failure is rare or acceptable to desync temporarily
+    }
   }
 
   @override
   SettingGeminiState? fromJson(Map<String, dynamic> json) {
-    return SettingGeminiState(
-      availableModels: List<String>.from(json['availableModels'] ?? []),
-      selectedModel: json['selectedModel'],
-    );
+    try {
+      return SettingGeminiState.fromJson(json);
+    } catch (_) {
+      return null;
+    }
   }
 
   @override
   Map<String, dynamic>? toJson(SettingGeminiState state) {
-    return {
-      'availableModels': state.availableModels,
-      'selectedModel': state.selectedModel,
-    };
+    // Only persist potentially necessary fields if needed, or all.
+    // For hydration, we usually want to persist relevant fields.
+    // However, API keys in HydratedBloc (plain text JSON on disk) might be risky?
+    // User already saves API key to SecureStorage in 'AppConfig'.
+    // So here we might only want to persist 'availableModels' or 'selectedModel' for UI cache.
+    // But 'selectedModel' is ALSO in SecureStorage.
+    // Let's stick to using SecureStorage as source of truth for Key and Model.
+    // Hydration here allows checking 'availableModels' immediately on startup.
+    return state.toJson();
   }
 }

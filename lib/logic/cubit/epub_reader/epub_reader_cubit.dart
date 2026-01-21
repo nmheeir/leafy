@@ -113,6 +113,8 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         filePath: _currentFilePath!,
         chapterIndex: chapterIndex,
         originalContent: originalParagraphs,
+        bookTitle: loadedState.book.title,
+        author: loadedState.book.author,
       );
 
       result.fold(
@@ -135,9 +137,6 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           );
           newTranslationMaps[chapterIndex] = translation.translatedContent;
 
-          // Re-flatten to update UI items if bilingual is on or off (data is available now)
-          // Ideally we only re-flatten if we want to show it immediately.
-          // Yes, update display items.
           final newDisplayItems = EpubHelper.flattenBook(
             loadedState.book,
             translationMaps: newTranslationMaps,

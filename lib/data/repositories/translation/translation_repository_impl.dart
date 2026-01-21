@@ -20,6 +20,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
     required int chapterIndex,
     required List<String> originalContent,
     required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
   }) async {
     try {
       // 1. Check Local
@@ -55,6 +58,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
         originalParagraphs: originalContent,
         context: contextString,
         targetLang: targetLang,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
       );
 
       // 4. Save to Local
