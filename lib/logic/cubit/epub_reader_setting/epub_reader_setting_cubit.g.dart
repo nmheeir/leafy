@@ -58,7 +58,7 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   letterSpacing: (json['letterSpacing'] as num?)?.toDouble() ?? 0.0,
   textAlignment:
       $enumDecodeNullable(_$TextAlignEnumMap, json['textAlignment']) ??
-      TextAlign.center,
+      TextAlign.justify,
   chapterAlignment:
       $enumDecodeNullable(_$TextAlignEnumMap, json['chapterAlignment']) ??
       TextAlign.center,

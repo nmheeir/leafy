@@ -30,7 +30,7 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(0.0) double paragraphSpacing,
     @Default(0.0) double indent,
     @Default(0.0) double letterSpacing,
-    @Default(TextAlign.center) TextAlign textAlignment,
+    @Default(TextAlign.justify) TextAlign textAlignment,
     @Default(TextAlign.center) TextAlign chapterAlignment,
     @Default(ProgressCountType.percentage) ProgressCountType progressCountType,
     @Default(true) bool showProgressBar,
