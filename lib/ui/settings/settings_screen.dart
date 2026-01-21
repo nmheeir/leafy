@@ -338,7 +338,7 @@ class SettingsScreen extends StatelessWidget {
     return SettingsTile.navigation(
       title: const Text('Cấu hình Gemini API', style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.psychology_outlined),
-      onPressed: (context) => context.push(Routes.settingGeminiApi),
+      onPressed: (context) => context.push(Routes.settingAiApi),
     );
   }
 

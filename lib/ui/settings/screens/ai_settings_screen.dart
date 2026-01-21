@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/logic/cubit/setting_gemini/setting_gemini_cubit.dart';
+import 'package:leafy/domain/models/ai_provider.dart';
+import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SettingGeminiApiScreen extends StatefulWidget {
-  const SettingGeminiApiScreen({super.key});
+class AISettingsScreen extends StatefulWidget {
+  const AISettingsScreen({super.key});
 
   @override
-  State<SettingGeminiApiScreen> createState() => _SettingGeminiApiScreenState();
+  State<AISettingsScreen> createState() => _AISettingsScreenState();
 }
 
-class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
+class _AISettingsScreenState extends State<AISettingsScreen> {
   final TextEditingController _controller = TextEditingController();
   bool _isObscure = true;
 
   @override
   void initState() {
     super.initState();
+    final state = context.aiSettingsCubit.state;
+    if (state.apiKey != null) {
+      _controller.text = state.apiKey!;
+    }
   }
 
   @override
@@ -28,24 +34,62 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SettingGeminiCubit, SettingGeminiState>(
+    return BlocConsumer<AISettingsCubit, AISettingsState>(
       listener: (context, state) {
         if (state.error != null) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text('Lỗi: ${state.error}')));
         }
-        if (_controller.text.isEmpty && state.apiKey != null) {
+        // Update text controller when apiKey changes (e.g. switching provider)
+        if (state.apiKey != null && _controller.text != state.apiKey) {
           _controller.text = state.apiKey!;
+        } else if (state.apiKey == null) {
+          _controller.text = '';
         }
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Cấu hình Gemini API')),
+          appBar: AppBar(title: const Text('Cấu hình AI')),
           body: state.isLoading && state.availableModels.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : SettingsList(
+                  lightTheme: const SettingsThemeData(
+                    settingsListBackground: Colors.white,
+                  ),
+                  darkTheme: const SettingsThemeData(
+                    settingsListBackground: Colors.black,
+                  ),
                   sections: [
+                    SettingsSection(
+                      title: const Text('Provider'),
+                      tiles: [
+                        CustomSettingsTile(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: DropdownButton<AIProvider>(
+                              value: state.selectedProvider,
+                              isExpanded: true,
+                              items: AIProvider.values.map((provider) {
+                                return DropdownMenuItem(
+                                  value: provider,
+                                  child: Text(provider.name.toUpperCase()),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  context.aiSettingsCubit.setProvider(value);
+                                  _controller.clear();
+                                }
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     SettingsSection(
                       title: const Text('API Key'),
                       tiles: [
@@ -58,9 +102,9 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text(
-                                  'Nhập Gemini API Key của bạn để sử dụng tính năng dịch AI.',
-                                  style: TextStyle(color: Colors.grey),
+                                Text(
+                                  'Nhập ${state.selectedProvider.name.toUpperCase()} API Key của bạn.',
+                                  style: const TextStyle(color: Colors.grey),
                                 ),
                                 const SizedBox(height: 10),
                                 TextField(
@@ -68,7 +112,7 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
                                   obscureText: _isObscure,
                                   decoration: InputDecoration(
                                     border: const OutlineInputBorder(),
-                                    labelText: 'Gemini API Key',
+                                    labelText: 'API Key',
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _isObscure
@@ -88,9 +132,9 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
                                   width: double.infinity,
                                   child: FilledButton.icon(
                                     onPressed: () {
-                                      context
-                                          .read<SettingGeminiCubit>()
-                                          .setApiKey(_controller.text.trim());
+                                      context.aiSettingsCubit.setApiKey(
+                                        _controller.text.trim(),
+                                      );
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
@@ -117,7 +161,7 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
                         tiles: [
                           SettingsTile.navigation(
                             leading: const Icon(Icons.psychology),
-                            title: const Text('Mô hình Gemini'),
+                            title: const Text('Mô hình'),
                             value: Text(state.selectedModel ?? 'Chưa chọn'),
                             onPressed: (context) {
                               _showModelSelectionDialog(context, state);
@@ -128,21 +172,22 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
                     SettingsSection(
                       title: const Text('Hướng dẫn'),
                       tiles: [
-                        SettingsTile.navigation(
-                          leading: const Icon(Icons.help_outline),
-                          title: const Text('Cách lấy API Key'),
-                          description: const Text(
-                            'Truy cập aistudio.google.com để tạo key miễn phí.',
+                        if (state.selectedProvider == AIProvider.gemini)
+                          SettingsTile.navigation(
+                            leading: const Icon(Icons.help_outline),
+                            title: const Text('Cách lấy API Key'),
+                            description: const Text(
+                              'Truy cập aistudio.google.com để tạo key miễn phí.',
+                            ),
+                            onPressed: (context) {
+                              launchUrl(
+                                Uri.parse(
+                                  'https://aistudio.google.com/app/apikey',
+                                ),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            },
                           ),
-                          onPressed: (context) {
-                            launchUrl(
-                              Uri.parse(
-                                'https://aistudio.google.com/app/apikey',
-                              ),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                        ),
                       ],
                     ),
                   ],
@@ -152,10 +197,7 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
     );
   }
 
-  void _showModelSelectionDialog(
-    BuildContext context,
-    SettingGeminiState state,
-  ) {
+  void _showModelSelectionDialog(BuildContext context, AISettingsState state) {
     showDialog(
       context: context,
       builder: (context) {
@@ -164,7 +206,7 @@ class _SettingGeminiApiScreenState extends State<SettingGeminiApiScreen> {
           children: state.availableModels.map((model) {
             return SimpleDialogOption(
               onPressed: () {
-                context.read<SettingGeminiCubit>().selectModel(model);
+                context.aiSettingsCubit.selectModel(model);
                 Navigator.pop(context);
               },
               child: Row(

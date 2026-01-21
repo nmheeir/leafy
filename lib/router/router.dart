@@ -4,13 +4,13 @@ import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
 import 'package:leafy/ui/search_gtd/search_gtd_screen.dart';
 import 'package:leafy/ui/search_ol/search_ol_screen.dart';
+import 'package:leafy/ui/settings/screens/ai_settings_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_accent_color_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_default_book_tag_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_download_mission_cover_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_epub_reader_screen.dart';
-import 'package:leafy/ui/settings/screens/setting_gemini_api_screen.dart';
 import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
 import 'package:leafy/ui/trash_screen/trash_screen.dart';
@@ -64,12 +64,12 @@ GoRouter router() => GoRouter(
       builder: (context, state) => SettingDefaultBookTagScreen(),
     ),
     GoRoute(
-      path: Routes.settingGeminiApi,
-      builder: (context, state) => SettingGeminiApiScreen(),
-    ),
-    GoRoute(
       path: Routes.searchGutendex,
       builder: (context, state) => SearchGtdScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingAiApi,
+      builder: (context, state) => AISettingsScreen(),
     ),
   ],
   // redirect: (context, state) {

@@ -18,11 +18,25 @@ class GenerateChapterSummaryUseCase {
     try {
       final fileHash = await CryptoUtils.getFileMd5(filePath);
 
-      return await _repository.generateAndSaveSummary(
+      // Check cache first
+      final existingResult = await _repository.getChapterSummary(
         fileHash: fileHash,
         chapterIndex: chapterIndex,
-        content: content,
       );
+
+      return existingResult.fold((failure) => Left(failure), (
+        summaryModel,
+      ) async {
+        if (summaryModel != null) {
+          return Right(summaryModel.summaryContent);
+        }
+        // Not found, generate
+        return await _repository.generateAndSaveSummary(
+          fileHash: fileHash,
+          chapterIndex: chapterIndex,
+          content: content,
+        );
+      });
     } catch (e) {
       return Left(Failure.cache('Could not compute file hash: $e'));
     }

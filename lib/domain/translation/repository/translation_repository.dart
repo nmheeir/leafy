@@ -14,6 +14,11 @@ abstract class TranslationRepository {
     String? bookSummary,
   });
 
+  Future<Either<Failure, SummaryModel?>> getChapterSummary({
+    required String fileHash,
+    required int chapterIndex,
+  });
+
   Future<Either<Failure, List<SummaryModel>>> getContextSummaries({
     required String fileHash,
     required int currentChapterIndex,

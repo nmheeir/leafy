@@ -33,7 +33,7 @@ import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
-import 'package:leafy/logic/cubit/setting_gemini/setting_gemini_cubit.dart';
+import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -92,7 +92,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<BookResourceCubit>()),
       BlocProvider(create: (context) => getIt<BookProgressCubit>()),
       BlocProvider(create: (context) => getIt<EpubReaderSettingCubit>()),
-      BlocProvider(create: (context) => getIt<SettingGeminiCubit>()),
+      BlocProvider(create: (context) => getIt<AISettingsCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

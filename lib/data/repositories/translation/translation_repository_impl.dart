@@ -15,6 +15,26 @@ class TranslationRepositoryImpl implements TranslationRepository {
   TranslationRepositoryImpl(this._localDataSource, this._remoteDataSource);
 
   @override
+  Future<Either<Failure, SummaryModel?>> getChapterSummary({
+    required String fileHash,
+    required int chapterIndex,
+  }) async {
+    try {
+      final summaries = await _localDataSource.getSummaries(
+        fileHash,
+        chapterIndex,
+        chapterIndex,
+      );
+      if (summaries.isNotEmpty) {
+        return Right(summaries.first);
+      }
+      return const Right(null);
+    } catch (e) {
+      return Left(Failure.cache(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, TranslationModel>> getTranslatedChapter({
     required String fileHash,
     required int chapterIndex,

@@ -6,12 +6,13 @@ import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:logger/logger.dart';
 
-@LazySingleton(as: TranslationRemoteDataSource)
-class GeminiTranslationDataSource implements TranslationRemoteDataSource {
+@Named('gemini')
+@Injectable(as: TranslationRemoteDataSource)
+class GeminiRemoteDataSource implements TranslationRemoteDataSource {
   final AppConfig _appConfig;
   final Logger _logger;
 
-  GeminiTranslationDataSource(this._appConfig, this._logger);
+  GeminiRemoteDataSource(this._appConfig, this._logger);
 
   Future<GoogleAIClient> _getClient() async {
     final apiKey = await _appConfig.getGeminiApiKey();

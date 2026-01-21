@@ -49,6 +49,8 @@ import '../data/datasources/remote/gutendex_remote_datasource/gutendex_remote_da
 import '../data/datasources/remote/network_file_datasource.dart' as _i798;
 import '../data/datasources/remote/network_file_datasource_impl.dart' as _i643;
 import '../data/datasources/remote/ol_remote_data_source.dart' as _i715;
+import '../data/datasources/remote/smart_translation_remote_datasource.dart'
+    as _i434;
 import '../data/datasources/remote/translation_remote_datasource.dart' as _i120;
 import '../data/file_import/services/file_picker_service_impl.dart' as _i328;
 import '../data/file_import/services/file_processing_service_impl.dart'
@@ -145,6 +147,7 @@ import '../logic/bloc/search_gtd/search_gtd_bloc.dart' as _i641;
 import '../logic/bloc/sort_bloc/sort_bloc.dart' as _i713;
 import '../logic/bloc/stats_bloc/stats_bloc.dart' as _i780;
 import '../logic/bloc/theme/theme_bloc.dart' as _i774;
+import '../logic/cubit/ai_settings/ai_settings_cubit.dart' as _i526;
 import '../logic/cubit/book_actor/book_actor_cubit.dart' as _i607;
 import '../logic/cubit/book_detail/book_detail_cubit.dart' as _i23;
 import '../logic/cubit/book_editor_action/book_editor_action_cubit.dart'
@@ -164,7 +167,6 @@ import '../logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart'
     as _i1059;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
-import '../logic/cubit/setting_gemini/setting_gemini_cubit.dart' as _i794;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
 import 'module/device_module.dart' as _i195;
 import 'module/logger_module.dart' as _i454;
@@ -309,8 +311,8 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i13.ReadingSessionLocalDatasource>(),
       ),
     );
-    gh.factory<_i794.SettingGeminiCubit>(
-      () => _i794.SettingGeminiCubit(
+    gh.factory<_i526.AISettingsCubit>(
+      () => _i526.AISettingsCubit(
         gh<_i221.AppConfig>(),
         gh<_i1052.GeminiService>(),
       ),
@@ -347,11 +349,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i750.GtdGetBooksUseCase>(
       () => _i750.GtdGetBooksUseCase(gh<_i844.GutendexRepository>()),
     );
-    gh.lazySingleton<_i120.TranslationRemoteDataSource>(
-      () => _i46.GeminiTranslationDataSource(
+    gh.factory<_i120.TranslationRemoteDataSource>(
+      () => _i46.GeminiRemoteDataSource(
         gh<_i221.AppConfig>(),
         gh<_i974.Logger>(),
       ),
+      instanceName: 'gemini',
     );
     gh.lazySingleton<_i23.ReaderProgressRepository>(
       () => _i919.ReaderProgressRepositoryImpl(
@@ -444,6 +447,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
         gh<_i679.GetDeletedBooksUseCase>(),
         gh<_i675.RestoreBookUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i120.TranslationRemoteDataSource>(
+      () => _i434.SmartTranslationRemoteDataSource(
+        gh<_i221.AppConfig>(),
+        gh<_i120.TranslationRemoteDataSource>(instanceName: 'gemini'),
       ),
     );
     gh.factory<_i641.SearchGtdBloc>(
