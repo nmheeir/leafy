@@ -296,6 +296,8 @@ abstract class  LocaleKeys {
   static const error_no_error_return = 'error.no_error_return';
   static const error_database = 'error.database';
   static const error_not_found = 'error.not_found';
+  static const error_permission = 'error.permission';
+  static const error_rate_limit = 'error.rate_limit';
   static const error = 'error';
   static const epub_reader_title = 'epub_reader.title';
   static const epub_reader_description = 'epub_reader.description';

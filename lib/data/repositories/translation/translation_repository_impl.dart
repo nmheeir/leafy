@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/local/translation_local_datasource.dart';
@@ -45,7 +46,6 @@ class TranslationRepositoryImpl implements TranslationRepository {
     String? bookSummary,
   }) async {
     try {
-      // 1. Check Local
       final local = await _localDataSource.getTranslation(
         fileHash,
         chapterIndex,
@@ -56,14 +56,6 @@ class TranslationRepositoryImpl implements TranslationRepository {
         return Right(local);
       }
 
-      // 2. Prepare Context (This should usually be passed in or handled by logic,
-      // but for simple repo flow, we might fetch it here or assume caller handles it.
-      // For now, let's fetch a minimal context or empty string if not provided in args.
-      // *Wait, repo usually doesn't decide context logic strategy, UseCase does.*
-      // But to call remote, we need context. Let's assume UseCase calls `getContextSummaries` first
-      // and passes the context string? No, the signature of this method doesn't have `context`.
-      // Let's internally fetch context.
-
       final contextSummaries = await _localDataSource.getSummaries(
         fileHash,
         (chapterIndex - 5).clamp(1, chapterIndex),
@@ -73,7 +65,6 @@ class TranslationRepositoryImpl implements TranslationRepository {
           .map((s) => s.summaryContent)
           .join('\n');
 
-      // 3. Call Remote
       final translatedMap = await _remoteDataSource.translateChapter(
         originalParagraphs: originalContent,
         context: contextString,
@@ -83,7 +74,6 @@ class TranslationRepositoryImpl implements TranslationRepository {
         bookSummary: bookSummary,
       );
 
-      // 4. Save to Local
       final newTranslation = TranslationModel(
         fileHash: fileHash,
         chapterIndex: chapterIndex,
@@ -95,7 +85,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
       await _localDataSource.saveTranslation(newTranslation);
 
       return Right(newTranslation);
-    } catch (e) {
+    } on RateLimitException catch (e) {
+      return Left(Failure.rateLimit(e.toString()));
+    } on Exception catch (e) {
       return Left(Failure.server(e.toString()));
     }
   }
@@ -121,7 +113,9 @@ class TranslationRepositoryImpl implements TranslationRepository {
         end,
       );
       return Right(summaries);
-    } catch (e) {
+    } on RateLimitException catch (e) {
+      return Left(Failure.rateLimit(e.toString()));
+    } on Exception catch (e) {
       return Left(Failure.cache(e.toString()));
     }
   }

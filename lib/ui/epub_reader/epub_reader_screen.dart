@@ -372,76 +372,66 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                       ? Colors.white
                       : null, // Base color
                   drawer: _buildDrawer(context, epubState),
-                  body: SafeArea(
-                    top: !settingState.cutoutMargin,
-                    bottom: !settingState.cutoutMargin,
-                    left: !settingState.cutoutMargin,
-                    right: !settingState.cutoutMargin,
-                    child: Listener(
-                      onPointerDown: (_) =>
-                          context.epubReaderCubit.onUserInteraction(),
-                      child: Stack(
-                        children: [
-                          // Main Content
-                          epubState.map(
-                            initial: (_) => const SizedBox.shrink(),
-                            loading: (data) => _buildLoading(data.progress),
-                            error: (data) => _buildError(data.message),
-                            loaded: (data) {
-                              _totalDisplayItems = data.displayItems.length;
-                              return Positioned.fill(
-                                child: GestureDetector(
-                                  onHorizontalDragEnd: (details) =>
-                                      _handleHorizontalDrag(
-                                        details,
-                                        settingState.horizontalGestureMode,
-                                      ),
-                                  onDoubleTap: settingState.doubleTapTranslate
-                                      ? () {
-                                          // Toggle translate or similar action
-                                        }
-                                      : null,
-                                  child: _buildContinuousReaderBody(
-                                    context,
-                                    data.displayItems,
-                                    data.currentItemIndex,
-                                    settingState,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
 
-                          Positioned(
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            child: SizeTransition(
-                              sizeFactor: _controlsAnimController,
-                              axisAlignment: -1.0,
-                              child: _buildTopBar(context, epubState),
-                            ),
-                          ),
-
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: SizeTransition(
-                              sizeFactor: _controlsAnimController,
-                              axisAlignment: 1.0,
-                              child: epubState.maybeMap(
-                                loaded: (data) => _buildBottomControlBar(
-                                  context,
-                                  data,
-                                  settingState,
-                                ),
-                                orElse: () => const SizedBox(),
-                              ),
-                            ),
-                          ),
-                        ],
+                  extendBodyBehindAppBar: true,
+                  extendBody: true,
+                  appBar: PreferredSize(
+                    preferredSize: const Size.fromHeight(64),
+                    child: SizeTransition(
+                      sizeFactor: _controlsAnimController,
+                      axisAlignment: -1.0,
+                      child: epubState.maybeMap(
+                        loaded: (data) => _buildTopBar(
+                          context,
+                          epubState,
+                          data,
+                          settingState,
+                        ),
+                        orElse: () => AppBar(
+                          backgroundColor: Colors.transparent,
+                          toolbarHeight: 0,
+                          elevation: 0,
+                        ),
                       ),
+                    ),
+                  ),
+                  bottomNavigationBar: SizeTransition(
+                    sizeFactor: _controlsAnimController,
+                    axisAlignment: 1.0,
+                    child: epubState.maybeMap(
+                      loaded: (data) =>
+                          _buildBottomControlBar(context, data, settingState),
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                  ),
+                  body: Listener(
+                    onPointerDown: (_) =>
+                        context.epubReaderCubit.onUserInteraction(),
+                    child: epubState.map(
+                      initial: (_) => const SizedBox.shrink(),
+                      loading: (data) => _buildLoading(data.progress),
+                      error: (data) => _buildError(data.message),
+                      loaded: (data) {
+                        _totalDisplayItems = data.displayItems.length;
+                        return GestureDetector(
+                          onHorizontalDragEnd: (details) =>
+                              _handleHorizontalDrag(
+                                details,
+                                settingState.horizontalGestureMode,
+                              ),
+                          onDoubleTap: settingState.doubleTapTranslate
+                              ? () {
+                                  // Toggle translate or similar action
+                                }
+                              : null,
+                          child: _buildContinuousReaderBody(
+                            context,
+                            data.displayItems,
+                            data.currentItemIndex,
+                            settingState,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -468,97 +458,121 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           horizontal: settings.sideMargin,
           vertical: settings.verticalMargin,
         ),
-        child: ScrollablePositionedList.builder(
-          initialScrollIndex: initialIndex,
-          itemCount: items.length,
-          itemScrollController: _itemScrollController,
-          itemPositionsListener: _itemPositionsListener,
+        child: SafeArea(
+          child: SelectionArea(
+            child: ScrollablePositionedList.builder(
+              initialScrollIndex: initialIndex,
+              itemCount: items.length,
+              itemScrollController: _itemScrollController,
+              itemPositionsListener: _itemPositionsListener,
 
-          // padding: const EdgeInsets.symmetric(vertical: 24), // Use container padding instead
-          itemBuilder: (context, index) {
-            final item = items[index];
+              itemBuilder: (context, index) {
+                final item = items[index];
 
-            // A. Xây dựng Widget chính (Nội dung)
-            Widget content;
-            if (item is ChapterHeaderItem) {
-              content = _ChapterHeaderItemWidget(
-                item: item,
-                settings: settings,
-              );
-            } else if (item is ParagraphItem) {
-              content = _ParagraphItemWidget(
-                item: item,
-                settings: settings,
-                onTap: _toggleControls,
-              );
-            } else if (item is ImageItem) {
-              content = _ImageItemWidget(item: item, settings: settings);
-            } else {
-              content = const SizedBox.shrink();
-            }
+                Widget content;
+                if (item is ChapterHeaderItem) {
+                  content = _ChapterHeaderItemWidget(
+                    item: item,
+                    settings: settings,
+                  );
+                } else if (item is ParagraphItem) {
+                  content = _ParagraphItemWidget(
+                    item: item,
+                    settings: settings,
+                    onTap: _toggleControls,
+                  );
+                } else if (item is ImageItem) {
+                  content = _ImageItemWidget(item: item, settings: settings);
+                } else {
+                  content = const SizedBox.shrink();
+                }
 
-            // B. Xây dựng Separator (Đường kẻ) ngay bên trong Item
-            Widget bottomSpacing = const SizedBox.shrink();
+                Widget bottomSpacing = const SizedBox.shrink();
 
-            // Kiểm tra xem có phải phần tử cuối cùng không
-            if (index < items.length - 1) {
-              final nextItem = items[index + 1];
-              final isEndOfChapter = item.chapterIndex != nextItem.chapterIndex;
+                if (index < items.length - 1) {
+                  final nextItem = items[index + 1];
+                  final isEndOfChapter =
+                      item.chapterIndex != nextItem.chapterIndex;
 
-              bottomSpacing = _EpubItemSeparator(
-                isEndOfChapter: isEndOfChapter,
-                nextChapterIndex: item.chapterIndex + 1,
-                settings: settings,
-              );
-            }
+                  bottomSpacing = _EpubItemSeparator(
+                    isEndOfChapter: isEndOfChapter,
+                    nextChapterIndex: item.chapterIndex + 1,
+                    settings: settings,
+                  );
+                }
 
-            // C. Gộp Content và Spacing vào 1 Column duy nhất
-            // Điều này giúp ScrollablePositionedList tính toán layout dễ hơn hẳn
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [content, bottomSpacing],
-            );
-          },
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [content, bottomSpacing],
+                );
+              },
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTopBar(BuildContext context, EpubReaderCubitState state) {
-    return Container(
-      color: context.colorScheme.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).maybePop(),
-          ),
-          Expanded(
-            child: state.maybeMap(
-              loaded: (data) => Text(
-                data.book.title,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
-              ),
-              orElse: () => const Text(""),
-            ),
-          ),
-          IconButton(
-            tooltip: "Mục lục",
-            icon: const Icon(Icons.format_list_bulleted),
-            onPressed: () {
-              _scaffoldKey.currentState?.openDrawer();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              EpubReaderSettingsSheet.show(context);
-            },
-          ),
-        ],
+  Widget _buildTopBar(
+    BuildContext context,
+    EpubReaderCubitState state,
+    dynamic data,
+    EpubReaderSettingState settings,
+  ) {
+    final int currentChapter = data.currentChapterIndex as int;
+    final Map<int, TranslationStatus> statuses =
+        data.translationStatuses as Map<int, TranslationStatus>;
+    final TranslationStatus translationStatus =
+        statuses[currentChapter] ?? TranslationStatus.initial;
+    final bool isBilingual = data.isBilingual as bool;
+    return AppBar(
+      automaticallyImplyLeading: false,
+      backgroundColor: context.colorScheme.surface,
+      scrolledUnderElevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => Navigator.of(context).maybePop(),
       ),
+      title: Text(
+        data.book.title,
+        style: const TextStyle(fontWeight: FontWeight.bold),
+        overflow: TextOverflow.ellipsis,
+      ),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child:
+            (translationStatus == TranslationStatus.loadingContext ||
+                translationStatus == TranslationStatus.translating ||
+                translationStatus == TranslationStatus.finalizing)
+            ? LinearProgressIndicator(color: context.colorScheme.primary)
+            : const SizedBox.shrink(),
+      ),
+      actions: [
+        IconButton(
+          tooltip: "Chế độ song ngữ",
+          onPressed: () {
+            if (translationStatus == TranslationStatus.initial ||
+                translationStatus == TranslationStatus.error) {
+              context.epubReaderCubit.translateChapter(currentChapter);
+            }
+            context.epubReaderCubit.toggleBilingualMode();
+          },
+          icon: _buildTranslationIcon(translationStatus, isBilingual),
+        ),
+        IconButton(
+          tooltip: "Mục lục",
+          icon: const Icon(Icons.format_list_bulleted),
+          onPressed: () {
+            _scaffoldKey.currentState?.openDrawer();
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.settings),
+          onPressed: () {
+            EpubReaderSettingsSheet.show(context);
+          },
+        ),
+      ],
     );
   }
 
@@ -569,12 +583,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
   ) {
     final items = data.displayItems as List<EpubDisplayItem>;
     final totalItems = items.length;
-    final int currentChapter = data.currentChapterIndex as int;
-    final Map<int, TranslationStatus> statuses =
-        data.translationStatuses as Map<int, TranslationStatus>;
-    final TranslationStatus translationStatus =
-        statuses[currentChapter] ?? TranslationStatus.initial;
-    final bool isBilingual = data.isBilingual as bool;
 
     return Container(
       color: context.colorScheme.surface,
@@ -587,63 +595,39 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
+          Column(
             children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    if (settings.showProgressBar)
-                      ValueListenableBuilder<double>(
-                        valueListenable: _chapterProgressNotifier,
-                        builder: (context, value, child) {
-                          return Column(
-                            children: [
-                              if (settings.progressCountType ==
-                                  ProgressCountType.percentage)
-                                Text("${(value * 100).toInt()}%")
-                              else
-                                Text(
-                                  "${(value * (totalItems - 1)).toInt() + 1}/$totalItems",
-                                ),
-                              const SizedBox(height: 16),
-                              SizedBox(
-                                height: 10,
-                                child: Slider(
-                                  value: value,
-                                  activeColor: Color(
-                                    settings.progressBarColor,
-                                  ).withValues(alpha: 1.0),
-                                  onChanged: (val) {
-                                    final targetIndex = (val * totalItems)
-                                        .toInt();
-                                    _itemScrollController.jumpTo(
-                                      index: targetIndex,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                  ],
-                ),
-              ),
-              // Bilingual Toggle Button
-              IconButton.filledTonal(
-                tooltip: "Chế độ song ngữ",
-                onPressed: () {
-                  if (translationStatus == TranslationStatus.initial ||
-                      translationStatus == TranslationStatus.error) {
-                    // If not translated yet, trigger translation
-                    context.read<EpubReaderCubit>().translateChapter(
-                      currentChapter,
+              if (settings.showProgressBar)
+                ValueListenableBuilder<double>(
+                  valueListenable: _chapterProgressNotifier,
+                  builder: (context, value, child) {
+                    return Column(
+                      children: [
+                        if (settings.progressCountType ==
+                            ProgressCountType.percentage)
+                          Text("${(value * 100).toInt()}%")
+                        else
+                          Text(
+                            "${(value * (totalItems - 1)).toInt() + 1}/$totalItems",
+                          ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 10,
+                          child: Slider(
+                            value: value,
+                            activeColor: Color(
+                              settings.progressBarColor,
+                            ).withValues(alpha: 1.0),
+                            onChanged: (val) {
+                              final targetIndex = (val * totalItems).toInt();
+                              _itemScrollController.jumpTo(index: targetIndex);
+                            },
+                          ),
+                        ),
+                      ],
                     );
-                  }
-                  context.read<EpubReaderCubit>().toggleBilingualMode();
-                },
-                icon: _buildTranslationIcon(translationStatus, isBilingual),
-              ),
+                  },
+                ),
             ],
           ),
 
@@ -671,7 +655,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       case TranslationStatus.error:
         return const Icon(Icons.error_outline, color: Colors.red);
       case TranslationStatus.initial:
-        return const Icon(Icons.translate, color: Colors.grey);
+        return const Icon(Icons.translate);
     }
   }
 
@@ -691,7 +675,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               currentAccountPicture: data.book.coverImage != null
                   ? Image.memory(data.book.coverImage!, fit: BoxFit.cover)
                   : const CircleAvatar(child: Icon(Icons.book)),
-              //NOTE: background nên dùng blurhash của ảnh bìa cuốn sách cho đep
               decoration: BoxDecoration(
                 color: context.colorScheme.primaryContainer,
               ),
@@ -908,53 +891,28 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
     final hasTranslation = translatedText != null && translatedText.isNotEmpty;
 
     // Original Text Widget
-    final originalWidget = SelectableText.rich(
-      TextSpan(
-        children: [
-          WidgetSpan(child: SizedBox(width: widget.settings.indent)),
-          TextSpan(
-            text: widget.item.content,
-            style: TextStyle(
-              fontSize: widget.settings.fontSize,
-              height: widget.settings.lineHeight,
-              fontFamily: widget.settings.fontFamily,
-              fontStyle: widget.settings.fontStyle,
-              fontWeight: widget.settings.fontThickness.weight,
-              letterSpacing: widget.settings.letterSpacing,
-              color: context.colorScheme.onSurface.withValues(alpha: 0.9),
-            ),
-          ),
-        ],
-      ),
-      textAlign: widget.settings.textAlignment,
+    final originalWidget = GestureDetector(
       onTap: widget.onTap,
-      contextMenuBuilder: (context, editableTextState) {
-        return AdaptiveTextSelectionToolbar.buttonItems(
-          anchors: editableTextState.contextMenuAnchors,
-          buttonItems: [
-            ...editableTextState.contextMenuButtonItems,
-            ContextMenuButtonItem(
-              label: 'Dịch chương này',
-              onPressed: () {
-                editableTextState.hideToolbar();
-                context.read<EpubReaderCubit>().translateChapter(
-                  widget.item.chapterIndex,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Đang bắt đầu dịch chương...')),
-                );
-              },
-            ),
-            ContextMenuButtonItem(
-              label: 'Đọc',
-              onPressed: () {
-                editableTextState.hideToolbar();
-                // TODO: Implement TTS here
-              },
+      child: Text.rich(
+        TextSpan(
+          children: [
+            WidgetSpan(child: SizedBox(width: widget.settings.indent * 2)),
+            TextSpan(
+              text: widget.item.content,
+              style: TextStyle(
+                fontSize: widget.settings.fontSize,
+                height: widget.settings.lineHeight,
+                fontFamily: widget.settings.fontFamily,
+                fontStyle: widget.settings.fontStyle,
+                fontWeight: widget.settings.fontThickness.weight,
+                letterSpacing: widget.settings.letterSpacing,
+                color: context.colorScheme.onSurface.withValues(alpha: 0.9),
+              ),
             ),
           ],
-        );
-      },
+        ),
+        textAlign: widget.settings.textAlignment,
+      ),
     );
 
     if (isBilingual && hasTranslation) {
@@ -981,7 +939,7 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
                 alpha: 0.3,
               ),
             ),
-            child: SelectableText(
+            child: Text(
               translatedText,
               style: TextStyle(
                 fontSize: widget.settings.fontSize * 0.9,

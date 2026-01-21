@@ -86,7 +86,7 @@ extension FailurePatterns on Failure {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerFailure value)?  server,TResult Function( _ConnectionFailure value)?  connection,TResult Function( _CacheFailure value)?  cache,TResult Function( _DatabaseFailure value)?  database,TResult Function( _UnexpectedFailure value)?  unexpected,TResult Function( _NotFoundFailure value)?  notFound,TResult Function( _ParseFailure value)?  parse,TResult Function( _PermissionFailure value)?  permission,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _ServerFailure value)?  server,TResult Function( _ConnectionFailure value)?  connection,TResult Function( _CacheFailure value)?  cache,TResult Function( _DatabaseFailure value)?  database,TResult Function( _UnexpectedFailure value)?  unexpected,TResult Function( _NotFoundFailure value)?  notFound,TResult Function( _ParseFailure value)?  parse,TResult Function( _PermissionFailure value)?  permission,TResult Function( _RateLimitFailure value)?  rateLimit,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
@@ -97,7 +97,8 @@ return database(_that);case _UnexpectedFailure() when unexpected != null:
 return unexpected(_that);case _NotFoundFailure() when notFound != null:
 return notFound(_that);case _ParseFailure() when parse != null:
 return parse(_that);case _PermissionFailure() when permission != null:
-return permission(_that);case _:
+return permission(_that);case _RateLimitFailure() when rateLimit != null:
+return rateLimit(_that);case _:
   return orElse();
 
 }
@@ -115,7 +116,7 @@ return permission(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerFailure value)  server,required TResult Function( _ConnectionFailure value)  connection,required TResult Function( _CacheFailure value)  cache,required TResult Function( _DatabaseFailure value)  database,required TResult Function( _UnexpectedFailure value)  unexpected,required TResult Function( _NotFoundFailure value)  notFound,required TResult Function( _ParseFailure value)  parse,required TResult Function( _PermissionFailure value)  permission,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _ServerFailure value)  server,required TResult Function( _ConnectionFailure value)  connection,required TResult Function( _CacheFailure value)  cache,required TResult Function( _DatabaseFailure value)  database,required TResult Function( _UnexpectedFailure value)  unexpected,required TResult Function( _NotFoundFailure value)  notFound,required TResult Function( _ParseFailure value)  parse,required TResult Function( _PermissionFailure value)  permission,required TResult Function( _RateLimitFailure value)  rateLimit,}){
 final _that = this;
 switch (_that) {
 case _ServerFailure():
@@ -126,7 +127,8 @@ return database(_that);case _UnexpectedFailure():
 return unexpected(_that);case _NotFoundFailure():
 return notFound(_that);case _ParseFailure():
 return parse(_that);case _PermissionFailure():
-return permission(_that);case _:
+return permission(_that);case _RateLimitFailure():
+return rateLimit(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -143,7 +145,7 @@ return permission(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerFailure value)?  server,TResult? Function( _ConnectionFailure value)?  connection,TResult? Function( _CacheFailure value)?  cache,TResult? Function( _DatabaseFailure value)?  database,TResult? Function( _UnexpectedFailure value)?  unexpected,TResult? Function( _NotFoundFailure value)?  notFound,TResult? Function( _ParseFailure value)?  parse,TResult? Function( _PermissionFailure value)?  permission,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _ServerFailure value)?  server,TResult? Function( _ConnectionFailure value)?  connection,TResult? Function( _CacheFailure value)?  cache,TResult? Function( _DatabaseFailure value)?  database,TResult? Function( _UnexpectedFailure value)?  unexpected,TResult? Function( _NotFoundFailure value)?  notFound,TResult? Function( _ParseFailure value)?  parse,TResult? Function( _PermissionFailure value)?  permission,TResult? Function( _RateLimitFailure value)?  rateLimit,}){
 final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
@@ -154,7 +156,8 @@ return database(_that);case _UnexpectedFailure() when unexpected != null:
 return unexpected(_that);case _NotFoundFailure() when notFound != null:
 return notFound(_that);case _ParseFailure() when parse != null:
 return parse(_that);case _PermissionFailure() when permission != null:
-return permission(_that);case _:
+return permission(_that);case _RateLimitFailure() when rateLimit != null:
+return rateLimit(_that);case _:
   return null;
 
 }
@@ -171,7 +174,7 @@ return permission(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? message)?  server,TResult Function( String? message)?  connection,TResult Function( String? message)?  cache,TResult Function( String? message)?  database,TResult Function( String? message)?  unexpected,TResult Function( String? message)?  notFound,TResult Function( String? message)?  parse,TResult Function( String? message)?  permission,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String? message)?  server,TResult Function( String? message)?  connection,TResult Function( String? message)?  cache,TResult Function( String? message)?  database,TResult Function( String? message)?  unexpected,TResult Function( String? message)?  notFound,TResult Function( String? message)?  parse,TResult Function( String? message)?  permission,TResult Function( String? message)?  rateLimit,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that.message);case _ConnectionFailure() when connection != null:
@@ -181,7 +184,8 @@ return database(_that.message);case _UnexpectedFailure() when unexpected != null
 return unexpected(_that.message);case _NotFoundFailure() when notFound != null:
 return notFound(_that.message);case _ParseFailure() when parse != null:
 return parse(_that.message);case _PermissionFailure() when permission != null:
-return permission(_that.message);case _:
+return permission(_that.message);case _RateLimitFailure() when rateLimit != null:
+return rateLimit(_that.message);case _:
   return orElse();
 
 }
@@ -199,7 +203,7 @@ return permission(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? message)  server,required TResult Function( String? message)  connection,required TResult Function( String? message)  cache,required TResult Function( String? message)  database,required TResult Function( String? message)  unexpected,required TResult Function( String? message)  notFound,required TResult Function( String? message)  parse,required TResult Function( String? message)  permission,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String? message)  server,required TResult Function( String? message)  connection,required TResult Function( String? message)  cache,required TResult Function( String? message)  database,required TResult Function( String? message)  unexpected,required TResult Function( String? message)  notFound,required TResult Function( String? message)  parse,required TResult Function( String? message)  permission,required TResult Function( String? message)  rateLimit,}) {final _that = this;
 switch (_that) {
 case _ServerFailure():
 return server(_that.message);case _ConnectionFailure():
@@ -209,7 +213,8 @@ return database(_that.message);case _UnexpectedFailure():
 return unexpected(_that.message);case _NotFoundFailure():
 return notFound(_that.message);case _ParseFailure():
 return parse(_that.message);case _PermissionFailure():
-return permission(_that.message);case _:
+return permission(_that.message);case _RateLimitFailure():
+return rateLimit(_that.message);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -226,7 +231,7 @@ return permission(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? message)?  server,TResult? Function( String? message)?  connection,TResult? Function( String? message)?  cache,TResult? Function( String? message)?  database,TResult? Function( String? message)?  unexpected,TResult? Function( String? message)?  notFound,TResult? Function( String? message)?  parse,TResult? Function( String? message)?  permission,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String? message)?  server,TResult? Function( String? message)?  connection,TResult? Function( String? message)?  cache,TResult? Function( String? message)?  database,TResult? Function( String? message)?  unexpected,TResult? Function( String? message)?  notFound,TResult? Function( String? message)?  parse,TResult? Function( String? message)?  permission,TResult? Function( String? message)?  rateLimit,}) {final _that = this;
 switch (_that) {
 case _ServerFailure() when server != null:
 return server(_that.message);case _ConnectionFailure() when connection != null:
@@ -236,7 +241,8 @@ return database(_that.message);case _UnexpectedFailure() when unexpected != null
 return unexpected(_that.message);case _NotFoundFailure() when notFound != null:
 return notFound(_that.message);case _ParseFailure() when parse != null:
 return parse(_that.message);case _PermissionFailure() when permission != null:
-return permission(_that.message);case _:
+return permission(_that.message);case _RateLimitFailure() when rateLimit != null:
+return rateLimit(_that.message);case _:
   return null;
 
 }
@@ -764,6 +770,72 @@ class __$PermissionFailureCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
   return _then(_PermissionFailure(
+freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _RateLimitFailure implements Failure {
+  const _RateLimitFailure([this.message]);
+  
+
+@override final  String? message;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RateLimitFailureCopyWith<_RateLimitFailure> get copyWith => __$RateLimitFailureCopyWithImpl<_RateLimitFailure>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RateLimitFailure&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'Failure.rateLimit(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RateLimitFailureCopyWith<$Res> implements $FailureCopyWith<$Res> {
+  factory _$RateLimitFailureCopyWith(_RateLimitFailure value, $Res Function(_RateLimitFailure) _then) = __$RateLimitFailureCopyWithImpl;
+@override @useResult
+$Res call({
+ String? message
+});
+
+
+
+
+}
+/// @nodoc
+class __$RateLimitFailureCopyWithImpl<$Res>
+    implements _$RateLimitFailureCopyWith<$Res> {
+  __$RateLimitFailureCopyWithImpl(this._self, this._then);
+
+  final _RateLimitFailure _self;
+  final $Res Function(_RateLimitFailure) _then;
+
+/// Create a copy of Failure
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? message = freezed,}) {
+  return _then(_RateLimitFailure(
 freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String?,
   ));

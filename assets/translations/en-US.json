@@ -301,7 +301,9 @@
     "unexpected": "Something went wrong. Please try again.",
     "no_error_return": "No error return",
     "database": "Database error",
-    "not_found": "Not found"
+    "not_found": "Not found",
+    "permission": "Permission denied",
+    "rate_limit": "Rate limit exceeded"
   },
   "epub_reader": {
     "title": "EPUB Reader",

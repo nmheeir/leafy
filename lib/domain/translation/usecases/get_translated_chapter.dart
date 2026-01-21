@@ -20,18 +20,6 @@ class GetTranslatedChapterUseCase {
     String? bookSummary,
     String targetLang = 'vi',
   }) async {
-    // 1. Compute File Hash from filePath (or file content if needed, but path usually implies file identity in this app scope)
-    // Actually, strictly speaking, fileHash should be MD5 of file content.
-    // For now, let's assume we can compute it here or it's passed.
-    // Ideally, the Helper or Cubit computes it once.
-    // Let's assume we compute MD5 of the file path + modification time or content?
-    // The requirement said "MD5 of file EPUB".
-    // Let's assume CryptoUtils.getFileMd5(filePath) exists or we implement it.
-
-    // For optimization, maybe we just use the simple hash of the path if deep hashing is too expensive every time.
-    // But requirement was MD5.
-    // Let's try to calculate it here.
-
     try {
       final fileHash = await CryptoUtils.getFileMd5(filePath);
 

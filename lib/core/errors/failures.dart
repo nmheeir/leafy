@@ -27,4 +27,7 @@ abstract class Failure with _$Failure {
 
   /// Lỗi quyền truy cập
   const factory Failure.permission([String? message]) = _PermissionFailure;
+
+  /// Lỗi rate limit
+  const factory Failure.rateLimit([String? message]) = _RateLimitFailure;
 }
