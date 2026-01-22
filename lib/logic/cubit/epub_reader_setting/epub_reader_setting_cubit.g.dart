@@ -81,6 +81,12 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
   lineSideMargin: (json['lineSideMargin'] as num?)?.toDouble() ?? 0.0,
   lineSideThickness: (json['lineSideThickness'] as num?)?.toDouble() ?? 0.0,
   currentTabIndex: (json['currentTabIndex'] as num?)?.toInt() ?? 0,
+  translationLanguage:
+      $enumDecodeNullable(
+        _$TranslationLanguageEnumMap,
+        json['translationLanguage'],
+      ) ??
+      TranslationLanguage.vietnamese,
 );
 
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
@@ -128,6 +134,8 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'lineSideMargin': instance.lineSideMargin,
   'lineSideThickness': instance.lineSideThickness,
   'currentTabIndex': instance.currentTabIndex,
+  'translationLanguage':
+      _$TranslationLanguageEnumMap[instance.translationLanguage]!,
 };
 
 const _$HorizontalGestureModeEnumMap = {
@@ -183,4 +191,12 @@ const _$TextAlignEnumMap = {
 const _$ProgressCountTypeEnumMap = {
   ProgressCountType.percentage: 'percentage',
   ProgressCountType.quantity: 'quantity',
+};
+
+const _$TranslationLanguageEnumMap = {
+  TranslationLanguage.vietnamese: 'vietnamese',
+  TranslationLanguage.unitedStates: 'unitedStates',
+  TranslationLanguage.japanese: 'japanese',
+  TranslationLanguage.chinese: 'chinese',
+  TranslationLanguage.french: 'french',
 };

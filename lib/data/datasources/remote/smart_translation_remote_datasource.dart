@@ -1,9 +1,10 @@
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
-import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/models/ai_provider.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 
 @LazySingleton(as: TranslationRemoteDataSource)
 class SmartTranslationRemoteDataSource implements TranslationRemoteDataSource {
@@ -38,7 +39,7 @@ class SmartTranslationRemoteDataSource implements TranslationRemoteDataSource {
   Future<Map<String, String>> translateChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -64,7 +65,7 @@ class SmartTranslationRemoteDataSource implements TranslationRemoteDataSource {
   Future<TranslateAndSummarizeResponse> translateAndSummarizeChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -80,10 +81,11 @@ class SmartTranslationRemoteDataSource implements TranslationRemoteDataSource {
     );
   }
 
+  @override
   Stream<TranslationUpdate> streamTranslateChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,

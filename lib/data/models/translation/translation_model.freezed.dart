@@ -15,11 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TranslationModel {
 
- int? get id;@JsonKey(name: 'file_hash') String get fileHash;@JsonKey(name: 'chapter_index') int get chapterIndex;@JsonKey(name: 'target_lang') String get targetLang;// JSON string -> Map<String, String> conversion handles at DB layer usually,
-// but here we model the generic key-value map for content.
-// For sqflite, we might need a custom converter if we want automatic string<->map.
-// Let's assume we pass the Map directly here and handle stringify in DataSource.
-@JsonKey(name: 'translated_content') Map<String, String> get translatedContent;@JsonKey(name: 'last_updated') int? get lastUpdated;
+ int? get id;@JsonKey(name: 'file_hash') String get fileHash;@JsonKey(name: 'chapter_index') int get chapterIndex;@JsonKey(name: 'target_lang')@TranslationLanguageConverter() TranslationLanguage get targetLang;@JsonKey(name: 'translated_content')@MapStringConverter() Map<String, String> get translatedContent;@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? get lastUpdated;
 /// Create a copy of TranslationModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -52,7 +48,7 @@ abstract mixin class $TranslationModelCopyWith<$Res>  {
   factory $TranslationModelCopyWith(TranslationModel value, $Res Function(TranslationModel) _then) = _$TranslationModelCopyWithImpl;
 @useResult
 $Res call({
- int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'target_lang') String targetLang,@JsonKey(name: 'translated_content') Map<String, String> translatedContent,@JsonKey(name: 'last_updated') int? lastUpdated
+ int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'target_lang')@TranslationLanguageConverter() TranslationLanguage targetLang,@JsonKey(name: 'translated_content')@MapStringConverter() Map<String, String> translatedContent,@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? lastUpdated
 });
 
 
@@ -75,9 +71,9 @@ id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,fileHash: null == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
 as String,chapterIndex: null == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int,targetLang: null == targetLang ? _self.targetLang : targetLang // ignore: cast_nullable_to_non_nullable
-as String,translatedContent: null == translatedContent ? _self.translatedContent : translatedContent // ignore: cast_nullable_to_non_nullable
+as TranslationLanguage,translatedContent: null == translatedContent ? _self.translatedContent : translatedContent // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 
@@ -162,7 +158,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')  String targetLang, @JsonKey(name: 'translated_content')  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')  int? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')@TranslationLanguageConverter()  TranslationLanguage targetLang, @JsonKey(name: 'translated_content')@MapStringConverter()  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TranslationModel() when $default != null:
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_that.translatedContent,_that.lastUpdated);case _:
@@ -183,7 +179,7 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')  String targetLang, @JsonKey(name: 'translated_content')  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')  int? lastUpdated)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')@TranslationLanguageConverter()  TranslationLanguage targetLang, @JsonKey(name: 'translated_content')@MapStringConverter()  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)  $default,) {final _that = this;
 switch (_that) {
 case _TranslationModel():
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_that.translatedContent,_that.lastUpdated);case _:
@@ -203,7 +199,7 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')  String targetLang, @JsonKey(name: 'translated_content')  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')  int? lastUpdated)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'target_lang')@TranslationLanguageConverter()  TranslationLanguage targetLang, @JsonKey(name: 'translated_content')@MapStringConverter()  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
 switch (_that) {
 case _TranslationModel() when $default != null:
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_that.translatedContent,_that.lastUpdated);case _:
@@ -218,29 +214,21 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.targetLang,_tha
 @JsonSerializable()
 
 class _TranslationModel implements TranslationModel {
-  const _TranslationModel({this.id, @JsonKey(name: 'file_hash') required this.fileHash, @JsonKey(name: 'chapter_index') required this.chapterIndex, @JsonKey(name: 'target_lang') this.targetLang = 'vi', @JsonKey(name: 'translated_content') required final  Map<String, String> translatedContent, @JsonKey(name: 'last_updated') this.lastUpdated}): _translatedContent = translatedContent;
+  const _TranslationModel({this.id, @JsonKey(name: 'file_hash') required this.fileHash, @JsonKey(name: 'chapter_index') required this.chapterIndex, @JsonKey(name: 'target_lang')@TranslationLanguageConverter() this.targetLang = TranslationLanguage.vietnamese, @JsonKey(name: 'translated_content')@MapStringConverter() required final  Map<String, String> translatedContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter() this.lastUpdated}): _translatedContent = translatedContent;
   factory _TranslationModel.fromJson(Map<String, dynamic> json) => _$TranslationModelFromJson(json);
 
 @override final  int? id;
 @override@JsonKey(name: 'file_hash') final  String fileHash;
 @override@JsonKey(name: 'chapter_index') final  int chapterIndex;
-@override@JsonKey(name: 'target_lang') final  String targetLang;
-// JSON string -> Map<String, String> conversion handles at DB layer usually,
-// but here we model the generic key-value map for content.
-// For sqflite, we might need a custom converter if we want automatic string<->map.
-// Let's assume we pass the Map directly here and handle stringify in DataSource.
+@override@JsonKey(name: 'target_lang')@TranslationLanguageConverter() final  TranslationLanguage targetLang;
  final  Map<String, String> _translatedContent;
-// JSON string -> Map<String, String> conversion handles at DB layer usually,
-// but here we model the generic key-value map for content.
-// For sqflite, we might need a custom converter if we want automatic string<->map.
-// Let's assume we pass the Map directly here and handle stringify in DataSource.
-@override@JsonKey(name: 'translated_content') Map<String, String> get translatedContent {
+@override@JsonKey(name: 'translated_content')@MapStringConverter() Map<String, String> get translatedContent {
   if (_translatedContent is EqualUnmodifiableMapView) return _translatedContent;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableMapView(_translatedContent);
 }
 
-@override@JsonKey(name: 'last_updated') final  int? lastUpdated;
+@override@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() final  DateTime? lastUpdated;
 
 /// Create a copy of TranslationModel
 /// with the given fields replaced by the non-null parameter values.
@@ -275,7 +263,7 @@ abstract mixin class _$TranslationModelCopyWith<$Res> implements $TranslationMod
   factory _$TranslationModelCopyWith(_TranslationModel value, $Res Function(_TranslationModel) _then) = __$TranslationModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'target_lang') String targetLang,@JsonKey(name: 'translated_content') Map<String, String> translatedContent,@JsonKey(name: 'last_updated') int? lastUpdated
+ int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'target_lang')@TranslationLanguageConverter() TranslationLanguage targetLang,@JsonKey(name: 'translated_content')@MapStringConverter() Map<String, String> translatedContent,@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? lastUpdated
 });
 
 
@@ -298,9 +286,9 @@ id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,fileHash: null == fileHash ? _self.fileHash : fileHash // ignore: cast_nullable_to_non_nullable
 as String,chapterIndex: null == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int,targetLang: null == targetLang ? _self.targetLang : targetLang // ignore: cast_nullable_to_non_nullable
-as String,translatedContent: null == translatedContent ? _self._translatedContent : translatedContent // ignore: cast_nullable_to_non_nullable
+as TranslationLanguage,translatedContent: null == translatedContent ? _self._translatedContent : translatedContent // ignore: cast_nullable_to_non_nullable
 as Map<String, String>,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 

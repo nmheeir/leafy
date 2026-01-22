@@ -17,6 +17,7 @@ part 'epub_reader_setting_cubit.g.dart';
 
 @injectable
 class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
+  // ignore: unused_field
   final GetBrightness _getBrightness;
   final SetBrightness _setBrightness;
   final ResetBrightnessUseCase _resetBrightness;
@@ -212,5 +213,9 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
 
   void updateTabIndex(int index) {
     emit(state.copyWith(currentTabIndex: index));
+  }
+
+  void updateTranslationLanguage(TranslationLanguage language) {
+    emit(state.copyWith(translationLanguage: language));
   }
 }

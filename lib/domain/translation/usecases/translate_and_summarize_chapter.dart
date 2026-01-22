@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/domain/translation/entities/translation_and_summary.dart';
@@ -33,7 +34,7 @@ class TranslateAndSummarizeChapterParams {
   final String fileHash;
   final int chapterIndex;
   final List<String> originalContent;
-  final String targetLang;
+  final TranslationLanguage targetLang;
   final String bookTitle;
   final String? author;
   final String? bookSummary;

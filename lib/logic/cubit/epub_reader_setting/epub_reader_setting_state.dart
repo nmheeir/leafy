@@ -46,6 +46,8 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(0.0) double lineSideMargin,
     @Default(0.0) double lineSideThickness,
     @Default(0) int currentTabIndex,
+    @Default(TranslationLanguage.vietnamese)
+    TranslationLanguage translationLanguage,
   }) = _EpubReaderSettingState;
 
   factory EpubReaderSettingState.fromJson(Map<String, dynamic> json) =>

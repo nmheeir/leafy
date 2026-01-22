@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 import 'package:leafy/core/utils/helpers/epub_helper.dart';
@@ -64,7 +65,10 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     );
   }
 
-  Future<void> translateChapter(int chapterIndex) async {
+  Future<void> translateChapter(
+    int chapterIndex, {
+    TranslationLanguage? targetLanguage,
+  }) async {
     final loadedState = state.mapOrNull(loaded: (s) => s);
     if (loadedState == null ||
         _currentFilePath == null ||
@@ -100,6 +104,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         originalContent: originalParagraphs,
         bookTitle: loadedState.book.title,
         author: loadedState.book.author,
+        targetLang: targetLanguage ?? TranslationLanguage.vietnamese,
       );
 
       stream.listen(

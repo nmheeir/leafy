@@ -1,8 +1,9 @@
 import 'dart:convert';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 
 abstract final class GeminiPrompts {
   static String translateChapter({
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -24,7 +25,7 @@ abstract final class GeminiPrompts {
 
     return '''
 Bạn là một dịch giả văn học chuyên nghiệp, am hiểu sâu sắc về phong cách ngôn ngữ và văn hóa. 
-Hãy dịch danh sách các đoạn văn sau sang ngôn ngữ: $targetLang.
+Hãy dịch danh sách các đoạn văn sau sang ngôn ngữ: ${targetLang.displayName}.
 
 --- HỒ SƠ TÁC PHẨM ---
 $bookProfile
@@ -51,7 +52,7 @@ ${jsonEncode(inputData)}
   }
 
   static String translateAndSummarizeChapter({
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -72,7 +73,7 @@ ${jsonEncode(inputData)}
 
     return '''
 Bạn là một dịch giả văn học lỗi lạc, người sở hữu vốn từ vựng phong phú và khả năng cảm thụ văn chương tinh tế.
-Nhiệm vụ của bạn là dịch danh sách các đoạn văn được cung cấp sang ngôn ngữ: "$targetLang" và tóm tắt lại nội dung đó.
+Nhiệm vụ của bạn là dịch danh sách các đoạn văn được cung cấp sang ngôn ngữ: "${targetLang.displayName}" và tóm tắt lại nội dung đó.
 
 --- HỒ SƠ TÁC PHẨM ---
 $bookProfile
@@ -103,7 +104,7 @@ ${jsonEncode(inputData)}
   }
 
   static String streamTranslateChapter({
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -124,7 +125,7 @@ ${jsonEncode(inputData)}
 
     return '''
 Bạn là một dịch giả văn học lỗi lạc, người sở hữu vốn từ vựng phong phú và khả năng cảm thụ văn chương tinh tế.
-Nhiệm vụ của bạn là dịch danh sách các đoạn văn được cung cấp sang ngôn ngữ: "$targetLang".
+Nhiệm vụ của bạn là dịch danh sách các đoạn văn được cung cấp sang ngôn ngữ: "${targetLang.displayName}".
 
 --- HỒ SƠ TÁC PHẨM ---
 $bookProfile

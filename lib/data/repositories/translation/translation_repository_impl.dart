@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/datasources/local/translation_local_datasource.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
@@ -9,19 +10,25 @@ import 'package:leafy/data/models/translation/translation_model.dart';
 import 'package:leafy/domain/translation/entities/translation_and_summary.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/translation/repository/translation_repository.dart';
+import 'package:logger/logger.dart';
 
 @LazySingleton(as: TranslationRepository)
 class TranslationRepositoryImpl implements TranslationRepository {
   final TranslationLocalDataSource _localDataSource;
   final TranslationRemoteDataSource _remoteDataSource;
+  final Logger _logger;
 
-  TranslationRepositoryImpl(this._localDataSource, this._remoteDataSource);
+  TranslationRepositoryImpl(
+    this._localDataSource,
+    this._remoteDataSource,
+    this._logger,
+  );
 
   @override
   Future<Either<Failure, TranslationModel?>> getLocalTranslatedChapter({
     required String fileHash,
     required int chapterIndex,
-    required String targetLang,
+    required TranslationLanguage targetLang,
   }) async {
     try {
       final local = await _localDataSource.getTranslation(
@@ -40,7 +47,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -75,6 +82,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
           accumulatedTranslation[update.id] = update.text;
           yield Right(update);
         } else if (update is TranslationUpdateSummary) {
+          _logger.d('TranslationUpdateSummary: $update');
           // Save summary immediately when received
           await _localDataSource.saveSummary(
             SummaryModel(
@@ -88,6 +96,8 @@ class TranslationRepositoryImpl implements TranslationRepository {
         }
       }
 
+      _logger.d('AccumeulatdTranslation: ${accumulatedTranslation.toString()}');
+
       // 3. Save accumulated translation to local DB
       if (accumulatedTranslation.isNotEmpty) {
         final newTranslation = TranslationModel(
@@ -95,11 +105,13 @@ class TranslationRepositoryImpl implements TranslationRepository {
           chapterIndex: chapterIndex,
           targetLang: targetLang,
           translatedContent: accumulatedTranslation,
-          lastUpdated: DateTime.now().millisecondsSinceEpoch,
+          lastUpdated: DateTime.now(),
         );
+        _logger.i(newTranslation.toJson());
         await _localDataSource.saveTranslation(newTranslation);
       }
-    } catch (e) {
+    } catch (e, st) {
+      _logger.e('Error: $e\nStackTrace: $st');
       yield Left(Failure.server(e.toString()));
     }
   }
@@ -129,7 +141,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -168,7 +180,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
         chapterIndex: chapterIndex,
         targetLang: targetLang,
         translatedContent: translatedMap,
-        lastUpdated: DateTime.now().millisecondsSinceEpoch,
+        lastUpdated: DateTime.now(),
       );
 
       await _localDataSource.saveTranslation(newTranslation);
@@ -258,7 +270,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -314,7 +326,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
         chapterIndex: chapterIndex,
         targetLang: targetLang,
         translatedContent: result.translation,
-        lastUpdated: DateTime.now().millisecondsSinceEpoch,
+        lastUpdated: DateTime.now(),
       );
 
       final newSummary = SummaryModel(

@@ -1,4 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
+import 'package:leafy/core/utils/converters/int_to_datetime_coverter.dart';
+import 'package:leafy/core/utils/converters/map_string_converter.dart';
+import 'package:leafy/core/utils/converters/translation_language_converter.dart';
 
 part 'translation_model.freezed.dart';
 part 'translation_model.g.dart';
@@ -9,14 +13,16 @@ abstract class TranslationModel with _$TranslationModel {
     int? id,
     @JsonKey(name: 'file_hash') required String fileHash,
     @JsonKey(name: 'chapter_index') required int chapterIndex,
-    @JsonKey(name: 'target_lang') @Default('vi') String targetLang,
-    // JSON string -> Map<String, String> conversion handles at DB layer usually,
-    // but here we model the generic key-value map for content.
-    // For sqflite, we might need a custom converter if we want automatic string<->map.
-    // Let's assume we pass the Map directly here and handle stringify in DataSource.
+    @JsonKey(name: 'target_lang')
+    @TranslationLanguageConverter()
+    @Default(TranslationLanguage.vietnamese)
+    TranslationLanguage targetLang,
     @JsonKey(name: 'translated_content')
+    @MapStringConverter()
     required Map<String, String> translatedContent,
-    @JsonKey(name: 'last_updated') int? lastUpdated,
+    @JsonKey(name: 'last_updated')
+    @IntToDatetimeCoverter()
+    DateTime? lastUpdated,
   }) = _TranslationModel;
 
   factory TranslationModel.fromJson(Map<String, dynamic> json) =>

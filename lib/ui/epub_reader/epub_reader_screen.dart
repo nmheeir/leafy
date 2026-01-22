@@ -553,7 +553,13 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           onPressed: () {
             if (translationStatus == TranslationStatus.initial ||
                 translationStatus == TranslationStatus.error) {
-              context.epubReaderCubit.translateChapter(currentChapter);
+              final language =
+                  context.epubReaderSettingCubit.state.translationLanguage;
+              print('Translation Language: $language');
+              context.epubReaderCubit.translateChapter(
+                currentChapter,
+                targetLanguage: language,
+              );
             } else {
               context.epubReaderCubit.toggleBilingualMode();
             }

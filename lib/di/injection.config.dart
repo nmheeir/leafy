@@ -481,12 +481,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1042.BookResourceRepository>(),
       ),
     );
-    gh.lazySingleton<_i499.TranslationRepository>(
-      () => _i965.TranslationRepositoryImpl(
-        gh<_i890.TranslationLocalDataSource>(),
-        gh<_i120.TranslationRemoteDataSource>(),
-      ),
-    );
     gh.factory<_i845.BookProgressCubit>(
       () => _i845.BookProgressCubit(gh<_i709.GetReaderProgressByPathUseCase>()),
     );
@@ -494,6 +488,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i939.LibraryCubit(
         gh<_i864.WatchAllBooksUseCase>(),
         gh<_i120.Logger>(),
+      ),
+    );
+    gh.lazySingleton<_i499.TranslationRepository>(
+      () => _i965.TranslationRepositoryImpl(
+        gh<_i890.TranslationLocalDataSource>(),
+        gh<_i120.TranslationRemoteDataSource>(),
+        gh<_i974.Logger>(),
       ),
     );
     gh.factory<_i838.MarkBookFinishedUseCase>(
@@ -593,9 +594,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i709.GetReaderProgressByPathUseCase>(),
         gh<_i770.LogReadingSessionByPathUseCase>(),
         gh<_i838.MarkBookFinishedUseCase>(),
-        gh<_i533.GetTranslatedChapterUseCase>(),
         gh<_i27.StreamTranslateChapterUseCase>(),
-        gh<_i431.GenerateChapterSummaryUseCase>(),
       ),
     );
     gh.factory<_i407.BookResourceCubit>(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
@@ -32,7 +33,7 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
   Future<Map<String, String>> translateChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -120,7 +121,7 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
   Future<TranslateAndSummarizeResponse> translateAndSummarizeChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -179,7 +180,7 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
   Stream<TranslationUpdate> streamTranslateChapter({
     required List<String> originalParagraphs,
     required String context,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,

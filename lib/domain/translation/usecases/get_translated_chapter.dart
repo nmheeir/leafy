@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 import 'package:leafy/data/models/translation/translation_model.dart';
@@ -18,7 +19,7 @@ class GetTranslatedChapterUseCase {
     required String bookTitle,
     String? author,
     String? bookSummary,
-    String targetLang = 'vi',
+    TranslationLanguage targetLang = TranslationLanguage.vietnamese,
   }) async {
     try {
       final fileHash = await CryptoUtils.getFileMd5(filePath);

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/utils/extensions.dart';
@@ -52,54 +53,45 @@ class TranslatorSubcategory extends StatelessWidget {
   }
 }
 
-class _TargetLanguageSelector extends StatefulWidget {
+class _TargetLanguageSelector extends StatelessWidget {
   const _TargetLanguageSelector();
 
   @override
-  State<_TargetLanguageSelector> createState() =>
-      _TargetLanguageSelectorState();
-}
-
-class _TargetLanguageSelectorState extends State<_TargetLanguageSelector> {
-  String _selectedLanguage = "Vietnamese";
-  final List<String> _languages = [
-    "Vietnamese",
-    "English",
-    "French",
-    "Japanese",
-    "Korean",
-    "Chinese",
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text("Translate to"),
-      subtitle: Text(
-        _selectedLanguage,
-        style: TextStyle(color: context.colorScheme.primary),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          showDragHandle: true,
-          context: context,
-          builder: (context) => ListView.builder(
-            itemCount: _languages.length,
-            itemBuilder: (context, index) {
-              final language = _languages[index];
-              return ListTile(
-                title: Text(language),
-                trailing: language == _selectedLanguage
-                    ? Icon(Icons.check, color: context.colorScheme.primary)
-                    : null,
-                onTap: () {
-                  setState(() => _selectedLanguage = language);
-                  Navigator.pop(context);
-                },
-              );
-            },
+    return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+      builder: (context, state) {
+        return ListTile(
+          title: const Text("Translate to"),
+          subtitle: Text(
+            state.translationLanguage.displayName,
+            style: TextStyle(color: context.colorScheme.primary),
           ),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            showModalBottomSheet(
+              showDragHandle: true,
+              context: context,
+              builder: (context) => ListView.builder(
+                shrinkWrap: true,
+                itemCount: TranslationLanguage.values.length,
+                itemBuilder: (context, index) {
+                  final language = TranslationLanguage.values[index];
+                  return ListTile(
+                    title: Text(language.displayName),
+                    trailing: language == state.translationLanguage
+                        ? Icon(Icons.check, color: context.colorScheme.primary)
+                        : null,
+                    onTap: () {
+                      context.epubReaderSettingCubit.updateTranslationLanguage(
+                        language,
+                      );
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

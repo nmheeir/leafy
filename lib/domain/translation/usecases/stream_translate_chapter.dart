@@ -1,10 +1,10 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/translation/repository/translation_repository.dart';
 import 'package:logger/logger.dart';
-// import 'package:leafy/domain/translation/usecases/generate_chapter_summary.dart';
 
 @injectable
 class StreamTranslateChapterUseCase {
@@ -18,7 +18,7 @@ class StreamTranslateChapterUseCase {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    String targetLang = 'vi',
+    TranslationLanguage targetLang = TranslationLanguage.vietnamese,
     required String bookTitle,
     String? author,
     String? bookSummary,

@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:leafy/core/constants/enums/translation_language.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/models/translation/translation_model.dart';
 import 'package:leafy/data/models/translation/summary_model.dart';
@@ -10,7 +11,7 @@ abstract class TranslationRepository {
   Future<Either<Failure, TranslationModel?>> getLocalTranslatedChapter({
     required String fileHash,
     required int chapterIndex,
-    required String targetLang,
+    required TranslationLanguage targetLang,
   });
 
   /// Streams translation from remote updates.
@@ -18,7 +19,7 @@ abstract class TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -30,7 +31,7 @@ abstract class TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
@@ -63,7 +64,7 @@ abstract class TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required List<String> originalContent,
-    required String targetLang,
+    required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
     String? bookSummary,
