@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/data/models/translation/translation_model.dart';
 import 'package:leafy/data/models/translation/summary_model.dart';
+import 'package:leafy/domain/translation/entities/translation_and_summary.dart';
 
 abstract class TranslationRepository {
   Future<Either<Failure, TranslationModel>> getTranslatedChapter({
@@ -35,5 +36,15 @@ abstract class TranslationRepository {
     required String fileHash,
     required int chapterIndex,
     required String content,
+  });
+
+  Future<Either<Failure, TranslationAndSummary>> translateAndSummarizeChapter({
+    required String fileHash,
+    required int chapterIndex,
+    required List<String> originalContent,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
   });
 }

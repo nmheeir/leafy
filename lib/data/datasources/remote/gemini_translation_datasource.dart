@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
 import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
+import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
 import 'package:logger/logger.dart';
 
 @Named('gemini')
@@ -49,31 +50,32 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       );
 
       final model =
-          await _appConfig.getSelectedModel() ?? 'gemini-3-flash-preview';
+          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
 
       _logger.d('Gemini Prompt: $prompt, Model: $model');
 
-      final response = await client.models.generateContent(
-        model: model,
-        request: GenerateContentRequest(
-          contents: [Content.text(prompt)],
-          generationConfig: const GenerationConfig(
-            responseMimeType: 'application/json',
-          ),
-        ),
-      );
+      // final response = await client.models.generateContent(
+      //   model: model,
+      //   request: GenerateContentRequest(
+      //     contents: [Content.text(prompt)],
+      //     generationConfig: const GenerationConfig(
+      //       responseMimeType: 'application/json',
+      //     ),
+      //   ),
+      // );
 
-      final text = _cleanResponse(response.text ?? '');
+      // final text = _cleanResponse(response.text ?? '');
 
-      if (text.isEmpty) {
-        throw Exception('Empty response from Gemini');
-      }
+      // if (text.isEmpty) {
+      //   throw Exception('Empty response from Gemini');
+      // }
 
-      _logger.i('Gemini: Translation successful');
-      _logger.d('Gemini Response (cleaned): $text');
+      // _logger.i('Gemini: Translation successful');
+      // _logger.d('Gemini Response (cleaned): $text');
 
-      final Map<String, dynamic> rawMap = jsonDecode(text);
-      return rawMap.map((key, value) => MapEntry(key, value.toString()));
+      // final Map<String, dynamic> rawMap = jsonDecode(text);
+      // return rawMap.map((key, value) => MapEntry(key, value.toString()));
+      return {};
     } catch (e, stackTrace) {
       _logger.e('Gemini: Translation failed', error: e, stackTrace: stackTrace);
       rethrow;
@@ -93,20 +95,81 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
 
       _logger.d('Gemini Prompt: $prompt, Model: $model');
 
+      // final response = await client.models.generateContent(
+      //   model: model,
+      //   request: GenerateContentRequest(contents: [Content.text(prompt)]),
+      // );
+
+      // final text = _cleanResponse(response.text ?? '');
+
+      // _logger.i('Gemini: Summarization successful');
+      // _logger.d('Gemini Summary: $text');
+
+      // return text;
+      return '';
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Gemini: Summarization failed',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  @override
+  Future<TranslateAndSummarizeResponse> translateAndSummarizeChapter({
+    required List<String> originalParagraphs,
+    required String context,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  }) async {
+    try {
+      _logger.i(
+        'Gemini: Starting translation and summarization for ${originalParagraphs.length} paragraphs to $targetLang',
+      );
+      final client = await _getClient();
+
+      final prompt = GeminiPrompts.translateAndSummarizeChapter(
+        targetLang: targetLang,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
+        chapterContext: context,
+        paragraphs: originalParagraphs,
+      );
+
+      final model =
+          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
+
+      _logger.d('Gemini Prompt: $prompt, Model: $model');
+
       final response = await client.models.generateContent(
         model: model,
-        request: GenerateContentRequest(contents: [Content.text(prompt)]),
+        request: GenerateContentRequest(
+          contents: [Content.text(prompt)],
+          generationConfig: const GenerationConfig(
+            responseMimeType: 'application/json',
+          ),
+        ),
       );
 
       final text = _cleanResponse(response.text ?? '');
 
-      _logger.i('Gemini: Summarization successful');
-      _logger.d('Gemini Summary: $text');
+      if (text.isEmpty) {
+        throw Exception('Empty response from Gemini');
+      }
 
-      return text;
+      _logger.i('Gemini: Translation and summarization successful');
+      _logger.d('Gemini Response (cleaned): $text');
+
+      final Map<String, dynamic> rawMap = jsonDecode(text);
+      return TranslateAndSummarizeResponse.fromJson(rawMap);
     } catch (e, stackTrace) {
       _logger.e(
-        'Gemini: Summarization failed',
+        'Gemini: Translation and summarization failed',
         error: e,
         stackTrace: stackTrace,
       );
@@ -124,7 +187,6 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       return match.trim();
     }
 
-    // 3. Dự phòng: Nếu không tìm thấy cặp {}, thử xóa Markdown theo cách cũ
     if (result.startsWith("```json")) {
       result = result.replaceFirst("```json", "");
     }

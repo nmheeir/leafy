@@ -139,6 +139,8 @@ import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
 import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
+import '../domain/translation/usecases/translate_and_summarize_chapter.dart'
+    as _i472;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
@@ -557,6 +559,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i533.GetTranslatedChapterUseCase>(
       () =>
           _i533.GetTranslatedChapterUseCase(gh<_i499.TranslationRepository>()),
+    );
+    gh.factory<_i472.TranslateAndSummarizeChapterUseCase>(
+      () => _i472.TranslateAndSummarizeChapterUseCase(
+        gh<_i499.TranslationRepository>(),
+      ),
     );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(

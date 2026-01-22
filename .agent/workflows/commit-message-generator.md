@@ -8,18 +8,22 @@ Use the last three commit messages as a style reference.
 
 Output requirements:
 
-- The entire commit message (header + body) must be written in a single block, ready to copy.
+- Output the entire commit message (header + body) in a single block, ready to copy.
 
 - Include a Conventional Commit header.
 
-- Include a commit body written as bullet points, with a maximum of 4 bullet points total.
+- Include a commit body with bullet points (maximum 4 bullets).
 
-Content rules:
+Strict content rules:
 
-- Describe changes at a conceptual or functional level (what changed and why).
+- Each bullet point must describe a concrete functional change or capability introduced by this commit.
 
-- Do not reference file paths, file locations, IDE links, or source code URLs.
+- Do NOT add summary, conclusion, motivation, or impact statements (e.g. “apply this commit to…”, “this change enables…”, “overall improvement…”).
 
-- Keep the wording concise and consistent with the existing commit style.
+- Do NOT include generic or promotional language.
 
-- Only include meta or reusable phrasing if it is genuinely relevant to the changes; otherwise, omit it.
+- Do NOT restate the commit header in the body.
+
+- Do NOT reference file paths, file locations, IDE links, or source code URLs.
+
+- If there are fewer than 4 meaningful changes, output fewer bullets rather than inventing new ones.

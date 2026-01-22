@@ -6,6 +6,7 @@ import 'package:leafy/data/datasources/local/translation_local_datasource.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:leafy/data/models/translation/summary_model.dart';
 import 'package:leafy/data/models/translation/translation_model.dart';
+import 'package:leafy/domain/translation/entities/translation_and_summary.dart';
 import 'package:leafy/domain/translation/repository/translation_repository.dart';
 
 @LazySingleton(as: TranslationRepository)
@@ -161,6 +162,90 @@ class TranslationRepositoryImpl implements TranslationRepository {
       return const Right(null);
     } catch (e) {
       return Left(Failure.cache(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TranslationAndSummary>> translateAndSummarizeChapter({
+    required String fileHash,
+    required int chapterIndex,
+    required List<String> originalContent,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  }) async {
+    try {
+      // 1. Check cache
+      final localTranslation = await _localDataSource.getTranslation(
+        fileHash,
+        chapterIndex,
+        targetLang,
+      );
+      final localSummaries = await _localDataSource.getSummaries(
+        fileHash,
+        chapterIndex,
+        chapterIndex,
+      );
+      final localSummary = localSummaries.isNotEmpty
+          ? localSummaries.first
+          : null;
+
+      if (localTranslation != null && localSummary != null) {
+        return Right(
+          TranslationAndSummary(
+            translation: localTranslation,
+            summary: localSummary,
+          ),
+        );
+      }
+
+      // 2. Prepare context
+      final contextSummaries = await _localDataSource.getSummaries(
+        fileHash,
+        (chapterIndex - 5).clamp(1, chapterIndex),
+        chapterIndex - 1,
+      );
+      final contextString = contextSummaries
+          .map((s) => s.summaryContent)
+          .join('\n');
+
+      // 3. Call Remote
+      final result = await _remoteDataSource.translateAndSummarizeChapter(
+        originalParagraphs: originalContent,
+        context: contextString,
+        targetLang: targetLang,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
+      );
+
+      // 4. Save results
+      final newTranslation = TranslationModel(
+        fileHash: fileHash,
+        chapterIndex: chapterIndex,
+        targetLang: targetLang,
+        translatedContent: result.translation,
+        lastUpdated: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      final newSummary = SummaryModel(
+        fileHash: fileHash,
+        chapterIndex: chapterIndex,
+        summaryContent: result.summary,
+        lastUpdated: DateTime.now().millisecondsSinceEpoch,
+      );
+
+      await _localDataSource.saveTranslation(newTranslation);
+      await _localDataSource.saveSummary(newSummary);
+
+      return Right(
+        TranslationAndSummary(translation: newTranslation, summary: newSummary),
+      );
+    } on RateLimitException catch (e) {
+      return Left(Failure.rateLimit(e.toString()));
+    } on Exception catch (e) {
+      return Left(Failure.server(e.toString()));
     }
   }
 }

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-class GeminiPrompts {
+abstract final class GeminiPrompts {
   static String translateChapter({
     required String targetLang,
     required String bookTitle,
@@ -48,5 +48,57 @@ ${jsonEncode(inputData)}
 
   static String summarizeContent(String content) {
     return 'Hãy tóm tắt nội dung sau đây một cách ngắn gọn, súc tích (khoảng 3-5 câu), tập trung vào các tình tiết chính để làm bối cảnh cho việc dịch các chương sau:\n\n$content';
+  }
+
+  static String translateAndSummarizeChapter({
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+    required String chapterContext,
+    required List<String> paragraphs,
+  }) {
+    final inputData = <Map<String, dynamic>>[];
+    for (int i = 0; i < paragraphs.length; i++) {
+      inputData.add({'id': i, 'text': paragraphs[i]});
+    }
+
+    final bookProfile = [
+      "Tác phẩm: $bookTitle",
+      if (author != null && author.isNotEmpty) "Tác giả: $author",
+      if (bookSummary != null && bookSummary.isNotEmpty)
+        "Tóm tắt cốt truyện chung: $bookSummary",
+    ].join("\n");
+
+    return '''
+Bạn là một dịch giả văn học lỗi lạc, người sở hữu vốn từ vựng phong phú và khả năng cảm thụ văn chương tinh tế.
+Nhiệm vụ của bạn là dịch danh sách các đoạn văn được cung cấp sang ngôn ngữ: "$targetLang" và tóm tắt lại nội dung đó.
+
+--- HỒ SƠ TÁC PHẨM ---
+$bookProfile
+Bối cảnh chương này: $chapterContext
+
+--- YÊU CẦU DỊCH THUẬT (QUAN TRỌNG) ---
+1. **Chất lượng văn chương**: 
+   - Tuyệt đối tránh lối dịch "word-by-word" khô khan. 
+   - Hãy dịch thoáng đạt, bay bổng, sử dụng từ ngữ "đắt" và giàu hình ảnh để tái hiện trọn vẹn cảm xúc, không khí và giọng văn của tác giả.
+   - Ưu tiên sự mượt mà và tự nhiên của ngôn ngữ đích, ngay cả khi phải thay đổi cấu trúc câu (nhưng vẫn giữ đúng ý nghĩa gốc).
+2. **Độ chính xác**: Giữ nguyên tên riêng, địa danh.
+
+--- YÊU CẦU ĐẦU RA (JSON BẮT BUỘC) ---
+Bạn phải trả về DUY NHẤT một đối tượng JSON hợp lệ, không có bất kỳ văn bản dẫn dắt hay Markdown (```json) nào khác. Cấu trúc như sau:
+
+{
+  "summary": "Viết một đoạn tóm tắt ngắn gọn (3-5 câu) về các diễn biến chính trong đoạn vừa dịch. Tóm tắt này sẽ dùng làm bối cảnh cho lần dịch tiếp theo.",
+  "translation": {
+    "0": "Nội dung dịch của đoạn có id 0",
+    "1": "Nội dung dịch của đoạn có id 1",
+    ... (tương ứng với tất cả các id đầu vào)
+  }
+}
+
+--- DỮ LIỆU ĐẦU VÀO ---
+${jsonEncode(inputData)}
+''';
   }
 }
