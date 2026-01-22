@@ -3,6 +3,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
 import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
 import 'package:logger/logger.dart';
@@ -175,6 +176,129 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       );
       rethrow;
     }
+  }
+
+  @override
+  Stream<TranslationUpdate> streamTranslateChapter({
+    required List<String> originalParagraphs,
+    required String context,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  }) async* {
+    try {
+      _logger.i(
+        'Gemini: Streaming translation for ${originalParagraphs.length} paragraphs to $targetLang',
+      );
+
+      final client = await _getClient();
+      final prompt = GeminiPrompts.streamTranslateChapter(
+        targetLang: targetLang,
+        bookTitle: bookTitle,
+        author: author,
+        bookSummary: bookSummary,
+        chapterContext: context,
+        paragraphs: originalParagraphs,
+      );
+
+      final model =
+          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
+
+      _logger.d('Gemini Stream Prompt: $prompt, Model: $model');
+
+      final contentStream = client.models.streamGenerateContent(
+        model: model,
+        request: GenerateContentRequest(
+          contents: [Content.text(prompt)],
+          generationConfig: const GenerationConfig(
+            responseMimeType: 'text/plain',
+          ),
+        ),
+      );
+
+      StringBuffer buffer = StringBuffer();
+
+      await for (final chunk in contentStream) {
+        final text = chunk.text;
+        if (text == null || text.isEmpty) continue;
+
+        _logger.d('Gemini Stream Chunk received: ${text.length} chars');
+
+        buffer.write(text);
+
+        // Process buffer for complete lines
+        String currentBuffer = buffer.toString();
+        // Check for newlines
+        if (currentBuffer.contains('\n')) {
+          final lines = currentBuffer.split('\n');
+          // The last part might be incomplete, keep it in buffer
+          final incompletePart = lines.last;
+
+          // Process all complete lines
+          for (int i = 0; i < lines.length - 1; i++) {
+            final line = lines[i].trim();
+            if (line.isNotEmpty) {
+              final update = _parseJsonLine(line);
+              if (update != null) {
+                _logger.d('Gemini Stream Parsed ID: ${update.id}');
+                yield update;
+              }
+            }
+          }
+
+          // Reset buffer to the incomplete part
+          buffer.clear();
+          buffer.write(incompletePart);
+        }
+      }
+
+      // Process remaining buffer
+      final remaining = buffer.toString().trim();
+      if (remaining.isNotEmpty) {
+        final lines = remaining.split('\n');
+        for (final line in lines) {
+          final trimmed = line.trim();
+          if (trimmed.isNotEmpty) {
+            final update = _parseJsonLine(trimmed);
+            if (update != null) yield update;
+          }
+        }
+      }
+
+      _logger.i('Gemini: Streaming translation finished');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Gemini: Streaming translation failed',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      yield* Stream.error(e, stackTrace);
+    }
+  }
+
+  TranslationUpdateData? _parseJsonLine(String line) {
+    if (line.isEmpty) return null;
+    try {
+      // Remove potential artifacts like ```json or ``` if they appear on their own lines (though we asked for pure JSON Lines)
+      if (line.startsWith('```')) return null;
+
+      final json = jsonDecode(line);
+      if (json is Map<String, dynamic>) {
+        final id = json['id'];
+        final text = json['text'];
+        if (id != null && text != null) {
+          return TranslationUpdateData(
+            id: id.toString(),
+            text: text.toString(),
+          );
+        }
+      }
+    } catch (e) {
+      // It might be a partial line or garbage, ignore or log
+      // _logger.d('Failed to parse line: $line');
+    }
+    return null;
   }
 
   String _cleanResponse(String rawResponse) {

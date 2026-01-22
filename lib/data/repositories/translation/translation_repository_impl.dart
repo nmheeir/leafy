@@ -7,6 +7,7 @@ import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart
 import 'package:leafy/data/models/translation/summary_model.dart';
 import 'package:leafy/data/models/translation/translation_model.dart';
 import 'package:leafy/domain/translation/entities/translation_and_summary.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/translation/repository/translation_repository.dart';
 
 @LazySingleton(as: TranslationRepository)
@@ -15,6 +16,84 @@ class TranslationRepositoryImpl implements TranslationRepository {
   final TranslationRemoteDataSource _remoteDataSource;
 
   TranslationRepositoryImpl(this._localDataSource, this._remoteDataSource);
+
+  @override
+  Future<Either<Failure, TranslationModel?>> getLocalTranslatedChapter({
+    required String fileHash,
+    required int chapterIndex,
+    required String targetLang,
+  }) async {
+    try {
+      final local = await _localDataSource.getTranslation(
+        fileHash,
+        chapterIndex,
+        targetLang,
+      );
+      return Right(local);
+    } catch (e) {
+      return Left(Failure.cache(e.toString()));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, TranslationUpdate>> streamTranslateChapter({
+    required String fileHash,
+    required int chapterIndex,
+    required List<String> originalContent,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  }) async* {
+    try {
+      // 1. Prepare context for better translation
+      final contextSummaries = await _localDataSource.getSummaries(
+        fileHash,
+        (chapterIndex - 5).clamp(1, chapterIndex),
+        chapterIndex - 1,
+      );
+      final contextString = contextSummaries
+          .map((s) => s.summaryContent)
+          .join('\n');
+
+      // 2. Stream from remote
+      final Stream<TranslationUpdate> remoteStream = _remoteDataSource
+          .streamTranslateChapter(
+            originalParagraphs: originalContent,
+            context: contextString,
+            targetLang: targetLang,
+            bookTitle: bookTitle,
+            author: author,
+            bookSummary: bookSummary,
+          );
+
+      // Accumulator to save full result at the end
+      final Map<String, String> accumulatedTranslation = {};
+
+      await for (final update in remoteStream) {
+        if (update is TranslationUpdateData) {
+          accumulatedTranslation[update.id] = update.text;
+          yield Right(update);
+        } else if (update is TranslationUpdateSummary) {
+          yield Right(update);
+        }
+      }
+
+      // 3. Save accumulated translation to local DB
+      if (accumulatedTranslation.isNotEmpty) {
+        final newTranslation = TranslationModel(
+          fileHash: fileHash,
+          chapterIndex: chapterIndex,
+          targetLang: targetLang,
+          translatedContent: accumulatedTranslation,
+          lastUpdated: DateTime.now().millisecondsSinceEpoch,
+        );
+        await _localDataSource.saveTranslation(newTranslation);
+      }
+    } catch (e) {
+      yield Left(Failure.server(e.toString()));
+    }
+  }
 
   @override
   Future<Either<Failure, SummaryModel?>> getChapterSummary({

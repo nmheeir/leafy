@@ -1,4 +1,5 @@
 import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 
 abstract class TranslationRemoteDataSource {
   /// Translates a list of paragraphs.
@@ -17,6 +18,16 @@ abstract class TranslationRemoteDataSource {
 
   /// Translates and summarizes a chapter in one go.
   Future<TranslateAndSummarizeResponse> translateAndSummarizeChapter({
+    required List<String> originalParagraphs,
+    required String context,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  });
+
+  /// Streams translation updates from remote source.
+  Stream<TranslationUpdate> streamTranslateChapter({
     required List<String> originalParagraphs,
     required String context,
     required String targetLang,

@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/models/ai_provider.dart';
 
 @LazySingleton(as: TranslationRemoteDataSource)
@@ -70,6 +71,25 @@ class SmartTranslationRemoteDataSource implements TranslationRemoteDataSource {
   }) async {
     final dataSource = await _getDataSource();
     return dataSource.translateAndSummarizeChapter(
+      originalParagraphs: originalParagraphs,
+      context: context,
+      targetLang: targetLang,
+      bookTitle: bookTitle,
+      author: author,
+      bookSummary: bookSummary,
+    );
+  }
+
+  Stream<TranslationUpdate> streamTranslateChapter({
+    required List<String> originalParagraphs,
+    required String context,
+    required String targetLang,
+    required String bookTitle,
+    String? author,
+    String? bookSummary,
+  }) async* {
+    final dataSource = await _getDataSource();
+    yield* dataSource.streamTranslateChapter(
       originalParagraphs: originalParagraphs,
       context: context,
       targetLang: targetLang,

@@ -10,9 +10,11 @@ import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_pat
 import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
 import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_path.dart';
 import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
+import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
 import 'package:leafy/domain/translation/usecases/get_translated_chapter.dart';
+import 'package:leafy/domain/translation/usecases/stream_translate_chapter.dart';
 import 'package:leafy/domain/translation/usecases/generate_chapter_summary.dart';
 import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 
@@ -26,7 +28,10 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
   final LogReadingSessionByPathUseCase _logSessionUseCase;
   final MarkBookFinishedUseCase _markBookFinishedUseCase;
+  // ignore: unused_field
   final GetTranslatedChapterUseCase _getTranslatedChapterUseCase;
+  final StreamTranslateChapterUseCase _streamTranslateChapterUseCase;
+  // ignore: unused_field
   final GenerateChapterSummaryUseCase _generateChapterSummaryUseCase;
   final Logger _logger;
 
@@ -54,6 +59,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     this._logSessionUseCase,
     this._markBookFinishedUseCase,
     this._getTranslatedChapterUseCase,
+    this._streamTranslateChapterUseCase,
     this._generateChapterSummaryUseCase,
   ) : super(EpubReaderCubitState.initial());
 
@@ -65,23 +71,6 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     );
   }
 
-  Future<void> _generateSummary(int chapterIndex, String content) async {
-    if (_currentFilePath == null) return;
-
-    _logger.i('Generating summary for chapter $chapterIndex...');
-    final result = await _generateChapterSummaryUseCase(
-      filePath: _currentFilePath!,
-      chapterIndex: chapterIndex,
-      content: content,
-    );
-
-    result.fold(
-      (failure) => _logger.e('Failed to generate summary: $failure'),
-      (summary) =>
-          _logger.i('Summary for chapter $chapterIndex generated and saved.'),
-    );
-  }
-
   Future<void> translateChapter(int chapterIndex) async {
     final loadedState = state.mapOrNull(loaded: (s) => s);
     if (loadedState == null ||
@@ -90,7 +79,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       return;
     }
 
-    // Check if already translating or successful
+    // Check if already translating (but allow retries if error)
     final currentStatus = loadedState.translationStatuses[chapterIndex];
     if (currentStatus == TranslationStatus.translating ||
         currentStatus == TranslationStatus.success) {
@@ -109,52 +98,93 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         loadedState.book.chapters[chapterIndex].body,
       );
 
-      final result = await _getTranslatedChapterUseCase(
+      final stream = _streamTranslateChapterUseCase(
         filePath: _currentFilePath!,
+        fileHash: loadedState.fileHash!,
         chapterIndex: chapterIndex,
         originalContent: originalParagraphs,
         bookTitle: loadedState.book.title,
         author: loadedState.book.author,
       );
 
-      result.fold(
-        (failure) {
-          _logger.e('Translate error: $failure');
-          final errorStatuses = Map<int, TranslationStatus>.from(
-            loadedState.translationStatuses,
+      stream.listen(
+        (either) {
+          either.fold(
+            (failure) {
+              _logger.e('Translate error: $failure');
+              // Only update status if it's the first error or something?
+              // For stream, we might get partial data then error.
+              // We can show error toast or set status.
+              // If we already have some data, maybe we don't want to replace with error screen.
+              // But here we just set status.
+              final currentLoaded = state.mapOrNull(loaded: (s) => s);
+              if (currentLoaded != null) {
+                final errorStatuses = Map<int, TranslationStatus>.from(
+                  currentLoaded.translationStatuses,
+                );
+                errorStatuses[chapterIndex] = TranslationStatus.error;
+                emit(
+                  currentLoaded.copyWith(translationStatuses: errorStatuses),
+                );
+              }
+            },
+            (update) {
+              if (update is TranslationUpdateData) {
+                final currentLoaded = state.mapOrNull(loaded: (s) => s);
+                if (currentLoaded == null) return;
+
+                final currentTranslationMaps =
+                    Map<int, Map<String, String>>.from(
+                      currentLoaded.translationMaps,
+                    );
+
+                if (!currentTranslationMaps.containsKey(chapterIndex)) {
+                  currentTranslationMaps[chapterIndex] = {};
+                }
+                currentTranslationMaps[chapterIndex]![update.id] = update.text;
+
+                // Optimize: flattenBook is expensive.
+                final newDisplayItems = EpubHelper.flattenBook(
+                  currentLoaded.book,
+                  translationMaps: currentTranslationMaps,
+                );
+
+                emit(
+                  currentLoaded.copyWith(
+                    translationMaps: currentTranslationMaps,
+                    displayItems: newDisplayItems,
+                  ),
+                );
+              } else if (update is TranslationUpdateSummary) {
+                _logger.d('Received summary update: ${update.summary}');
+              }
+            },
           );
-          errorStatuses[chapterIndex] = TranslationStatus.error;
-          emit(loadedState.copyWith(translationStatuses: errorStatuses));
         },
-        (translation) {
-          final successStatuses = Map<int, TranslationStatus>.from(
-            loadedState.translationStatuses,
-          );
-          successStatuses[chapterIndex] = TranslationStatus.success;
-
-          final newTranslationMaps = Map<int, Map<String, String>>.from(
-            loadedState.translationMaps,
-          );
-          newTranslationMaps[chapterIndex] = translation.translatedContent;
-
-          final newDisplayItems = EpubHelper.flattenBook(
-            loadedState.book,
-            translationMaps: newTranslationMaps,
-          );
-
-          emit(
-            loadedState.copyWith(
-              translationStatuses: successStatuses,
-              translationMaps: newTranslationMaps,
-              displayItems: newDisplayItems,
-            ),
-          );
-
-          // Background summarization to build context for future translations
-          _generateSummary(
-            chapterIndex,
-            loadedState.book.chapters[chapterIndex].body,
-          );
+        onError: (e) {
+          _logger.e('Stream error: $e');
+          final currentLoaded = state.mapOrNull(loaded: (s) => s);
+          if (currentLoaded != null) {
+            final errorStatuses = Map<int, TranslationStatus>.from(
+              currentLoaded.translationStatuses,
+            );
+            errorStatuses[chapterIndex] = TranslationStatus.error;
+            emit(currentLoaded.copyWith(translationStatuses: errorStatuses));
+          }
+        },
+        onDone: () {
+          _logger.i('Translation stream completed for chapter $chapterIndex');
+          final currentLoaded = state.mapOrNull(loaded: (s) => s);
+          if (currentLoaded != null) {
+            // If we arrived here without fatal error, success.
+            // But we might have had failures in the stream (handled in listen).
+            // Assuming mixed success is success for status.
+            final successStatuses = Map<int, TranslationStatus>.from(
+              currentLoaded.translationStatuses,
+            );
+            successStatuses[chapterIndex] = TranslationStatus.success;
+            emit(currentLoaded.copyWith(translationStatuses: successStatuses));
+          }
         },
       );
     } catch (e) {

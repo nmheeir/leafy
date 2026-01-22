@@ -139,6 +139,7 @@ import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
 import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
+import '../domain/translation/usecases/stream_translate_chapter.dart' as _i27;
 import '../domain/translation/usecases/translate_and_summarize_chapter.dart'
     as _i472;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
@@ -560,6 +561,10 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i533.GetTranslatedChapterUseCase(gh<_i499.TranslationRepository>()),
     );
+    gh.factory<_i27.StreamTranslateChapterUseCase>(
+      () =>
+          _i27.StreamTranslateChapterUseCase(gh<_i499.TranslationRepository>()),
+    );
     gh.factory<_i472.TranslateAndSummarizeChapterUseCase>(
       () => _i472.TranslateAndSummarizeChapterUseCase(
         gh<_i499.TranslationRepository>(),
@@ -575,9 +580,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i693.AddBookResourceUseCase>(),
       ),
     );
-    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
-      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
-    );
     gh.lazySingleton<_i206.EpubReaderCubit>(
       () => _i206.EpubReaderCubit(
         gh<_i748.ParseEpubUseCase>(),
@@ -587,8 +589,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i770.LogReadingSessionByPathUseCase>(),
         gh<_i838.MarkBookFinishedUseCase>(),
         gh<_i533.GetTranslatedChapterUseCase>(),
+        gh<_i27.StreamTranslateChapterUseCase>(),
         gh<_i431.GenerateChapterSummaryUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
+      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
     gh.factory<_i407.BookResourceCubit>(
       () => _i407.BookResourceCubit(

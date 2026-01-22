@@ -644,6 +644,15 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     switch (status) {
       case TranslationStatus.loadingContext:
       case TranslationStatus.translating:
+        // Show loading if we are translating but no content yet, or rely on other mechanism.
+        // But actually, for streaming we might want to show an icon that indicates 'streaming'
+        // even if we have some text.
+        // For now, let's keep it as loading spinner.
+        return const SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        );
       case TranslationStatus.finalizing:
         return const SizedBox(
           width: 24,
