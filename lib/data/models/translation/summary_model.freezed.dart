@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SummaryModel {
 
- int? get id;@JsonKey(name: 'file_hash') String get fileHash;@JsonKey(name: 'chapter_index') int get chapterIndex;@JsonKey(name: 'summary_content') String get summaryContent;@JsonKey(name: 'last_updated') int? get lastUpdated;
+ int? get id;@JsonKey(name: 'file_hash') String get fileHash;@JsonKey(name: 'chapter_index') int get chapterIndex;@JsonKey(name: 'summary_content') String get summaryContent;@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? get lastUpdated;
 /// Create a copy of SummaryModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $SummaryModelCopyWith<$Res>  {
   factory $SummaryModelCopyWith(SummaryModel value, $Res Function(SummaryModel) _then) = _$SummaryModelCopyWithImpl;
 @useResult
 $Res call({
- int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'summary_content') String summaryContent,@JsonKey(name: 'last_updated') int? lastUpdated
+ int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'summary_content') String summaryContent,@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? lastUpdated
 });
 
 
@@ -72,7 +72,7 @@ as int?,fileHash: null == fileHash ? _self.fileHash : fileHash // ignore: cast_n
 as String,chapterIndex: null == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int,summaryContent: null == summaryContent ? _self.summaryContent : summaryContent // ignore: cast_nullable_to_non_nullable
 as String,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 
@@ -157,7 +157,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')  int? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SummaryModel() when $default != null:
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,_that.lastUpdated);case _:
@@ -178,7 +178,7 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')  int? lastUpdated)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)  $default,) {final _that = this;
 switch (_that) {
 case _SummaryModel():
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,_that.lastUpdated);case _:
@@ -198,7 +198,7 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')  int? lastUpdated)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int? id, @JsonKey(name: 'file_hash')  String fileHash, @JsonKey(name: 'chapter_index')  int chapterIndex, @JsonKey(name: 'summary_content')  String summaryContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter()  DateTime? lastUpdated)?  $default,) {final _that = this;
 switch (_that) {
 case _SummaryModel() when $default != null:
 return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,_that.lastUpdated);case _:
@@ -213,14 +213,14 @@ return $default(_that.id,_that.fileHash,_that.chapterIndex,_that.summaryContent,
 @JsonSerializable()
 
 class _SummaryModel implements SummaryModel {
-  const _SummaryModel({this.id, @JsonKey(name: 'file_hash') required this.fileHash, @JsonKey(name: 'chapter_index') required this.chapterIndex, @JsonKey(name: 'summary_content') required this.summaryContent, @JsonKey(name: 'last_updated') this.lastUpdated});
+  const _SummaryModel({this.id, @JsonKey(name: 'file_hash') required this.fileHash, @JsonKey(name: 'chapter_index') required this.chapterIndex, @JsonKey(name: 'summary_content') required this.summaryContent, @JsonKey(name: 'last_updated')@IntToDatetimeCoverter() this.lastUpdated});
   factory _SummaryModel.fromJson(Map<String, dynamic> json) => _$SummaryModelFromJson(json);
 
 @override final  int? id;
 @override@JsonKey(name: 'file_hash') final  String fileHash;
 @override@JsonKey(name: 'chapter_index') final  int chapterIndex;
 @override@JsonKey(name: 'summary_content') final  String summaryContent;
-@override@JsonKey(name: 'last_updated') final  int? lastUpdated;
+@override@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() final  DateTime? lastUpdated;
 
 /// Create a copy of SummaryModel
 /// with the given fields replaced by the non-null parameter values.
@@ -255,7 +255,7 @@ abstract mixin class _$SummaryModelCopyWith<$Res> implements $SummaryModelCopyWi
   factory _$SummaryModelCopyWith(_SummaryModel value, $Res Function(_SummaryModel) _then) = __$SummaryModelCopyWithImpl;
 @override @useResult
 $Res call({
- int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'summary_content') String summaryContent,@JsonKey(name: 'last_updated') int? lastUpdated
+ int? id,@JsonKey(name: 'file_hash') String fileHash,@JsonKey(name: 'chapter_index') int chapterIndex,@JsonKey(name: 'summary_content') String summaryContent,@JsonKey(name: 'last_updated')@IntToDatetimeCoverter() DateTime? lastUpdated
 });
 
 
@@ -279,7 +279,7 @@ as int?,fileHash: null == fileHash ? _self.fileHash : fileHash // ignore: cast_n
 as String,chapterIndex: null == chapterIndex ? _self.chapterIndex : chapterIndex // ignore: cast_nullable_to_non_nullable
 as int,summaryContent: null == summaryContent ? _self.summaryContent : summaryContent // ignore: cast_nullable_to_non_nullable
 as String,lastUpdated: freezed == lastUpdated ? _self.lastUpdated : lastUpdated // ignore: cast_nullable_to_non_nullable
-as int?,
+as DateTime?,
   ));
 }
 

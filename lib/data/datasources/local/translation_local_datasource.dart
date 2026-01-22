@@ -49,7 +49,7 @@ class TranslationLocalDataSourceImpl implements TranslationLocalDataSource {
     final List<Map<String, dynamic>> maps = await db.query(
       'epub_translations',
       where: 'file_hash = ? AND chapter_index = ? AND target_lang = ?',
-      whereArgs: [fileHash, chapterIndex, lang],
+      whereArgs: [fileHash, chapterIndex, lang.code],
     );
 
     if (maps.isEmpty) return null;

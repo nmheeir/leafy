@@ -12,14 +12,17 @@ _SummaryModel _$SummaryModelFromJson(Map<String, dynamic> json) =>
       fileHash: json['file_hash'] as String,
       chapterIndex: (json['chapter_index'] as num).toInt(),
       summaryContent: json['summary_content'] as String,
-      lastUpdated: (json['last_updated'] as num?)?.toInt(),
+      lastUpdated: const IntToDatetimeCoverter().fromJson(
+        (json['last_updated'] as num?)?.toInt(),
+      ),
     );
 
-Map<String, dynamic> _$SummaryModelToJson(_SummaryModel instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'file_hash': instance.fileHash,
-      'chapter_index': instance.chapterIndex,
-      'summary_content': instance.summaryContent,
-      'last_updated': instance.lastUpdated,
-    };
+Map<String, dynamic> _$SummaryModelToJson(
+  _SummaryModel instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'file_hash': instance.fileHash,
+  'chapter_index': instance.chapterIndex,
+  'summary_content': instance.summaryContent,
+  'last_updated': const IntToDatetimeCoverter().toJson(instance.lastUpdated),
+};

@@ -89,14 +89,14 @@ class TranslationRepositoryImpl implements TranslationRepository {
               fileHash: fileHash,
               chapterIndex: chapterIndex,
               summaryContent: update.summary,
-              lastUpdated: DateTime.now().millisecondsSinceEpoch,
+              lastUpdated: DateTime.now(),
             ),
           );
           yield Right(update);
         }
       }
 
-      _logger.d('AccumeulatdTranslation: ${accumulatedTranslation.toString()}');
+      // _logger.d('AccumeulatdTranslation: ${accumulatedTranslation.toString()}');
 
       // 3. Save accumulated translation to local DB
       if (accumulatedTranslation.isNotEmpty) {
@@ -256,7 +256,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
           fileHash: fileHash,
           chapterIndex: chapterIndex,
           summaryContent: content,
-          lastUpdated: DateTime.now().millisecondsSinceEpoch,
+          lastUpdated: DateTime.now(),
         ),
       );
       return const Right(null);
@@ -333,7 +333,7 @@ class TranslationRepositoryImpl implements TranslationRepository {
         fileHash: fileHash,
         chapterIndex: chapterIndex,
         summaryContent: result.summary,
-        lastUpdated: DateTime.now().millisecondsSinceEpoch,
+        lastUpdated: DateTime.now(),
       );
 
       await _localDataSource.saveTranslation(newTranslation);

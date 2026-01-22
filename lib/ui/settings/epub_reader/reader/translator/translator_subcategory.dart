@@ -61,7 +61,7 @@ class _TargetLanguageSelector extends StatelessWidget {
     return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
       builder: (context, state) {
         return ListTile(
-          title: const Text("Translate to"),
+          title: Text(LocaleKeys.epub_reader_translator_translate_to),
           subtitle: Text(
             state.translationLanguage.displayName,
             style: TextStyle(color: context.colorScheme.primary),

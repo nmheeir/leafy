@@ -386,10 +386,24 @@ abstract class  LocaleKeys {
   static const epub_reader_text_paragraph_spacing_description = 'epub_reader.text.paragraph_spacing_description';
   static const epub_reader_text = 'epub_reader.text';
   static const epub_reader_translator_title = 'epub_reader.translator.title';
+  static const epub_reader_translator_translate_to = 'epub_reader.translator.translate_to';
   static const epub_reader_translator_double_click_translation = 'epub_reader.translator.double_click_translation';
   static const epub_reader_translator_double_click_translation_description = 'epub_reader.translator.double_click_translation_description';
   static const epub_reader_translator_auto_detect_source_language = 'epub_reader.translator.auto_detect_source_language';
   static const epub_reader_translator = 'epub_reader.translator';
   static const epub_reader = 'epub_reader';
+  static const ai_api_key_setting_title = 'ai_api_key_setting.title';
+  static const ai_api_key_setting_config = 'ai_api_key_setting.config';
+  static const ai_api_key_setting_provider = 'ai_api_key_setting.provider';
+  static const ai_api_key_setting_api_key = 'ai_api_key_setting.api_key';
+  static const ai_api_key_setting_save_load_models = 'ai_api_key_setting.save_load_models';
+  static const ai_api_key_setting_saving_loading_models = 'ai_api_key_setting.saving_loading_models';
+  static const ai_api_key_setting_select_model = 'ai_api_key_setting.select_model';
+  static const ai_api_key_setting_not_selected = 'ai_api_key_setting.not_selected';
+  static const ai_api_key_setting_model = 'ai_api_key_setting.model';
+  static const ai_api_key_setting_guide = 'ai_api_key_setting.guide';
+  static const ai_api_key_setting_how_to_get_api_key = 'ai_api_key_setting.how_to_get_api_key';
+  static const ai_api_key_setting_visit_ai_studio_site = 'ai_api_key_setting.visit_ai_studio_site';
+  static const ai_api_key_setting = 'ai_api_key_setting';
 
 }

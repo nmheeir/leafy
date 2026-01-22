@@ -555,7 +555,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                 translationStatus == TranslationStatus.error) {
               final language =
                   context.epubReaderSettingCubit.state.translationLanguage;
-              print('Translation Language: $language');
               context.epubReaderCubit.translateChapter(
                 currentChapter,
                 targetLanguage: language,

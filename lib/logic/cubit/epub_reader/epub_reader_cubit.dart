@@ -69,17 +69,29 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     int chapterIndex, {
     TranslationLanguage? targetLanguage,
   }) async {
+    _logger.i(
+      'Call translateChapter: index=$chapterIndex, lang=${targetLanguage?.name}',
+    );
+
     final loadedState = state.mapOrNull(loaded: (s) => s);
     if (loadedState == null ||
         _currentFilePath == null ||
         loadedState.fileHash == null) {
+      _logger.w(
+        'Translate aborted: Invalid state. loadedState=${loadedState != null}, path=$_currentFilePath, hash=${loadedState?.fileHash}',
+      );
       return;
     }
 
     // Check if already translating (but allow retries if error)
     final currentStatus = loadedState.translationStatuses[chapterIndex];
+    _logger.d('Current Status: $currentStatus');
+    _logger.d('Chapter Index: $chapterIndex');
     if (currentStatus == TranslationStatus.translating ||
         currentStatus == TranslationStatus.success) {
+      _logger.i(
+        'Translate skipped: Chapter $chapterIndex status is $currentStatus',
+      );
       return;
     }
 
@@ -91,10 +103,14 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     emit(
       loadedState.copyWith(translationStatuses: newStatuses, isBilingual: true),
     );
+    _logger.d('State updated: Chapter $chapterIndex set to translating');
 
     try {
       final originalParagraphs = EpubHelper.splitToParagraphs(
         loadedState.book.chapters[chapterIndex].body,
+      );
+      _logger.d(
+        'Prepared ${originalParagraphs.length} paragraphs for translation',
       );
 
       final stream = _streamTranslateChapterUseCase(
@@ -107,11 +123,14 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         targetLang: targetLanguage ?? TranslationLanguage.vietnamese,
       );
 
+      _logger.d('Stream initiated, starting listener...');
+
       stream.listen(
         (either) {
           either.fold(
             (failure) {
-              _logger.e('Translate error: $failure');
+              // NOTE: cần hiển thị lỗi cho UI
+              _logger.e('Translate error (Failure): $failure');
               final currentLoaded = state.mapOrNull(loaded: (s) => s);
               if (currentLoaded != null) {
                 final errorStatuses = Map<int, TranslationStatus>.from(
@@ -125,8 +144,14 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
             },
             (update) {
               if (update is TranslationUpdateData) {
+                _logger.t(
+                  'Received UpdateData: id=${update.id}, textLength=${update.text.length}',
+                );
                 final currentLoaded = state.mapOrNull(loaded: (s) => s);
-                if (currentLoaded == null) return;
+                if (currentLoaded == null) {
+                  _logger.w('UpdateData ignored: State is not Loaded');
+                  return;
+                }
 
                 final currentTranslationMaps =
                     Map<int, Map<String, String>>.from(
@@ -139,6 +164,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
                 currentTranslationMaps[chapterIndex]![update.id] = update.text;
 
                 // Optimize: flattenBook is expensive.
+                _logger.t('Flattening book for display...');
                 final newDisplayItems = EpubHelper.flattenBook(
                   currentLoaded.book,
                   translationMaps: currentTranslationMaps,
@@ -150,6 +176,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
                     displayItems: newDisplayItems,
                   ),
                 );
+                _logger.t('State emitted with new translation data');
               } else if (update is TranslationUpdateSummary) {
                 _logger.d('Received summary update: ${update.summary}');
               }
@@ -157,7 +184,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           );
         },
         onError: (e) {
-          _logger.e('Stream error: $e');
+          _logger.e('Stream error (onError): $e');
           final currentLoaded = state.mapOrNull(loaded: (s) => s);
           if (currentLoaded != null) {
             final errorStatuses = Map<int, TranslationStatus>.from(
@@ -179,8 +206,12 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           }
         },
       );
-    } catch (e) {
-      _logger.e('Unexpected translation error: $e');
+    } catch (e, stackTrace) {
+      _logger.e(
+        'Unexpected translation error: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
       final errorStatuses = Map<int, TranslationStatus>.from(
         loadedState.translationStatuses,
       );

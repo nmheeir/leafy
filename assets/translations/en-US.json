@@ -404,9 +404,25 @@
     },
     "translator": {
       "title": "Translator",
+      "translate_to": "Translate to",
       "double_click_translation": "Double Click Translation",
       "double_click_translation_description": "Double Click Translation",
       "auto_detect_source_language": "Auto-detect Source Language"
-    }
+    },
+    "appearance": {}
+  },
+  "ai_api_key_setting": {
+    "title": "AI Api Key Settings",
+    "config": "Config API Keys",
+    "provider": "Provider",
+    "api_key": "API Key",
+    "save_load_models": "Save & Load models",
+    "saving_loading_models": "Saving and loading the model list…",
+    "select_model": "Select model",
+    "not_selected": "Not selected",
+    "model": "Model",
+    "guide": "Guide",
+    "how_to_get_api_key": "How to get API key",
+    "visit_ai_studio_site": "Visit aistudio.google.com to create a free API key."
   }
 }

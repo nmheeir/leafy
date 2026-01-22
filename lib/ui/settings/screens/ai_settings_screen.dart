@@ -1,6 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/domain/models/ai_provider.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -39,7 +41,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
         if (state.error != null) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(SnackBar(content: Text('Lỗi: ${state.error}')));
+          ).showSnackBar(SnackBar(content: Text('Error: ${state.error}')));
         }
         // Update text controller when apiKey changes (e.g. switching provider)
         if (state.apiKey != null && _controller.text != state.apiKey) {
@@ -50,7 +52,9 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
       },
       builder: (context, state) {
         return Scaffold(
-          appBar: AppBar(title: const Text('Cấu hình AI')),
+          appBar: AppBar(
+            title: Text(LocaleKeys.ai_api_key_setting_config.tr()),
+          ),
           body: state.isLoading && state.availableModels.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : SettingsList(
@@ -62,7 +66,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                   ),
                   sections: [
                     SettingsSection(
-                      title: const Text('Provider'),
+                      title: Text(LocaleKeys.ai_api_key_setting_provider.tr()),
                       tiles: [
                         CustomSettingsTile(
                           child: Padding(
@@ -91,7 +95,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                       ],
                     ),
                     SettingsSection(
-                      title: const Text('API Key'),
+                      title: Text(LocaleKeys.ai_api_key_setting_api_key.tr()),
                       tiles: [
                         CustomSettingsTile(
                           child: Padding(
@@ -112,7 +116,9 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                                   obscureText: _isObscure,
                                   decoration: InputDecoration(
                                     border: const OutlineInputBorder(),
-                                    labelText: 'API Key',
+                                    labelText: LocaleKeys
+                                        .ai_api_key_setting_api_key
+                                        .tr(),
                                     suffixIcon: IconButton(
                                       icon: Icon(
                                         _isObscure
@@ -138,15 +144,21 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(
-                                        const SnackBar(
+                                        SnackBar(
                                           content: Text(
-                                            'Đang lưu và tải danh sách model...',
+                                            LocaleKeys
+                                                .ai_api_key_setting_saving_loading_models
+                                                .tr(),
                                           ),
                                         ),
                                       );
                                     },
                                     icon: const Icon(Icons.save),
-                                    label: const Text('Lưu & Tải Models'),
+                                    label: Text(
+                                      LocaleKeys
+                                          .ai_api_key_setting_save_load_models
+                                          .tr(),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -157,12 +169,20 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                     ),
                     if (state.availableModels.isNotEmpty)
                       SettingsSection(
-                        title: const Text('Chọn Model'),
+                        title: Text(
+                          LocaleKeys.ai_api_key_setting_not_selected.tr(),
+                        ),
                         tiles: [
                           SettingsTile.navigation(
                             leading: const Icon(Icons.psychology),
-                            title: const Text('Mô hình'),
-                            value: Text(state.selectedModel ?? 'Chưa chọn'),
+                            title: Text(
+                              LocaleKeys.ai_api_key_setting_model.tr(),
+                            ),
+                            value: Text(
+                              state.selectedModel ??
+                                  LocaleKeys.ai_api_key_setting_not_selected
+                                      .tr(),
+                            ),
                             onPressed: (context) {
                               _showModelSelectionDialog(context, state);
                             },
@@ -170,14 +190,18 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
                         ],
                       ),
                     SettingsSection(
-                      title: const Text('Hướng dẫn'),
+                      title: Text(LocaleKeys.ai_api_key_setting_guide.tr()),
                       tiles: [
                         if (state.selectedProvider == AIProvider.gemini)
                           SettingsTile.navigation(
                             leading: const Icon(Icons.help_outline),
-                            title: const Text('Cách lấy API Key'),
-                            description: const Text(
-                              'Truy cập aistudio.google.com để tạo key miễn phí.',
+                            title: Text(
+                              LocaleKeys.ai_api_key_setting_how_to_get_api_key
+                                  .tr(),
+                            ),
+                            description: Text(
+                              LocaleKeys.ai_api_key_setting_visit_ai_studio_site
+                                  .tr(),
                             ),
                             onPressed: (context) {
                               launchUrl(
@@ -202,7 +226,7 @@ class _AISettingsScreenState extends State<AISettingsScreen> {
       context: context,
       builder: (context) {
         return SimpleDialog(
-          title: const Text('Chọn Model'),
+          title: Text(LocaleKeys.ai_api_key_setting_select_model.tr()),
           children: state.availableModels.map((model) {
             return SimpleDialogOption(
               onPressed: () {

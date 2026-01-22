@@ -84,8 +84,11 @@ class SettingsScreen extends StatelessWidget {
                       _buildBackupRestoreSetting(context),
                       _buildAppearanceSetting(context),
                       _buildLanguageSetting(context),
-                      _buildGeminiApiSetting(context),
                     ],
+                  ),
+                  SettingsSection(
+                    title: Text(LocaleKeys.ai_api_key_setting_title.tr()),
+                    tiles: [_buildGeminiApiSetting(context)],
                   ),
                   SettingsSection(
                     title: Text(
@@ -336,7 +339,10 @@ class SettingsScreen extends StatelessWidget {
 
   SettingsTile _buildGeminiApiSetting(BuildContext context) {
     return SettingsTile.navigation(
-      title: const Text('Cấu hình Gemini API', style: TextStyle(fontSize: 16)),
+      title: Text(
+        LocaleKeys.ai_api_key_setting_config,
+        style: TextStyle(fontSize: 16),
+      ),
       leading: const Icon(Icons.psychology_outlined),
       onPressed: (context) => context.push(Routes.settingAiApi),
     );

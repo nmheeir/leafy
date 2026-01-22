@@ -37,6 +37,7 @@ class StreamTranslateChapterUseCase {
       for (final entry in localModel.translatedContent.entries) {
         yield Right(TranslationUpdateData(id: entry.key, text: entry.value));
       }
+      _logger.d('Local model: ${localModel.toJson()}');
 
       // Trigger summary check
       _checkAndGenerateSummary(
@@ -46,6 +47,8 @@ class StreamTranslateChapterUseCase {
       );
       return;
     }
+
+    _logger.d('Local model is null');
 
     // 2. Stream from remote
     yield* _repository.streamTranslateChapter(

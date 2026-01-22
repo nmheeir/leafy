@@ -12,7 +12,6 @@ part 'open_lib_search_bloc.freezed.dart';
 part 'open_lib_search_event.dart';
 part 'open_lib_search_state.dart';
 
-// TODO: đổi tên thành OpenLibSearchBloc
 @injectable
 class OpenLibSearchBloc extends Bloc<OpenLibSearchEvent, OpenLibSearchState> {
   final OpenLibSearchUseCase _openLibSearchUseCase;
@@ -247,7 +246,10 @@ class OpenLibSearchBloc extends Bloc<OpenLibSearchEvent, OpenLibSearchState> {
     );
   }
 
-  Future<void> _onLoadMore(_LoadMore event, Emitter<OpenLibSearchState> emit) async {
+  Future<void> _onLoadMore(
+    _LoadMore event,
+    Emitter<OpenLibSearchState> emit,
+  ) async {
     if (state.hasReachedMax || state.status == SearchStatus.loading) return;
 
     // Không emit Loading để tránh UI giật, user chỉ thấy list dài ra
