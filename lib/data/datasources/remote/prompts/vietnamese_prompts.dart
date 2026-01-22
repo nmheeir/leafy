@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'package:leafy/core/constants/enums/translation_language.dart';
+import 'package:leafy/data/datasources/remote/prompts/translation_prompt_strategy.dart';
 
-abstract final class GeminiPrompts {
-  static String translateChapter({
+class VietnamesePrompts implements TranslationPromptStrategy {
+  @override
+  String translateChapter({
     required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
@@ -15,7 +17,6 @@ abstract final class GeminiPrompts {
       inputData.add({'i': i, 't': paragraphs[i]});
     }
 
-    // Xây dựng phần hồ sơ tác phẩm
     final bookProfile = [
       "Tên tác phẩm: $bookTitle",
       if (author != null && author.isNotEmpty) "Tác giả: $author",
@@ -47,11 +48,13 @@ ${jsonEncode(inputData)}
 ''';
   }
 
-  static String summarizeContent(String content) {
+  @override
+  String summarizeContent(String content) {
     return 'Hãy tóm tắt nội dung sau đây một cách ngắn gọn, súc tích (khoảng 3-5 câu), tập trung vào các tình tiết chính để làm bối cảnh cho việc dịch các chương sau:\n\n$content';
   }
 
-  static String translateAndSummarizeChapter({
+  @override
+  String translateAndSummarizeChapter({
     required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,
@@ -103,7 +106,8 @@ ${jsonEncode(inputData)}
 ''';
   }
 
-  static String streamTranslateChapter({
+  @override
+  String streamTranslateChapter({
     required TranslationLanguage targetLang,
     required String bookTitle,
     String? author,

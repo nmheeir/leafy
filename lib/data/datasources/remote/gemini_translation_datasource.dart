@@ -3,7 +3,7 @@ import 'package:googleai_dart/googleai_dart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/config/app_config.dart';
 import 'package:leafy/core/constants/enums/translation_language.dart';
-import 'package:leafy/data/datasources/remote/gemini_prompts.dart';
+import 'package:leafy/data/datasources/remote/prompts/prompt_strategy_factory.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/data/datasources/remote/translation_remote_datasource.dart';
 import 'package:leafy/data/models/translation/translate_and_summarize_response.dart';
@@ -44,7 +44,9 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       );
       final client = await _getClient();
 
-      final prompt = GeminiPrompts.translateChapter(
+      final strategy = PromptStrategyFactory.getStrategy(targetLang);
+
+      final prompt = strategy.translateChapter(
         targetLang: targetLang,
         bookTitle: bookTitle,
         author: author,
@@ -90,7 +92,13 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       _logger.i('Gemini: Starting content summarization');
       final client = await _getClient();
 
-      final prompt = GeminiPrompts.summarizeContent(content);
+      // Unknown target language for standalone summarization, defaulting to Vietnamese
+      // to match original behavior or we could infer from app settings if we had access here.
+      // Since the original code used Vietnamese prompts hardcoded, we use Vietnamese strategy.
+      // NOTE: This is a temporary solution, we should fix this in the future
+      const defaultLang = TranslationLanguage.vietnamese;
+      final strategy = PromptStrategyFactory.getStrategy(defaultLang);
+      final prompt = strategy.summarizeContent(content);
 
       final model = await _appConfig.getSelectedModel() ?? _defaultModel;
 
@@ -132,7 +140,9 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       );
       final client = await _getClient();
 
-      final prompt = GeminiPrompts.translateAndSummarizeChapter(
+      final strategy = PromptStrategyFactory.getStrategy(targetLang);
+
+      final prompt = strategy.translateAndSummarizeChapter(
         targetLang: targetLang,
         bookTitle: bookTitle,
         author: author,
@@ -191,7 +201,8 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
       );
 
       final client = await _getClient();
-      final prompt = GeminiPrompts.streamTranslateChapter(
+      final strategy = PromptStrategyFactory.getStrategy(targetLang);
+      final prompt = strategy.streamTranslateChapter(
         targetLang: targetLang,
         bookTitle: bookTitle,
         author: author,
