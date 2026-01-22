@@ -16,6 +16,8 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
 
   GeminiRemoteDataSource(this._appConfig, this._logger);
 
+  final String _defaultModel = 'gemini-2.5-flash-lite';
+
   Future<GoogleAIClient> _getClient() async {
     final apiKey = await _appConfig.getGeminiApiKey();
     if (apiKey == null || apiKey.isEmpty) {
@@ -50,33 +52,31 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
         paragraphs: originalParagraphs,
       );
 
-      final model =
-          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
+      final model = await _appConfig.getSelectedModel() ?? _defaultModel;
 
       _logger.d('Gemini Prompt: $prompt, Model: $model');
 
-      // final response = await client.models.generateContent(
-      //   model: model,
-      //   request: GenerateContentRequest(
-      //     contents: [Content.text(prompt)],
-      //     generationConfig: const GenerationConfig(
-      //       responseMimeType: 'application/json',
-      //     ),
-      //   ),
-      // );
+      final response = await client.models.generateContent(
+        model: model,
+        request: GenerateContentRequest(
+          contents: [Content.text(prompt)],
+          generationConfig: const GenerationConfig(
+            responseMimeType: 'application/json',
+          ),
+        ),
+      );
 
-      // final text = _cleanResponse(response.text ?? '');
+      final text = _cleanResponse(response.text ?? '');
 
-      // if (text.isEmpty) {
-      //   throw Exception('Empty response from Gemini');
-      // }
+      if (text.isEmpty) {
+        throw Exception('Empty response from Gemini');
+      }
 
-      // _logger.i('Gemini: Translation successful');
-      // _logger.d('Gemini Response (cleaned): $text');
+      _logger.i('Gemini: Translation successful');
+      _logger.d('Gemini Response (cleaned): $text');
 
-      // final Map<String, dynamic> rawMap = jsonDecode(text);
-      // return rawMap.map((key, value) => MapEntry(key, value.toString()));
-      return {};
+      final Map<String, dynamic> rawMap = jsonDecode(text);
+      return rawMap.map((key, value) => MapEntry(key, value.toString()));
     } catch (e, stackTrace) {
       _logger.e('Gemini: Translation failed', error: e, stackTrace: stackTrace);
       rethrow;
@@ -91,23 +91,21 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
 
       final prompt = GeminiPrompts.summarizeContent(content);
 
-      final model =
-          await _appConfig.getSelectedModel() ?? 'gemini-3-flash-preview';
+      final model = await _appConfig.getSelectedModel() ?? _defaultModel;
 
       _logger.d('Gemini Prompt: $prompt, Model: $model');
 
-      // final response = await client.models.generateContent(
-      //   model: model,
-      //   request: GenerateContentRequest(contents: [Content.text(prompt)]),
-      // );
+      final response = await client.models.generateContent(
+        model: model,
+        request: GenerateContentRequest(contents: [Content.text(prompt)]),
+      );
 
-      // final text = _cleanResponse(response.text ?? '');
+      final text = _cleanResponse(response.text ?? '');
 
-      // _logger.i('Gemini: Summarization successful');
-      // _logger.d('Gemini Summary: $text');
+      _logger.i('Gemini: Summarization successful');
+      _logger.d('Gemini Summary: $text');
 
-      // return text;
-      return '';
+      return text;
     } catch (e, stackTrace) {
       _logger.e(
         'Gemini: Summarization failed',
@@ -142,8 +140,7 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
         paragraphs: originalParagraphs,
       );
 
-      final model =
-          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
+      final model = await _appConfig.getSelectedModel() ?? _defaultModel;
 
       _logger.d('Gemini Prompt: $prompt, Model: $model');
 
@@ -202,8 +199,7 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
         paragraphs: originalParagraphs,
       );
 
-      final model =
-          await _appConfig.getSelectedModel() ?? 'gemini-2.5-flash-lite';
+      final model = await _appConfig.getSelectedModel() ?? _defaultModel;
 
       _logger.d('Gemini Stream Prompt: $prompt, Model: $model');
 
@@ -241,7 +237,11 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
             if (line.isNotEmpty) {
               final update = _parseJsonLine(line);
               if (update != null) {
-                _logger.d('Gemini Stream Parsed ID: ${update.id}');
+                if (update is TranslationUpdateData) {
+                  _logger.d('Gemini Stream Parsed ID: ${update.id}');
+                } else if (update is TranslationUpdateSummary) {
+                  _logger.d('Gemini Stream Parsed Summary');
+                }
                 yield update;
               }
             }
@@ -277,26 +277,45 @@ class GeminiRemoteDataSource implements TranslationRemoteDataSource {
     }
   }
 
-  TranslationUpdateData? _parseJsonLine(String line) {
+  TranslationUpdate? _parseJsonLine(String line) {
     if (line.isEmpty) return null;
     try {
-      // Remove potential artifacts like ```json or ``` if they appear on their own lines (though we asked for pure JSON Lines)
       if (line.startsWith('```')) return null;
 
       final json = jsonDecode(line);
       if (json is Map<String, dynamic>) {
-        final id = json['id'];
-        final text = json['text'];
-        if (id != null && text != null) {
-          return TranslationUpdateData(
-            id: id.toString(),
-            text: text.toString(),
-          );
+        // Check for "type" field
+        final type = json['type'];
+
+        if (type == 'summary') {
+          final content = json['content'];
+          if (content != null) {
+            return TranslationUpdateSummary(summary: content.toString());
+          }
+        } else if (type == 'translation') {
+          final id = json['id'];
+          final text = json['text'];
+          if (id != null && text != null) {
+            return TranslationUpdateData(
+              id: id.toString(),
+              text: text.toString(),
+            );
+          }
+        } else {
+          // Fallback for legacy or untyped
+          final id = json['id'];
+          final text = json['text'];
+          if (id != null && text != null) {
+            return TranslationUpdateData(
+              id: id.toString(),
+              text: text.toString(),
+            );
+          }
         }
       }
     } catch (e) {
-      // It might be a partial line or garbage, ignore or log
-      // _logger.d('Failed to parse line: $line');
+      // Ignore parse error
+      _logger.e('Gemini: Failed to parse line', error: e);
     }
     return null;
   }

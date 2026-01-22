@@ -1,22 +1,21 @@
 import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 import 'package:leafy/core/utils/helpers/epub_helper.dart';
-import 'package:leafy/domain/epub_reader/usecases/parse_epub.dart';
+import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_book.dart';
 import 'package:leafy/domain/epub_reader/entities/epub_display_item.dart';
+import 'package:leafy/domain/epub_reader/usecases/parse_epub.dart';
 import 'package:leafy/domain/reader_progress/usecases/get_reader_progress_by_path.dart';
 import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_path.dart';
 import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_path.dart';
-import 'package:leafy/domain/book/usecases/mark_book_finished.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
+import 'package:leafy/domain/translation/usecases/stream_translate_chapter.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
-import 'package:leafy/domain/translation/usecases/get_translated_chapter.dart';
-import 'package:leafy/domain/translation/usecases/stream_translate_chapter.dart';
-import 'package:leafy/domain/translation/usecases/generate_chapter_summary.dart';
-import 'package:leafy/core/utils/crypto/crypto_utils.dart';
 
 part 'epub_reader_cubit.freezed.dart';
 part 'epub_reader_cubit_state.dart';
@@ -28,11 +27,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   final GetReaderProgressByPathUseCase _getReaderProgressByPathUseCase;
   final LogReadingSessionByPathUseCase _logSessionUseCase;
   final MarkBookFinishedUseCase _markBookFinishedUseCase;
-  // ignore: unused_field
-  final GetTranslatedChapterUseCase _getTranslatedChapterUseCase;
   final StreamTranslateChapterUseCase _streamTranslateChapterUseCase;
-  // ignore: unused_field
-  final GenerateChapterSummaryUseCase _generateChapterSummaryUseCase;
   final Logger _logger;
 
   String? _currentFilePath;
@@ -58,9 +53,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
     this._getReaderProgressByPathUseCase,
     this._logSessionUseCase,
     this._markBookFinishedUseCase,
-    this._getTranslatedChapterUseCase,
     this._streamTranslateChapterUseCase,
-    this._generateChapterSummaryUseCase,
   ) : super(EpubReaderCubitState.initial());
 
   void selectChapter(int index) {
@@ -86,12 +79,14 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       return;
     }
 
-    // Update Status: Loading
+    // Update Status: Loading, and enable bilingual mode
     final newStatuses = Map<int, TranslationStatus>.from(
       loadedState.translationStatuses,
     );
     newStatuses[chapterIndex] = TranslationStatus.translating;
-    emit(loadedState.copyWith(translationStatuses: newStatuses));
+    emit(
+      loadedState.copyWith(translationStatuses: newStatuses, isBilingual: true),
+    );
 
     try {
       final originalParagraphs = EpubHelper.splitToParagraphs(
@@ -112,11 +107,6 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           either.fold(
             (failure) {
               _logger.e('Translate error: $failure');
-              // Only update status if it's the first error or something?
-              // For stream, we might get partial data then error.
-              // We can show error toast or set status.
-              // If we already have some data, maybe we don't want to replace with error screen.
-              // But here we just set status.
               final currentLoaded = state.mapOrNull(loaded: (s) => s);
               if (currentLoaded != null) {
                 final errorStatuses = Map<int, TranslationStatus>.from(
@@ -176,9 +166,6 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           _logger.i('Translation stream completed for chapter $chapterIndex');
           final currentLoaded = state.mapOrNull(loaded: (s) => s);
           if (currentLoaded != null) {
-            // If we arrived here without fatal error, success.
-            // But we might have had failures in the stream (handled in listen).
-            // Assuming mixed success is success for status.
             final successStatuses = Map<int, TranslationStatus>.from(
               currentLoaded.translationStatuses,
             );

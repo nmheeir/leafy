@@ -75,6 +75,15 @@ class TranslationRepositoryImpl implements TranslationRepository {
           accumulatedTranslation[update.id] = update.text;
           yield Right(update);
         } else if (update is TranslationUpdateSummary) {
+          // Save summary immediately when received
+          await _localDataSource.saveSummary(
+            SummaryModel(
+              fileHash: fileHash,
+              chapterIndex: chapterIndex,
+              summaryContent: update.summary,
+              lastUpdated: DateTime.now().millisecondsSinceEpoch,
+            ),
+          );
           yield Right(update);
         }
       }

@@ -561,13 +561,15 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i533.GetTranslatedChapterUseCase(gh<_i499.TranslationRepository>()),
     );
-    gh.factory<_i27.StreamTranslateChapterUseCase>(
-      () =>
-          _i27.StreamTranslateChapterUseCase(gh<_i499.TranslationRepository>()),
-    );
     gh.factory<_i472.TranslateAndSummarizeChapterUseCase>(
       () => _i472.TranslateAndSummarizeChapterUseCase(
         gh<_i499.TranslationRepository>(),
+      ),
+    );
+    gh.factory<_i27.StreamTranslateChapterUseCase>(
+      () => _i27.StreamTranslateChapterUseCase(
+        gh<_i499.TranslationRepository>(),
+        gh<_i974.Logger>(),
       ),
     );
     gh.factory<_i607.BookActorCubit>(
@@ -579,6 +581,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i909.BulkDeleteUseCase>(),
         gh<_i693.AddBookResourceUseCase>(),
       ),
+    );
+    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
+      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
     gh.lazySingleton<_i206.EpubReaderCubit>(
       () => _i206.EpubReaderCubit(
@@ -592,9 +597,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i27.StreamTranslateChapterUseCase>(),
         gh<_i431.GenerateChapterSummaryUseCase>(),
       ),
-    );
-    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
-      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
     gh.factory<_i407.BookResourceCubit>(
       () => _i407.BookResourceCubit(

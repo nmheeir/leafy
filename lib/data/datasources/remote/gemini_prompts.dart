@@ -142,7 +142,9 @@ Bối cảnh chương này: $chapterContext
    - Ưu tiên sự mượt mà và tự nhiên của ngôn ngữ đích, ngay cả khi phải thay đổi cấu trúc câu (nhưng vẫn giữ đúng ý nghĩa gốc).
 2. **Độ chính xác**: Giữ nguyên tên riêng, địa danh.
 
-Cấu trúc mỗi dòng (BẮT BUỘC xuống dòng sau mỗi object): {"id": "index", "text": "nội dung dịch"}
+Cấu trúc mỗi dòng (BẮT BUỘC xuống dòng sau mỗi object):
+- Bản dịch: {"type": "translation", "id": "index", "text": "nội dung dịch"}
+- Tóm tắt (ở cuối cùng): {"type": "summary", "content": "tóm tắt nội dung chương 3-5 câu"}
 
 --- DỮ LIỆU ĐẦU VÀO ---
 ${jsonEncode(inputData)}

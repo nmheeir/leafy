@@ -554,8 +554,9 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             if (translationStatus == TranslationStatus.initial ||
                 translationStatus == TranslationStatus.error) {
               context.epubReaderCubit.translateChapter(currentChapter);
+            } else {
+              context.epubReaderCubit.toggleBilingualMode();
             }
-            context.epubReaderCubit.toggleBilingualMode();
           },
           icon: _buildTranslationIcon(translationStatus, isBilingual),
         ),
