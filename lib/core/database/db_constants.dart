@@ -1,6 +1,6 @@
 class DbConstants {
   static const dbName = 'leafy.db';
-  static const dbVersion = 1;
+  static const dbVersion = 2;
 
   // =====================================================
   // 1. Bảng BOOKS – metadata thuần của sách
@@ -123,7 +123,34 @@ class DbConstants {
   ''';
 
   // =====================================================
+  // 6. BOOK MARKS - Lưu các marker/highlight (PDF/EPUB)
+  // =====================================================
+  static const createBookMarksTable = '''
+    CREATE TABLE book_marks (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      resource_id INTEGER NOT NULL,         -- FK -> book_resources.id
+      page_index INTEGER NOT NULL,          -- Trang số mấy (0-based)
+      
+      -- PDF Coordinates (JSON) hoặc Custom Locators
+      start_offset INTEGER,                 -- (Optional) character offset start
+      end_offset INTEGER,                   -- (Optional) character offset end
+      
+      rects TEXT,                           -- JSON List<Rect> cho PDF Highlights
+      
+      color INTEGER,                        -- Màu (int value của Color)
+      text TEXT,                            -- Text được highlight (nếu có)
+      
+      created_at INTEGER,                   -- Timestamp create
+      
+      FOREIGN KEY (resource_id) REFERENCES book_resources (id) ON DELETE CASCADE
+    );
+  ''';
+
+  static const createBookMarksIndex =
+      'CREATE INDEX idx_book_marks_resource ON book_marks (resource_id);';
+
+  // =====================================================
   // Migration placeholder
   // =====================================================
-  static const migrateV1toV2 = [];
+  static const migrateV1toV2 = [createBookMarksTable, createBookMarksIndex];
 }

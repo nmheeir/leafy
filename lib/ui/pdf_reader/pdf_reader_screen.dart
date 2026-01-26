@@ -1,9 +1,16 @@
-import 'dart:math';
+import 'dart:convert';
 import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:file_selector/file_selector.dart' as fs;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:leafy/domain/book_marks/entities/book_mark.dart';
+import 'package:leafy/logic/cubit/pdf_reader/pdf_reader_cubit.dart';
+import 'package:leafy/logic/cubit/pdf_reader/pdf_reader_cubit_state.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/pdf_reader/widgets/marker_views.dart';
 import 'package:leafy/ui/pdf_reader/widgets/noto_google_fonts.dart';
 import 'package:leafy/ui/pdf_reader/widgets/outline_view.dart';
@@ -12,7 +19,6 @@ import 'package:leafy/ui/pdf_reader/widgets/search_view.dart';
 import 'package:leafy/ui/pdf_reader/widgets/thumnails_view.dart';
 import 'package:pdfrx/pdfrx.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:file_selector/file_selector.dart' as fs;
 
 class PdfReaderScreen extends StatefulWidget {
   const PdfReaderScreen({this.fileOrUri, required this.filePath, super.key});
@@ -29,18 +35,14 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   final documentRef = ValueNotifier<PdfDocumentRef?>(null);
   final controller = PdfViewerController();
-  final showLeftPane = ValueNotifier<bool>(false);
   final outline = ValueNotifier<List<PdfOutlineNode>?>(null);
   final textSearcher = ValueNotifier<PdfTextSearcher?>(null);
-  final _markers = <int, List<Marker>>{};
   List<PdfPageTextRange>? textSelections;
 
   bool _isDraggingHandle = false;
+  bool _canPop = false;
   // Magnifier animation controller
-  late final AnimationController _magnifierAnimController = AnimationController(
-    duration: const Duration(milliseconds: 250),
-    vsync: this,
-  );
+  late final AnimationController _magnifierAnimController;
 
   void _update() {
     if (mounted) {
@@ -51,6 +53,11 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
   @override
   void initState() {
     super.initState();
+    _magnifierAnimController = AnimationController(
+      duration: const Duration(milliseconds: 250),
+      vsync: this,
+    );
+    context.pdfReaderCubit.load(widget.filePath);
     WidgetsBinding.instance.addObserver(this);
     openInitialFile();
   }
@@ -61,7 +68,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
     WidgetsBinding.instance.removeObserver(this);
     textSearcher.value?.dispose();
     textSearcher.dispose();
-    showLeftPane.dispose();
     outline.dispose();
     documentRef.dispose();
     super.dispose();
@@ -87,7 +93,7 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
         leading: IconButton(
           icon: const Icon(Icons.menu),
           onPressed: () {
-            showLeftPane.value = !showLeftPane.value;
+            context.pdfReaderCubit.toggleLeftPane();
           },
         ),
         title: ValueListenableBuilder(
@@ -169,8 +175,9 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
                   onPressed: documentRef == null
                       ? null
                       : () {
-                          if (controller.isReady)
+                          if (controller.isReady) {
                             controller.goToPage(pageNumber: 1);
+                          }
                         },
                 ),
                 IconButton(
@@ -191,495 +198,397 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
           },
         ),
       ),
-      body: Row(
+      body: BlocProvider.value(
+        value: context.pdfReaderCubit,
+        child: PopScope(
+          canPop: _canPop,
+          onPopInvokedWithResult: (didPop, result) async {
+            if (didPop) return;
+
+            await context.pdfReaderCubit.saveProgress();
+            await context.pdfReaderCubit.endSession();
+
+            if (mounted) {
+              setState(() {
+                _canPop = true;
+              });
+              Navigator.of(context).pop();
+            }
+          },
+          child: BlocBuilder<PdfReaderCubit, PdfReaderCubitState>(
+            builder: (context, state) {
+              return state.maybeMap(
+                loaded: (state) {
+                  return Row(
+                    children: [
+                      _buildSidePane(state),
+                      _buildPdfViewer(state.currentPage),
+                    ],
+                  );
+                },
+                loading: (state) =>
+                    const Center(child: CircularProgressIndicator()),
+                orElse: () => const SizedBox(),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPdfViewer(int currentPage) {
+    return Expanded(
+      child: Stack(
         children: [
-          AnimatedSize(
-            duration: const Duration(milliseconds: 300),
-            child: ValueListenableBuilder(
-              valueListenable: showLeftPane,
-              builder: (context, isLeftPaneShown, child) {
-                final isMobileDevice = determineWhetherMobileDeviceOrNot();
-                return SizedBox(
-                  width: isLeftPaneShown ? 300 : 0,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(1, 0, 4, 0),
-                    child: DefaultTabController(
-                      length: 4,
-                      child: Column(
-                        children: [
-                          if (isMobileDevice)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8.0,
-                              ),
-                              child: Row(
-                                children: [
-                                  ValueListenableBuilder(
-                                    valueListenable: documentRef,
-                                    builder: (context, documentRef, child) =>
-                                        Expanded(
-                                          child: Text(
-                                            _fileName(
-                                                  documentRef?.key.sourceName,
-                                                ) ??
-                                                'No document loaded',
-                                            softWrap: false,
-                                          ),
-                                        ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.file_open),
-                                    onPressed: () {
-                                      showLeftPane.value = false;
-                                      openFile();
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.http),
-                                    onPressed: () {
-                                      showLeftPane.value = false;
-                                      openUri();
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ClipRect(
-                            // NOTE: without ClipRect, TabBar shown even if the width is 0
-                            child: const TabBar(
-                              tabs: [
-                                Tab(icon: Icon(Icons.search), text: 'Search'),
-                                Tab(icon: Icon(Icons.menu_book), text: 'TOC'),
-                                Tab(icon: Icon(Icons.image), text: 'Pages'),
-                                Tab(
-                                  icon: Icon(Icons.bookmark),
-                                  text: 'Markers',
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: TabBarView(
-                              children: [
-                                ValueListenableBuilder(
-                                  valueListenable: textSearcher,
-                                  builder: (context, textSearcher, child) {
-                                    if (textSearcher == null) return SizedBox();
-                                    return TextSearchView(
-                                      textSearcher: textSearcher,
-                                    );
-                                  },
-                                ),
-                                ValueListenableBuilder(
-                                  valueListenable: outline,
-                                  builder: (context, outline, child) =>
-                                      OutlineView(
-                                        outline: outline,
-                                        controller: controller,
-                                      ),
-                                ),
-                                ValueListenableBuilder(
-                                  valueListenable: documentRef,
-                                  builder: (context, documentRef, child) =>
-                                      ThumbnailsView(
-                                        documentRef: documentRef,
-                                        controller: controller,
-                                      ),
-                                ),
-                                MarkersView(
-                                  markers: _markers.values
-                                      .expand((e) => e)
-                                      .toList(),
-                                  onTap: (marker) {
-                                    final rect = controller
-                                        .calcRectForRectInsidePage(
-                                          pageNumber:
-                                              marker.range.pageText.pageNumber,
-                                          rect: marker.range.bounds,
-                                        );
-                                    controller.ensureVisible(rect);
-                                  },
-                                  onDeleteTap: (marker) {
-                                    _markers[marker.range.pageNumber]!.remove(
-                                      marker,
-                                    );
-                                    setState(() {});
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+          ValueListenableBuilder(
+            valueListenable: documentRef,
+            builder: (context, docRef, child) {
+              if (docRef == null) {
+                return const Center(
+                  child: Text(
+                    'No document loaded',
+                    style: TextStyle(fontSize: 20),
                   ),
                 );
-              },
-            ),
-          ),
-          Expanded(
-            child: Stack(
-              children: [
-                ValueListenableBuilder(
-                  valueListenable: documentRef,
-                  builder: (context, docRef, child) {
-                    if (docRef == null) {
-                      return const Center(
-                        child: Text(
-                          'No document loaded',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      );
-                    }
-                    return PdfViewer(
-                      docRef,
-                      // PdfViewer.asset(
-                      //   'assets/hello.pdf',
-                      // PdfViewer.file(
-                      //   r"D:\pdfrx\example\assets\hello.pdf",
-                      // PdfViewer.uri(
-                      //   Uri.parse(
-                      //       'https://opensource.adobe.com/dc-acrobat-sdk-docs/pdfstandards/PDF32000_2008.pdf'),
-                      // Set password provider to show password dialog
-                      //passwordProvider: () => passwordDialog(context),
-                      controller: controller,
-                      params: PdfViewerParams(
-                        layoutPages: _layoutPages[_layoutTypeIndex],
-                        scrollHorizontallyByMouseWheel: isHorizontalLayout,
-                        pageAnchor: isHorizontalLayout
-                            ? PdfPageAnchor.left
-                            : PdfPageAnchor.top,
-                        pageAnchorEnd: isHorizontalLayout
-                            ? PdfPageAnchor.right
-                            : PdfPageAnchor.bottom,
-                        textSelectionParams: PdfTextSelectionParams(
-                          onTextSelectionChange: (textSelection) async {
-                            textSelections = await textSelection
-                                .getSelectedTextRanges();
+              }
+              return PdfViewer(
+                docRef,
+                controller: controller,
+                initialPageNumber: currentPage,
+                params: PdfViewerParams(
+                  layoutPages: _layoutPages[_layoutTypeIndex],
+                  scrollHorizontallyByMouseWheel: isHorizontalLayout,
+                  pageAnchor: isHorizontalLayout
+                      ? PdfPageAnchor.left
+                      : PdfPageAnchor.top,
+                  pageAnchorEnd: isHorizontalLayout
+                      ? PdfPageAnchor.right
+                      : PdfPageAnchor.bottom,
+                  textSelectionParams: PdfTextSelectionParams(
+                    onTextSelectionChange: (textSelection) async {
+                      textSelections = await textSelection
+                          .getSelectedTextRanges();
+                    },
+                    magnifier: PdfViewerSelectionMagnifierParams(
+                      shouldShowMagnifierForAnchor:
+                          (textAnchor, controller, params) => true,
+                      getMagnifierRectForAnchor:
+                          (textAnchor, params, clampedPointerPosition) {
+                            final c =
+                                textAnchor.page.charRects[textAnchor.index];
+                            final baseUnit = switch (textAnchor.direction) {
+                              PdfTextDirection.ltr ||
+                              PdfTextDirection.rtl ||
+                              PdfTextDirection.unknown => c.height,
+                              PdfTextDirection.vrtl => c.width,
+                            };
+
+                            // Convert clamped pointer position from viewport to document coordinates
+                            final pointerInDocument = controller
+                                .localToDocument(clampedPointerPosition);
+                            return Rect.fromLTRB(
+                              pointerInDocument.dx - baseUnit * 2.5,
+                              textAnchor.rect.top - baseUnit * 0.5,
+                              pointerInDocument.dx + baseUnit * 2.5,
+                              textAnchor.rect.bottom + baseUnit * 0.5,
+                            );
                           },
-                          magnifier: PdfViewerSelectionMagnifierParams(
-                            shouldShowMagnifierForAnchor:
-                                (textAnchor, controller, params) => true,
-                            getMagnifierRectForAnchor:
-                                (textAnchor, params, clampedPointerPosition) {
-                                  final c = textAnchor
-                                      .page
-                                      .charRects[textAnchor.index];
-                                  final baseUnit =
-                                      switch (textAnchor.direction) {
-                                        PdfTextDirection.ltr ||
-                                        PdfTextDirection.rtl ||
-                                        PdfTextDirection.unknown => c.height,
-                                        PdfTextDirection.vrtl => c.width,
-                                      };
-
-                                  // Convert clamped pointer position from viewport to document coordinates
-                                  final pointerInDocument = controller
-                                      .localToDocument(clampedPointerPosition);
-                                  return Rect.fromLTRB(
-                                    pointerInDocument.dx - baseUnit * 2.5,
-                                    textAnchor.rect.top - baseUnit * 0.5,
-                                    pointerInDocument.dx + baseUnit * 2.5,
-                                    textAnchor.rect.bottom + baseUnit * 0.5,
-                                  );
-                                },
-                            builder:
-                                (
-                                  context,
-                                  textAnchor,
-                                  params,
-                                  magnifierContent,
-                                  magnifierContentSize,
-                                  pointerPosition,
-                                  magnifierPosition,
-                                ) {
-                                  // calculate the scale to fit the magnifier content fit into 80x80 box
-                                  final contentScale =
-                                      80 /
-                                      math.min(
-                                        magnifierContentSize.width,
-                                        magnifierContentSize.height,
-                                      );
-
-                                  // Calculate the actual magnifier widget size (with border radius padding)
-                                  final magnifierWidgetSize = Size(
-                                    magnifierContentSize.width * contentScale,
-                                    magnifierContentSize.height * contentScale,
-                                  );
-
-                                  // Start animation when magnifier first appears and capture initial pointer position
-                                  if (_magnifierAnimController.status ==
-                                      AnimationStatus.dismissed) {
-                                    _magnifierAnimController.forward();
-                                  }
-
-                                  final centeredStartOffset =
-                                      pointerPosition -
-                                      Offset(
-                                        magnifierWidgetSize.width / 2,
-                                        magnifierWidgetSize.height / 2,
-                                      );
-                                  final delta =
-                                      centeredStartOffset - magnifierPosition;
-
-                                  return AnimatedBuilder(
-                                    animation: _magnifierAnimController,
-                                    builder: (context, child) {
-                                      final currentProgress =
-                                          _magnifierAnimController.value;
-                                      return Transform.translate(
-                                        offset: delta * (1 - currentProgress),
-                                        child: Transform.scale(
-                                          scale: currentProgress,
-                                          alignment: Alignment.center,
-                                          child: child!,
-                                        ),
-                                      );
-                                    },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(25),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            blurRadius: 8,
-                                            spreadRadius: 2,
-                                          ),
-                                        ],
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(25),
-                                        child: SizedBox(
-                                          width:
-                                              magnifierContentSize.width *
-                                              contentScale,
-                                          height:
-                                              magnifierContentSize.height *
-                                              contentScale,
-                                          child: magnifierContent,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                            calcPosition:
-                                (
-                                  widgetSize,
-                                  anchorLocalRect,
-                                  handleLocalRect,
-                                  textAnchor,
-                                  pointerPosition, {
-                                  margin = 10.0,
-                                  marginOnTop,
-                                  marginOnBottom,
-                                }) {
-                                  if (widgetSize == null) return null;
-
-                                  final viewSize = controller.viewSize;
-
-                                  // Center magnifier horizontally on pointer for smooth tracking
-                                  var left =
-                                      pointerPosition.dx - widgetSize.width / 2;
-
-                                  // Clamp to viewport bounds
-                                  if (left < margin) {
-                                    left = margin;
-                                  } else if (left + widgetSize.width + margin >
-                                      viewSize.width) {
-                                    left =
-                                        viewSize.width -
-                                        widgetSize.width -
-                                        margin;
-                                  }
-
-                                  var top =
-                                      anchorLocalRect.top -
-                                      widgetSize.height -
-                                      (marginOnTop ?? margin);
-
-                                  // If too close to top, place below instead
-                                  if (top < margin) {
-                                    top =
-                                        anchorLocalRect.bottom +
-                                        (marginOnBottom ?? margin);
-                                  }
-
-                                  return Offset(left, top);
-                                },
-                            shouldShowMagnifier: () =>
-                                _isDraggingHandle ||
-                                _magnifierAnimController.status ==
-                                    AnimationStatus.reverse ||
-                                _magnifierAnimController.status ==
-                                    AnimationStatus.forward,
-                            animationDuration: Duration.zero,
-                          ),
-                          onSelectionHandlePanStart: (anchor) {
-                            setState(() {
-                              _isDraggingHandle = true;
-                            });
-                          },
-
-                          onSelectionHandlePanEnd: (anchor) {
-                            // Animate out, then reset for next drag
-                            if (mounted) {
-                              setState(() {
-                                _isDraggingHandle = false;
-                              });
-                            }
-                            _magnifierAnimController.reverse().then((_) {
-                              _magnifierAnimController.reset();
-                            });
-                          },
-                        ),
-                        keyHandlerParams: PdfViewerKeyHandlerParams(
-                          autofocus: true,
-                        ),
-                        maxScale: 8,
-                        //scrollPhysics: PdfViewerParams.getScrollPhysics(context),
-                        //pageTransition: PageTransition.discrete,
-                        customizeContextMenuItems: (params, items) {
-                          // Example: add custom menu item to search selected text on web
-                          items.add(
-                            ContextMenuButtonItem(
-                              type: ContextMenuButtonType.searchWeb,
-                              onPressed: () async {
-                                final text = await controller
-                                    .textSelectionDelegate
-                                    .getSelectedText();
-                                if (text.isNotEmpty) {
-                                  final shortened = text.length > 100
-                                      ? text.substring(0, 100)
-                                      : text;
-                                  await launchUrl(
-                                    Uri.parse(
-                                      'https://www.google.com/search?q=${Uri.encodeComponent(shortened)}',
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
-                          );
-                        },
-                        //pageTransition: PageTransition.discrete,
-                        viewerOverlayBuilder: (context, size, handleLinkTap) => [
-                          //
-                          // Example use of GestureDetector to handle custom gestures
-                          //
-                          // GestureDetector(
-                          //   behavior: HitTestBehavior.translucent,
-                          //   // If you use GestureDetector on viewerOverlayBuilder, it breaks link-tap handling
-                          //   // and you should manually handle it using onTapUp callback
-                          //   onTapUp: (details) {
-                          //     handleLinkTap(details.localPosition);
-                          //   },
-                          //   onDoubleTap: () {
-                          //     controller.zoomUp(loop: true);
-                          //   },
-                          //   // Make the GestureDetector covers all the viewer widget's area
-                          //   // but also make the event go through to the viewer.
-                          //   child: IgnorePointer(
-                          //     child:
-                          //         SizedBox(width: size.width, height: size.height),
-                          //   ),
-                          // ),
-                          //
-                          // Scroll-thumbs example
-                          //
-                          // Show vertical scroll thumb on the right; it has page number on it
-                        ],
-                        //
-                        // Loading progress indicator example
-                        //
-                        loadingBannerBuilder:
-                            (context, bytesDownloaded, totalBytes) => Center(
-                              child: CircularProgressIndicator(
-                                value: totalBytes != null
-                                    ? bytesDownloaded / totalBytes
-                                    : null,
-                                backgroundColor: Colors.grey,
-                              ),
-                            ),
-                        //
-                        // Link handling example
-                        //
-                        linkHandlerParams: PdfLinkHandlerParams(
-                          onLinkTap: (link) {
-                            if (link.url != null) {
-                              navigateToUrl(link.url!);
-                            } else if (link.dest != null) {
-                              controller.goToDest(link.dest);
-                            }
-                          },
-                        ),
-                        pagePaintCallbacks: [
-                          if (textSearcher.value != null)
-                            textSearcher.value!.pageTextMatchPaintCallback,
-                          _paintMarkers,
-                        ],
-                        onDocumentChanged: (document) async {
-                          if (document == null) {
-                            textSearcher.value?.dispose();
-                            textSearcher.value = null;
-                            outline.value = null;
-                            textSelections = null;
-                            _markers.clear();
-                          }
-                        },
-                        onViewerReady: (document, controller) async {
-                          outline.value = await document.loadOutline();
-                          textSearcher.value = PdfTextSearcher(controller)
-                            ..addListener(_update);
-                          controller.requestFocus();
-                          controller.document.events.listen((event) {
-                            if (event is PdfDocumentMissingFontsEvent) {
-                              Future.microtask(() async {
-                                // NOTE: This is just an example of downloading missing fonts from Google Fonts.
-                                // In real-world use cases, you might want to have a more sophisticated
-                                // mechanism to manage the fonts.
-                                debugPrint(
-                                  'Missing fonts: ${event.missingFonts.map((f) => f.toString()).join(', ')}',
+                      builder:
+                          (
+                            context,
+                            textAnchor,
+                            params,
+                            magnifierContent,
+                            magnifierContentSize,
+                            pointerPosition,
+                            magnifierPosition,
+                          ) {
+                            // calculate the scale to fit the magnifier content fit into 80x80 box
+                            final contentScale =
+                                80 /
+                                math.min(
+                                  magnifierContentSize.width,
+                                  magnifierContentSize.height,
                                 );
-                                int count = 0;
-                                for (final font in event.missingFonts) {
-                                  final gf = getGoogleFontsUriFromFontQuery(
-                                    font,
-                                  );
-                                  if (gf != null) {
-                                    debugPrint(
-                                      'Downloading font "${gf.faceName}" from ${gf.uri}...',
-                                    );
-                                    final downloaded = (await http.get(
-                                      gf.uri,
-                                    )).bodyBytes;
-                                    debugPrint(
-                                      '  Downloaded ${downloaded.length} bytes',
-                                    );
-                                    await PdfrxEntryFunctions.instance
-                                        .addFontData(
-                                          face: font.face,
-                                          data: downloaded,
-                                        );
-                                    count++;
-                                  }
-                                }
-                                if (count > 0) {
-                                  await PdfrxEntryFunctions.instance
-                                      .reloadFonts();
-                                  await controller.documentRef
-                                      .resolveListenable()
-                                      .load(forceReload: true);
-                                }
-                              });
+
+                            // Calculate the actual magnifier widget size (with border radius padding)
+                            final magnifierWidgetSize = Size(
+                              magnifierContentSize.width * contentScale,
+                              magnifierContentSize.height * contentScale,
+                            );
+
+                            // Start animation when magnifier first appears and capture initial pointer position
+                            if (_magnifierAnimController.status ==
+                                AnimationStatus.dismissed) {
+                              _magnifierAnimController.forward();
                             }
-                          });
+
+                            final centeredStartOffset =
+                                pointerPosition -
+                                Offset(
+                                  magnifierWidgetSize.width / 2,
+                                  magnifierWidgetSize.height / 2,
+                                );
+                            final delta =
+                                centeredStartOffset - magnifierPosition;
+
+                            return AnimatedBuilder(
+                              animation: _magnifierAnimController,
+                              builder: (context, child) {
+                                final currentProgress =
+                                    _magnifierAnimController.value;
+                                return Transform.translate(
+                                  offset: delta * (1 - currentProgress),
+                                  child: Transform.scale(
+                                    scale: currentProgress,
+                                    alignment: Alignment.center,
+                                    child: child!,
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 8,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: SizedBox(
+                                    width:
+                                        magnifierContentSize.width *
+                                        contentScale,
+                                    height:
+                                        magnifierContentSize.height *
+                                        contentScale,
+                                    child: magnifierContent,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                      calcPosition:
+                          (
+                            widgetSize,
+                            anchorLocalRect,
+                            handleLocalRect,
+                            textAnchor,
+                            pointerPosition, {
+                            margin = 10.0,
+                            marginOnTop,
+                            marginOnBottom,
+                          }) {
+                            if (widgetSize == null) return null;
+
+                            final viewSize = controller.viewSize;
+
+                            // Center magnifier horizontally on pointer for smooth tracking
+                            var left =
+                                pointerPosition.dx - widgetSize.width / 2;
+
+                            // Clamp to viewport bounds
+                            if (left < margin) {
+                              left = margin;
+                            } else if (left + widgetSize.width + margin >
+                                viewSize.width) {
+                              left = viewSize.width - widgetSize.width - margin;
+                            }
+
+                            var top =
+                                anchorLocalRect.top -
+                                widgetSize.height -
+                                (marginOnTop ?? margin);
+
+                            // If too close to top, place below instead
+                            if (top < margin) {
+                              top =
+                                  anchorLocalRect.bottom +
+                                  (marginOnBottom ?? margin);
+                            }
+
+                            return Offset(left, top);
+                          },
+                      shouldShowMagnifier: () =>
+                          _isDraggingHandle ||
+                          _magnifierAnimController.status ==
+                              AnimationStatus.reverse ||
+                          _magnifierAnimController.status ==
+                              AnimationStatus.forward,
+                      animationDuration: Duration.zero,
+                    ),
+                    onSelectionHandlePanStart: (anchor) {
+                      setState(() {
+                        _isDraggingHandle = true;
+                      });
+                    },
+
+                    onSelectionHandlePanEnd: (anchor) {
+                      // Animate out, then reset for next drag
+                      if (mounted) {
+                        setState(() {
+                          _isDraggingHandle = false;
+                        });
+                      }
+                      _magnifierAnimController.reverse().then((_) {
+                        _magnifierAnimController.reset();
+                      });
+                    },
+                  ),
+                  keyHandlerParams: PdfViewerKeyHandlerParams(autofocus: true),
+                  maxScale: 8,
+                  //scrollPhysics: PdfViewerParams.getScrollPhysics(context),
+                  //pageTransition: PageTransition.discrete,
+                  customizeContextMenuItems: (params, items) {
+                    // Example: add custom menu item to search selected text on web
+                    items.add(
+                      ContextMenuButtonItem(
+                        type: ContextMenuButtonType.searchWeb,
+                        onPressed: () async {
+                          final text = await controller.textSelectionDelegate
+                              .getSelectedText();
+                          if (text.isNotEmpty) {
+                            final shortened = text.length > 100
+                                ? text.substring(0, 100)
+                                : text;
+                            await launchUrl(
+                              Uri.parse(
+                                'https://www.google.com/search?q=${Uri.encodeComponent(shortened)}',
+                              ),
+                            );
+                          }
                         },
                       ),
                     );
                   },
+                  //pageTransition: PageTransition.discrete,
+                  viewerOverlayBuilder: (context, size, handleLinkTap) => [
+                    //
+                    // Example use of GestureDetector to handle custom gestures
+                    //
+                    // GestureDetector(
+                    //   behavior: HitTestBehavior.translucent,
+                    //   // If you use GestureDetector on viewerOverlayBuilder, it breaks link-tap handling
+                    //   // and you should manually handle it using onTapUp callback
+                    //   onTapUp: (details) {
+                    //     handleLinkTap(details.localPosition);
+                    //   },
+                    //   onDoubleTap: () {
+                    //     controller.zoomUp(loop: true);
+                    //   },
+                    //   // Make the GestureDetector covers all the viewer widget's area
+                    //   // but also make the event go through to the viewer.
+                    //   child: IgnorePointer(
+                    //     child:
+                    //         SizedBox(width: size.width, height: size.height),
+                    //   ),
+                    // ),
+                    //
+                    // Scroll-thumbs example
+                    //
+                    // Show vertical scroll thumb on the right; it has page number on it
+                  ],
+                  //
+                  // Loading progress indicator example
+                  //
+                  loadingBannerBuilder:
+                      (context, bytesDownloaded, totalBytes) => Center(
+                        child: CircularProgressIndicator(
+                          value: totalBytes != null
+                              ? bytesDownloaded / totalBytes
+                              : null,
+                          backgroundColor: Colors.grey,
+                        ),
+                      ),
+                  //
+                  // Link handling example
+                  //
+                  linkHandlerParams: PdfLinkHandlerParams(
+                    onLinkTap: (link) {
+                      if (link.url != null) {
+                        navigateToUrl(link.url!);
+                      } else if (link.dest != null) {
+                        controller.goToDest(link.dest);
+                      }
+                    },
+                  ),
+                  pagePaintCallbacks: [
+                    if (textSearcher.value != null)
+                      textSearcher.value!.pageTextMatchPaintCallback,
+                    _paintMarkers,
+                  ],
+                  onPageChanged: (pageNumber) {
+                    if (pageNumber != null) {
+                      print('Current Page number: $pageNumber');
+                      context.pdfReaderCubit.onPageChanged(pageNumber);
+                    }
+                  },
+                  onDocumentChanged: (document) async {
+                    if (document == null) {
+                      textSearcher.value?.dispose();
+                      textSearcher.value = null;
+                      outline.value = null;
+                      textSelections = null;
+                      // _markers.clear(); // Handled by Cubit? No, markers loaded from DB.
+                    } else {
+                      // Notify Cubit document ready (totalPages)
+                      context.pdfReaderCubit.onDocumentReady(
+                        document.pages.length,
+                      );
+                    }
+                  },
+                  onViewerReady: (document, controller) async {
+                    outline.value = await document.loadOutline();
+                    textSearcher.value = PdfTextSearcher(controller)
+                      ..addListener(_update);
+                    controller.requestFocus();
+                    controller.document.events.listen((event) {
+                      if (event is PdfDocumentMissingFontsEvent) {
+                        Future.microtask(() async {
+                          // NOTE: This is just an example of downloading missing fonts from Google Fonts.
+                          // In real-world use cases, you might want to have a more sophisticated
+                          // mechanism to manage the fonts.
+                          debugPrint(
+                            'Missing fonts: ${event.missingFonts.map((f) => f.toString()).join(', ')}',
+                          );
+                          int count = 0;
+                          for (final font in event.missingFonts) {
+                            final gf = getGoogleFontsUriFromFontQuery(font);
+                            if (gf != null) {
+                              debugPrint(
+                                'Downloading font "${gf.faceName}" from ${gf.uri}...',
+                              );
+                              final downloaded = (await http.get(
+                                gf.uri,
+                              )).bodyBytes;
+                              debugPrint(
+                                '  Downloaded ${downloaded.length} bytes',
+                              );
+                              await PdfrxEntryFunctions.instance.addFontData(
+                                face: font.face,
+                                data: downloaded,
+                              );
+                              count++;
+                            }
+                          }
+                          if (count > 0) {
+                            await PdfrxEntryFunctions.instance.reloadFonts();
+                            await controller.documentRef
+                                .resolveListenable()
+                                .load(forceReload: true);
+                          }
+                        });
+                      }
+                    });
+                  },
                 ),
-              ],
-            ),
+              );
+            },
           ),
         ],
       ),
@@ -687,20 +596,39 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
   }
 
   void _paintMarkers(Canvas canvas, Rect pageRect, PdfPage page) {
-    final markers = _markers[page.pageNumber];
-    if (markers == null) {
-      return;
-    }
-    for (final marker in markers) {
-      final paint = Paint()
-        ..color = marker.color.withAlpha(100)
-        ..style = PaintingStyle.fill;
+    // We need to access markers from state or pass them somehow.
+    // Since _paintMarkers is callback, we can access _cubit state.
+    final state = context.pdfReaderCubit.state;
 
-      canvas.drawRect(
-        marker.range.bounds.toRectInDocument(page: page, pageRect: pageRect),
-        paint,
-      );
-    }
+    state.mapOrNull(
+      loaded: (loaded) {
+        final markers = loaded.markers
+            .where((m) => m.pageIndex == page.pageNumber)
+            .toList();
+        for (final marker in markers) {
+          final paint = Paint()
+            ..color = Color(marker.color).withAlpha(100)
+            ..style = PaintingStyle.fill;
+
+          // Parse JSON
+          final rects = (jsonDecode(marker.rects) as List).cast<List>();
+          if (rects.isNotEmpty) {
+            final r = rects[0];
+            final bounds = Rect.fromLTWH(r[0], r[1], r[2], r[3]);
+            final pdfRect = PdfRect(
+              bounds.left,
+              bounds.top,
+              bounds.width,
+              bounds.height,
+            );
+            canvas.drawRect(
+              pdfRect.toRectInDocument(page: page, pageRect: pageRect),
+              paint,
+            );
+          }
+        }
+      },
+    );
   }
 
   int _layoutTypeIndex = 0;
@@ -712,7 +640,138 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
     });
   }
 
-  bool get isHorizontalLayout => _layoutTypeIndex == 1 || _layoutTypeIndex == 3;
+  Widget _buildSidePane(PdfReaderCubitState state) {
+    return state.map(
+      initial: (_) => const SizedBox(),
+      loading: (_) => const Center(child: CircularProgressIndicator()),
+      error: (e) => Center(child: Text(e.message)),
+      loaded: (loadedState) {
+        final isLeftPaneShown = loadedState.isLeftPaneShown;
+        final isMobileDevice = determineWhetherMobileDeviceOrNot();
+        return SizedBox(
+          width: isLeftPaneShown ? 300 : 0,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(1, 0, 4, 0),
+            child: DefaultTabController(
+              length: 4,
+              child: Column(
+                children: [
+                  if (isMobileDevice)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        children: [
+                          ValueListenableBuilder(
+                            valueListenable: documentRef,
+                            builder: (context, documentRef, child) => Expanded(
+                              child: Text(
+                                _fileName(documentRef?.key.sourceName) ??
+                                    'No document loaded',
+                                softWrap: false,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.file_open),
+                            onPressed: () {
+                              context.pdfReaderCubit.toggleLeftPane();
+                              openFile();
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.http),
+                            onPressed: () {
+                              context.pdfReaderCubit.toggleLeftPane();
+                              openUri();
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ClipRect(
+                    child: const TabBar(
+                      tabs: [
+                        Tab(icon: Icon(Icons.search), text: 'Search'),
+                        Tab(icon: Icon(Icons.menu_book), text: 'TOC'),
+                        Tab(icon: Icon(Icons.image), text: 'Pages'),
+                        Tab(icon: Icon(Icons.bookmark), text: 'Markers'),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: textSearcher,
+                          builder: (context, textSearcher, child) {
+                            if (textSearcher == null) return const SizedBox();
+                            return TextSearchView(textSearcher: textSearcher);
+                          },
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: outline,
+                          builder: (context, outline, child) => OutlineView(
+                            outline: outline,
+                            controller: controller,
+                          ),
+                        ),
+                        ValueListenableBuilder(
+                          valueListenable: documentRef,
+                          builder: (context, documentRef, child) =>
+                              ThumbnailsView(
+                                documentRef: documentRef,
+                                controller: controller,
+                              ),
+                        ),
+                        MarkersView(
+                          markers: loadedState.markers.map((m) {
+                            final rects = (jsonDecode(m.rects) as List)
+                                .cast<List>();
+                            final bounds = rects.isNotEmpty
+                                ? Rect.fromLTWH(
+                                    rects[0][0],
+                                    rects[0][1],
+                                    rects[0][2],
+                                    rects[0][3],
+                                  )
+                                : Rect.zero;
+                            return Marker.fromEntity(
+                              Color(m.color),
+                              m.pageIndex,
+                              bounds,
+                              m.text ?? '',
+                              m.id,
+                            );
+                          }).toList(),
+                          onTap: (marker) {
+                            final rect = controller.calcRectForRectInsidePage(
+                              pageNumber: marker.pageNumber,
+                              rect: PdfRect(
+                                marker.bounds.left,
+                                marker.bounds.top,
+                                marker.bounds.width,
+                                marker.bounds.height,
+                              ),
+                            );
+                            controller.ensureVisible(rect);
+                          },
+                          onDeleteTap: (marker) {
+                            if (marker.id != null) {
+                              context.pdfReaderCubit.deleteMarker(marker.id!);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   /// Page reading order; true to L-to-R that is commonly used by books like manga or such
   var isRightToLeftReadingOrder = false;
@@ -770,11 +829,28 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
   void _addCurrentSelectionToMarkers(Color color) {
     if (controller.isReady && textSelections != null) {
       for (final selectedText in textSelections!) {
-        _markers
-            .putIfAbsent(selectedText.pageNumber, () => [])
-            .add(Marker(color, selectedText));
+        final rectsJson = jsonEncode([
+          [
+            selectedText.bounds.left,
+            selectedText.bounds.top,
+            selectedText.bounds.width,
+            selectedText.bounds.height,
+          ],
+        ]);
+
+        final mark = BookMark(
+          resourceId:
+              context.pdfReaderCubit.state.mapOrNull(
+                loaded: (s) => s.resourceId,
+              ) ??
+              -1,
+          pageIndex: selectedText.pageNumber,
+          rects: rectsJson,
+          color: color.toARGB32(),
+          text: selectedText.text,
+        );
+        context.pdfReaderCubit.addMarker(mark);
       }
-      setState(() {});
     }
   }
 
@@ -927,4 +1003,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
     final parts = path.split(RegExp(r'[\\/]'));
     return parts.isEmpty ? path : parts.last;
   }
+
+  bool get isHorizontalLayout => _layoutTypeIndex == 1 || _layoutTypeIndex == 3;
 }
