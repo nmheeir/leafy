@@ -15,6 +15,8 @@ import 'package:leafy/domain/reader_progress/usecases/save_reader_progress_by_pa
 import 'package:leafy/domain/reading_session/usecases/log_reading_session_by_path.dart';
 import 'package:leafy/domain/translation/entities/translation_update.dart';
 import 'package:leafy/domain/translation/usecases/stream_translate_chapter.dart';
+import 'package:fpdart/fpdart.dart';
+import 'package:leafy/core/errors/failures.dart';
 import 'package:logger/web.dart';
 import 'package:uuid/uuid.dart';
 
@@ -174,79 +176,101 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
 
       _logger.d('Stream initiated, starting listener...');
 
-      stream.listen(
-        (either) {
-          either.fold(
-            (failure) {
-              // NOTE: cần hiển thị lỗi cho UI
-              _logger.e('Translate error (Failure): $failure');
+      stream
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: (sink) {
+              sink.add(Left(Failure.connection("Hết thời gian chờ kết nối.")));
+              sink.close();
+            },
+          )
+          .listen(
+            (either) {
+              either.fold(
+                (failure) {
+                  _logger.e('Translate error (Failure): $failure');
+                  _handleTranslationError(
+                    chapterIndex,
+                    failure.message ?? failure.toString(),
+                    previousTranslation,
+                  );
+                },
+                (update) {
+                  if (update is TranslationUpdateData) {
+                    _logger.t(
+                      'Received UpdateData: id=${update.id}, textLength=${update.text.length}',
+                    );
+                    final currentLoaded = state.mapOrNull(loaded: (s) => s);
+                    if (currentLoaded == null) {
+                      _logger.w('UpdateData ignored: State is not Loaded');
+                      return;
+                    }
+
+                    final currentTranslationMaps =
+                        Map<int, Map<String, String>>.from(
+                          currentLoaded.translationMaps,
+                        );
+
+                    if (!currentTranslationMaps.containsKey(chapterIndex)) {
+                      currentTranslationMaps[chapterIndex] = {};
+                    }
+                    currentTranslationMaps[chapterIndex]![update.id] =
+                        update.text;
+
+                    // Optimize: flattenBook is expensive.
+                    _logger.t('Flattening book for display...');
+                    final newDisplayItems = EpubHelper.flattenBook(
+                      currentLoaded.book,
+                      translationMaps: currentTranslationMaps,
+                    );
+
+                    emit(
+                      currentLoaded.copyWith(
+                        translationMaps: currentTranslationMaps,
+                        displayItems: newDisplayItems,
+                      ),
+                    );
+                    _logger.t('State emitted with new translation data');
+                  } else if (update is TranslationUpdateSummary) {
+                    _logger.d('Received summary update: ${update.summary}');
+                  }
+                },
+              );
+            },
+            onError: (e) {
+              _logger.e('Stream error (onError): $e');
               _handleTranslationError(
                 chapterIndex,
-                failure.message ?? failure.toString(),
+                e.toString(),
                 previousTranslation,
               );
             },
-            (update) {
-              if (update is TranslationUpdateData) {
-                _logger.t(
-                  'Received UpdateData: id=${update.id}, textLength=${update.text.length}',
-                );
-                final currentLoaded = state.mapOrNull(loaded: (s) => s);
-                if (currentLoaded == null) {
-                  _logger.w('UpdateData ignored: State is not Loaded');
+            onDone: () {
+              _logger.i(
+                'Translation stream completed for chapter $chapterIndex',
+              );
+              final currentLoaded = state.mapOrNull(loaded: (s) => s);
+              if (currentLoaded != null) {
+                // Bug fix: Do NOT overwrite Error status with Success
+                final currentStatus =
+                    currentLoaded.translationStatuses[chapterIndex];
+                if (currentStatus == TranslationStatus.error) {
+                  _logger.w(
+                    'Stream done but status is Error. Keeping Error status.',
+                  );
                   return;
                 }
 
-                final currentTranslationMaps =
-                    Map<int, Map<String, String>>.from(
-                      currentLoaded.translationMaps,
-                    );
-
-                if (!currentTranslationMaps.containsKey(chapterIndex)) {
-                  currentTranslationMaps[chapterIndex] = {};
-                }
-                currentTranslationMaps[chapterIndex]![update.id] = update.text;
-
-                // Optimize: flattenBook is expensive.
-                _logger.t('Flattening book for display...');
-                final newDisplayItems = EpubHelper.flattenBook(
-                  currentLoaded.book,
-                  translationMaps: currentTranslationMaps,
+                final successStatuses = Map<int, TranslationStatus>.from(
+                  currentLoaded.translationStatuses,
                 );
-
+                successStatuses[chapterIndex] = TranslationStatus.success;
                 emit(
-                  currentLoaded.copyWith(
-                    translationMaps: currentTranslationMaps,
-                    displayItems: newDisplayItems,
-                  ),
+                  currentLoaded.copyWith(translationStatuses: successStatuses),
                 );
-                _logger.t('State emitted with new translation data');
-              } else if (update is TranslationUpdateSummary) {
-                _logger.d('Received summary update: ${update.summary}');
               }
             },
           );
-        },
-        onError: (e) {
-          _logger.e('Stream error (onError): $e');
-          _handleTranslationError(
-            chapterIndex,
-            e.toString(),
-            previousTranslation,
-          );
-        },
-        onDone: () {
-          _logger.i('Translation stream completed for chapter $chapterIndex');
-          final currentLoaded = state.mapOrNull(loaded: (s) => s);
-          if (currentLoaded != null) {
-            final successStatuses = Map<int, TranslationStatus>.from(
-              currentLoaded.translationStatuses,
-            );
-            successStatuses[chapterIndex] = TranslationStatus.success;
-            emit(currentLoaded.copyWith(translationStatuses: successStatuses));
-          }
-        },
-      );
     } catch (e, stackTrace) {
       _logger.e(
         'Unexpected translation error: $e',
@@ -292,30 +316,6 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
           translationStatuses: errorStatuses,
           translationMaps: finalTranslationMaps,
           displayItems: finalDisplayItems,
-        ),
-      );
-
-      // Optionally emit a side effect or ensure UI knows about the error
-      emit(
-        EpubReaderCubitState.error(
-          message: "Lỗi dịch: $errorMessage. Đã khôi phục bản cũ nếu có.",
-        ),
-      );
-      // BUT wait, emit error will replace the Loaded state with Error state, which kills the UI!
-      // We should NOT emit a top-level Error state for a partial error if we want to keep the book open.
-      // We should just use the status .error in the map and maybe show a toast/snackbar via listener.
-      // Reverting the "emit Error" line above. The UI reads translationStatuses.
-
-      // To properly show error message without destroying state, we might need a transient error field
-      // or just rely on the UI seeing "Error" status and showing a generic message.
-      // For now, restoring the Loaded state is correct.
-      emit(
-        currentLoaded.copyWith(
-          translationStatuses: errorStatuses,
-          translationMaps: finalTranslationMaps,
-          displayItems: finalDisplayItems,
-          // We can't easily send a one-time error message in state without clearing it later.
-          // Leaving it as visual indication in statuses.
         ),
       );
     }
