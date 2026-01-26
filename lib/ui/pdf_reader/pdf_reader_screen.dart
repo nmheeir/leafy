@@ -534,7 +534,6 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
                       textSearcher.value = null;
                       outline.value = null;
                       textSelections = null;
-                      // _markers.clear(); // Handled by Cubit? No, markers loaded from DB.
                     } else {
                       // Notify Cubit document ready (totalPages)
                       context.pdfReaderCubit.onDocumentReady(
@@ -614,12 +613,13 @@ class _PdfReaderScreenState extends State<PdfReaderScreen>
           final rects = (jsonDecode(marker.rects) as List).cast<List>();
           if (rects.isNotEmpty) {
             final r = rects[0];
-            final bounds = Rect.fromLTWH(r[0], r[1], r[2], r[3]);
+            // final bounds = Rect.fromLTWH(r[0], r[1], r[2], r[3]); // Unused
             final pdfRect = PdfRect(
-              bounds.left,
-              bounds.top,
-              bounds.width,
-              bounds.height,
+              r[0], // left
+              r[1], // top
+              r[0] + r[2], // right = left + width
+              r[1] -
+                  r[3], // bottom = top - height (PDF coordinate system is Y-up)
             );
             canvas.drawRect(
               pdfRect.toRectInDocument(page: page, pageRect: pageRect),
