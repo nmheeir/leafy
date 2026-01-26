@@ -92,7 +92,7 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   SettingsSection(
                     title: Text(
-                      LocaleKeys.epub_reader_title.tr(),
+                      LocaleKeys.epub_reader_settings_title.tr(),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -359,7 +359,7 @@ class SettingsScreen extends StatelessWidget {
   SettingsTile _buildEpubReaderSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(
-        LocaleKeys.epub_reader_title.tr(),
+        LocaleKeys.epub_reader_settings_title.tr(),
         style: TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.book),

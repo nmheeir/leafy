@@ -305,7 +305,7 @@
     "permission": "Permission denied",
     "rate_limit": "Rate limit exceeded"
   },
-  "epub_reader": {
+  "epub_reader_settings": {
     "title": "EPUB Reader",
     "description": "EPUB Reader Settings",
     "chapter": {
@@ -424,5 +424,23 @@
     "guide": "Guide",
     "how_to_get_api_key": "How to get API key",
     "visit_ai_studio_site": "Visit aistudio.google.com to create a free API key."
+  },
+  "epub_reader": {
+    "bilingual_mode": "Bilingual Mode",
+    "retranslate_chapter_question": "Retranslate this chapter?",
+    "retranslate_chapter_warning": "Are you sure you want to retranslate this chapter? The current translation will be replaced.",
+    "retranslate_action": "Retranslate",
+    "table_of_contents": "Table of Contents",
+    "translation_error_rollback": "An error occurred during translation. Rolled back to previous version.",
+    "wait_for_translation": "Please wait for the translation to complete...",
+    "finish_book_question": "Finish book?",
+    "finish_book_confirmation": "You have reached the end of the book. Do you want to mark it as finished?",
+    "mark_finished": "Mark finished",
+    "keep_unfinished": "Keep unfinished",
+    "parse_loading": "Parse loading... {}",
+    "previous_chapter": "Previous chapter",
+    "next_chapter": "Next chapter",
+    "last_chapter": "Last chapter",
+    "end_of_chapter": "End of chapter {}"
   }
 }

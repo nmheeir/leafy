@@ -22,7 +22,7 @@ class ImageSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_image_title.tr(),
+                LocaleKeys.epub_reader_settings_image_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -30,7 +30,9 @@ class ImageSubcategory extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: Text(LocaleKeys.epub_reader_image_display_images.tr()),
+              title: Text(
+                LocaleKeys.epub_reader_settings_image_display_images.tr(),
+              ),
               value: state.displayImage,
               onChanged: (_) {
                 context.epubReaderSettingCubit.toggleDisplayImage();
@@ -45,7 +47,8 @@ class ImageSubcategory extends StatelessWidget {
                       children: [
                         SwitchListTile(
                           title: Text(
-                            LocaleKeys.epub_reader_image_show_caption.tr(),
+                            LocaleKeys.epub_reader_settings_image_show_caption
+                                .tr(),
                           ),
                           value: state.showImageCaption,
                           onChanged: (_) {
@@ -91,7 +94,7 @@ class _ColorEffectSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            LocaleKeys.epub_reader_image_color_effect.tr(),
+            LocaleKeys.epub_reader_settings_image_color_effect.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),
@@ -127,7 +130,7 @@ class _CornerRadiusSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: LocaleKeys.epub_reader_image_corner_radius.tr(),
+      title: LocaleKeys.epub_reader_settings_image_corner_radius.tr(),
       value: cornerRadius,
       min: 0.0,
       max: 24.0,
@@ -167,7 +170,7 @@ class _AlignmentSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            LocaleKeys.epub_reader_image_alignment.tr(),
+            LocaleKeys.epub_reader_settings_image_alignment.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),
@@ -204,7 +207,7 @@ class _SizeSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: LocaleKeys.epub_reader_image_size.tr(),
+      title: LocaleKeys.epub_reader_settings_image_size.tr(),
       value: multiplier,
       min: 0.0,
       max: 100.0,

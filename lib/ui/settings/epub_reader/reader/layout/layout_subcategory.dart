@@ -22,14 +22,15 @@ class LayoutSubcategory extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    LocaleKeys.epub_reader_layout_title.tr(),
+                    LocaleKeys.epub_reader_settings_layout_title.tr(),
                     style: context.textTheme.titleSmall?.copyWith(
                       color: context.colorScheme.primary,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    LocaleKeys.epub_reader_layout_requires_re_layout.tr(),
+                    LocaleKeys.epub_reader_settings_layout_requires_re_layout
+                        .tr(),
                     style: context.textTheme.labelSmall?.copyWith(
                       color: context.colorScheme.tertiary,
                       fontStyle: FontStyle.italic,
@@ -40,7 +41,7 @@ class LayoutSubcategory extends StatelessWidget {
             ),
             _buildSliderTile(
               context: context,
-              title: LocaleKeys.epub_reader_layout_side_margin.tr(),
+              title: LocaleKeys.epub_reader_settings_layout_side_margin.tr(),
               value: state.sideMargin,
               min: 0,
               max: 60,
@@ -50,7 +51,8 @@ class LayoutSubcategory extends StatelessWidget {
             ),
             _buildSliderTile(
               context: context,
-              title: LocaleKeys.epub_reader_layout_vertical_margin.tr(),
+              title: LocaleKeys.epub_reader_settings_layout_vertical_margin
+                  .tr(),
               value: state.verticalMargin,
               min: 0,
               max: 60,
@@ -59,7 +61,9 @@ class LayoutSubcategory extends StatelessWidget {
                   context.epubReaderSettingCubit.updateVerticalMargin(val),
             ),
             SwitchListTile(
-              title: Text(LocaleKeys.epub_reader_layout_cutout_margin.tr()),
+              title: Text(
+                LocaleKeys.epub_reader_settings_layout_cutout_margin.tr(),
+              ),
               value: state.cutoutMargin,
               onChanged: (_) =>
                   context.epubReaderSettingCubit.toggleCutoutMargin(),
@@ -70,7 +74,8 @@ class LayoutSubcategory extends StatelessWidget {
             ),
             _buildSliderTile(
               context: context,
-              title: LocaleKeys.epub_reader_layout_bottom_bar_margin.tr(),
+              title: LocaleKeys.epub_reader_settings_layout_bottom_bar_margin
+                  .tr(),
               value: state.bottomBarMargin,
               min: 0,
               max: 100,

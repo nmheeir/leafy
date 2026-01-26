@@ -29,7 +29,7 @@ class ReadingModeSubcategory extends StatelessWidget {
                   vertical: 8,
                 ),
                 child: Text(
-                  LocaleKeys.epub_reader_reading_mode_title.tr(),
+                  LocaleKeys.epub_reader_settings_reading_mode_title.tr(),
                   style: context.textTheme.titleSmall?.copyWith(
                     color: context.colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -43,7 +43,9 @@ class ReadingModeSubcategory extends StatelessWidget {
                   vertical: 8,
                 ),
                 child: Text(
-                  LocaleKeys.epub_reader_reading_mode_horizontal_gestures.tr(),
+                  LocaleKeys
+                      .epub_reader_settings_reading_mode_horizontal_gestures
+                      .tr(),
                   style: context.textTheme.labelLarge,
                 ),
               ),
@@ -78,7 +80,7 @@ class ReadingModeSubcategory extends StatelessWidget {
                           const SizedBox(height: 16),
                           SliderListTile(
                             title: LocaleKeys
-                                .epub_reader_reading_mode_scroll_fraction
+                                .epub_reader_settings_reading_mode_scroll_fraction
                                 .tr(),
                             value: state.scrollFraction,
                             min: 0.1,
@@ -89,7 +91,7 @@ class ReadingModeSubcategory extends StatelessWidget {
                           ),
                           SliderListTile(
                             title: LocaleKeys
-                                .epub_reader_reading_mode_sensitivity
+                                .epub_reader_settings_reading_mode_sensitivity
                                 .tr(),
                             value: state.sensitivity,
                             min: 0.5,
@@ -100,7 +102,8 @@ class ReadingModeSubcategory extends StatelessWidget {
                           ),
                           SwitchListTile(
                             title: Text(
-                              LocaleKeys.epub_reader_reading_mode_pull_animation
+                              LocaleKeys
+                                  .epub_reader_settings_reading_mode_pull_animation
                                   .tr(),
                             ),
                             value: state.pullAnimation,
@@ -114,7 +117,7 @@ class ReadingModeSubcategory extends StatelessWidget {
                           SwitchListTile(
                             title: Text(
                               LocaleKeys
-                                  .epub_reader_reading_mode_visibility_animation
+                                  .epub_reader_settings_reading_mode_visibility_animation
                                   .tr(),
                             ),
                             value: state.visibilityAnimation,

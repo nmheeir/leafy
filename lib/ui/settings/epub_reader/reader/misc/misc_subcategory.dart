@@ -19,7 +19,7 @@ class MiscSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_misc_title.tr(),
+                LocaleKeys.epub_reader_settings_misc_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -28,10 +28,11 @@ class MiscSubcategory extends StatelessWidget {
             ),
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_misc_volume_key_navigation.tr(),
+                LocaleKeys.epub_reader_settings_misc_volume_key_navigation.tr(),
               ),
               subtitle: Text(
-                LocaleKeys.epub_reader_misc_volume_key_navigation_description
+                LocaleKeys
+                    .epub_reader_settings_misc_volume_key_navigation_description
                     .tr(),
               ),
               value: state.volumeKeyNavigation,
@@ -44,9 +45,12 @@ class MiscSubcategory extends StatelessWidget {
                   context.epubReaderSettingCubit.toggleVolumeKeyNavigation(),
             ),
             SwitchListTile(
-              title: Text(LocaleKeys.epub_reader_misc_keep_screen_on.tr()),
+              title: Text(
+                LocaleKeys.epub_reader_settings_misc_keep_screen_on.tr(),
+              ),
               subtitle: Text(
-                LocaleKeys.epub_reader_misc_keep_screen_on_description.tr(),
+                LocaleKeys.epub_reader_settings_misc_keep_screen_on_description
+                    .tr(),
               ),
               value: state.keepScreenOn,
               secondary: Icon(
@@ -59,10 +63,11 @@ class MiscSubcategory extends StatelessWidget {
             ),
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_misc_double_tap_translate.tr(),
+                LocaleKeys.epub_reader_settings_misc_double_tap_translate.tr(),
               ),
               subtitle: Text(
-                LocaleKeys.epub_reader_misc_double_tap_translate_description
+                LocaleKeys
+                    .epub_reader_settings_misc_double_tap_translate_description
                     .tr(),
               ),
               value: state.doubleTapTranslate,

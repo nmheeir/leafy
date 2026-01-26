@@ -10,6 +10,8 @@ import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.
 import 'package:leafy/core/constants/enums/index.dart';
 import 'package:flutter/services.dart';
 import 'package:extended_image/extended_image.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class EpubReaderScreen extends StatefulWidget {
   final String filePath;
@@ -219,16 +221,16 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     if (mode == HorizontalGestureMode.off) return;
 
     // Sensitivity threshold
-    if (details.primaryVelocity == null || details.primaryVelocity!.abs() < 200)
+    if (details.primaryVelocity == null ||
+        details.primaryVelocity!.abs() < 200) {
       return;
+    }
 
     final isSwipeRight = details.primaryVelocity! > 0;
     // Swipe Right -> Prev Page (if logic is: move content to right, shows left content)
     // Swipe Left -> Next Page
 
     // mode: scroll vs swift
-    // For now we just implement simple next/prev chapter or page flip simulation logic
-    // But since this is a vertical scroll reader, "Horizontal Navigation" usually implies changing chapters.
 
     if (isSwipeRight) {
       // Swipe Right -> Go to Previous
@@ -264,10 +266,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     // Only handle Key down
     if (event is! KeyDownEvent) return;
 
-    // Only handle if volume navigation is enabled in state
-    // We need access to state here, so we might need to look it up or rely on the builder
-    // Ideally this listener should be added/removed based on state, or check state inside.
-    final state = context.read<EpubReaderSettingCubit>().state;
+    final state = context.epubReaderSettingCubit.state;
     if (!state.volumeKeyNavigation) return;
 
     if (event.logicalKey == LogicalKeyboardKey.audioVolumeUp) {
@@ -336,8 +335,10 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           },
           listener: (context, state) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Có lỗi xảy ra khi dịch. Đã khôi phục bản cũ."),
+              SnackBar(
+                content: Text(
+                  LocaleKeys.epub_reader_translation_error_rollback.tr(),
+                ),
                 backgroundColor: Colors.red,
               ),
             );
@@ -375,9 +376,9 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
 
                     if (isTranslating) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
+                        SnackBar(
                           content: Text(
-                            "Vui lòng đợi quá trình dịch hoàn tất...",
+                            LocaleKeys.epub_reader_wait_for_translation.tr(),
                           ),
                           duration: Duration(seconds: 1),
                         ),
@@ -392,18 +393,25 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                       final shouldMarkFinished = await showDialog<bool>(
                         context: context,
                         builder: (context) => AlertDialog(
-                          title: const Text('Hoàn thành sách?'),
-                          content: const Text(
-                            'Bạn đã đọc đến cuối sách. Bạn có muốn đánh dấu là đã đọc xong không?',
+                          title: Text(
+                            LocaleKeys.epub_reader_finish_book_question.tr(),
+                          ),
+                          content: Text(
+                            LocaleKeys.epub_reader_finish_book_confirmation
+                                .tr(),
                           ),
                           actions: [
                             TextButton(
                               onPressed: () => Navigator.pop(context, false),
-                              child: const Text('Chưa xong'),
+                              child: Text(
+                                LocaleKeys.epub_reader_keep_unfinished.tr(),
+                              ),
                             ),
                             FilledButton(
                               onPressed: () => Navigator.pop(context, true),
-                              child: const Text('Đã xong'),
+                              child: Text(
+                                LocaleKeys.epub_reader_mark_finished.tr(),
+                              ),
                             ),
                           ],
                         ),
@@ -473,7 +481,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                           context.epubReaderCubit.onUserInteraction(),
                       child: epubState.map(
                         initial: (_) => const SizedBox.shrink(),
-                        loading: (data) => _buildLoading(data.progress),
+                        loading: (data) => _buildParseLoading(data.progress),
                         error: (data) => _buildError(data.message),
                         loaded: (data) {
                           _totalDisplayItems = data.displayItems.length;
@@ -614,7 +622,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
       ),
       actions: [
         IconButton(
-          tooltip: "Chế độ song ngữ",
+          tooltip: LocaleKeys.epub_reader_bilingual_mode.tr(),
           onPressed: () {
             if (translationStatus == TranslationStatus.initial ||
                 translationStatus == TranslationStatus.error) {
@@ -638,18 +646,20 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
             final confirm = await showDialog<bool>(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text("Dịch lại chương này?"),
-                content: const Text(
-                  "Bạn có chắc muốn dịch lại chương này không? Bản dịch hiện tại sẽ được thay thế.",
+                title: Text(
+                  LocaleKeys.epub_reader_retranslate_chapter_question.tr(),
+                ),
+                content: Text(
+                  LocaleKeys.epub_reader_retranslate_chapter_warning.tr(),
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: const Text("Huỷ"),
+                    child: Text(LocaleKeys.cancel.tr()),
                   ),
                   FilledButton(
                     onPressed: () => Navigator.pop(context, true),
-                    child: const Text("Dịch lại"),
+                    child: Text(LocaleKeys.epub_reader_retranslate_action.tr()),
                   ),
                 ],
               ),
@@ -668,7 +678,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           icon: _buildTranslationIcon(translationStatus, isBilingual),
         ),
         IconButton(
-          tooltip: "Mục lục",
+          tooltip: LocaleKeys.epub_reader_table_of_contents.tr(),
           icon: const Icon(Icons.format_list_bulleted),
           onPressed: () {
             _scaffoldKey.currentState?.openDrawer();
@@ -752,10 +762,6 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     switch (status) {
       case TranslationStatus.loadingContext:
       case TranslationStatus.translating:
-        // Show loading if we are translating but no content yet, or rely on other mechanism.
-        // But actually, for streaming we might want to show an icon that indicates 'streaming'
-        // even if we have some text.
-        // For now, let's keep it as loading spinner.
         return const SizedBox(
           width: 24,
           height: 24,
@@ -846,14 +852,18 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
     );
   }
 
-  Widget _buildLoading(double progress) {
+  Widget _buildParseLoading(double progress) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           CircularProgressIndicator(value: progress > 0 ? progress : null),
           const SizedBox(height: 16),
-          Text("Đang phân tích sách... ${(progress * 100).toInt()}%"),
+          Text(
+            LocaleKeys.epub_reader_parse_loading.tr(
+              args: [(progress * 100).toInt().toString()],
+            ),
+          ),
         ],
       ),
     );
@@ -896,8 +906,8 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                     _jumpToTarget(target);
                   },
                   icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-                  label: const Text(
-                    "Chương trước",
+                  label: Text(
+                    LocaleKeys.epub_reader_previous_chapter.tr(),
                     overflow: TextOverflow.ellipsis,
                   ),
                   style: FilledButton.styleFrom(
@@ -921,9 +931,11 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                       _jumpToTarget(target);
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Đã là chương cuối cùng"),
-                          duration: Duration(milliseconds: 500),
+                        SnackBar(
+                          content: Text(
+                            LocaleKeys.epub_reader_last_chapter.tr(),
+                          ),
+                          duration: const Duration(milliseconds: 500),
                         ),
                       );
                     }
@@ -934,10 +946,13 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                   icon: const SizedBox.shrink(),
                   label: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("Chương sau", overflow: TextOverflow.ellipsis),
-                      SizedBox(width: 8),
-                      Icon(Icons.arrow_forward_ios_rounded, size: 18),
+                    children: [
+                      Text(
+                        LocaleKeys.epub_reader_next_chapter.tr(),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 18),
                     ],
                   ),
                 ),
@@ -1216,7 +1231,9 @@ class _EpubItemSeparator extends StatelessWidget {
           const SizedBox(height: 40),
           Divider(color: context.colorScheme.primary.withValues(alpha: 0.2)),
           Text(
-            "Hết chương $nextChapterIndex",
+            LocaleKeys.epub_reader_end_of_chapter.tr(
+              args: [nextChapterIndex.toString()],
+            ),
             style: const TextStyle(fontSize: 10, color: Colors.grey),
           ),
           const SizedBox(height: 40),

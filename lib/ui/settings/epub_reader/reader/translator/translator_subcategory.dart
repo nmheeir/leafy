@@ -20,7 +20,7 @@ class TranslatorSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_translator_title.tr(),
+                LocaleKeys.epub_reader_settings_translator_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -33,11 +33,13 @@ class TranslatorSubcategory extends StatelessWidget {
             const SizedBox(height: 16),
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_translator_double_click_translation.tr(),
+                LocaleKeys
+                    .epub_reader_settings_translator_double_click_translation
+                    .tr(),
               ),
               subtitle: Text(
                 LocaleKeys
-                    .epub_reader_translator_double_click_translation_description
+                    .epub_reader_settings_translator_double_click_translation_description
                     .tr(),
               ),
               value: state.doubleTapTranslate,
@@ -61,7 +63,9 @@ class _TargetLanguageSelector extends StatelessWidget {
     return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
       builder: (context, state) {
         return ListTile(
-          title: Text(LocaleKeys.epub_reader_translator_translate_to.tr()),
+          title: Text(
+            LocaleKeys.epub_reader_settings_translator_translate_to.tr(),
+          ),
           subtitle: Text(
             state.translationLanguage.displayName,
             style: TextStyle(color: context.colorScheme.primary),
@@ -112,7 +116,8 @@ class _AutoDetectToggleState extends State<_AutoDetectToggle> {
   Widget build(BuildContext context) {
     return SwitchListTile(
       title: Text(
-        LocaleKeys.epub_reader_translator_auto_detect_source_language.tr(),
+        LocaleKeys.epub_reader_settings_translator_auto_detect_source_language
+            .tr(),
       ),
       value: _isAutoDetect,
       onChanged: (value) => setState(() => _isAutoDetect = value),

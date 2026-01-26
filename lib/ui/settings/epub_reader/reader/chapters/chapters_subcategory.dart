@@ -19,7 +19,7 @@ class ChaptersSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_chapter_title.tr(),
+                LocaleKeys.epub_reader_settings_chapter_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -65,7 +65,7 @@ class _ChapterAlignmentSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            LocaleKeys.epub_reader_chapter_title_alignment.tr(),
+            LocaleKeys.epub_reader_settings_chapter_title_alignment.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),

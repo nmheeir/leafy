@@ -20,7 +20,7 @@ class SystemSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_system_title.tr(),
+                LocaleKeys.epub_reader_settings_system_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -28,7 +28,9 @@ class SystemSubcategory extends StatelessWidget {
               ),
             ),
             SwitchListTile(
-              title: Text(LocaleKeys.epub_reader_system_custom_brightness.tr()),
+              title: Text(
+                LocaleKeys.epub_reader_settings_system_custom_brightness.tr(),
+              ),
               value: state.customBrightnessEnabled,
               onChanged: (value) {
                 context.epubReaderSettingCubit.toggleCustomBrightness();
@@ -78,7 +80,8 @@ class SystemSubcategory extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    LocaleKeys.epub_reader_system_screen_orientation.tr(),
+                    LocaleKeys.epub_reader_settings_system_screen_orientation
+                        .tr(),
                     style: context.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 8),
