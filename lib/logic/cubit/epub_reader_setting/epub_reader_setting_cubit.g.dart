@@ -87,6 +87,10 @@ _EpubReaderSettingState _$EpubReaderSettingStateFromJson(
         json['translationLanguage'],
       ) ??
       TranslationLanguage.vietnamese,
+  backgroundColor: (json['backgroundColor'] as num?)?.toInt() ?? 0xFFFFFFFF,
+  textColor: (json['textColor'] as num?)?.toInt() ?? 0xFF000000,
+  selectionColor: (json['selectionColor'] as num?)?.toInt() ?? 0xFFFFFF00,
+  themePreset: json['themePreset'] as String? ?? 'Light',
 );
 
 Map<String, dynamic> _$EpubReaderSettingStateToJson(
@@ -136,6 +140,10 @@ Map<String, dynamic> _$EpubReaderSettingStateToJson(
   'currentTabIndex': instance.currentTabIndex,
   'translationLanguage':
       _$TranslationLanguageEnumMap[instance.translationLanguage]!,
+  'backgroundColor': instance.backgroundColor,
+  'textColor': instance.textColor,
+  'selectionColor': instance.selectionColor,
+  'themePreset': instance.themePreset,
 };
 
 const _$HorizontalGestureModeEnumMap = {

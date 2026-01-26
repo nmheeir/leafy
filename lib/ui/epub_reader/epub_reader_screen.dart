@@ -440,9 +440,7 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                   },
                   child: Scaffold(
                     key: _scaffoldKey,
-                    backgroundColor: settingState.customBrightnessEnabled
-                        ? Colors.white
-                        : null, // Base color
+                    backgroundColor: Color(settingState.backgroundColor),
                     drawer: _buildDrawer(context, epubState),
 
                     extendBodyBehindAppBar: true,
@@ -532,53 +530,63 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
           vertical: settings.verticalMargin,
         ),
         child: SafeArea(
-          child: SelectionArea(
-            child: ScrollablePositionedList.builder(
-              initialScrollIndex: initialIndex,
-              itemCount: items.length,
-              itemScrollController: _itemScrollController,
-              itemPositionsListener: _itemPositionsListener,
+          child: Theme(
+            data: Theme.of(context).copyWith(
+              textSelectionTheme: TextSelectionThemeData(
+                selectionColor: Color(
+                  settings.selectionColor,
+                ).withValues(alpha: 0.3),
+                selectionHandleColor: Color(settings.selectionColor),
+              ),
+            ),
+            child: SelectionArea(
+              child: ScrollablePositionedList.builder(
+                initialScrollIndex: initialIndex,
+                itemCount: items.length,
+                itemScrollController: _itemScrollController,
+                itemPositionsListener: _itemPositionsListener,
 
-              itemBuilder: (context, index) {
-                final item = items[index];
+                itemBuilder: (context, index) {
+                  final item = items[index];
 
-                Widget content;
-                if (item is ChapterHeaderItem) {
-                  content = _ChapterHeaderItemWidget(
-                    item: item,
-                    settings: settings,
+                  Widget content;
+                  if (item is ChapterHeaderItem) {
+                    content = _ChapterHeaderItemWidget(
+                      item: item,
+                      settings: settings,
+                    );
+                  } else if (item is ParagraphItem) {
+                    content = _ParagraphItemWidget(
+                      item: item,
+                      settings: settings,
+                      onTap: _toggleControls,
+                    );
+                  } else if (item is ImageItem) {
+                    content = _ImageItemWidget(item: item, settings: settings);
+                  } else {
+                    content = const SizedBox.shrink();
+                  }
+
+                  Widget bottomSpacing = const SizedBox.shrink();
+
+                  if (index < items.length - 1) {
+                    final nextItem = items[index + 1];
+                    final isEndOfChapter =
+                        item.chapterIndex != nextItem.chapterIndex;
+
+                    bottomSpacing = _EpubItemSeparator(
+                      isEndOfChapter: isEndOfChapter,
+                      nextChapterIndex: item.chapterIndex + 1,
+                      settings: settings,
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [content, bottomSpacing],
                   );
-                } else if (item is ParagraphItem) {
-                  content = _ParagraphItemWidget(
-                    item: item,
-                    settings: settings,
-                    onTap: _toggleControls,
-                  );
-                } else if (item is ImageItem) {
-                  content = _ImageItemWidget(item: item, settings: settings);
-                } else {
-                  content = const SizedBox.shrink();
-                }
-
-                Widget bottomSpacing = const SizedBox.shrink();
-
-                if (index < items.length - 1) {
-                  final nextItem = items[index + 1];
-                  final isEndOfChapter =
-                      item.chapterIndex != nextItem.chapterIndex;
-
-                  bottomSpacing = _EpubItemSeparator(
-                    isEndOfChapter: isEndOfChapter,
-                    nextChapterIndex: item.chapterIndex + 1,
-                    settings: settings,
-                  );
-                }
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [content, bottomSpacing],
-                );
-              },
+                },
+              ),
             ),
           ),
         ),
@@ -981,6 +989,7 @@ class _ChapterHeaderItemWidget extends StatelessWidget {
           fontSize: settings.fontSize * 1.5,
           fontWeight: FontWeight.bold,
           fontFamily: settings.fontFamily,
+          color: Color(settings.textColor),
         ),
         textAlign: settings.chapterAlignment,
       ),
@@ -1038,7 +1047,7 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
                 fontStyle: widget.settings.fontStyle,
                 fontWeight: widget.settings.fontThickness.weight,
                 letterSpacing: widget.settings.letterSpacing,
-                color: context.colorScheme.onSurface.withValues(alpha: 0.9),
+                color: Color(widget.settings.textColor),
               ),
             ),
           ],
@@ -1077,7 +1086,7 @@ class _ParagraphItemWidgetState extends State<_ParagraphItemWidget>
                 fontSize: widget.settings.fontSize * 0.9,
                 height: widget.settings.lineHeight,
                 fontFamily: widget.settings.fontFamily,
-                color: context.colorScheme.onSurface,
+                color: Color(widget.settings.textColor).withValues(alpha: 0.9),
                 fontStyle: FontStyle.italic,
               ),
               textAlign: widget.settings.textAlignment,

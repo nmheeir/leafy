@@ -218,4 +218,30 @@ class EpubReaderSettingCubit extends HydratedCubit<EpubReaderSettingState> {
   void updateTranslationLanguage(TranslationLanguage language) {
     emit(state.copyWith(translationLanguage: language));
   }
+
+  void updateThemePreset(
+    String presetName, {
+    required int backgroundColor,
+    required int textColor,
+  }) {
+    emit(
+      state.copyWith(
+        themePreset: presetName,
+        backgroundColor: backgroundColor,
+        textColor: textColor,
+      ),
+    );
+  }
+
+  void updateBackgroundColor(int color) {
+    emit(state.copyWith(backgroundColor: color, themePreset: 'Custom'));
+  }
+
+  void updateTextColor(int color) {
+    emit(state.copyWith(textColor: color, themePreset: 'Custom'));
+  }
+
+  void updateSelectionColor(int color) {
+    emit(state.copyWith(selectionColor: color));
+  }
 }

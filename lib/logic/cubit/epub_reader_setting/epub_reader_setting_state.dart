@@ -48,6 +48,11 @@ abstract class EpubReaderSettingState with _$EpubReaderSettingState {
     @Default(0) int currentTabIndex,
     @Default(TranslationLanguage.vietnamese)
     TranslationLanguage translationLanguage,
+    @Default(0xFFFFFFFF) int backgroundColor,
+    @Default(0xFF000000) int textColor,
+    @Default(0xFFFFFF00)
+    int selectionColor, // Default is a standard yellow highlight
+    @Default('Light') String themePreset,
   }) = _EpubReaderSettingState;
 
   factory EpubReaderSettingState.fromJson(Map<String, dynamic> json) =>

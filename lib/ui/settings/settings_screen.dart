@@ -340,7 +340,7 @@ class SettingsScreen extends StatelessWidget {
   SettingsTile _buildGeminiApiSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(
-        LocaleKeys.ai_api_key_setting_config,
+        LocaleKeys.ai_api_key_setting_config.tr(),
         style: TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.psychology_outlined),
