@@ -32,6 +32,7 @@ import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
+import 'package:leafy/logic/cubit/pdf_reader/pdf_reader_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
@@ -39,10 +40,12 @@ import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:leafy/core/utils/app_globals.dart';
+import 'package:pdfrx/pdfrx.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  await pdfrxFlutterInitialize(dismissPdfiumWasmWarnings: true);
 
   configureDependencies();
 
@@ -93,6 +96,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<BookProgressCubit>()),
       BlocProvider(create: (context) => getIt<EpubReaderSettingCubit>()),
       BlocProvider(create: (context) => getIt<AISettingsCubit>()),
+      BlocProvider(create: (context) => getIt<PdfReaderCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

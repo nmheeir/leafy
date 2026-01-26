@@ -17,6 +17,7 @@ import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
+import 'package:leafy/logic/cubit/pdf_reader/pdf_reader_cubit.dart';
 
 extension BlocExtensions on BuildContext {
   ///////////////////////////// CUBIT /////////////////////////////
@@ -53,6 +54,8 @@ extension BlocExtensions on BuildContext {
       read<EpubReaderSettingCubit>();
 
   AISettingsCubit get aiSettingsCubit => read<AISettingsCubit>();
+
+  PdfReaderCubit get pdfReaderCubit => read<PdfReaderCubit>();
 
   ///////////////////////////// BLOC /////////////////////////////
   LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();

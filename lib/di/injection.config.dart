@@ -169,6 +169,7 @@ import '../logic/cubit/epub_reader/epub_reader_cubit.dart' as _i206;
 import '../logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart'
     as _i1059;
 import '../logic/cubit/library/library_cubit.dart' as _i939;
+import '../logic/cubit/pdf_reader/pdf_reader_cubit.dart' as _i628;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
 import 'module/device_module.dart' as _i195;
@@ -285,6 +286,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i925.EpubReaderRepository>(
       () => _i608.EpubBookRepositoryImpl(gh<_i722.EpubReaderLocalDataSource>()),
+    );
+    gh.factory<_i628.PdfReaderCubit>(
+      () => _i628.PdfReaderCubit(gh<_i120.Logger>()),
     );
     gh.lazySingleton<_i13.ReadingSessionLocalDatasource>(
       () =>

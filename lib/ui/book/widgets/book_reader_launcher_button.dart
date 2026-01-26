@@ -17,6 +17,8 @@ import 'package:leafy/logic/cubit/book_resource/book_resource_state.dart';
 
 import 'package:leafy/ui/book/widgets/celebration_dialog.dart';
 import 'package:leafy/ui/epub_reader/epub_reader_screen.dart';
+import 'package:leafy/ui/pdf_reader/pdf_reader_screen.dart';
+import 'package:leafy/ui/reader/placeholder_reader_screen.dart';
 
 class BookReaderLauncherButton extends StatelessWidget {
   const BookReaderLauncherButton({super.key, required this.book});
@@ -268,10 +270,27 @@ class BookReaderLauncherButton extends StatelessWidget {
   }
 
   void _openReader(BuildContext context, BookResource resource) async {
+    final Widget screen;
+    switch (resource.format) {
+      case BookResourceFormat.epub:
+        screen = EpubReaderScreen(filePath: resource.filePath!);
+        break;
+      case BookResourceFormat.pdf:
+        screen = PdfReaderScreen(
+          filePath: resource.filePath!,
+          fileOrUri: resource.filePath,
+        );
+        break;
+      default:
+        screen = PlaceholderReaderScreen(
+          format: resource.format.name,
+          filePath: resource.filePath!,
+        );
+        break;
+    }
+
     final result = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(
-        builder: (context) => EpubReaderScreen(filePath: resource.filePath!),
-      ),
+      MaterialPageRoute(builder: (context) => screen),
     );
 
     if (context.mounted) {
