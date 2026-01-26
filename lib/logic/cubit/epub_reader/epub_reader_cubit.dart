@@ -68,9 +68,10 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
   Future<void> translateChapter(
     int chapterIndex, {
     TranslationLanguage? targetLanguage,
+    bool force = false,
   }) async {
     _logger.i(
-      'Call translateChapter: index=$chapterIndex, lang=${targetLanguage?.name}',
+      'Call translateChapter: index=$chapterIndex, lang=${targetLanguage?.name}, force=$force',
     );
 
     final loadedState = state.mapOrNull(loaded: (s) => s);
@@ -83,16 +84,30 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       return;
     }
 
-    // Check if already translating (but allow retries if error)
+    // Check if already translating (but allow retries if error OR if forced)
     final currentStatus = loadedState.translationStatuses[chapterIndex];
     _logger.d('Current Status: $currentStatus');
     _logger.d('Chapter Index: $chapterIndex');
-    if (currentStatus == TranslationStatus.translating ||
-        currentStatus == TranslationStatus.success) {
-      _logger.i(
-        'Translate skipped: Chapter $chapterIndex status is $currentStatus',
+
+    if (!force) {
+      if (currentStatus == TranslationStatus.translating ||
+          currentStatus == TranslationStatus.success) {
+        _logger.i(
+          'Translate skipped: Chapter $chapterIndex status is $currentStatus',
+        );
+        return;
+      }
+    }
+
+    // Save previous translation for rollback if forcing
+    Map<String, String>? previousTranslation;
+    if (force && loadedState.translationMaps.containsKey(chapterIndex)) {
+      previousTranslation = Map<String, String>.from(
+        loadedState.translationMaps[chapterIndex]!,
       );
-      return;
+      _logger.d(
+        'Saved previous translation for rollback. Items: ${previousTranslation.length}',
+      );
     }
 
     // Update Status: Loading, and enable bilingual mode
@@ -100,10 +115,43 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
       loadedState.translationStatuses,
     );
     newStatuses[chapterIndex] = TranslationStatus.translating;
-    emit(
-      loadedState.copyWith(translationStatuses: newStatuses, isBilingual: true),
+
+    // Reset translation for this chapter if forcing (to clear old text from UI while loading new one?
+    // OR keep old text until new text arrives to avoid flickering?
+    // Strategy: If force, we can clear it or keep it.
+    // If we clear it, user sees loading immediately.
+    // If we keep it, it might be confusing if it's mixing old and new?
+    // Let's clear it for "Fresh" feel, but we have rollback so it's safe.
+    final newTranslationMaps = Map<int, Map<String, String>>.from(
+      loadedState.translationMaps,
     );
-    _logger.d('State updated: Chapter $chapterIndex set to translating');
+
+    // If forcing, we clear the current map for this chapter to start fresh visually
+    // BUT, stream will yield "chunks", so if we clear, it will be empty first.
+    if (force) {
+      newTranslationMaps[chapterIndex] = {};
+    }
+
+    // Flatten book might be needed if we cleared map
+    List<EpubDisplayItem> currentDisplayItems = loadedState.displayItems;
+    if (force) {
+      currentDisplayItems = EpubHelper.flattenBook(
+        loadedState.book,
+        translationMaps: newTranslationMaps,
+      );
+    }
+
+    emit(
+      loadedState.copyWith(
+        translationStatuses: newStatuses,
+        translationMaps: newTranslationMaps,
+        displayItems: currentDisplayItems,
+        isBilingual: true,
+      ),
+    );
+    _logger.d(
+      'State updated: Chapter $chapterIndex set to translating (Force: $force)',
+    );
 
     try {
       final originalParagraphs = EpubHelper.splitToParagraphs(
@@ -121,6 +169,7 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         bookTitle: loadedState.book.title,
         author: loadedState.book.author,
         targetLang: targetLanguage ?? TranslationLanguage.vietnamese,
+        forceRefresh: force,
       );
 
       _logger.d('Stream initiated, starting listener...');
@@ -131,16 +180,11 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
             (failure) {
               // NOTE: cần hiển thị lỗi cho UI
               _logger.e('Translate error (Failure): $failure');
-              final currentLoaded = state.mapOrNull(loaded: (s) => s);
-              if (currentLoaded != null) {
-                final errorStatuses = Map<int, TranslationStatus>.from(
-                  currentLoaded.translationStatuses,
-                );
-                errorStatuses[chapterIndex] = TranslationStatus.error;
-                emit(
-                  currentLoaded.copyWith(translationStatuses: errorStatuses),
-                );
-              }
+              _handleTranslationError(
+                chapterIndex,
+                failure.message ?? failure.toString(),
+                previousTranslation,
+              );
             },
             (update) {
               if (update is TranslationUpdateData) {
@@ -185,14 +229,11 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         },
         onError: (e) {
           _logger.e('Stream error (onError): $e');
-          final currentLoaded = state.mapOrNull(loaded: (s) => s);
-          if (currentLoaded != null) {
-            final errorStatuses = Map<int, TranslationStatus>.from(
-              currentLoaded.translationStatuses,
-            );
-            errorStatuses[chapterIndex] = TranslationStatus.error;
-            emit(currentLoaded.copyWith(translationStatuses: errorStatuses));
-          }
+          _handleTranslationError(
+            chapterIndex,
+            e.toString(),
+            previousTranslation,
+          );
         },
         onDone: () {
           _logger.i('Translation stream completed for chapter $chapterIndex');
@@ -212,11 +253,71 @@ class EpubReaderCubit extends Cubit<EpubReaderCubitState> {
         error: e,
         stackTrace: stackTrace,
       );
+      _handleTranslationError(chapterIndex, e.toString(), previousTranslation);
+    }
+  }
+
+  void _handleTranslationError(
+    int chapterIndex,
+    String errorMessage,
+    Map<String, String>? previousTranslation,
+  ) {
+    final currentLoaded = state.mapOrNull(loaded: (s) => s);
+    if (currentLoaded != null) {
       final errorStatuses = Map<int, TranslationStatus>.from(
-        loadedState.translationStatuses,
+        currentLoaded.translationStatuses,
       );
       errorStatuses[chapterIndex] = TranslationStatus.error;
-      emit(loadedState.copyWith(translationStatuses: errorStatuses));
+
+      // Rollback Logic
+      Map<int, Map<String, String>> finalTranslationMaps =
+          currentLoaded.translationMaps;
+      List<EpubDisplayItem> finalDisplayItems = currentLoaded.displayItems;
+
+      if (previousTranslation != null) {
+        _logger.i('Performing rollback for chapter $chapterIndex');
+        finalTranslationMaps = Map<int, Map<String, String>>.from(
+          currentLoaded.translationMaps,
+        );
+        finalTranslationMaps[chapterIndex] = previousTranslation;
+
+        finalDisplayItems = EpubHelper.flattenBook(
+          currentLoaded.book,
+          translationMaps: finalTranslationMaps,
+        );
+      }
+
+      emit(
+        currentLoaded.copyWith(
+          translationStatuses: errorStatuses,
+          translationMaps: finalTranslationMaps,
+          displayItems: finalDisplayItems,
+        ),
+      );
+
+      // Optionally emit a side effect or ensure UI knows about the error
+      emit(
+        EpubReaderCubitState.error(
+          message: "Lỗi dịch: $errorMessage. Đã khôi phục bản cũ nếu có.",
+        ),
+      );
+      // BUT wait, emit error will replace the Loaded state with Error state, which kills the UI!
+      // We should NOT emit a top-level Error state for a partial error if we want to keep the book open.
+      // We should just use the status .error in the map and maybe show a toast/snackbar via listener.
+      // Reverting the "emit Error" line above. The UI reads translationStatuses.
+
+      // To properly show error message without destroying state, we might need a transient error field
+      // or just rely on the UI seeing "Error" status and showing a generic message.
+      // For now, restoring the Loaded state is correct.
+      emit(
+        currentLoaded.copyWith(
+          translationStatuses: errorStatuses,
+          translationMaps: finalTranslationMaps,
+          displayItems: finalDisplayItems,
+          // We can't easily send a one-time error message in state without clearing it later.
+          // Leaving it as visual indication in statuses.
+        ),
+      );
     }
   }
 

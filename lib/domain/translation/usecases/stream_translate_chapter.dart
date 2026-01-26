@@ -22,33 +22,37 @@ class StreamTranslateChapterUseCase {
     required String bookTitle,
     String? author,
     String? bookSummary,
+    bool forceRefresh = false,
   }) async* {
-    // 1. Check local cache
-    final localResult = await _repository.getLocalTranslatedChapter(
-      fileHash: fileHash,
-      chapterIndex: chapterIndex,
-      targetLang: targetLang,
-    );
-
-    final localModel = localResult.toOption().toNullable();
-
-    if (localModel != null) {
-      // Yield cached paragraphs
-      for (final entry in localModel.translatedContent.entries) {
-        yield Right(TranslationUpdateData(id: entry.key, text: entry.value));
-      }
-      _logger.d('Local model: ${localModel.toJson()}');
-
-      // Trigger summary check
-      _checkAndGenerateSummary(
+    // 1. Check local cache (only if not forcing refresh)
+    if (!forceRefresh) {
+      final localResult = await _repository.getLocalTranslatedChapter(
         fileHash: fileHash,
         chapterIndex: chapterIndex,
-        originalContent: originalContent,
+        targetLang: targetLang,
       );
-      return;
-    }
 
-    _logger.d('Local model is null');
+      final localModel = localResult.toOption().toNullable();
+
+      if (localModel != null) {
+        // Yield cached paragraphs
+        for (final entry in localModel.translatedContent.entries) {
+          yield Right(TranslationUpdateData(id: entry.key, text: entry.value));
+        }
+        _logger.d('Local model: ${localModel.toJson()}');
+
+        // Trigger summary check
+        _checkAndGenerateSummary(
+          fileHash: fileHash,
+          chapterIndex: chapterIndex,
+          originalContent: originalContent,
+        );
+        return;
+      }
+      _logger.d('Local model is null');
+    } else {
+      _logger.d('Force refresh enabled. Skipping local cache check.');
+    }
 
     // 2. Stream from remote
     yield* _repository.streamTranslateChapter(

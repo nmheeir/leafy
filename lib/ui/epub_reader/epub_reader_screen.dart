@@ -321,6 +321,34 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
                 onPopInvokedWithResult: (didPop, result) async {
                   if (didPop) return;
 
+                  // Check if translating
+                  final cubitState = context.read<EpubReaderCubit>().state;
+                  bool isTranslating = false;
+                  cubitState.mapOrNull(
+                    loaded: (data) {
+                      final status =
+                          data.translationStatuses[data.currentChapterIndex] ??
+                          TranslationStatus.initial;
+                      if (status == TranslationStatus.translating ||
+                          status == TranslationStatus.loadingContext ||
+                          status == TranslationStatus.finalizing) {
+                        isTranslating = true;
+                      }
+                    },
+                  );
+
+                  if (isTranslating) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Vui lòng đợi quá trình dịch hoàn tất...",
+                        ),
+                        duration: Duration(seconds: 1),
+                      ),
+                    );
+                    return;
+                  }
+
                   final progress = _chapterProgressNotifier.value;
 
                   // Check if finished when popping
@@ -561,6 +589,43 @@ class _EpubReaderContentState extends State<_EpubReaderContent>
               );
             } else {
               context.epubReaderCubit.toggleBilingualMode();
+            }
+          },
+          onLongPress: () async {
+            if (translationStatus == TranslationStatus.loadingContext ||
+                translationStatus == TranslationStatus.translating ||
+                translationStatus == TranslationStatus.finalizing) {
+              return; // Already doing something
+            }
+
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text("Dịch lại chương này?"),
+                content: const Text(
+                  "Bạn có chắc muốn dịch lại chương này không? Bản dịch hiện tại sẽ được thay thế.",
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text("Huỷ"),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: const Text("Dịch lại"),
+                  ),
+                ],
+              ),
+            );
+
+            if (confirm == true && context.mounted) {
+              final language =
+                  context.epubReaderSettingCubit.state.translationLanguage;
+              context.epubReaderCubit.translateChapter(
+                currentChapter,
+                targetLanguage: language,
+                force: true,
+              );
             }
           },
           icon: _buildTranslationIcon(translationStatus, isBilingual),
