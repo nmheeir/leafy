@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
+import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
 import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
@@ -50,6 +51,8 @@ extension BlocExtensions on BuildContext {
 
   EpubReaderSettingCubit get epubReaderSettingCubit =>
       read<EpubReaderSettingCubit>();
+
+  AISettingsCubit get aiSettingsCubit => read<AISettingsCubit>();
 
   ///////////////////////////// BLOC /////////////////////////////
   LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();

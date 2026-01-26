@@ -9,7 +9,6 @@ import 'package:leafy/domain/file_import/entities/file_temporary_object.dart';
 import 'package:leafy/domain/file_import/entities/processed_file.dart';
 import 'package:leafy/domain/file_import/services/file_processing_service.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 @LazySingleton(as: FileProcessingService)
 class FileProcessingServiceImpl implements FileProcessingService {
@@ -25,8 +24,6 @@ class FileProcessingServiceImpl implements FileProcessingService {
     final List<ProcessedFile> processedFiles = [];
 
     try {
-      final appDocDir = await getApplicationDocumentsDirectory();
-
       for (final file in files) {
         // 1. Calculate Identification (MD5)
         final File ioFile = File(file.path);
@@ -58,6 +55,11 @@ class FileProcessingServiceImpl implements FileProcessingService {
         }
 
         final targetPath = FileHelper.generateEpubFilePath(file.name);
+
+        final targetDir = Directory(p.dirname(targetPath));
+        if (!targetDir.existsSync()) {
+          await targetDir.create(recursive: true);
+        }
 
         // 4. Persistence
         try {

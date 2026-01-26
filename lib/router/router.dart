@@ -4,6 +4,7 @@ import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
 import 'package:leafy/ui/search_gtd/search_gtd_screen.dart';
 import 'package:leafy/ui/search_ol/search_ol_screen.dart';
+import 'package:leafy/ui/settings/screens/ai_settings_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_accent_color_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_appearance_screen.dart';
 import 'package:leafy/ui/settings/screens/setting_backup_restore_screen.dart';
@@ -65,6 +66,10 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.searchGutendex,
       builder: (context, state) => SearchGtdScreen(),
+    ),
+    GoRoute(
+      path: Routes.settingAiApi,
+      builder: (context, state) => AISettingsScreen(),
     ),
   ],
   // redirect: (context, state) {

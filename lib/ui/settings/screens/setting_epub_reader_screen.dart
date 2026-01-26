@@ -35,7 +35,7 @@ class SettingEpubReaderScreen extends StatelessWidget {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: Text(LocaleKeys.epub_reader_title.tr())),
+      appBar: AppBar(title: Text(LocaleKeys.epub_reader_settings_title.tr())),
       body: SettingsList(
         darkTheme: SettingsThemeData(
           settingsListBackground:

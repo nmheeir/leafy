@@ -80,7 +80,7 @@ class BookReaderLauncherButton extends StatelessWidget {
         },
         failure: (error) => _buildActionButton(
           context,
-          text: LocaleKeys.error.tr(),
+          text: LocaleKeys.error_unexpected.tr(),
           icon: Icons.error_outline,
           onTap: () => context.bookResourceCubit.loadResources(book.id ?? 0),
         ),

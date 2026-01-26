@@ -21,7 +21,7 @@ class ProgressSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_progress_title.tr(),
+                LocaleKeys.epub_reader_settings_progress_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -31,7 +31,9 @@ class ProgressSubcategory extends StatelessWidget {
             _ProgressCountSelector(currentType: state.progressCountType),
             const SizedBox(height: 16),
             SwitchListTile(
-              title: Text(LocaleKeys.epub_reader_progress_show_bar.tr()),
+              title: Text(
+                LocaleKeys.epub_reader_settings_progress_show_bar.tr(),
+              ),
               value: state.showProgressBar,
               onChanged: (_) {
                 context.epubReaderSettingCubit.toggleShowProgressBar();
@@ -72,8 +74,8 @@ class _ProgressCountSelector extends StatelessWidget {
     ];
 
     final List<String> labels = [
-      LocaleKeys.epub_reader_progress_count_percentage.tr(),
-      LocaleKeys.epub_reader_progress_count_quantity.tr(),
+      LocaleKeys.epub_reader_settings_progress_count_percentage.tr(),
+      LocaleKeys.epub_reader_settings_progress_count_quantity.tr(),
     ];
     final List<bool> isSelected = types
         .map((type) => type == currentType)
@@ -85,7 +87,7 @@ class _ProgressCountSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            LocaleKeys.epub_reader_progress_count.tr(),
+            LocaleKeys.epub_reader_settings_progress_count.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),
@@ -129,14 +131,14 @@ class _ProgressBarColorPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(LocaleKeys.epub_reader_progress_bar_color.tr()),
+      title: Text(LocaleKeys.epub_reader_settings_progress_bar_color.tr()),
       trailing: GestureDetector(
         onTap: () async {
           final Color newColor = await showColorPickerDialog(
             context,
             color,
             title: Text(
-              LocaleKeys.epub_reader_progress_bar_color.tr(),
+              LocaleKeys.epub_reader_settings_progress_bar_color.tr(),
               style: context.textTheme.titleLarge,
             ),
             width: 40,

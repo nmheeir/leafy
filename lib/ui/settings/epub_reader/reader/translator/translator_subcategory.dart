@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/constants/enums/index.dart';
 import 'package:leafy/logic/cubit/epub_reader_setting/epub_reader_setting_cubit.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/utils/extensions.dart';
@@ -19,7 +20,7 @@ class TranslatorSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_translator_title.tr(),
+                LocaleKeys.epub_reader_settings_translator_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -32,11 +33,13 @@ class TranslatorSubcategory extends StatelessWidget {
             const SizedBox(height: 16),
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_translator_double_click_translation.tr(),
+                LocaleKeys
+                    .epub_reader_settings_translator_double_click_translation
+                    .tr(),
               ),
               subtitle: Text(
                 LocaleKeys
-                    .epub_reader_translator_double_click_translation_description
+                    .epub_reader_settings_translator_double_click_translation_description
                     .tr(),
               ),
               value: state.doubleTapTranslate,
@@ -52,54 +55,47 @@ class TranslatorSubcategory extends StatelessWidget {
   }
 }
 
-class _TargetLanguageSelector extends StatefulWidget {
+class _TargetLanguageSelector extends StatelessWidget {
   const _TargetLanguageSelector();
 
   @override
-  State<_TargetLanguageSelector> createState() =>
-      _TargetLanguageSelectorState();
-}
-
-class _TargetLanguageSelectorState extends State<_TargetLanguageSelector> {
-  String _selectedLanguage = "Vietnamese";
-  final List<String> _languages = [
-    "Vietnamese",
-    "English",
-    "French",
-    "Japanese",
-    "Korean",
-    "Chinese",
-  ];
-
-  @override
   Widget build(BuildContext context) {
-    return ListTile(
-      title: const Text("Translate to"),
-      subtitle: Text(
-        _selectedLanguage,
-        style: TextStyle(color: context.colorScheme.primary),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: () {
-        showModalBottomSheet(
-          showDragHandle: true,
-          context: context,
-          builder: (context) => ListView.builder(
-            itemCount: _languages.length,
-            itemBuilder: (context, index) {
-              final language = _languages[index];
-              return ListTile(
-                title: Text(language),
-                trailing: language == _selectedLanguage
-                    ? Icon(Icons.check, color: context.colorScheme.primary)
-                    : null,
-                onTap: () {
-                  setState(() => _selectedLanguage = language);
-                  Navigator.pop(context);
-                },
-              );
-            },
+    return BlocBuilder<EpubReaderSettingCubit, EpubReaderSettingState>(
+      builder: (context, state) {
+        return ListTile(
+          title: Text(
+            LocaleKeys.epub_reader_settings_translator_translate_to.tr(),
           ),
+          subtitle: Text(
+            state.translationLanguage.displayName,
+            style: TextStyle(color: context.colorScheme.primary),
+          ),
+          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+          onTap: () {
+            showModalBottomSheet(
+              showDragHandle: true,
+              context: context,
+              builder: (context) => ListView.builder(
+                shrinkWrap: true,
+                itemCount: TranslationLanguage.values.length,
+                itemBuilder: (context, index) {
+                  final language = TranslationLanguage.values[index];
+                  return ListTile(
+                    title: Text(language.displayName),
+                    trailing: language == state.translationLanguage
+                        ? Icon(Icons.check, color: context.colorScheme.primary)
+                        : null,
+                    onTap: () {
+                      context.epubReaderSettingCubit.updateTranslationLanguage(
+                        language,
+                      );
+                      Navigator.pop(context);
+                    },
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -120,7 +116,8 @@ class _AutoDetectToggleState extends State<_AutoDetectToggle> {
   Widget build(BuildContext context) {
     return SwitchListTile(
       title: Text(
-        LocaleKeys.epub_reader_translator_auto_detect_source_language.tr(),
+        LocaleKeys.epub_reader_settings_translator_auto_detect_source_language
+            .tr(),
       ),
       value: _isAutoDetect,
       onChanged: (value) => setState(() => _isAutoDetect = value),

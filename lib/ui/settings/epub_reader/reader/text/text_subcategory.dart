@@ -20,7 +20,7 @@ class TextSubcategory extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Text(
-                LocaleKeys.epub_reader_text_title.tr(),
+                LocaleKeys.epub_reader_settings_text_title.tr(),
                 style: context.textTheme.titleSmall?.copyWith(
                   color: context.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -72,7 +72,7 @@ class _TextAlignSelector extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
-            LocaleKeys.epub_reader_text_alignment.tr(),
+            LocaleKeys.epub_reader_settings_text_alignment.tr(),
             style: context.textTheme.labelLarge,
           ),
         ),
@@ -83,7 +83,7 @@ class _TextAlignSelector extends StatelessWidget {
               return ToggleButtons(
                 isSelected: isSelected,
                 onPressed: (index) {
-                  context.read<EpubReaderSettingCubit>().updateTextAlignment(
+                  context.epubReaderSettingCubit.updateTextAlignment(
                     alignments[index],
                   );
                 },
@@ -109,7 +109,7 @@ class _LineHeightSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: LocaleKeys.epub_reader_text_line_height.tr(),
+      title: LocaleKeys.epub_reader_settings_text_line_height.tr(),
       value: lineHeight,
       min: 1.0,
       max: 3.0,
@@ -128,7 +128,7 @@ class _ParagraphSpacingSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: LocaleKeys.epub_reader_text_paragraph_spacing.tr(),
+      title: LocaleKeys.epub_reader_settings_text_paragraph_spacing.tr(),
       value: spacing,
       min: 0.0,
       max: 24.0,
@@ -147,7 +147,7 @@ class _IndentSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SliderListTile(
-      title: LocaleKeys.epub_reader_text_indentation.tr(),
+      title: LocaleKeys.epub_reader_settings_text_indentation.tr(),
       value: indent,
       min: 0.0,
       max: 24.0,

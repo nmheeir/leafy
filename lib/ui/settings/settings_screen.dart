@@ -87,8 +87,12 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   ),
                   SettingsSection(
+                    title: Text(LocaleKeys.ai_api_key_setting_title.tr()),
+                    tiles: [_buildGeminiApiSetting(context)],
+                  ),
+                  SettingsSection(
                     title: Text(
-                      LocaleKeys.epub_reader_title.tr(),
+                      LocaleKeys.epub_reader_settings_title.tr(),
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -333,6 +337,17 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  SettingsTile _buildGeminiApiSetting(BuildContext context) {
+    return SettingsTile.navigation(
+      title: Text(
+        LocaleKeys.ai_api_key_setting_config,
+        style: TextStyle(fontSize: 16),
+      ),
+      leading: const Icon(Icons.psychology_outlined),
+      onPressed: (context) => context.push(Routes.settingAiApi),
+    );
+  }
+
   SettingsTile _buildAppearanceSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(LocaleKeys.apperance.tr(), style: TextStyle(fontSize: 16)),
@@ -344,7 +359,7 @@ class SettingsScreen extends StatelessWidget {
   SettingsTile _buildEpubReaderSetting(BuildContext context) {
     return SettingsTile.navigation(
       title: Text(
-        LocaleKeys.epub_reader_title.tr(),
+        LocaleKeys.epub_reader_settings_title.tr(),
         style: TextStyle(fontSize: 16),
       ),
       leading: const Icon(Icons.book),

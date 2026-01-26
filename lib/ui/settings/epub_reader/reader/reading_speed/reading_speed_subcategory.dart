@@ -23,7 +23,7 @@ class ReadingSpeedSubcategory extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    LocaleKeys.epub_reader_reading_speed_title.tr(),
+                    LocaleKeys.epub_reader_settings_reading_speed_title.tr(),
                     style: context.textTheme.titleSmall?.copyWith(
                       color: context.colorScheme.primary,
                       fontWeight: FontWeight.bold,
@@ -39,7 +39,8 @@ class ReadingSpeedSubcategory extends StatelessWidget {
             // Highlight Words
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_reading_speed_highlight_words.tr(),
+                LocaleKeys.epub_reader_settings_reading_speed_highlight_words
+                    .tr(),
               ),
               subtitle: const Text("Highlight words as they are spoken"),
               value: state.highlightWords,
@@ -52,7 +53,7 @@ class ReadingSpeedSubcategory extends StatelessWidget {
               child: state.highlightWords
                   ? SliderListTile(
                       title: LocaleKeys
-                          .epub_reader_reading_speed_highlight_thickness
+                          .epub_reader_settings_reading_speed_highlight_thickness
                           .tr(),
                       value: state.highlightThickness,
                       min: 1.0,
@@ -71,11 +72,13 @@ class ReadingSpeedSubcategory extends StatelessWidget {
             // Perception Expander
             SwitchListTile(
               title: Text(
-                LocaleKeys.epub_reader_reading_speed_perception_expander.tr(),
+                LocaleKeys
+                    .epub_reader_settings_reading_speed_perception_expander
+                    .tr(),
               ),
               subtitle: Text(
                 LocaleKeys
-                    .epub_reader_reading_speed_perception_expander_description
+                    .epub_reader_settings_reading_speed_perception_expander_description
                     .tr(),
               ),
               value: state.perceptionExpander,
@@ -90,7 +93,7 @@ class ReadingSpeedSubcategory extends StatelessWidget {
                       children: [
                         SliderListTile(
                           title: LocaleKeys
-                              .epub_reader_reading_speed_line_side_margin
+                              .epub_reader_settings_reading_speed_line_side_margin
                               .tr(),
                           value: state.lineSideMargin,
                           min: 0.0,
@@ -102,7 +105,7 @@ class ReadingSpeedSubcategory extends StatelessWidget {
                         ),
                         SliderListTile(
                           title: LocaleKeys
-                              .epub_reader_reading_speed_line_side_thickness
+                              .epub_reader_settings_reading_speed_line_side_thickness
                               .tr(),
                           value: state.lineSideThickness,
                           min: 0.0,
@@ -163,13 +166,13 @@ class _SpeedSliderState extends State<_SpeedSlider> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                LocaleKeys.epub_reader_reading_speed_slow.tr(),
+                LocaleKeys.epub_reader_settings_reading_speed_slow.tr(),
                 style: context.textTheme.labelMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
               ),
               Text(
-                LocaleKeys.epub_reader_reading_speed_fast.tr(),
+                LocaleKeys.epub_reader_settings_reading_speed_fast.tr(),
                 style: context.textTheme.labelMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant,
                 ),
