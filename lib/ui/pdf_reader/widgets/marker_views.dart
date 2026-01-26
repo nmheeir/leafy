@@ -1,10 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:pdfrx/pdfrx.dart';
 
 class Marker {
-  Marker(this.color, this.range);
+  Marker({
+    required this.color,
+    required this.pageNumber,
+    required this.bounds,
+    required this.text,
+  }) : id = null;
+
+  Marker.fromEntity(
+    this.color,
+    this.pageNumber,
+    this.bounds,
+    this.text,
+    this.id,
+  );
+
+  final int? id;
   final Color color;
-  final PdfPageTextRange range;
+  final int pageNumber;
+  final Rect bounds;
+  final String text;
 }
 
 class MarkersView extends StatefulWidget {
@@ -40,9 +56,7 @@ class _MarkersViewState extends State<MarkersView> {
                   child: SizedBox(
                     width: double.infinity,
                     height: 40,
-                    child: Text(
-                      'Page #${marker.range.pageNumber} - ${marker.range.text}',
-                    ),
+                    child: Text('Page #${marker.pageNumber} - ${marker.text}'),
                   ),
                 ),
               ),

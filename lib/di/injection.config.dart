@@ -25,6 +25,7 @@ import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
 import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
+import '../data/datasources/local/book_mark_local_datasource.dart' as _i328;
 import '../data/datasources/local/book_resource_local_datasource.dart' as _i880;
 import '../data/datasources/local/book_resource_local_datasource_impl.dart'
     as _i612;
@@ -57,6 +58,7 @@ import '../data/file_import/services/file_processing_service_impl.dart'
     as _i503;
 import '../data/file_import/services/metadata_extraction_service_impl.dart'
     as _i804;
+import '../data/repositories/book_mark_repository_impl.dart' as _i1069;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
 import '../data/repositories/device/device_repository_impl.dart' as _i938;
@@ -82,6 +84,10 @@ import '../domain/book/usecases/search_books.dart' as _i755;
 import '../domain/book/usecases/stat_calculator.dart' as _i800;
 import '../domain/book/usecases/update_book.dart' as _i552;
 import '../domain/book/usecases/watch_all_books.dart' as _i864;
+import '../domain/book_marks/repositories/book_mark_repository.dart' as _i16;
+import '../domain/book_marks/usecases/delete_book_mark.dart' as _i27;
+import '../domain/book_marks/usecases/get_book_marks.dart' as _i773;
+import '../domain/book_marks/usecases/save_book_mark.dart' as _i902;
 import '../domain/book_resource/repositories/book_resource_repository.dart'
     as _i1042;
 import '../domain/book_resource/usecase/add_book_resource.dart' as _i693;
@@ -242,6 +248,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i890.TranslationLocalDataSource>(
       () => _i890.TranslationLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.lazySingleton<_i328.BookMarkLocalDataSource>(
+      () => _i328.BookMarkLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
     gh.lazySingleton<_i620.EpubFileLocalDataSource>(
       () => _i536.EpubFileLocalDataSourceImpl(gh<_i497.Directory>()),
     );
@@ -284,11 +293,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i568.PickLocalFilesUseCase>(
       () => _i568.PickLocalFilesUseCase(gh<_i255.FilePickerService>()),
     );
+    gh.lazySingleton<_i16.BookMarkRepository>(
+      () => _i1069.BookMarkRepositoryImpl(gh<_i328.BookMarkLocalDataSource>()),
+    );
     gh.lazySingleton<_i925.EpubReaderRepository>(
       () => _i608.EpubBookRepositoryImpl(gh<_i722.EpubReaderLocalDataSource>()),
     );
-    gh.factory<_i628.PdfReaderCubit>(
-      () => _i628.PdfReaderCubit(gh<_i120.Logger>()),
+    gh.lazySingleton<_i27.DeleteBookMarkUseCase>(
+      () => _i27.DeleteBookMarkUseCase(gh<_i16.BookMarkRepository>()),
+    );
+    gh.lazySingleton<_i773.GetBookMarksUseCase>(
+      () => _i773.GetBookMarksUseCase(gh<_i16.BookMarkRepository>()),
+    );
+    gh.lazySingleton<_i902.SaveBookMarkUseCase>(
+      () => _i902.SaveBookMarkUseCase(gh<_i16.BookMarkRepository>()),
     );
     gh.lazySingleton<_i13.ReadingSessionLocalDatasource>(
       () =>
@@ -498,6 +516,18 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i965.TranslationRepositoryImpl(
         gh<_i890.TranslationLocalDataSource>(),
         gh<_i120.TranslationRemoteDataSource>(),
+        gh<_i974.Logger>(),
+      ),
+    );
+    gh.factory<_i628.PdfReaderCubit>(
+      () => _i628.PdfReaderCubit(
+        gh<_i1042.BookResourceRepository>(),
+        gh<_i902.SaveBookMarkUseCase>(),
+        gh<_i773.GetBookMarksUseCase>(),
+        gh<_i27.DeleteBookMarkUseCase>(),
+        gh<_i615.SaveReaderProgressByPathUseCase>(),
+        gh<_i709.GetReaderProgressByPathUseCase>(),
+        gh<_i770.LogReadingSessionByPathUseCase>(),
         gh<_i974.Logger>(),
       ),
     );
