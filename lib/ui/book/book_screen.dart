@@ -20,6 +20,7 @@ import 'package:leafy/ui/book/widgets/book_reader_launcher_button.dart';
 
 import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
+import 'package:leafy/ui/common/image_placeholder.dart';
 
 //TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
@@ -182,8 +183,19 @@ class BookScreen extends StatelessWidget {
             ? Center(
                 child: CoverView(heroTag: heroTag, book: state),
               )
-            : SizedBox(
-                height: mediaQuery.padding.top + AppBar().preferredSize.height,
+            : Container(
+                padding: EdgeInsets.fromLTRB(
+                  50,
+                  mediaQuery.padding.top + 20,
+                  50,
+                  50,
+                ),
+                height:
+                    (mediaQuery.size.height / 2.5) +
+                    mediaQuery.padding.top +
+                    20,
+                width: double.infinity,
+                child: const ImagePlaceholder(borderRadius: 10),
               );
       },
     );

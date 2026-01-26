@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:diacritic/diacritic.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -15,12 +13,20 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
-import 'package:leafy/ui/common/drag_handle.dart';
 import 'package:leafy/ui/home/widgets/tag_filter_chip.dart';
 import 'package:leafy/ui/home/widgets/year_filter_chip.dart';
 
 class SortBottomSheet extends StatefulWidget {
   const SortBottomSheet({super.key});
+
+  static Future<void> show(BuildContext context) async {
+    await showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) => const SortBottomSheet(),
+    );
+  }
 
   @override
   State<SortBottomSheet> createState() => SortBottomSheetState();
@@ -42,53 +48,44 @@ class SortBottomSheetState extends State<SortBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       child: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (Platform.isAndroid) DragHandle(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-              child: BlocBuilder<BookListsOrderCubit, List<BookStatus>>(
-                builder: (context, bookStatus) {
-                  return BlocBuilder<BookTabIndexCubit, int>(
-                    builder: (context, tabIndex) {
-                      switch (bookStatus[tabIndex]) {
-                        case BookStatus.finished:
-                          return BlocBuilder<SortFinishedBooksBloc, SortState>(
-                            builder: (context, state) =>
-                                _buildBody(BookStatus.finished, state),
-                          );
-                        case BookStatus.inProgress:
-                          return BlocBuilder<
-                            SortInProgressBooksBloc,
-                            SortState
-                          >(
-                            builder: (context, state) =>
-                                _buildBody(BookStatus.inProgress, state),
-                          );
-                        case BookStatus.forLater:
-                          return BlocBuilder<SortForLaterBooksBloc, SortState>(
-                            builder: (context, state) =>
-                                _buildBody(BookStatus.forLater, state),
-                          );
-                        case BookStatus.unfinished:
-                          return BlocBuilder<
-                            SortUnfinishedBooksBloc,
-                            SortState
-                          >(
-                            builder: (context, state) =>
-                                _buildBody(BookStatus.unfinished, state),
-                          );
-                      }
-                    },
-                  );
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          physics: const BouncingScrollPhysics(),
+          child: BlocBuilder<BookListsOrderCubit, List<BookStatus>>(
+            builder: (context, bookStatus) {
+              return BlocBuilder<BookTabIndexCubit, int>(
+                builder: (context, tabIndex) {
+                  switch (bookStatus[tabIndex]) {
+                    case BookStatus.finished:
+                      return BlocBuilder<SortFinishedBooksBloc, SortState>(
+                        builder: (context, state) =>
+                            _buildBody(BookStatus.finished, state),
+                      );
+                    case BookStatus.inProgress:
+                      return BlocBuilder<SortInProgressBooksBloc, SortState>(
+                        builder: (context, state) =>
+                            _buildBody(BookStatus.inProgress, state),
+                      );
+                    case BookStatus.forLater:
+                      return BlocBuilder<SortForLaterBooksBloc, SortState>(
+                        builder: (context, state) =>
+                            _buildBody(BookStatus.forLater, state),
+                      );
+                    case BookStatus.unfinished:
+                      return BlocBuilder<SortUnfinishedBooksBloc, SortState>(
+                        builder: (context, state) =>
+                            _buildBody(BookStatus.unfinished, state),
+                      );
+                  }
                 },
-              ),
-            ),
-          ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -303,6 +300,7 @@ class SortBottomSheetState extends State<SortBottomSheet> {
 
   Widget _buildBody(BookStatus bookStatus, SortState sortState) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 5),

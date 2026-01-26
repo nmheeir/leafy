@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/ui/book/widgets/cover_background.dart';
+import 'package:leafy/ui/common/image_placeholder.dart';
 
 class CoverView extends StatefulWidget {
   const CoverView({
@@ -66,7 +67,10 @@ class _CoverViewState extends State<CoverView> {
                                 height: mediaQuery.size.height / 2.5,
                               ),
                             )
-                          : const SizedBox(),
+                          : SizedBox(
+                              height: mediaQuery.size.height / 2.5,
+                              child: const ImagePlaceholder(borderRadius: 0),
+                            ),
                     ),
                   ),
                 ),

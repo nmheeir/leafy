@@ -18,6 +18,7 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/core/utils/app_globals.dart';
+import 'package:leafy/ui/common/image_placeholder.dart';
 
 class BookCardList extends StatelessWidget {
   const BookCardList({
@@ -228,7 +229,7 @@ class BookCardList extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildCover(coverFile),
-                SizedBox(width: (coverFile != null) ? 15 : 0),
+                const SizedBox(width: 15),
                 _buildDetails(context),
               ],
             ),
@@ -332,40 +333,46 @@ class BookCardList extends StatelessWidget {
     const coverWidth = 85.0;
     const coverHeight = coverWidth * 1.5;
 
+    if (coverFile == null) {
+      return SizedBox(
+        width: coverWidth,
+        height: coverHeight,
+        child: const ImagePlaceholder(),
+      );
+    }
+
     return SizedBox(
-      width: (coverFile != null) ? coverWidth : 0,
+      width: coverWidth,
       height: coverHeight,
-      child: (coverFile != null)
-          ? ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: Hero(
-                tag: heroTag,
-                child: Image.file(
-                  coverFile,
-                  width: coverWidth,
-                  height: coverHeight,
-                  fit: BoxFit.cover,
-                  frameBuilder:
-                      (
-                        BuildContext context,
-                        Widget child,
-                        int? frame,
-                        bool wasSynchronouslyLoaded,
-                      ) {
-                        if (wasSynchronouslyLoaded) {
-                          return child;
-                        }
-                        return AnimatedOpacity(
-                          opacity: frame == null ? 0 : 1,
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                          child: child,
-                        );
-                      },
-                ),
-              ),
-            )
-          : const SizedBox(),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(3),
+        child: Hero(
+          tag: heroTag,
+          child: Image.file(
+            coverFile,
+            width: coverWidth,
+            height: coverHeight,
+            fit: BoxFit.cover,
+            frameBuilder:
+                (
+                  BuildContext context,
+                  Widget child,
+                  int? frame,
+                  bool wasSynchronouslyLoaded,
+                ) {
+                  if (wasSynchronouslyLoaded) {
+                    return child;
+                  }
+                  return AnimatedOpacity(
+                    opacity: frame == null ? 0 : 1,
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOut,
+                    child: child,
+                  );
+                },
+          ),
+        ),
+      ),
     );
   }
 

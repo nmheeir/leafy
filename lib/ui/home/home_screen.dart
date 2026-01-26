@@ -23,7 +23,6 @@ import 'package:leafy/ui/home/widgets/multi_select_fab.dart';
 import 'package:leafy/ui/home/widgets/sort_bottom_sheet.dart';
 import 'package:leafy/ui/statistics/statistics_screen.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -228,33 +227,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onFabPressed() {
-    if (Platform.isIOS) {
-      showCupertinoModalBottomSheet(
-        context: context,
-        expand: false,
-        builder: (_) {
-          return AddBookSheet(
-            addManually: _addBookManually,
-            searchInGutendex: _searchInGutendexLibrary,
-            searchInOpenLibrary: _searchInOpenLibrary,
-            scanBarcode: _scanBarcode,
-          );
-        },
-      );
-    } else if (Platform.isAndroid) {
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: Colors.transparent,
-        builder: (_) {
-          return AddBookSheet(
-            addManually: _addBookManually,
-            searchInGutendex: _searchInGutendexLibrary,
-            searchInOpenLibrary: _searchInOpenLibrary,
-            scanBarcode: _scanBarcode,
-          );
-        },
-      );
-    }
+    AddBookSheet.show(
+      context,
+      addManually: _addBookManually,
+      searchInOpenLibrary: _searchInOpenLibrary,
+      searchInGutendex: _searchInGutendexLibrary,
+      scanBarcode: _scanBarcode,
+    );
   }
 
   void _setEmptyBookForEditorScreen() {
@@ -285,10 +264,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _openSortFilterSheet() {
     FocusManager.instance.primaryFocus?.unfocus();
 
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => SortBottomSheet(),
-    );
+    SortBottomSheet.show(context);
   }
 
   Future<void> _invokeMenuOption(String choice) async {
