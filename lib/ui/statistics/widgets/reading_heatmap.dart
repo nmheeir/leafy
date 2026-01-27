@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:heatmap_calendar/heatmap_calendar.dart';
+import 'package:leafy/core/utils/app_globals.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/statistics/entities/daily_reading.dart';
 
 class ReadingHeatmap extends StatelessWidget {
@@ -45,21 +47,22 @@ class ReadingHeatmap extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Reading Consistency',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text('Reading Consistency', style: context.textTheme.titleMedium),
             const SizedBox(height: 16),
             HeatMap(
               datasets: datasets,
               colorMode: ColorMode.opacity,
               showText: false,
               scrollable: true,
-              colorsets: {1: Theme.of(context).colorScheme.primary},
+              colorTipHelper: [Text('Less'), Text('More')],
+              colorsets: {1: context.colorScheme.primaryContainer},
+              tooltipBuilder: (value, count) {
+                return '${dateFormat.format(value)} \nRead $count minutes';
+              },
+              monthSeparatorWidth: 8,
               onClick: (value) {
-                // Optionally show details for the day
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Read ${value} minutes')),
+                  SnackBar(content: Text('You read $value minutes')),
                 );
               },
               startDate: endDate.subtract(
@@ -67,9 +70,7 @@ class ReadingHeatmap extends StatelessWidget {
               ), // Show last ~3 months initially? Or 365
               endDate: endDate,
               size: 20, // Box size
-              defaultColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest,
+              defaultColor: context.colorScheme.surfaceContainerHighest,
             ),
           ],
         ),

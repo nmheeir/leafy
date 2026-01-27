@@ -1,12 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import './heatmap_month_text.dart';
-import './heatmap_column.dart';
-import '../data/heatmap_color_mode.dart';
-import '../util/datasets_util.dart';
-import '../util/date_util.dart';
-import './heatmap_week_text.dart';
+import 'package:heatmap_calendar/src/widget/heatmap_month_text.dart';
+import 'package:heatmap_calendar/src/widget/heatmap_column.dart';
+import 'package:heatmap_calendar/src/data/heatmap_color_mode.dart';
+import 'package:heatmap_calendar/src/util/datasets_util.dart';
+import 'package:heatmap_calendar/src/util/date_util.dart';
+import 'package:heatmap_calendar/src/widget/heatmap_week_text.dart';
 
 class HeatMapPage extends StatelessWidget {
   /// List value of every sunday's month information.
@@ -75,8 +75,17 @@ class HeatMapPage extends StatelessWidget {
 
   final bool? showText;
 
+  /// Whether to draw week labels.
+  final bool? drawWeekLabel;
+
+  /// Tooltip builder for every block.
+  final String Function(DateTime, int?)? tooltipBuilder;
+
+  /// The width of month separator.
+  final double? monthSeparatorWidth;
+
   HeatMapPage({
-    Key? key,
+    super.key,
     required this.colorMode,
     required this.startDate,
     required this.endDate,
@@ -90,9 +99,11 @@ class HeatMapPage extends StatelessWidget {
     this.onClick,
     this.margin,
     this.showText,
-  })  : _dateDifferent = endDate.difference(startDate).inDays,
-        maxValue = DatasetsUtil.getMaxValue(datasets),
-        super(key: key);
+    this.tooltipBuilder,
+    this.monthSeparatorWidth,
+    this.drawWeekLabel,
+  }) : _dateDifferent = endDate.difference(startDate).inDays,
+       maxValue = DatasetsUtil.getMaxValue(datasets);
 
   /// Get [HeatMapColumn] from [startDate] to [endDate].
   List<Widget> _heatmapColumnList() {
@@ -101,39 +112,105 @@ class HeatMapPage extends StatelessWidget {
 
     // Set cursor(position) to first day of weeks
     // until cursor reaches the final week.
-    for (int datePos = 0 - (startDate.weekday % 7);
-        datePos <= _dateDifferent;
-        datePos += 7) {
+    for (
+      int datePos = 0 - (startDate.weekday % 7);
+      datePos <= _dateDifferent;
+      datePos += 7
+    ) {
       // Get first day of week by adding cursor's value to startDate.
-      DateTime _firstDay = DateUtil.changeDay(startDate, datePos);
+      DateTime firstDay = DateUtil.changeDay(startDate, datePos);
 
-      columns.add(HeatMapColumn(
-        // If last day is not saturday, week also includes future Date.
-        // So we have to make future day on last column blanck.
-        //
-        // To make empty space to future day, we have to pass this HeatMapPage's
-        // endDate to HeatMapColumn's endDate.
-        startDate: _firstDay,
-        endDate: datePos <= _dateDifferent - 7
-            ? DateUtil.changeDay(startDate, datePos + 6)
-            : endDate,
-        colorMode: colorMode,
-        numDays: min(endDate.difference(_firstDay).inDays + 1, 7),
-        size: size,
-        fontSize: fontSize,
-        defaultColor: defaultColor,
-        colorsets: colorsets,
-        textColor: textColor,
-        borderRadius: borderRadius,
-        margin: margin,
-        maxValue: maxValue,
-        onClick: onClick,
-        datasets: datasets,
-        showText: showText,
-      ));
+      // check if first day and last day are in different months
+      DateTime lastDay = datePos <= _dateDifferent - 7
+          ? DateUtil.changeDay(startDate, datePos + 6)
+          : endDate;
 
-      // also add first day's month information to _firstDayInfos list.
-      _firstDayInfos.add(_firstDay.month);
+      if (firstDay.month != lastDay.month && monthSeparatorWidth != null) {
+        // ... previous logic ...
+        // Split into two columns
+        columns.add(
+          HeatMapColumn(
+            startDate: firstDay,
+            endDate: lastDay,
+            colorMode: colorMode,
+            numDays: min(endDate.difference(firstDay).inDays + 1, 7),
+            size: size,
+            fontSize: fontSize,
+            defaultColor: defaultColor,
+            colorsets: colorsets,
+            textColor: textColor,
+            borderRadius: borderRadius,
+            margin: margin,
+            maxValue: maxValue,
+            onClick: onClick,
+            datasets: datasets,
+            showText: showText,
+            tooltipBuilder: tooltipBuilder,
+            filterMonth: firstDay.month,
+          ),
+        );
+        _firstDayInfos.add(firstDay.month);
+
+        columns.add(SizedBox(width: monthSeparatorWidth));
+
+        columns.add(
+          HeatMapColumn(
+            startDate: firstDay,
+            endDate: lastDay,
+            colorMode: colorMode,
+            numDays: min(endDate.difference(firstDay).inDays + 1, 7),
+            size: size,
+            fontSize: fontSize,
+            defaultColor: defaultColor,
+            colorsets: colorsets,
+            textColor: textColor,
+            borderRadius: borderRadius,
+            margin: margin,
+            maxValue: maxValue,
+            onClick: onClick,
+            datasets: datasets,
+            showText: showText,
+            tooltipBuilder: tooltipBuilder,
+            filterMonth: lastDay.month,
+          ),
+        );
+        _firstDayInfos.add(lastDay.month);
+      } else {
+        // Normal single column
+        columns.add(
+          HeatMapColumn(
+            startDate: firstDay,
+            endDate: lastDay,
+            colorMode: colorMode,
+            numDays: min(endDate.difference(firstDay).inDays + 1, 7),
+            size: size,
+            fontSize: fontSize,
+            defaultColor: defaultColor,
+            colorsets: colorsets,
+            textColor: textColor,
+            borderRadius: borderRadius,
+            margin: margin,
+            maxValue: maxValue,
+            onClick: onClick,
+            datasets: datasets,
+            showText: showText,
+            tooltipBuilder: tooltipBuilder,
+          ),
+        );
+        _firstDayInfos.add(firstDay.month);
+
+        if (datePos < _dateDifferent - 7) {
+          // Check next week exists
+          DateTime nextWeekFirstDay = DateUtil.changeDay(
+            startDate,
+            datePos + 7,
+          );
+          if (lastDay.month != nextWeekFirstDay.month &&
+              monthSeparatorWidth != null) {
+            columns.add(SizedBox(width: monthSeparatorWidth));
+          }
+        }
+      }
     }
 
     return columns;
@@ -145,14 +222,20 @@ class HeatMapPage extends StatelessWidget {
       children: <Widget>[
         Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Show week labels to left side of heatmap.
-            HeatMapWeekText(
-              margin: margin,
-              fontSize: fontSize,
-              size: size,
-              fontColor: textColor,
-            ),
+            if (drawWeekLabel == true)
+              Container(
+                // Add margin to align with heatmap block
+                padding: EdgeInsets.only(top: fontSize ?? 12),
+                child: HeatMapWeekText(
+                  margin: margin,
+                  fontSize: fontSize,
+                  size: size,
+                  fontColor: textColor,
+                ),
+              ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -163,12 +246,11 @@ class HeatMapPage extends StatelessWidget {
                   fontSize: fontSize,
                   fontColor: textColor,
                   size: size,
+                  monthSeparatorWidth: monthSeparatorWidth,
                 ),
 
                 // Heatmap itself.
-                Row(
-                  children: <Widget>[..._heatmapColumnList()],
-                ),
+                Row(children: <Widget>[..._heatmapColumnList()]),
               ],
             ),
           ],

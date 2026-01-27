@@ -48,15 +48,22 @@ class WeeklyActivityChart extends StatelessWidget {
               aspectRatio: 1.7,
               child: BarChart(
                 BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
+                  minY: 0,
                   maxY: maxHours,
+                  rangeAnnotations: const RangeAnnotations(),
                   barTouchData: BarTouchData(
                     enabled: true,
                     touchTooltipData: BarTouchTooltipData(
+                      getTooltipColor: (_) => Theme.of(context).cardColor,
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         return BarTooltipItem(
                           '${rod.toY.toStringAsFixed(1)}h',
-                          const TextStyle(color: Colors.white),
+                          TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.bodyMedium?.color,
+                            fontWeight: FontWeight.bold,
+                          ),
                         );
                       },
                     ),
@@ -66,6 +73,7 @@ class WeeklyActivityChart extends StatelessWidget {
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
+                        reservedSize: 28,
                         getTitlesWidget: (double value, TitleMeta meta) {
                           final index = value.toInt();
                           if (index < 0 || index >= 7) return const SizedBox();
@@ -74,14 +82,28 @@ class WeeklyActivityChart extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               DateFormat.E().format(day),
-                              style: const TextStyle(fontSize: 12),
+                              style: Theme.of(context).textTheme.bodySmall,
                             ),
                           );
                         },
                       ),
                     ),
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 40,
+                        getTitlesWidget: (value, meta) {
+                          if (value == 0) return const SizedBox();
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Text(
+                              '${value.toInt()}h',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              textAlign: TextAlign.right,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                     topTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
@@ -90,8 +112,27 @@ class WeeklyActivityChart extends StatelessWidget {
                       sideTitles: SideTitles(showTitles: false),
                     ),
                   ),
-                  gridData: const FlGridData(show: false),
-                  borderData: FlBorderData(show: false),
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: 1,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Theme.of(
+                          context,
+                        ).dividerColor.withValues(alpha: 0.5),
+                        strokeWidth: 1,
+                        dashArray: [5, 5],
+                      );
+                    },
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      bottom: BorderSide(color: Theme.of(context).dividerColor),
+                      left: BorderSide(color: Theme.of(context).dividerColor),
+                    ),
+                  ),
                   barGroups: weekData.asMap().entries.map((e) {
                     return BarChartGroupData(
                       x: e.key,
@@ -100,7 +141,17 @@ class WeeklyActivityChart extends StatelessWidget {
                           toY: e.value,
                           color: Theme.of(context).colorScheme.primary,
                           width: 16,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(4),
+                          ),
+                          backDrawRodData: BackgroundBarChartRodData(
+                            show: true,
+                            toY: maxHours,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .primaryContainer
+                                .withValues(alpha: 0.2),
+                          ),
                         ),
                       ],
                     );

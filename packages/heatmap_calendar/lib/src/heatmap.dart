@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './widget/heatmap_page.dart';
 import './widget/heatmap_color_tip.dart';
+import './widget/heatmap_week_text.dart';
 import './data/heatmap_color_mode.dart';
 import './util/date_util.dart';
 
@@ -87,8 +88,14 @@ class HeatMap extends StatefulWidget {
   /// The double value of [HeatMapColorTip]'s tip container's size.
   final double? colorTipSize;
 
+  /// Tooltip builder for every block.
+  final String Function(DateTime, int?)? tooltipBuilder;
+
+  /// The width of month separator.
+  final double? monthSeparatorWidth;
+
   const HeatMap({
-    Key? key,
+    super.key,
     required this.colorsets,
     this.colorMode = ColorMode.opacity,
     this.startDate,
@@ -107,7 +114,9 @@ class HeatMap extends StatefulWidget {
     this.colorTipHelper,
     this.colorTipCount,
     this.colorTipSize,
-  }) : super(key: key);
+    this.tooltipBuilder,
+    this.monthSeparatorWidth,
+  });
 
   @override
   State<StatefulWidget> createState() => _HeatMap();
@@ -131,22 +140,50 @@ class _HeatMap extends State<HeatMap> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         // Heatmap Widget.
-        _scrollableHeatMap(HeatMapPage(
-          endDate: widget.endDate ?? DateTime.now(),
-          startDate: widget.startDate ??
-              DateUtil.oneYearBefore(widget.endDate ?? DateTime.now()),
-          colorMode: widget.colorMode,
-          size: widget.size,
-          fontSize: widget.fontSize,
-          datasets: widget.datasets,
-          defaultColor: widget.defaultColor,
-          textColor: widget.textColor,
-          colorsets: widget.colorsets,
-          borderRadius: widget.borderRadius,
-          onClick: widget.onClick,
-          margin: widget.margin,
-          showText: widget.showText,
-        )),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Fixed Week labels
+            Padding(
+              padding: EdgeInsets.only(
+                // top:
+                //     widget.fontSize ??
+                //     12, // Align with heatmap rows, skipping Month Text height
+              ),
+              child: HeatMapWeekText(
+                margin: widget.margin,
+                fontSize: widget.fontSize,
+                size: widget.size,
+                fontColor: widget.textColor,
+              ),
+            ),
+            Expanded(
+              child: _scrollableHeatMap(
+                HeatMapPage(
+                  endDate: widget.endDate ?? DateTime.now(),
+                  startDate:
+                      widget.startDate ??
+                      DateUtil.oneYearBefore(widget.endDate ?? DateTime.now()),
+                  colorMode: widget.colorMode,
+                  size: widget.size,
+                  fontSize: widget.fontSize,
+                  datasets: widget.datasets,
+                  defaultColor: widget.defaultColor,
+                  textColor: widget.textColor,
+                  colorsets: widget.colorsets,
+                  borderRadius: widget.borderRadius,
+                  onClick: widget.onClick,
+                  margin: widget.margin,
+                  showText: widget.showText,
+                  tooltipBuilder: widget.tooltipBuilder,
+                  monthSeparatorWidth: widget.monthSeparatorWidth,
+                  drawWeekLabel: false,
+                ),
+              ),
+            ),
+          ],
+        ),
 
         // Show HeatMapColorTip if showColorTip is true.
         if (widget.showColorTip == true)
