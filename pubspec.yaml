@@ -87,6 +87,7 @@ dependencies:
   heatmap_calendar:
     path: packages/heatmap_calendar
   google_fonts: ^8.0.0
+  flutter_svg: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -119,6 +120,7 @@ flutter:
     - assets/icons/
     - assets/translations/
     - assets/pdf/
+    - assets/flags/
 
   fonts:
     - family: Nunito

@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/index.dart';
@@ -18,6 +19,7 @@ import 'package:leafy/core/database/seeds/db_seeder.dart';
 import 'package:leafy/data/datasources/local/database_service.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
+import 'package:leafy/core/constants/locale/locale.dart';
 
 const String releasesUrl = 'https://github.com/nmheeir/leafy/releases';
 const String repoUrl = 'https://github.com/nmheeir/leafy';
@@ -35,6 +37,9 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Force rebuild when locale changes
+    context.locale;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -277,39 +282,90 @@ class SettingsScreen extends StatelessWidget {
     Navigator.of(context).pop();
   }
 
+  SettingsTile _buildLanguageSetting(BuildContext context) {
+    return SettingsTile(
+      title: Text(
+        LocaleKeys.language.tr(),
+        style: const TextStyle(fontSize: 16),
+      ),
+      leading: const Icon(Icons.public),
+      description: Text(_getLanguageName(context.locale)),
+      onPressed: (context) {
+        _showLanguageDialog(context);
+      },
+    );
+  }
+
+  String _getLanguageName(Locale locale) {
+    if (locale.languageCode == 'vi') return 'Tiếng Việt';
+    return 'English';
+  }
+
   void _showLanguageDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      backgroundColor: context.colorScheme.surface,
       builder: (context) {
-        return CommonDialog(
-          title: LocaleKeys.language.tr(),
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Text(
-                  LocaleKeys.select_language.tr(),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Scrollbar(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        // children: _buildLanguageButtons(context, state),
+              const SizedBox(height: 20),
+              Text(
+                LocaleKeys.select_language.tr(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: supportedLocales.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                  itemBuilder: (context, index) {
+                    final language = supportedLocales[index];
+                    final isSelected = context.locale == language.locale;
+
+                    return ListTile(
+                      leading: SvgPicture.asset(
+                        language.flagPath,
+                        width: 30,
+                        height: 20,
                       ),
-                    ),
-                  ),
+                      title: Text(
+                        language.fullName,
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                      trailing: isSelected
+                          ? Icon(
+                              Icons.check,
+                              color: context.colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () {
+                        context.setLocale(language.locale);
+                        context.pop();
+                      },
+                    );
+                  },
                 ),
               ),
+              const SizedBox(height: 20),
             ],
           ),
         );
@@ -388,16 +444,6 @@ class SettingsScreen extends StatelessWidget {
       ),
       leading: const Icon(Icons.book),
       onPressed: (context) => context.push(Routes.settingEpubReader),
-    );
-  }
-
-  SettingsTile _buildLanguageSetting(BuildContext context) {
-    return SettingsTile(
-      title: Text(LocaleKeys.language.tr(), style: TextStyle(fontSize: 16)),
-      leading: const Icon(Icons.public),
-      onPressed: (context) {
-        _showLanguageDialog(context);
-      },
     );
   }
 
