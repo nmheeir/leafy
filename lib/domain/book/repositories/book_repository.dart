@@ -31,4 +31,7 @@ abstract class BookRepository {
   Future<Either<Failure, List<Book>>> getBooksWithSameAuthor(String author);
 
   Future<Either<Failure, Book>> restoreBook(int id);
+
+  /// Forces a refresh of the books stream. Useful after external DB changes (e.g. seeding).
+  Future<void> refresh();
 }

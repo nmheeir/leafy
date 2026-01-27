@@ -25,6 +25,11 @@ class BookRepositoryImpl implements BookRepository {
     _refreshBooks();
   }
 
+  @override
+  Future<void> refresh() async {
+    await _refreshBooks();
+  }
+
   /// Hàm nội bộ để làm mới Stream
   Future<void> _refreshBooks() async {
     try {

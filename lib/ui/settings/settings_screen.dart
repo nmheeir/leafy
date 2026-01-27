@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -13,11 +14,15 @@ import 'package:leafy/ui/settings/widgets/setting_dialog_button.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:leafy/core/database/seeds/db_seeder.dart';
+import 'package:leafy/data/datasources/local/database_service.dart';
+import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/book/repositories/book_repository.dart';
 
-const String releasesUrl = 'https://github.com/phucnt63/leafy/releases';
-const String repoUrl = 'https://github.com/phucnt63/leafy';
+const String releasesUrl = 'https://github.com/nmheeir/leafy/releases';
+const String repoUrl = 'https://github.com/nmheeir/leafy';
 const String licence = 'MIT License';
-const String licenceUrl = 'https://github.com/phucnt63/leafy/blob/main/LICENSE';
+const String licenceUrl = 'https://github.com/nmheeir/leafy/blob/main/LICENSE';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -140,6 +145,25 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
+                  if (kDebugMode)
+                    SettingsSection(
+                      title: Text(
+                        'Developer',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: context.colorScheme.primary,
+                        ),
+                      ),
+                      tiles: [
+                        SettingsTile(
+                          title: const Text('Seed Fake Data'),
+                          description: const Text('Clear DB & Insert 20 books'),
+                          leading: const Icon(Icons.bug_report),
+                          onPressed: (context) => _confirmAndSeed(context),
+                        ),
+                      ],
+                    ),
                 ],
               );
             } else {
@@ -409,5 +433,67 @@ class SettingsScreen extends StatelessWidget {
         _openUrl(context, url);
       },
     );
+  }
+
+  Future<void> _confirmAndSeed(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Seed Fake Data'),
+          content: const Text(
+            'WARNING: This will DELETE ALL existing data and replace it with fake data.\n\nAre you sure?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'SEED NOW',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        // Show loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const Center(child: CircularProgressIndicator()),
+        );
+
+        final dbService = getIt<DatabaseService>();
+        final db = await dbService.database;
+        await DbSeeder(db).seed(count: 20);
+
+        await getIt<BookRepository>().refresh();
+
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Database seeded successfully! Please restart app or pull to refresh.',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error seeding: $e')));
+        }
+      }
+    }
   }
 }
