@@ -86,6 +86,7 @@ dependencies:
   file_selector: ^1.1.0
   heatmap_calendar:
     path: packages/heatmap_calendar
+  google_fonts: ^8.0.0
 
 dev_dependencies:
   flutter_test:

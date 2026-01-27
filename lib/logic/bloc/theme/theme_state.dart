@@ -20,6 +20,9 @@ final class SetThemeState extends ThemeState {
   final String? fontFamily;
   final bool useMaterialYou;
   final bool amoledDark;
+  final ThemeContrast themeContrast;
+  final List<ThemeContrast> supportedContrasts;
+  final String? themeId;
 
   const SetThemeState({
     required this.themeMode,
@@ -27,6 +30,9 @@ final class SetThemeState extends ThemeState {
     required this.fontFamily,
     required this.useMaterialYou,
     required this.amoledDark,
+    this.themeContrast = ThemeContrast.standard,
+    required this.supportedContrasts,
+    this.themeId,
   });
 
   SetThemeState copyWith({
@@ -35,6 +41,9 @@ final class SetThemeState extends ThemeState {
     String? fontFamily,
     bool? useMaterialYou,
     bool? amoledDark,
+    ThemeContrast? themeContrast,
+    List<ThemeContrast>? supportedContrasts,
+    String? themeId,
   }) {
     return SetThemeState(
       themeMode: themeMode ?? this.themeMode,
@@ -42,6 +51,9 @@ final class SetThemeState extends ThemeState {
       fontFamily: fontFamily ?? this.fontFamily,
       useMaterialYou: useMaterialYou ?? this.useMaterialYou,
       amoledDark: amoledDark ?? this.amoledDark,
+      themeContrast: themeContrast ?? this.themeContrast,
+      supportedContrasts: supportedContrasts ?? this.supportedContrasts,
+      themeId: themeId ?? this.themeId,
     );
   }
 
@@ -52,5 +64,8 @@ final class SetThemeState extends ThemeState {
     fontFamily,
     useMaterialYou,
     amoledDark,
+    themeContrast,
+    themeId,
+    supportedContrasts,
   ];
 }

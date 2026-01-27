@@ -13,6 +13,9 @@ final class ChangeThemeEvent extends ThemeEvent {
   final String? fontFamily;
   final bool useMaterialYou;
   final bool amoledDark;
+  final ThemeContrast? themeContrast;
+  final String? themeId;
+  final List<ThemeContrast> supportedContrasts;
 
   const ChangeThemeEvent({
     required this.themeMode,
@@ -20,6 +23,9 @@ final class ChangeThemeEvent extends ThemeEvent {
     required this.fontFamily,
     required this.useMaterialYou,
     required this.amoledDark,
+    this.themeContrast,
+    this.themeId,
+    required this.supportedContrasts,
   });
 
   @override
@@ -29,6 +35,9 @@ final class ChangeThemeEvent extends ThemeEvent {
     fontFamily,
     useMaterialYou,
     amoledDark,
+    themeContrast,
+    themeId,
+    supportedContrasts,
   ];
 }
 

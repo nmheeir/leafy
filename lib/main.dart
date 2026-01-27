@@ -40,6 +40,7 @@ import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:leafy/core/utils/app_globals.dart';
+import 'package:leafy/core/theme/app_theme_provider.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 void main() async {
@@ -167,14 +168,62 @@ class _LeafyAppState extends State<LeafyApp> {
       builder: (lightDynamic, darkDynamic) {
         SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
         final themeMode = widget.themeState.themeMode;
+        final themeId = widget.themeState.themeId;
+        final themeContrast = widget.themeState.themeContrast;
 
-        final lightColorScheme = ColorScheme.fromSeed(
-          seedColor: widget.themeState.useMaterialYou && lightDynamic != null
-              ? lightDynamic.primary
-              : widget.themeState.primaryColor,
-          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-          brightness: Brightness.light,
-        );
+        // Helper to determine ColorScheme
+        ColorScheme getColorScheme(Brightness brightness) {
+          final isDark = brightness == Brightness.dark;
+          final dynamicScheme = isDark ? darkDynamic : lightDynamic;
+
+          // 1. Material You (Dynamic Color)
+          if (widget.themeState.useMaterialYou && dynamicScheme != null) {
+            return ColorScheme.fromSeed(
+              seedColor: dynamicScheme.primary,
+              brightness: brightness,
+              dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+              surface: isDark && widget.themeState.amoledDark
+                  ? Colors.black
+                  : null,
+              surfaceContainer: isDark && widget.themeState.amoledDark
+                  ? Colors.black
+                  : null,
+            );
+          }
+
+          // 2. Defined Themes (Registry Lookup)
+          final appTheme = AppThemes.getThemeById(themeId);
+          if (appTheme != null) {
+            final scheme = isDark
+                ? appTheme.darkColorScheme(themeContrast)
+                : appTheme.lightColorScheme(themeContrast);
+
+            // Apply Amoled Dark if needed override for surface
+            if (isDark && widget.themeState.amoledDark) {
+              return scheme.copyWith(
+                surface: Colors.black,
+                surfaceContainer: Colors.black,
+              );
+            }
+            return scheme;
+          }
+
+          // 3. Custom/Seed Color (Legacy)
+          return ColorScheme.fromSeed(
+            seedColor: widget.themeState.primaryColor,
+            brightness: brightness,
+            dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
+            surface: isDark && widget.themeState.amoledDark
+                ? Colors.black
+                : null,
+            surfaceContainer: isDark && widget.themeState.amoledDark
+                ? Colors.black
+                : null,
+          );
+        }
+
+        final lightColorScheme = getColorScheme(Brightness.light);
+        final darkColorScheme = getColorScheme(Brightness.dark);
 
         final lightTheme =
             ThemeData(
@@ -190,16 +239,6 @@ class _LeafyAppState extends State<LeafyApp> {
                 backgroundColor: lightColorScheme.surfaceContainerLow,
               ),
             );
-
-        final darkColorScheme = ColorScheme.fromSeed(
-          seedColor: widget.themeState.useMaterialYou && darkDynamic != null
-              ? darkDynamic.primary
-              : widget.themeState.primaryColor,
-          dynamicSchemeVariant: DynamicSchemeVariant.fidelity,
-          brightness: Brightness.dark,
-          surface: widget.themeState.amoledDark ? Colors.black : null,
-          surfaceContainer: widget.themeState.amoledDark ? Colors.black : null,
-        );
 
         final darkTheme =
             ThemeData(

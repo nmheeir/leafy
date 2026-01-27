@@ -1,16 +1,17 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/index.dart';
+import 'package:leafy/core/theme/app_theme_provider.dart';
+import 'package:leafy/core/theme/theme_contrast.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
-import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/settings/widgets/setting_dialog_button.dart';
+import 'package:leafy/ui/settings/widgets/themes/app_theme_option_item.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingAppearanceScreen extends StatelessWidget {
@@ -274,6 +275,9 @@ class SettingAppearanceScreen extends StatelessWidget {
         fontFamily: state.fontFamily,
         useMaterialYou: state.useMaterialYou,
         amoledDark: state.amoledDark,
+        themeId: state.themeId,
+        themeContrast: state.themeContrast,
+        supportedContrasts: state.supportedContrasts,
       ),
     );
   }
@@ -290,6 +294,9 @@ class SettingAppearanceScreen extends StatelessWidget {
         fontFamily: state.fontFamily,
         useMaterialYou: state.useMaterialYou,
         amoledDark: amoledDark,
+        themeId: state.themeId,
+        themeContrast: state.themeContrast,
+        supportedContrasts: state.supportedContrasts,
       ),
     );
 
@@ -304,6 +311,9 @@ class SettingAppearanceScreen extends StatelessWidget {
         fontFamily: fontFamily,
         useMaterialYou: state.useMaterialYou,
         amoledDark: state.amoledDark,
+        themeId: state.themeId,
+        themeContrast: state.themeContrast,
+        supportedContrasts: state.supportedContrasts,
       ),
     );
 
@@ -339,7 +349,10 @@ class SettingAppearanceScreen extends StatelessWidget {
             sections: [
               SettingsSection(
                 tiles: [
-                  _buildAccentColorSetting(context),
+                  CustomSettingsTile(
+                    child: _buildVisualThemeSelector(context, state),
+                  ),
+                  // _buildAccentColorSetting(context),
                   _buildThemeModeSetting(context),
                   _buildDarkModeSetting(context),
                   _buildFontSetting(context),
@@ -350,6 +363,148 @@ class SettingAppearanceScreen extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildVisualThemeSelector(BuildContext context, ThemeState state) {
+    if (state is! SetThemeState) return const SizedBox();
+
+    // Only use defined themes from registry
+    final definedThemes = AppThemes.allThemes;
+    // +1 for Dynamic
+    final totalCount = definedThemes.length + 1;
+
+    // Show selector if current state supports more than 1 contrast
+    final showContrastSelector = state.supportedContrasts.length > 1;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 10),
+          child: Text(
+            LocaleKeys.theme_mode.tr(),
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 200,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            scrollDirection: Axis.horizontal,
+            itemCount: totalCount,
+            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              String label;
+              Color seedColor;
+              String? themeId;
+              bool isSelected;
+              bool isDynamic = false;
+              List<ThemeContrast> supportedContrasts;
+
+              if (index == 0) {
+                // Dynamic Option
+                label = 'Dynamic';
+                if (state.useMaterialYou) {
+                  seedColor = context.colorScheme.primary;
+                } else {
+                  seedColor = Colors.blue; // Fallback for preview
+                }
+                themeId = null;
+                isSelected = state.useMaterialYou;
+                isDynamic = true;
+                supportedContrasts = [ThemeContrast.standard];
+              } else {
+                // Defined Themes
+                final theme = definedThemes[index - 1];
+                label = theme.name;
+                seedColor = theme
+                    .lightColorScheme(ThemeContrast.standard)
+                    .primary;
+                themeId = theme.id;
+                isSelected = !state.useMaterialYou && state.themeId == theme.id;
+                supportedContrasts = theme.supportedContrasts;
+              }
+
+              return AppThemeOptionItem(
+                seedColor: seedColor,
+                themeMode: state.themeMode,
+                isSelected: isSelected,
+                label: label,
+                onTap: () {
+                  BlocProvider.of<ThemeBloc>(context).add(
+                    ChangeThemeEvent(
+                      themeMode: state.themeMode,
+                      primaryColor: isDynamic ? state.primaryColor : seedColor,
+                      fontFamily: state.fontFamily,
+                      useMaterialYou: isDynamic,
+                      amoledDark: state.amoledDark,
+                      themeId: themeId,
+                      // Pass the supported contrasts of the SELECTED theme
+                      supportedContrasts: supportedContrasts,
+                      // Default to standard when switching theme
+                      themeContrast: ThemeContrast.standard,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+        if (showContrastSelector) ...[
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: Text(
+              'Contrast Level',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<ThemeContrast>(
+                segments: state.supportedContrasts.map((contrast) {
+                  return ButtonSegment<ThemeContrast>(
+                    value: contrast,
+                    label: Text(
+                      contrast.name[0].toUpperCase() +
+                          contrast.name.substring(1).toLowerCase(),
+                    ),
+                  );
+                }).toList(),
+                selected: {state.themeContrast},
+                onSelectionChanged: (Set<ThemeContrast> newSelection) {
+                  BlocProvider.of<ThemeBloc>(context).add(
+                    ChangeThemeEvent(
+                      themeMode: state.themeMode,
+                      primaryColor: state.primaryColor,
+                      fontFamily: state.fontFamily,
+                      useMaterialYou: state.useMaterialYou,
+                      amoledDark: state.amoledDark,
+                      themeId: state.themeId,
+                      themeContrast: newSelection.first,
+                      supportedContrasts: state.supportedContrasts,
+                    ),
+                  );
+                },
+                showSelectedIcon: false,
+              ),
+            ),
+          ),
+        ],
+        const SizedBox(height: 10),
+      ],
     );
   }
 
@@ -400,10 +555,7 @@ class SettingAppearanceScreen extends StatelessWidget {
 
   SettingsTile _buildFontSetting(BuildContext context) {
     return SettingsTile(
-      title: Text(
-        LocaleKeys.font_default.tr(),
-        style: TextStyle(fontSize: 16),
-      ),
+      title: Text(LocaleKeys.font_default.tr(), style: TextStyle(fontSize: 16)),
       leading: const Icon(Icons.font_download, size: 22),
       description: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
@@ -436,30 +588,6 @@ class SettingAppearanceScreen extends StatelessWidget {
         },
       ),
       onPressed: (context) => _showRatingBarDialog(context),
-    );
-  }
-
-  //TODO: apply ThemeBloc
-  SettingsTile _buildAccentColorSetting(BuildContext context) {
-    return SettingsTile.navigation(
-      title: Text(LocaleKeys.accent_color.tr(), style: TextStyle(fontSize: 16)),
-      leading: const Icon(Icons.color_lens),
-      description: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          if (state is SetThemeState) {
-            return Text(
-              state.useMaterialYou
-                  ? LocaleKeys.use_material_you.tr()
-                  // Chuyển đổi Color thành chuỗi Hex
-                  : '0xFF${state.primaryColor.hex}',
-              style: const TextStyle(),
-            );
-          } else {
-            return const SizedBox();
-          }
-        },
-      ),
-      onPressed: (context) => context.push(Routes.settingAccentColor),
     );
   }
 }
