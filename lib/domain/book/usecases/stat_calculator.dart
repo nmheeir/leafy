@@ -5,18 +5,53 @@ import 'package:leafy/domain/book/entities/book_read_stat.dart';
 import 'package:leafy/domain/book/entities/book_yearly_stat.dart';
 import 'package:leafy/domain/book/entities/stats_result.dart';
 
+import 'package:logger/logger.dart';
+
 class StatsEmptyException implements Exception {}
 
 @injectable
 class StatsCalculator {
-  StatsResult calculate(List<Book> books) {
-    final finishedBooks = _filterBooksByStatus(books, BookStatus.finished);
+  final Logger _logger;
 
-    if (finishedBooks.isEmpty) {
-      throw StatsEmptyException();
-    }
+  StatsCalculator(this._logger);
+
+  StatsResult calculate(List<Book> books) {
+    _logger.d('StatsCalculator: Calculating stats for ${books.length} books');
+
+    final finishedBooks = _filterBooksByStatus(books, BookStatus.finished);
+    _logger.d('StatsCalculator: Found ${finishedBooks.length} finished books');
 
     final years = _calculateYears(finishedBooks);
+
+    if (finishedBooks.isEmpty) {
+      _logger.d('StatsCalculator: No finished books, returning empty result');
+      return StatsResult(
+        years: const [],
+        finishedBooks: const [],
+        inProgressBooks: _filterBooksByStatus(books, BookStatus.inProgress),
+        forLaterBooks: _filterBooksByStatus(books, BookStatus.forLater),
+        unfinishedBooks: _filterBooksByStatus(books, BookStatus.unfinished),
+        finishedBooksByMonthAllTypes: const [],
+        finishedBooksByMonthPaperbackBooks: const [],
+        finishedBooksByMonthHardcoverBooks: const [],
+        finishedBooksByMonthEbooks: const [],
+        finishedBooksByMonthAudiobooks: const [],
+        finishedPagesByMonthAllTypes: const [],
+        finishedPagesByMonthPaperbackBooks: const [],
+        finishedPagesByMonthHardcoverBooks: const [],
+        finishedPagesByMonthEbooks: const [],
+        finishedPagesByMonthAudiobooks: const [],
+        finishedBooksAll: 0,
+        finishedPagesAll: 0,
+        averageRating: const [],
+        averagePages: const [],
+        averageReadingTime: const [],
+        longestBook: const [],
+        shortestBook: const [],
+        fastestBook: const [],
+        slowestBook: const [],
+      );
+    }
 
     return StatsResult(
       years: years,

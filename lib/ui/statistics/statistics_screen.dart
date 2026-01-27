@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
-import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
@@ -27,16 +26,6 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
 
     libraryState.mapOrNull(
       loaded: (value) => context.statsBloc..add(StatsLoad(value.allBooks)),
-    );
-  }
-
-  void _setChallenge(int books, int pages, int year) {
-    BlocProvider.of<ChallengeBloc>(context).add(
-      ChangeChallengeEvent(
-        books: (books == 0) ? null : books,
-        pages: (pages == 0) ? null : pages,
-        year: year,
-      ),
     );
   }
 
@@ -67,11 +56,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                       size: 42,
                     ),
                   ),
-                  StatsLoaded() => Statistics(
-                    state: state,
-                    setChallenge: _setChallenge,
-                  ),
-                  // TODO: change to LocalesKey
+                  StatsLoaded() => Statistics(state: state),
                   StatsEmpty() => const Center(child: Text('Empty')),
                   StatsFailure() => Center(
                     child: Text(switch (state.type) {

@@ -11,11 +11,17 @@ final class StatsLoading extends StatsState {}
 
 final class StatsLoaded extends StatsState {
   final StatsResult result;
+  final List<DailyReading> dailyReadingActivity;
+  final List<GenreStats> genreStats;
 
-  const StatsLoaded(this.result);
+  const StatsLoaded({
+    required this.result,
+    required this.dailyReadingActivity,
+    required this.genreStats,
+  });
 
   @override
-  List<Object?> get props => [result];
+  List<Object?> get props => [result, dailyReadingActivity, genreStats];
 }
 
 final class StatsEmpty extends StatsState {}

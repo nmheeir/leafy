@@ -84,6 +84,8 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   envied: ^1.3.2
   file_selector: ^1.1.0
+  heatmap_calendar:
+    path: packages/heatmap_calendar
 
 dev_dependencies:
   flutter_test:

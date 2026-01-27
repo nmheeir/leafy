@@ -43,6 +43,8 @@ import '../data/datasources/local/reading_session_local_datasource.dart'
     as _i13;
 import '../data/datasources/local/reading_session_local_datasource_impl.dart'
     as _i653;
+import '../data/datasources/local/stats_local_datasource.dart' as _i101;
+import '../data/datasources/local/stats_local_datasource_impl.dart' as _i207;
 import '../data/datasources/local/translation_local_datasource.dart' as _i890;
 import '../data/datasources/remote/gemini_translation_datasource.dart' as _i46;
 import '../data/datasources/remote/gutendex_remote_datasource/gutendex_remote_datasource.dart'
@@ -67,6 +69,7 @@ import '../data/repositories/gutendex_repository_impl.dart' as _i779;
 import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../data/repositories/reader_progress_repository_impl.dart' as _i919;
 import '../data/repositories/reading_session_repository_impl.dart' as _i297;
+import '../data/repositories/stats_repository_impl.dart' as _i540;
 import '../data/repositories/translation/translation_repository_impl.dart'
     as _i965;
 import '../domain/book/repositories/book_repository.dart' as _i29;
@@ -142,6 +145,7 @@ import '../domain/reading_session/usecases/log_reading_session_by_path.dart'
 import '../domain/services/gemini_service.dart' as _i1052;
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
+import '../domain/statistics/repositories/stats_repository.dart' as _i1061;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
 import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
@@ -194,7 +198,6 @@ extension GetItInjectableX on _i174.GetIt {
     final deviceModule = _$DeviceModule();
     final loggerModule = _$LoggerModule();
     final networkModule = _$NetworkModule();
-    gh.factory<_i800.StatsCalculator>(() => _i800.StatsCalculator());
     gh.factory<_i854.ChallengeBloc>(() => _i854.ChallengeBloc());
     gh.factory<_i280.RatingTypeBloc>(() => _i280.RatingTypeBloc());
     gh.factory<_i713.SortFinishedBooksBloc>(
@@ -242,9 +245,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i798.NetworkFileDataSource>(
       () => _i643.NetworkFileDataSourceImpl(gh<_i361.Dio>()),
     );
-    gh.factory<_i780.StatsBloc>(
-      () => _i780.StatsBloc(gh<_i800.StatsCalculator>()),
-    );
     gh.lazySingleton<_i890.TranslationLocalDataSource>(
       () => _i890.TranslationLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
@@ -259,6 +259,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i715.OlRemoteDataSource>(
       () => _i715.OlRemoteDataSource(gh<_i361.Dio>()),
+    );
+    gh.factory<_i800.StatsCalculator>(
+      () => _i800.StatsCalculator(gh<_i974.Logger>()),
     );
     gh.lazySingleton<_i308.HistoryObserver>(
       () => _i308.HistoryObserver(gh<_i974.Logger>()),
@@ -296,6 +299,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i16.BookMarkRepository>(
       () => _i1069.BookMarkRepositoryImpl(gh<_i328.BookMarkLocalDataSource>()),
     );
+    gh.lazySingleton<_i101.StatsLocalDataSource>(
+      () => _i207.StatsLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
     gh.lazySingleton<_i925.EpubReaderRepository>(
       () => _i608.EpubBookRepositoryImpl(gh<_i722.EpubReaderLocalDataSource>()),
     );
@@ -331,6 +337,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i446.GutendexService>(
       () => _i446.GutendexService(gh<_i974.Logger>(), gh<_i361.Dio>()),
     );
+    gh.lazySingleton<_i1061.StatsRepository>(
+      () => _i540.StatsRepositoryImpl(
+        gh<_i101.StatsLocalDataSource>(),
+        gh<_i974.Logger>(),
+      ),
+    );
     gh.lazySingleton<_i564.ReadingSessionRepository>(
       () => _i297.ReadingSessionRepositoryImpl(
         gh<_i13.ReadingSessionLocalDatasource>(),
@@ -357,6 +369,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i429.MetadataExtractionService>(
       () => _i804.MetadataExtractionServiceImpl(
         gh<_i722.EpubReaderLocalDataSource>(),
+      ),
+    );
+    gh.factory<_i780.StatsBloc>(
+      () => _i780.StatsBloc(
+        gh<_i800.StatsCalculator>(),
+        gh<_i1061.StatsRepository>(),
+        gh<_i974.Logger>(),
       ),
     );
     gh.lazySingleton<_i29.BookRepository>(
