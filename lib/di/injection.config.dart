@@ -23,6 +23,10 @@ import 'package:screen_brightness/screen_brightness.dart' as _i108;
 import '../core/config/app_config.dart' as _i221;
 import '../core/services/connectivity_service.dart' as _i786;
 import '../core/utils/extensions/history_observer.dart' as _i308;
+import '../data/backup/backup_repository_impl.dart' as _i845;
+import '../data/backup/backup_service.dart' as _i189;
+import '../data/backup/csv_service.dart' as _i828;
+import '../data/backup/google_drive_service.dart' as _i306;
 import '../data/datasources/local/book_local_datasource.dart' as _i758;
 import '../data/datasources/local/book_local_datasource_impl.dart' as _i689;
 import '../data/datasources/local/book_mark_local_datasource.dart' as _i328;
@@ -72,6 +76,7 @@ import '../data/repositories/reading_session_repository_impl.dart' as _i297;
 import '../data/repositories/stats_repository_impl.dart' as _i540;
 import '../data/repositories/translation/translation_repository_impl.dart'
     as _i965;
+import '../domain/backup/repositories/backup_repository.dart' as _i609;
 import '../domain/book/repositories/book_repository.dart' as _i29;
 import '../domain/book/usecases/add_book.dart' as _i660;
 import '../domain/book/usecases/bulk_delete.dart' as _i909;
@@ -152,6 +157,7 @@ import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
 import '../domain/translation/usecases/stream_translate_chapter.dart' as _i27;
 import '../domain/translation/usecases/translate_and_summarize_chapter.dart'
     as _i472;
+import '../logic/backup/backup_restore_cubit.dart' as _i100;
 import '../logic/bloc/challenge_bloc/challenge_bloc.dart' as _i854;
 import '../logic/bloc/local_search/local_search_bloc.dart' as _i365;
 import '../logic/bloc/open_lib_search/open_lib_search_bloc.dart' as _i52;
@@ -229,6 +235,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i786.ConnectivityService>(
       () => _i786.ConnectivityService(),
     );
+    gh.lazySingleton<_i306.GoogleDriveService>(
+      () => _i306.GoogleDriveService(),
+    );
     gh.lazySingleton<_i328.DatabaseService>(() => _i328.DatabaseService());
     gh.lazySingleton<_i108.ScreenBrightness>(
       () => deviceModule.screenBrightness,
@@ -250,6 +259,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i328.BookMarkLocalDataSource>(
       () => _i328.BookMarkLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i189.BackupService>(
+      () => _i189.BackupService(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i828.CsvService>(
+      () => _i828.CsvService(gh<_i328.DatabaseService>()),
     );
     gh.lazySingleton<_i620.EpubFileLocalDataSource>(
       () => _i536.EpubFileLocalDataSourceImpl(gh<_i497.Directory>()),
@@ -301,6 +316,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i101.StatsLocalDataSource>(
       () => _i207.StatsLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i609.BackupRepository>(
+      () => _i845.BackupRepositoryImpl(
+        gh<_i189.BackupService>(),
+        gh<_i828.CsvService>(),
+        gh<_i306.GoogleDriveService>(),
+      ),
     );
     gh.lazySingleton<_i925.EpubReaderRepository>(
       () => _i608.EpubBookRepositoryImpl(gh<_i722.EpubReaderLocalDataSource>()),
@@ -404,6 +426,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i919.ReaderProgressRepositoryImpl(
         gh<_i770.ReaderProgressLocalDatasource>(),
       ),
+    );
+    gh.factory<_i100.BackupRestoreCubit>(
+      () => _i100.BackupRestoreCubit(gh<_i609.BackupRepository>()),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),

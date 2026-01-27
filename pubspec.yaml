@@ -88,6 +88,12 @@ dependencies:
     path: packages/heatmap_calendar
   google_fonts: ^8.0.0
   flutter_svg: ^2.2.3
+  archive: ^4.0.4 # ZIP creation/extraction for backup
+  google_sign_in: ^7.1.1 # Google Sign-in for cloud backup
+  googleapis: ^14.0.0 # Google Drive API
+  extension_google_sign_in_as_googleapis_auth: ^3.0.0 # Auth extension
+  googleapis_auth: ^2.0.0 # Google API auth client
+  csv: ^6.0.0 # CSV parsing for export/import
 
 dev_dependencies:
   flutter_test:
