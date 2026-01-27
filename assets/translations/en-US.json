@@ -75,7 +75,6 @@
   "display_tags": "Show tags",
   "only_books_with_all_tags": "Only books with all selected tags",
   "sort_filter": "Sort / filter",
-  "statistics": "Statistics",
   "settings": "Settings",
   "this_list_is_empty_1": "This list is currently empty.",
   "this_list_is_empty_2": "Click the + button below to add a new book",
@@ -442,5 +441,22 @@
     "next_chapter": "Next chapter",
     "last_chapter": "Last chapter",
     "end_of_chapter": "End of chapter {}"
+  },
+  "statistics": {
+    "title": "Statistics",
+    "reading_heatmap": "Reading Heatmap",
+    "activity_chart": "Activity Chart",
+    "reading_consistency": "Reading Consistency",
+    "most_read_formats": "Most read formats",
+    "genre_breakdown": "Genre Breakdown",
+    "book_count": "{} books",
+    "color_tip_less": "Less",
+    "color_tip_more": "More",
+    "tool_tip": "{} \nRead {} minutes",
+    "total_time": "Total Time",
+    "avg_daily": "Avg. Daily",
+    "books_read": "Books Read",
+    "pages_read": "Pages Read",
+    "weekly_activity": "Weekly Activity"
   }
 }

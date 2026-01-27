@@ -1,8 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:heatmap_calendar/heatmap_calendar.dart';
 import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/statistics/entities/daily_reading.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 
 class ReadingHeatmap extends StatelessWidget {
   final List<DailyReading> dailyReadings;
@@ -47,24 +49,30 @@ class ReadingHeatmap extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Reading Consistency', style: context.textTheme.titleMedium),
+            Text(
+              LocaleKeys.statistics_reading_consistency.tr(),
+              style: context.textTheme.titleMedium,
+            ),
             const SizedBox(height: 16),
             HeatMap(
               datasets: datasets,
               colorMode: ColorMode.opacity,
               showText: false,
               scrollable: true,
-              colorTipHelper: [Text('Less'), Text('More')],
+              colorTipHelper: [
+                Text(LocaleKeys.statistics_color_tip_less.tr()),
+                Text(LocaleKeys.statistics_color_tip_more.tr()),
+              ],
               colorsets: {1: context.colorScheme.primaryContainer},
               tooltipBuilder: (value, count) {
-                return '${dateFormat.format(value)} \nRead $count minutes';
-              },
-              monthSeparatorWidth: 8,
-              onClick: (value) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('You read $value minutes')),
+                return LocaleKeys.statistics_tool_tip.tr(
+                  args: [
+                    dateFormat.format(value),
+                    count == null ? '0' : count.toString(),
+                  ],
                 );
               },
+              monthSeparatorWidth: 8,
               startDate: endDate.subtract(
                 const Duration(days: 100),
               ), // Show last ~3 months initially? Or 365

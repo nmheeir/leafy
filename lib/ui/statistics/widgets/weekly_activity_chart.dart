@@ -1,7 +1,10 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart'
+    show BuildContextExtensions;
 import 'package:leafy/domain/statistics/entities/daily_reading.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 
 class WeeklyActivityChart extends StatelessWidget {
   final List<DailyReading> dailyReadings;
@@ -40,8 +43,8 @@ class WeeklyActivityChart extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Weekly Activity',
-              style: Theme.of(context).textTheme.titleMedium,
+              LocaleKeys.statistics_weekly_activity.tr(),
+              style: context.textTheme.titleMedium,
             ),
             const SizedBox(height: 24),
             AspectRatio(
@@ -82,7 +85,7 @@ class WeeklyActivityChart extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 8.0),
                             child: Text(
                               DateFormat.E().format(day),
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: context.textTheme.bodySmall,
                             ),
                           );
                         },
@@ -98,7 +101,7 @@ class WeeklyActivityChart extends StatelessWidget {
                             padding: const EdgeInsets.only(right: 8.0),
                             child: Text(
                               '${value.toInt()}h',
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: context.textTheme.bodySmall,
                               textAlign: TextAlign.right,
                             ),
                           );
@@ -139,7 +142,7 @@ class WeeklyActivityChart extends StatelessWidget {
                       barRods: [
                         BarChartRodData(
                           toY: e.value,
-                          color: Theme.of(context).colorScheme.primary,
+                          color: context.colorScheme.primary,
                           width: 16,
                           borderRadius: const BorderRadius.vertical(
                             top: Radius.circular(4),
@@ -147,9 +150,7 @@ class WeeklyActivityChart extends StatelessWidget {
                           backDrawRodData: BackgroundBarChartRodData(
                             show: true,
                             toY: maxHours,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primaryContainer
+                            color: context.colorScheme.primaryContainer
                                 .withValues(alpha: 0.2),
                           ),
                         ),

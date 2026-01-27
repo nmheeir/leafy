@@ -79,7 +79,6 @@ abstract class  LocaleKeys {
   static const display_tags = 'display_tags';
   static const only_books_with_all_tags = 'only_books_with_all_tags';
   static const sort_filter = 'sort_filter';
-  static const statistics = 'statistics';
   static const settings = 'settings';
   static const this_list_is_empty_1 = 'this_list_is_empty_1';
   static const this_list_is_empty_2 = 'this_list_is_empty_2';
@@ -423,5 +422,21 @@ abstract class  LocaleKeys {
   static const epub_reader_last_chapter = 'epub_reader.last_chapter';
   static const epub_reader_end_of_chapter = 'epub_reader.end_of_chapter';
   static const epub_reader = 'epub_reader';
+  static const statistics_title = 'statistics.title';
+  static const statistics_reading_heatmap = 'statistics.reading_heatmap';
+  static const statistics_activity_chart = 'statistics.activity_chart';
+  static const statistics_reading_consistency = 'statistics.reading_consistency';
+  static const statistics_most_read_formats = 'statistics.most_read_formats';
+  static const statistics_genre_breakdown = 'statistics.genre_breakdown';
+  static const statistics_book_count = 'statistics.book_count';
+  static const statistics_color_tip_less = 'statistics.color_tip_less';
+  static const statistics_color_tip_more = 'statistics.color_tip_more';
+  static const statistics_tool_tip = 'statistics.tool_tip';
+  static const statistics_total_time = 'statistics.total_time';
+  static const statistics_avg_daily = 'statistics.avg_daily';
+  static const statistics_books_read = 'statistics.books_read';
+  static const statistics_pages_read = 'statistics.pages_read';
+  static const statistics_weekly_activity = 'statistics.weekly_activity';
+  static const statistics = 'statistics';
 
 }

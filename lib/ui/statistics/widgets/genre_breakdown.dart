@@ -1,6 +1,9 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/statistics/entities/genre_stats.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 
 class GenreBreakdown extends StatelessWidget {
   final List<GenreStats> genreStats;
@@ -20,8 +23,8 @@ class GenreBreakdown extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Most Read Formats',
-              style: Theme.of(context).textTheme.titleMedium,
+              LocaleKeys.statistics_most_read_formats.tr(),
+              style: context.textTheme.titleMedium,
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -78,7 +81,11 @@ class GenreBreakdown extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(stat.genre),
                       const Spacer(),
-                      Text('${stat.bookCount} books'),
+                      Text(
+                        LocaleKeys.statistics_book_count.tr(
+                          args: [stat.bookCount.toString()],
+                        ),
+                      ),
                     ],
                   ),
                 );

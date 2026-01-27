@@ -1,5 +1,7 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/domain/statistics/entities/daily_reading.dart';
+import 'package:leafy/generated/locale_keys.g.dart';
 
 class SummaryGrid extends StatelessWidget {
   final List<DailyReading> dailyReadings;
@@ -35,15 +37,30 @@ class SummaryGrid extends StatelessWidget {
         mainAxisSpacing: 16,
         childAspectRatio: 1.5,
         children: [
-          _buildCard(context, 'Total Time', '${totalHours}h', Icons.timer),
           _buildCard(
             context,
-            'Avg. Daily',
+            LocaleKeys.statistics_total_time.tr(),
+            '${totalHours}h',
+            Icons.timer,
+          ),
+          _buildCard(
+            context,
+            LocaleKeys.statistics_avg_daily.tr(),
             '${avgMinutesPerDay}m',
             Icons.speed,
           ),
-          _buildCard(context, 'Books Read', '$totalBooks', Icons.book),
-          _buildCard(context, 'Pages Read', '$totalPages', Icons.pages),
+          _buildCard(
+            context,
+            LocaleKeys.statistics_books_read.tr(),
+            '$totalBooks',
+            Icons.book,
+          ),
+          _buildCard(
+            context,
+            LocaleKeys.statistics_pages_read.tr(),
+            '$totalPages',
+            Icons.pages,
+          ),
         ],
       ),
     );

@@ -45,7 +45,7 @@ class _HomeNavigationBarState extends State<HomeNavigationBar> {
                 ? context.colorScheme.onPrimaryContainer
                 : context.colorScheme.onSurface,
           ),
-          label: LocaleKeys.statistics.tr(),
+          label: LocaleKeys.statistics_title.tr(),
         ),
         // ..._addHubDestination(useHub),
       ],
