@@ -17,6 +17,18 @@ abstract final class Constants {
 
   static const fonts = [
     {'text': 'Nunito', 'family': 'Nunito'},
+    {'text': 'Atkinson Hyperlegible', 'family': 'Atkinson Hyperlegible'},
+    {'text': 'Barlow', 'family': 'Barlow'},
+    {'text': 'Inter', 'family': 'Inter'},
+    {'text': 'Jost', 'family': 'Jost'},
+    {'text': 'Kanit', 'family': 'Kanit'},
+    {'text': 'Lato', 'family': 'Lato'},
+    {'text': 'Lora', 'family': 'Lora'},
+    {'text': 'Montserrat', 'family': 'Montserrat'},
+    {'text': 'Poppins', 'family': 'Poppins'},
+    {'text': 'Quicksand', 'family': 'Quicksand'},
+    {'text': 'Raleway', 'family': 'Raleway'},
+    {'text': 'Sofia Sans', 'family': 'Sofia Sans'},
   ];
 }
 

@@ -138,74 +138,108 @@ class SettingAppearanceScreen extends StatelessWidget {
   }
 
   void _showFontDialog(BuildContext context) {
-    showDialog(
+    showModalBottomSheet(
       context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(cornerRadius),
-          ),
-          backgroundColor: context.colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 20),
-            child: BlocBuilder<ThemeBloc, ThemeState>(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      backgroundColor: context.colorScheme.surface,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.6,
+          minChildSize: 0.4,
+          maxChildSize: 0.9,
+          expand: false,
+          builder: (context, scrollController) {
+            return BlocBuilder<ThemeBloc, ThemeState>(
               builder: (context, state) {
-                if (state is SetThemeState) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 10),
-                        child: Text(
-                          LocaleKeys.select_font.tr(),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                if (state is! SetThemeState) return const SizedBox();
+
+                final currentFont = state.fontFamily;
+
+                return Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                      const SizedBox(height: 15),
-                      Expanded(
-                        child: Scrollbar(
-                          thumbVisibility: true,
-                          child: SingleChildScrollView(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              // mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SettingDialogButton(
-                                  text: LocaleKeys.font_default.tr(),
-                                  onPressed: () {
-                                    _setFont(context, state, null);
-                                  },
-                                ),
-                                for (var font in Constants.fonts) ...[
-                                  const SizedBox(height: 5),
-                                  SettingDialogButton(
-                                    text: font['text'] as String,
-                                    fontFamily: font['family'] as String,
-                                    onPressed: () {
-                                      _setFont(
-                                        context,
-                                        state,
-                                        font['family'] as String,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      LocaleKeys.select_font.tr(),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: ListView.separated(
+                        controller: scrollController,
+                        itemCount: Constants.fonts.length + 1,
+                        separatorBuilder: (context, index) =>
+                            const Divider(height: 1, indent: 16, endIndent: 16),
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            final isSelected = currentFont == null;
+                            return ListTile(
+                              title: Text(LocaleKeys.font_default.tr()),
+                              trailing: isSelected
+                                  ? Icon(
+                                      Icons.check,
+                                      color: context.colorScheme.primary,
+                                    )
+                                  : null,
+                              onTap: () {
+                                _setFont(context, state, null);
+                              },
+                            );
+                          }
+
+                          final fontData = Constants.fonts[index - 1];
+                          final fontFamily = fontData['family'] as String;
+                          final fontText = fontData['text'] as String;
+                          final isSelected = currentFont == fontFamily;
+
+                          return ListTile(
+                            title: Text(
+                              fontText,
+                              style: TextStyle(
+                                fontFamily: fontFamily,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                        ),
+                            subtitle: Text(
+                              'The quick brown fox jumps over the lazy dog',
+                              style: TextStyle(
+                                fontFamily: fontFamily,
+                                fontSize: 13,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            trailing: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    color: context.colorScheme.primary,
+                                  )
+                                : null,
+                            onTap: () {
+                              _setFont(context, state, fontFamily);
+                            },
+                          );
+                        },
                       ),
-                    ],
-                  );
-                } else {
-                  return const SizedBox();
-                }
+                    ),
+                  ],
+                );
               },
-            ),
-          ),
+            );
+          },
         );
       },
     );
