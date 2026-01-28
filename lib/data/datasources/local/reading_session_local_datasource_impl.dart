@@ -11,13 +11,14 @@ class ReadingSessionLocalDatasourceImpl
 
   ReadingSessionLocalDatasourceImpl(this._db);
 
-  static const _table = 'reading_sessions';
+  static const _sessionsTable = 'reading_sessions';
+  static const _resourcesTable = 'book_resources';
 
   @override
   Future<void> insertSession(ReadingSessionModel session) async {
     final db = await _db.database;
     await db.insert(
-      _table,
+      _sessionsTable,
       session.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
@@ -26,11 +27,15 @@ class ReadingSessionLocalDatasourceImpl
   @override
   Future<List<ReadingSessionModel>> getSessionsByBookId(int bookId) async {
     final db = await _db.database;
-    final result = await db.query(
-      _table,
-      where: 'resource_id = ?',
-      whereArgs: [bookId],
-      orderBy: 'start_time DESC',
+    // Join with book_resources to get sessions by book_id
+    final result = await db.rawQuery(
+      '''
+      SELECT rs.* FROM $_sessionsTable rs
+      INNER JOIN $_resourcesTable br ON rs.resource_id = br.id
+      WHERE br.book_id = ?
+      ORDER BY rs.start_time DESC
+    ''',
+      [bookId],
     );
     return result.map((e) => ReadingSessionModel.fromJson(e)).toList();
   }
@@ -38,13 +43,91 @@ class ReadingSessionLocalDatasourceImpl
   @override
   Future<List<ReadingSessionModel>> getAllSessions() async {
     final db = await _db.database;
-    final result = await db.query(_table, orderBy: 'start_time DESC');
+    final result = await db.query(_sessionsTable, orderBy: 'start_time DESC');
     return result.map((e) => ReadingSessionModel.fromJson(e)).toList();
   }
 
   @override
   Future<void> deleteSessionsByBookId(int bookId) async {
     final db = await _db.database;
-    await db.delete(_table, where: 'resource_id = ?', whereArgs: [bookId]);
+    // Delete via subquery through book_resources
+    await db.rawDelete(
+      '''
+      DELETE FROM $_sessionsTable
+      WHERE resource_id IN (
+        SELECT id FROM $_resourcesTable WHERE book_id = ?
+      )
+    ''',
+      [bookId],
+    );
+  }
+
+  @override
+  Future<int> getTotalDurationByBookId(int bookId) async {
+    final db = await _db.database;
+    final result = await db.rawQuery(
+      '''
+      SELECT COALESCE(SUM(rs.duration_ms), 0) as total
+      FROM $_sessionsTable rs
+      INNER JOIN $_resourcesTable br ON rs.resource_id = br.id
+      WHERE br.book_id = ?
+    ''',
+      [bookId],
+    );
+    return (result.first['total'] as int?) ?? 0;
+  }
+
+  @override
+  Future<int> getSessionCountByBookId(int bookId) async {
+    final db = await _db.database;
+    final result = await db.rawQuery(
+      '''
+      SELECT COUNT(*) as count
+      FROM $_sessionsTable rs
+      INNER JOIN $_resourcesTable br ON rs.resource_id = br.id
+      WHERE br.book_id = ?
+    ''',
+      [bookId],
+    );
+    return (result.first['count'] as int?) ?? 0;
+  }
+
+  @override
+  Future<ReadingSessionModel?> getLastSessionByBookId(int bookId) async {
+    final db = await _db.database;
+    final result = await db.rawQuery(
+      '''
+      SELECT rs.* FROM $_sessionsTable rs
+      INNER JOIN $_resourcesTable br ON rs.resource_id = br.id
+      WHERE br.book_id = ?
+      ORDER BY rs.end_time DESC
+      LIMIT 1
+    ''',
+      [bookId],
+    );
+    if (result.isEmpty) return null;
+    return ReadingSessionModel.fromJson(result.first);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSessionsWithResourceByBookId(
+    int bookId,
+  ) async {
+    final db = await _db.database;
+    // Get sessions with resource format info
+    final result = await db.rawQuery(
+      '''
+      SELECT 
+        rs.*,
+        br.format as resource_format,
+        br.id as resource_id
+      FROM $_sessionsTable rs
+      INNER JOIN $_resourcesTable br ON rs.resource_id = br.id
+      WHERE br.book_id = ?
+      ORDER BY rs.start_time DESC
+    ''',
+      [bookId],
+    );
+    return result;
   }
 }

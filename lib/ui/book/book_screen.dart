@@ -17,12 +17,12 @@ import 'package:leafy/ui/book/widgets/book_screen_app_bar.dart';
 import 'package:leafy/ui/book/widgets/book_status_detail.dart';
 import 'package:leafy/ui/book/widgets/book_title_detail.dart';
 import 'package:leafy/ui/book/widgets/book_reader_launcher_button.dart';
+import 'package:leafy/ui/book/widgets/reading_stats_card.dart';
 
 import 'package:leafy/ui/book/widgets/cover_view.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 import 'package:leafy/ui/common/image_placeholder.dart';
 
-//TODO: change layout similar to android
 class BookScreen extends StatelessWidget {
   const BookScreen({super.key, required this.heroTag});
 
@@ -97,6 +97,13 @@ class BookScreen extends StatelessWidget {
                           _buildTitleDetail(state),
                           BookStatusDetail(book: state),
                           BookReaderLauncherButton(book: state),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: ReadingStatsCard(
+                              bookId: state.id!,
+                              bookTitle: state.title,
+                            ),
+                          ),
                           _buildBookFormatDetail(state),
                           _buildPublicationYearDetail(state),
                           _buildPagesDetail(state),

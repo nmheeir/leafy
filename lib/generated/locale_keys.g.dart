@@ -447,5 +447,17 @@ abstract class  LocaleKeys {
   static const csv_import_description = 'csv.import_description';
   static const csv_export_description = 'csv.export_description';
   static const csv = 'csv';
+  static const reading_history_empty = 'reading_history.empty';
+  static const reading_history_today = 'reading_history.today';
+  static const reading_history_yesterday = 'reading_history.yesterday';
+  static const reading_history_total_time = 'reading_history.total_time';
+  static const reading_history_sessions = 'reading_history.sessions';
+  static const reading_history_avg_session = 'reading_history.avg_session';
+  static const reading_history = 'reading_history';
+  static const book_reading_activity = 'book.reading_activity';
+  static const book_total_time = 'book.total_time';
+  static const book_sessions = 'book.sessions';
+  static const book_last_read = 'book.last_read';
+  static const book = 'book';
 
 }

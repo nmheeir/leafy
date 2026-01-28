@@ -42,6 +42,48 @@ class ReadingSessionRepositoryImpl implements ReadingSessionRepository {
     await _datasource.deleteSessionsByBookId(bookId);
   }
 
+  @override
+  Future<ReadingHistorySummary> getHistorySummaryByBookId(int bookId) async {
+    final totalDuration = await _datasource.getTotalDurationByBookId(bookId);
+    final sessionCount = await _datasource.getSessionCountByBookId(bookId);
+    final lastSession = await _datasource.getLastSessionByBookId(bookId);
+
+    return ReadingHistorySummary(
+      totalDurationMs: totalDuration,
+      sessionCount: sessionCount,
+      lastReadAt: lastSession != null
+          ? DateTime.fromMillisecondsSinceEpoch(lastSession.endTime)
+          : null,
+    );
+  }
+
+  @override
+  Future<List<SessionWithResource>> getSessionsWithResourceByBookId(
+    int bookId,
+  ) async {
+    final rawData = await _datasource.getSessionsWithResourceByBookId(bookId);
+
+    return rawData.map((row) {
+      final session = ReadingSession(
+        id: row['id'] as String,
+        resourceId: row['resource_id'] as int,
+        startTime: DateTime.fromMillisecondsSinceEpoch(
+          row['start_time'] as int,
+        ),
+        endTime: DateTime.fromMillisecondsSinceEpoch(row['end_time'] as int),
+        durationMs: row['duration_ms'] as int,
+        startLocator: row['start_locator'] as String?,
+        endLocator: row['end_locator'] as String?,
+        chapterIndex: row['chapter_index'] as int?,
+      );
+
+      return SessionWithResource(
+        session: session,
+        resourceFormat: row['resource_format'] as String? ?? 'unknown',
+      );
+    }).toList();
+  }
+
   ReadingSession _modelToEntity(ReadingSessionModel model) {
     return ReadingSession(
       id: model.id,

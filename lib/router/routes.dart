@@ -18,4 +18,5 @@ abstract final class Routes {
   static const settingAiApi = '/setting-ai-api';
   static const epubView = '/epub-view';
   static const searchGutendex = '/search-gutendex';
+  static const readingHistory = '/reading-history';
 }

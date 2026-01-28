@@ -1,9 +1,9 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:leafy/core/utils/extensions/history_observer.dart';
-import 'package:leafy/di/injection.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
+import 'package:leafy/ui/reading_history/reading_history_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
 import 'package:leafy/ui/search_gtd/search_gtd_screen.dart';
 import 'package:leafy/ui/search_ol/search_ol_screen.dart';
@@ -77,6 +77,22 @@ GoRouter router() => GoRouter(
     GoRoute(
       path: Routes.settingAiApi,
       builder: (context, state) => AISettingsScreen(),
+    ),
+    GoRoute(
+      path: Routes.readingHistory,
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final bookId = extra?['bookId'] as int?;
+        final bookTitle = extra?['bookTitle'] as String? ?? 'Reading History';
+
+        if (bookId == null) {
+          return const Scaffold(
+            body: Center(child: Text("Error: Book ID required")),
+          );
+        }
+
+        return ReadingHistoryScreen(bookId: bookId, bookTitle: bookTitle);
+      },
     ),
   ],
   // redirect: (context, state) {

@@ -470,5 +470,19 @@
     "export": "Export CSV",
     "import_description": "Import books from a CSV file",
     "export_description": "Export books to a CSV file"
+  },
+  "reading_history": {
+    "empty": "No reading history yet",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "total_time": "Total Time",
+    "sessions": "Sessions",
+    "avg_session": "Avg/Session"
+  },
+  "book": {
+    "reading_activity": "Reading Activity",
+    "total_time": "Total Time",
+    "sessions": "Sessions",
+    "last_read": "Last Read"
   }
 }
