@@ -97,7 +97,14 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   ),
                   SettingsSection(
-                    title: Text(LocaleKeys.ai_api_key_setting_title.tr()),
+                    title: Text(
+                      LocaleKeys.ai_api_key_setting_title.tr(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.colorScheme.primary,
+                      ),
+                    ),
                     tiles: [_buildGeminiApiSetting(context)],
                   ),
                   SettingsSection(

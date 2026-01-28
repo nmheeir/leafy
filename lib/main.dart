@@ -9,6 +9,7 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/core/services/connectivity_service.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/logic/backup/backup_restore_cubit.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/open_lib/open_lib_bloc.dart';
@@ -98,6 +99,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<EpubReaderSettingCubit>()),
       BlocProvider(create: (context) => getIt<AISettingsCubit>()),
       BlocProvider(create: (context) => getIt<PdfReaderCubit>()),
+      BlocProvider(create: (context) => getIt<BackupRestoreCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

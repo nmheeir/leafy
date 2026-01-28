@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:googleapis_auth/googleapis_auth.dart' as auth show AuthClient;
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/config/env.dart';
 import 'package:leafy/domain/backup/entities/backup_result.dart';
 import 'package:logger/logger.dart';
 
@@ -28,8 +29,8 @@ class GoogleDriveService {
     try {
       final signIn = GoogleSignIn.instance;
 
-      // Initialize
-      await signIn.initialize();
+      // Initialize with serverClientId (required for Android)
+      await signIn.initialize(serverClientId: Env.googleWebClientId);
 
       // Try to authenticate
       if (signIn.supportsAuthenticate()) {
@@ -134,19 +135,31 @@ class GoogleDriveService {
 
   /// List backups on Google Drive
   Future<List<CloudBackupInfo>> listBackups() async {
-    if (_driveApi == null) return [];
+    _logger.d('listBackups: Starting...');
+
+    if (_driveApi == null) {
+      _logger.w('listBackups: DriveApi is null, not signed in');
+      return [];
+    }
 
     try {
+      _logger.d('listBackups: Getting folder ID...');
       final folderId = await _getFolderId();
-      if (folderId == null) return [];
+      if (folderId == null) {
+        _logger.w('listBackups: Folder not found');
+        return [];
+      }
+      _logger.d('listBackups: Folder ID = $folderId');
 
+      _logger.d('listBackups: Fetching files from Drive...');
       final result = await _driveApi!.files.list(
         q: "'$folderId' in parents and mimeType='$_mimeTypeZip' and trashed=false",
         orderBy: 'createdTime desc',
         $fields: 'files(id, name, createdTime, size)',
       );
 
-      return (result.files ?? []).map((f) {
+      final backups = (result.files ?? []).map((f) {
+        _logger.d('listBackups: Found backup - ${f.name} (${f.id})');
         return CloudBackupInfo(
           id: f.id ?? '',
           name: f.name ?? '',
@@ -154,39 +167,58 @@ class GoogleDriveService {
           sizeBytes: int.tryParse(f.size ?? '0') ?? 0,
         );
       }).toList();
+
+      _logger.i('listBackups: Found ${backups.length} backups');
+      return backups;
     } on Exception catch (e, st) {
-      _logger.e('Failed to list Drive backups', error: e, stackTrace: st);
+      _logger.e('listBackups: Failed', error: e, stackTrace: st);
       return [];
     }
   }
 
   /// Download backup from Google Drive
   Future<String?> downloadBackup(String fileId, String destinationPath) async {
-    if (_driveApi == null) return null;
+    _logger.d('downloadBackup: Starting...');
+    _logger.d('downloadBackup: fileId = $fileId');
+    _logger.d('downloadBackup: destinationPath = $destinationPath');
+
+    if (_driveApi == null) {
+      _logger.w('downloadBackup: DriveApi is null, not signed in');
+      return null;
+    }
 
     try {
+      _logger.d('downloadBackup: Fetching file from Drive...');
       final response = await _driveApi!.files.get(
         fileId,
         downloadOptions: drive.DownloadOptions.fullMedia,
       );
 
+      _logger.d('downloadBackup: Response type = ${response.runtimeType}');
+
       if (response is! drive.Media) {
+        _logger.e('downloadBackup: Response is not Media type');
         return null;
       }
 
+      _logger.d('downloadBackup: Writing to file...');
       final outputFile = File(destinationPath);
       final sink = outputFile.openWrite();
 
+      var bytesWritten = 0;
       await for (final chunk in response.stream) {
         sink.add(chunk);
+        bytesWritten += chunk.length;
       }
 
       await sink.close();
 
-      _logger.i('Backup downloaded: $destinationPath');
+      _logger.i(
+        'downloadBackup: Success! Downloaded $bytesWritten bytes to $destinationPath',
+      );
       return destinationPath;
     } on Exception catch (e, st) {
-      _logger.e('Drive download failed', error: e, stackTrace: st);
+      _logger.e('downloadBackup: Failed', error: e, stackTrace: st);
       return null;
     }
   }

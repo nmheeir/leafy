@@ -2,28 +2,17 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:leafy/di/injection.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/core/utils/helpers/file_helper.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/backup/backup_restore_cubit.dart';
 import 'package:leafy/logic/backup/backup_restore_state.dart';
+import 'package:leafy/logic/utils/extensions.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:settings_ui/settings_ui.dart';
 
-/// Màn hình Sao lưu & Phục hồi với đầy đủ chức năng
 class SettingBackupRestoreScreen extends StatelessWidget {
   const SettingBackupRestoreScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<BackupRestoreCubit>(),
-      child: const _SettingBackupRestoreView(),
-    );
-  }
-}
-
-class _SettingBackupRestoreView extends StatelessWidget {
-  const _SettingBackupRestoreView();
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +30,7 @@ class _SettingBackupRestoreView extends StatelessWidget {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              LocaleKeys.backup.tr(),
+              LocaleKeys.backup_and_restore.tr(),
               style: const TextStyle(fontSize: 18),
             ),
           ),
@@ -50,15 +39,13 @@ class _SettingBackupRestoreView extends StatelessWidget {
               SettingsList(
                 contentPadding: const EdgeInsets.only(top: 10),
                 darkTheme: SettingsThemeData(
-                  settingsListBackground:
-                      Theme.of(context).brightness == Brightness.dark
+                  settingsListBackground: context.brightness == Brightness.dark
                       ? Colors.black
-                      : Theme.of(context).colorScheme.surfaceContainerLowest,
+                      : context.colorScheme.surfaceContainerLowest,
                 ),
                 lightTheme: SettingsThemeData(
-                  settingsListBackground: Theme.of(
-                    context,
-                  ).colorScheme.surfaceContainerLowest,
+                  settingsListBackground:
+                      context.colorScheme.surfaceContainerLowest,
                 ),
                 sections: [
                   _buildBackupSection(context),
@@ -86,13 +73,13 @@ class _SettingBackupRestoreView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 LoadingAnimationWidget.staggeredDotsWave(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: context.colorScheme.primary,
                   size: 48,
                 ),
                 const SizedBox(height: 16),
                 Text(
                   state.message ?? 'Processing...',
-                  style: Theme.of(context).textTheme.bodyLarge,
+                  style: context.textTheme.bodyLarge,
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -106,11 +93,11 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsSection _buildBackupSection(BuildContext context) {
     return SettingsSection(
       title: Text(
-        LocaleKeys.leafy_backup.tr(),
+        LocaleKeys.backup_title.tr(),
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          color: context.colorScheme.primary,
         ),
       ),
       tiles: <SettingsTile>[
@@ -124,11 +111,11 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsSection _buildCsvSection(BuildContext context) {
     return SettingsSection(
       title: Text(
-        LocaleKeys.csv.tr(),
+        LocaleKeys.csv_title.tr(),
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).colorScheme.primary,
+          color: context.colorScheme.primary,
         ),
       ),
       tiles: <SettingsTile>[
@@ -141,17 +128,17 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsTile _buildCreateLocalBackup(BuildContext context) {
     return SettingsTile(
       title: Text(
-        LocaleKeys.create_local_backup.tr(),
+        LocaleKeys.backup_local_create.tr(),
         style: const TextStyle(fontSize: 16),
       ),
       leading: const Icon(FontAwesomeIcons.solidFloppyDisk),
-      description: Text(LocaleKeys.create_local_backup_description.tr()),
+      description: Text(LocaleKeys.backup_local_create_description.tr()),
       onPressed: (ctx) => _showConfirmDialog(
         ctx,
-        title: LocaleKeys.create_local_backup.tr(),
+        title: LocaleKeys.backup_local_create.tr(),
         content:
             'This will create a backup file containing all your books and reading progress.',
-        onConfirm: () => context.read<BackupRestoreCubit>().createLocalBackup(),
+        onConfirm: () => context.backupRestoreCubit.createLocalBackup(),
       ),
     );
   }
@@ -159,17 +146,16 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsTile _buildCreateCloudBackup(BuildContext context) {
     return SettingsTile(
       title: Text(
-        LocaleKeys.create_cloud_backup.tr(),
+        LocaleKeys.backup_cloud_create.tr(),
         style: const TextStyle(fontSize: 16),
       ),
       leading: const Icon(FontAwesomeIcons.cloudArrowUp),
-      description: Text(LocaleKeys.create_cloud_backup_description.tr()),
+      description: Text(LocaleKeys.backup_cloud_create_description.tr()),
       onPressed: (ctx) => _showConfirmDialog(
         ctx,
-        title: LocaleKeys.create_cloud_backup.tr(),
-        content:
-            'This will upload a backup to your Google Drive.\n\nYou will need to sign in with your Google account.',
-        onConfirm: () => context.read<BackupRestoreCubit>().createCloudBackup(),
+        title: LocaleKeys.backup_cloud_create.tr(),
+        content: LocaleKeys.backup_cloud_create_alert.tr(),
+        onConfirm: () => context.backupRestoreCubit.createCloudBackup(),
       ),
     );
   }
@@ -177,11 +163,11 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsTile _buildRestoreBackup(BuildContext context) {
     return SettingsTile(
       title: Text(
-        LocaleKeys.restore_backup.tr(),
+        LocaleKeys.restore_title.tr(),
         style: const TextStyle(fontSize: 16),
       ),
       leading: const Icon(FontAwesomeIcons.arrowUpFromBracket),
-      description: Text(LocaleKeys.restore_backup_alert_content.tr()),
+      description: Text(LocaleKeys.restore_alert.tr()),
       onPressed: (ctx) => _showRestoreOptionsDialog(ctx, context),
     );
   }
@@ -189,19 +175,19 @@ class _SettingBackupRestoreView extends StatelessWidget {
   SettingsTile _buildExportAsCSV(BuildContext context) {
     return SettingsTile(
       title: Text(
-        LocaleKeys.export_csv.tr(),
+        LocaleKeys.csv_export.tr(),
         style: const TextStyle(fontSize: 16),
       ),
       leading: const Icon(FontAwesomeIcons.fileCsv),
-      description: Text(LocaleKeys.export_csv_description_1.tr()),
-      onPressed: (ctx) => context.read<BackupRestoreCubit>().exportCsv(),
+      description: Text(LocaleKeys.csv_export_description.tr()),
+      onPressed: (ctx) => context.backupRestoreCubit.exportCsv(),
     );
   }
 
   SettingsTile _buildImportCSV(BuildContext context) {
     return SettingsTile(
       title: Text(
-        LocaleKeys.import_csv.tr(),
+        LocaleKeys.csv_title.tr(),
         style: const TextStyle(fontSize: 16),
       ),
       leading: Image.asset(
@@ -211,10 +197,9 @@ class _SettingBackupRestoreView extends StatelessWidget {
       ),
       onPressed: (ctx) => _showConfirmDialog(
         ctx,
-        title: LocaleKeys.import_csv.tr(),
-        content:
-            'Import books from a Leafy CSV file.\n\nThis will add new books to your library.',
-        onConfirm: () => context.read<BackupRestoreCubit>().importCsv(),
+        title: LocaleKeys.csv_import.tr(),
+        content: LocaleKeys.csv_import_description.tr(),
+        onConfirm: () => context.backupRestoreCubit.importCsv(),
       ),
     );
   }
@@ -223,22 +208,20 @@ class _SettingBackupRestoreView extends StatelessWidget {
     showDialog(
       context: ctx,
       builder: (dialogContext) => AlertDialog(
-        title: Text(LocaleKeys.restore_backup.tr()),
-        content: const Text(
-          'Where would you like to restore from?\n\n⚠️ This will replace all your current data!',
-        ),
+        title: Text(LocaleKeys.restore_title.tr()),
+        content: Text(LocaleKeys.restore_alert.tr()),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancel'),
+            child: Text(LocaleKeys.restore_cancel.tr()),
           ),
           TextButton.icon(
             onPressed: () {
               Navigator.pop(dialogContext);
-              cubitContext.read<BackupRestoreCubit>().restoreLocalBackup();
+              cubitContext.backupRestoreCubit.restoreLocalBackup();
             },
             icon: const Icon(FontAwesomeIcons.solidFloppyDisk, size: 16),
-            label: const Text('Local File'),
+            label: Text(LocaleKeys.restore_local_file.tr()),
           ),
           TextButton.icon(
             onPressed: () {
@@ -246,7 +229,7 @@ class _SettingBackupRestoreView extends StatelessWidget {
               _showCloudBackupsDialog(ctx, cubitContext);
             },
             icon: const Icon(FontAwesomeIcons.cloudArrowDown, size: 16),
-            label: const Text('Google Drive'),
+            label: Text(LocaleKeys.restore_google_drive.tr()),
           ),
         ],
       ),
@@ -254,7 +237,7 @@ class _SettingBackupRestoreView extends StatelessWidget {
   }
 
   void _showCloudBackupsDialog(BuildContext ctx, BuildContext cubitContext) {
-    final cubit = cubitContext.read<BackupRestoreCubit>();
+    final cubit = cubitContext.backupRestoreCubit;
     cubit.loadCloudBackups();
 
     showDialog(
@@ -263,39 +246,86 @@ class _SettingBackupRestoreView extends StatelessWidget {
         value: cubit,
         child: BlocBuilder<BackupRestoreCubit, BackupRestoreState>(
           builder: (context, state) {
-            return AlertDialog(
-              title: const Text('Cloud Backups'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: state.status == BackupStatus.loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : state.cloudBackups.isEmpty
-                    ? const Text('No cloud backups found')
-                    : ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: state.cloudBackups.length,
-                        itemBuilder: (ctx, index) {
-                          final backup = state.cloudBackups[index];
-                          return ListTile(
-                            title: Text(backup.name),
-                            subtitle: Text(
-                              DateFormat.yMMMd().add_Hm().format(
-                                backup.createdAt,
-                              ),
-                            ),
-                            trailing: Text(_formatBytes(backup.sizeBytes)),
-                            onTap: () {
-                              Navigator.pop(dialogContext);
-                              cubit.restoreCloudBackup(backup.id);
-                            },
-                          );
-                        },
+            Widget content;
+
+            if (state.status == BackupStatus.loading) {
+              content = Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text(LocaleKeys.backup_loading.tr()),
+                    ],
+                  ),
+                ),
+              );
+            } else if (state.cloudBackups.isNotEmpty) {
+              content = Column(
+                mainAxisSize: MainAxisSize.min,
+                children: state.cloudBackups.map((backup) {
+                  return ListTile(
+                    leading: const Icon(Icons.cloud_download_outlined),
+                    title: Text(
+                      backup.name,
+                      style: const TextStyle(fontSize: 14),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      DateFormat.yMMMd().add_Hm().format(backup.createdAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colorScheme.outline,
                       ),
+                    ),
+                    trailing: Text(
+                      FileHelper.formatSize(backup.sizeBytes),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.colorScheme.outline,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pop(dialogContext);
+                      cubit.restoreCloudBackup(backup.id);
+                    },
+                  );
+                }).toList(),
+              );
+            } else {
+              content = Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.cloud_off, size: 48, color: Colors.grey),
+                      SizedBox(height: 16),
+                      Text(LocaleKeys.backup_cloud_no_found.tr()),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            return AlertDialog(
+              title: Row(
+                children: [
+                  Icon(Icons.cloud, color: context.colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(LocaleKeys.backup_cloud_create.tr()),
+                ],
+              ),
+              content: SizedBox(
+                width: 320,
+                child: SingleChildScrollView(child: content),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text('Cancel'),
+                  child: Text(LocaleKeys.cancel.tr()),
                 ),
               ],
             );
@@ -319,14 +349,14 @@ class _SettingBackupRestoreView extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(LocaleKeys.cancel.tr()),
           ),
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
               onConfirm();
             },
-            child: const Text('Continue'),
+            child: Text(LocaleKeys.continuee.tr()),
           ),
         ],
       ),
@@ -338,15 +368,15 @@ class _SettingBackupRestoreView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.check_circle, color: Colors.green, size: 48),
-        title: const Text('Success'),
+        title: Text(LocaleKeys.success.tr()),
         content: Text(message),
         actions: [
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<BackupRestoreCubit>().reset();
+              context.backupRestoreCubit.reset();
             },
-            child: const Text('OK'),
+            child: Text(LocaleKeys.ok.tr()),
           ),
         ],
       ),
@@ -358,24 +388,18 @@ class _SettingBackupRestoreView extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         icon: Icon(Icons.error, color: Colors.red, size: 48),
-        title: const Text('Error'),
+        title: Text(LocaleKeys.error_unexpected.tr()),
         content: Text(message),
         actions: [
           FilledButton(
             onPressed: () {
               Navigator.pop(ctx);
-              context.read<BackupRestoreCubit>().reset();
+              context.backupRestoreCubit.reset();
             },
-            child: const Text('OK'),
+            child: Text(LocaleKeys.ok.tr()),
           ),
         ],
       ),
     );
-  }
-
-  String _formatBytes(int bytes) {
-    if (bytes < 1024) return '$bytes B';
-    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }

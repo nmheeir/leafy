@@ -427,9 +427,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i770.ReaderProgressLocalDatasource>(),
       ),
     );
-    gh.factory<_i100.BackupRestoreCubit>(
-      () => _i100.BackupRestoreCubit(gh<_i609.BackupRepository>()),
-    );
     gh.factory<_i909.BulkDeleteUseCase>(
       () => _i909.BulkDeleteUseCase(gh<_i29.BookRepository>()),
     );
@@ -545,6 +542,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i623.SaveImportedResourceUseCase>(
       () => _i623.SaveImportedResourceUseCase(
         gh<_i1042.BookResourceRepository>(),
+      ),
+    );
+    gh.factory<_i100.BackupRestoreCubit>(
+      () => _i100.BackupRestoreCubit(
+        gh<_i609.BackupRepository>(),
+        gh<_i29.BookRepository>(),
       ),
     );
     gh.factory<_i845.BookProgressCubit>(

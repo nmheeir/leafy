@@ -6,6 +6,7 @@ extension BuildContextExtensions on BuildContext {
   ColorScheme get colorScheme => _theme.colorScheme;
   Size get deviceSize => MediaQuery.sizeOf(this);
   EdgeInsets get padding => MediaQuery.of(this).padding;
+  Brightness get brightness => _theme.brightness;
 }
 
 extension StringExtension on String {

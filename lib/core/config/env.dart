@@ -6,4 +6,7 @@ part 'env.g.dart';
 abstract class Env {
   @EnviedField(varName: 'GEMINI_API_KEY', obfuscate: true)
   static final String geminiApiKey = _Env.geminiApiKey;
+
+  @EnviedField(varName: 'GOOGLE_WEB_CLIENT_ID', obfuscate: true)
+  static final String googleWebClientId = _Env.googleWebClientId;
 }

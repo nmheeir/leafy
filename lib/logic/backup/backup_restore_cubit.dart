@@ -2,14 +2,16 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/domain/backup/repositories/backup_repository.dart';
+import 'package:leafy/domain/book/repositories/book_repository.dart';
 import 'package:leafy/logic/backup/backup_restore_state.dart';
 import 'package:share_plus/share_plus.dart';
 
 @Injectable()
 class BackupRestoreCubit extends Cubit<BackupRestoreState> {
   final BackupRepository _backupRepository;
+  final BookRepository _bookRepository;
 
-  BackupRestoreCubit(this._backupRepository)
+  BackupRestoreCubit(this._backupRepository, this._bookRepository)
     : super(const BackupRestoreState());
 
   /// Tạo local backup
@@ -157,19 +159,33 @@ class BackupRestoreCubit extends Cubit<BackupRestoreState> {
     final result = await _backupRepository.listCloudBackups();
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: BackupStatus.failure,
-          errorMessage: failure.message ?? 'Unknown error',
-        ),
-      ),
-      (backups) => emit(
-        state.copyWith(
-          status: BackupStatus.success,
-          cloudBackups: backups,
-          isGoogleSignedIn: true,
-        ),
-      ),
+      (failure) {
+        print('loadCloudBackups FAILURE: ${failure.message}');
+        emit(
+          state.copyWith(
+            status: BackupStatus.failure,
+            errorMessage: failure.message ?? 'Unknown error',
+          ),
+        );
+      },
+      (backups) {
+        print('loadCloudBackups SUCCESS: ${backups.length} backups');
+        for (final b in backups) {
+          print('  - ${b.name} (${b.id})');
+        }
+        // Use 'initial' status to prevent triggering success dialog
+        // but still update cloudBackups list
+        emit(
+          BackupRestoreState(
+            status: BackupStatus.initial,
+            cloudBackups: backups,
+            isGoogleSignedIn: true,
+          ),
+        );
+        print(
+          'State after emit: cloudBackups.length = ${state.cloudBackups.length}',
+        );
+      },
     );
   }
 
@@ -193,14 +209,17 @@ class BackupRestoreCubit extends Cubit<BackupRestoreState> {
           errorMessage: failure.message ?? 'Unknown error',
         ),
       ),
-      (result) => emit(
-        state.copyWith(
-          status: BackupStatus.success,
-          message:
-              'Cloud restore completed!\n'
-              '${result.booksRestored} books restored',
-        ),
-      ),
+      (result) async {
+        emit(
+          state.copyWith(
+            status: BackupStatus.success,
+            message:
+                'Cloud restore completed!\n'
+                '${result.booksRestored} books restored',
+          ),
+        );
+        _bookRepository.refresh();
+      },
     );
   }
 

@@ -14,6 +14,8 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>leafy</string>
+	<key>CFBundleURLTypes</key>
+	<string>559734656335-romuskt7h6c1drul01idcani5s9kdqn5.apps.googleusercontent.com</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>

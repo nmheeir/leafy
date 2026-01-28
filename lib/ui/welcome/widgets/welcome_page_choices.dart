@@ -50,20 +50,12 @@ class WelcomePageChoices extends StatelessWidget {
                       children: [
                         const SizedBox(height: 20),
                         WelcomeChoiceButton(
-                          description: LocaleKeys.restore_backup.tr(),
+                          description: LocaleKeys.restore_title.tr(),
                           onPressed: restoreBackup,
                         ),
                         WelcomeChoiceButton(
-                          description: LocaleKeys.import_csv.tr(),
+                          description: LocaleKeys.csv_import.tr(),
                           onPressed: importOpenreadsCsv,
-                        ),
-                        WelcomeChoiceButton(
-                          description: LocaleKeys.import_goodreads_csv.tr(),
-                          onPressed: importGoodreadsCsv,
-                        ),
-                        WelcomeChoiceButton(
-                          description: LocaleKeys.import_bookwyrm_csv.tr(),
-                          onPressed: importBookwyrmCsv,
                         ),
                       ],
                     ),

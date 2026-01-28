@@ -146,18 +146,24 @@ class BackupRepositoryImpl implements BackupRepository {
 
   @override
   Future<Either<Failure, List<CloudBackupInfo>>> listCloudBackups() async {
+    _logger.d('listCloudBackups: Starting...');
     try {
       if (!_googleDriveService.isSignedIn) {
+        _logger.d('listCloudBackups: Not signed in, attempting sign in...');
         final signedIn = await _googleDriveService.signIn();
         if (!signedIn) {
+          _logger.e('listCloudBackups: Sign in failed');
           return Left(Failure.unexpected('Google Sign-In failed or cancelled'));
         }
+        _logger.d('listCloudBackups: Sign in successful');
       }
 
+      _logger.d('listCloudBackups: Fetching backups list...');
       final backups = await _googleDriveService.listBackups();
+      _logger.i('listCloudBackups: Found ${backups.length} backups');
       return Right(backups);
-    } on Exception catch (e) {
-      _logger.e('listCloudBackups failed', error: e);
+    } on Exception catch (e, st) {
+      _logger.e('listCloudBackups failed', error: e, stackTrace: st);
       return Left(Failure.unexpected('Failed to list cloud backups: $e'));
     }
   }
@@ -166,42 +172,78 @@ class BackupRepositoryImpl implements BackupRepository {
   Future<Either<Failure, RestoreResult>> restoreFromCloudBackup({
     required String backupId,
   }) async {
+    _logger.d('restoreFromCloudBackup: Starting...');
+    _logger.d('restoreFromCloudBackup: backupId = $backupId');
+
     try {
       if (!_googleDriveService.isSignedIn) {
+        _logger.d(
+          'restoreFromCloudBackup: Not signed in, attempting sign in...',
+        );
         final signedIn = await _googleDriveService.signIn();
         if (!signedIn) {
+          _logger.e('restoreFromCloudBackup: Sign in failed');
           return Left(Failure.unexpected('Google Sign-In failed or cancelled'));
         }
+        _logger.d('restoreFromCloudBackup: Sign in successful');
       }
 
       // Download to temp
       final tempPath = '${appDocumentsDirectory.path}/temp_restore.zip';
+      _logger.d('restoreFromCloudBackup: Downloading to $tempPath');
+
       final downloadedPath = await _googleDriveService.downloadBackup(
         backupId,
         tempPath,
       );
 
       if (downloadedPath == null) {
+        _logger.e('restoreFromCloudBackup: Download returned null');
         return Left(Failure.unexpected('Failed to download backup from Drive'));
       }
 
+      _logger.d('restoreFromCloudBackup: Download complete: $downloadedPath');
+
+      // Check if file exists and size
+      final downloadedFile = File(downloadedPath);
+      if (downloadedFile.existsSync()) {
+        final fileSize = downloadedFile.lengthSync();
+        _logger.d(
+          'restoreFromCloudBackup: Downloaded file size = $fileSize bytes',
+        );
+      } else {
+        _logger.e('restoreFromCloudBackup: Downloaded file does not exist!');
+        return Left(Failure.unexpected('Downloaded file not found'));
+      }
+
       // Restore
+      _logger.d('restoreFromCloudBackup: Starting restore...');
       final result = await _backupService.restoreBackup(downloadedPath);
+      _logger.d('restoreFromCloudBackup: Restore result = ${result.success}');
 
       // Clean up
       try {
         await File(downloadedPath).delete();
-      } on Exception catch (_) {}
+        _logger.d('restoreFromCloudBackup: Temp file cleaned up');
+      } on Exception catch (e) {
+        _logger.w('restoreFromCloudBackup: Failed to clean up temp file: $e');
+      }
 
       if (result.success) {
+        _logger.i(
+          'restoreFromCloudBackup: Success! ${result.booksRestored} books, ${result.coversRestored} covers',
+        );
         return Right(result);
       } else {
+        _logger.e(
+          'restoreFromCloudBackup: Restore failed - ${result.errorMessage}',
+        );
         return Left(
           Failure.unexpected(result.errorMessage ?? 'Restore failed'),
         );
       }
-    } on Exception catch (e) {
-      _logger.e('restoreFromCloudBackup failed', error: e);
+    } on Exception catch (e, st) {
+      _logger.e('restoreFromCloudBackup: Exception', error: e, stackTrace: st);
       return Left(Failure.unexpected('Failed to restore from cloud: $e'));
     }
   }

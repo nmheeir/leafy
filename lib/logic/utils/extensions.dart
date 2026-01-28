@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:leafy/logic/backup/backup_restore_cubit.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
@@ -56,6 +57,8 @@ extension BlocExtensions on BuildContext {
   AISettingsCubit get aiSettingsCubit => read<AISettingsCubit>();
 
   PdfReaderCubit get pdfReaderCubit => read<PdfReaderCubit>();
+
+  BackupRestoreCubit get backupRestoreCubit => read<BackupRestoreCubit>();
 
   ///////////////////////////// BLOC /////////////////////////////
   LocalSearchBloc get localSearchBloc => read<LocalSearchBloc>();
