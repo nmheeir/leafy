@@ -1,4 +1,4 @@
-package com.example.leafy
+package com.nmheeir.leafy
 
 import com.example.leafy.epub.EpubMapper
 import com.example.leafy.epub.EpubParser
