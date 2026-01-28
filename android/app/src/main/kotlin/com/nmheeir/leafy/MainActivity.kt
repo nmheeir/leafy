@@ -1,7 +1,7 @@
 package com.nmheeir.leafy
 
-import com.example.leafy.epub.EpubMapper
-import com.example.leafy.epub.EpubParser
+import com.nmheeir.leafy.epub.EpubMapper
+import com.nmheeir.leafy.epub.EpubParser
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel

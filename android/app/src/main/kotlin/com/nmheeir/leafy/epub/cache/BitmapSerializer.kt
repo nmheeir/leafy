@@ -1,4 +1,4 @@
-package com.example.leafy.epub.cache
+package com.nmheeir.leafy.epub.cache
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

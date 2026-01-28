@@ -1,8 +1,9 @@
-package com.example.leafy.epub
+package com.nmheeir.leafy.epub
 
 import android.graphics.BitmapFactory
 import android.util.Log
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
 import org.jsoup.nodes.TextNode
 import java.io.File
@@ -47,7 +48,7 @@ class EpubXMLFileParser(
 
         val title: String
         val bodyContent: String
-        val bodyElement: org.jsoup.nodes.Element?
+        val bodyElement: Element?
 
         if (fragmentId != null) {
             // Check if the fragment ID represents a <div> tag

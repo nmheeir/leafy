@@ -24,4 +24,34 @@ class ReadingSessionRepositoryImpl implements ReadingSessionRepository {
     );
     await _datasource.insertSession(model);
   }
+
+  @override
+  Future<List<ReadingSession>> getSessionsByBookId(int bookId) async {
+    final models = await _datasource.getSessionsByBookId(bookId);
+    return models.map(_modelToEntity).toList();
+  }
+
+  @override
+  Future<List<ReadingSession>> getAllSessions() async {
+    final models = await _datasource.getAllSessions();
+    return models.map(_modelToEntity).toList();
+  }
+
+  @override
+  Future<void> deleteSessionsByBookId(int bookId) async {
+    await _datasource.deleteSessionsByBookId(bookId);
+  }
+
+  ReadingSession _modelToEntity(ReadingSessionModel model) {
+    return ReadingSession(
+      id: model.id,
+      resourceId: model.resourceId,
+      startTime: DateTime.fromMillisecondsSinceEpoch(model.startTime),
+      endTime: DateTime.fromMillisecondsSinceEpoch(model.endTime),
+      durationMs: model.durationMs,
+      startLocator: model.startLocator,
+      endLocator: model.endLocator,
+      chapterIndex: model.chapterIndex,
+    );
+  }
 }

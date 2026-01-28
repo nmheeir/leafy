@@ -1,4 +1,4 @@
-package com.example.leafy.epub
+package com.nmheeir.leafy.epub
 
 /**
  * Exception thrown when an error occurs while parsing an EPUB file.

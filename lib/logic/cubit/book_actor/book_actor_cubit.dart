@@ -4,7 +4,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/domain/book/usecases/add_book.dart';
 import 'package:leafy/domain/book/usecases/bulk_delete.dart';
 import 'package:leafy/domain/book/usecases/bulk_update.dart';
@@ -154,22 +153,13 @@ class BookActorCubit extends Cubit<BookActorState> {
 
     if (newStatus == BookStatus.finished) {
       // CASE A: Hoàn thành sách
-
       updatedBook = book.markAsFinished(date: today, rating: rating);
     } else if (newStatus == BookStatus.inProgress) {
       // CASE B: Bắt đầu đọc (hoặc Đọc lại)
-
-      List<Reading> newReadings = List.from(book.readings);
-
-      // Tạo một phiên đọc mới bắt đầu từ hôm nay
-      final newReadingSession = Reading(startDate: today);
-
-      // Logic: Luôn thêm phiên đọc mới nhất vào đầu danh sách
-      newReadings.insert(0, newReadingSession);
-
+      // Set startDate directly on the book
       updatedBook = book.copyWith(
         status: BookStatus.inProgress,
-        readings: newReadings,
+        startDate: today,
       );
     } else {
       // CASE C: Các trạng thái khác (VD: chuyển về ForLater...)

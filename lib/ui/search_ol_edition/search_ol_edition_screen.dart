@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/data/models/ol_edition_result.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
@@ -64,7 +63,6 @@ class _SearchOLEditionsScreenState extends State<SearchOLEditionsScreen> {
       favorite: false,
       publicationYear: widget.firstPublishYear,
       bookFormat: result.physicalFormat ?? defaultBookFormat,
-      readings: List<Reading>.empty(growable: true),
       tags: defaultTags.isNotEmpty == true ? defaultTags.join('|||||') : null,
       dateAdded: addDate,
       dateModified: addDate,

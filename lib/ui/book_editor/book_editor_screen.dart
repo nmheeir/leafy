@@ -12,12 +12,10 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/router/routes.dart';
@@ -30,7 +28,6 @@ import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/tags_fiels.dart';
-import 'package:leafy/ui/book_editor/widgets/reading_row.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -119,12 +116,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       _showSnackbar(LocaleKeys.author_cannot_be_empty.tr());
       return false;
     }
-    for (final reading in book.readings) {
-      if (reading.startDate != null && reading.finishDate != null) {
-        if (reading.finishDate!.isBefore(reading.startDate!)) {
-          _showSnackbar(LocaleKeys.finish_date_before_start.tr());
-          return false;
-        }
+
+    // Validate start/finish date consistency
+    if (book.startDate != null && book.finishDate != null) {
+      if (book.finishDate!.isBefore(book.startDate!)) {
+        _showSnackbar(LocaleKeys.finish_date_before_start.tr());
+        return false;
       }
     }
 
@@ -532,20 +529,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     ),
                   const SizedBox(height: 10),
                   BookRatingBar(animDuration: _animDuration),
-                  BlocBuilder<EditBookCubit, Book>(
-                    builder: (context, state) {
-                      return Column(
-                        children: [
-                          ...state.readings.asMap().entries.map((entry) {
-                            return ReadingRow(
-                              index: entry.key,
-                              reading: entry.value,
-                            );
-                          }),
-                        ],
-                      );
-                    },
-                  ),
+                  // Readings section removed - now using ReadingSession table
                   // _buildAddNewReadingButton(context),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   BookTypeDropdown(
@@ -749,29 +733,5 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     );
   }
 
-  Padding _buildAddNewReadingButton(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-      child: FilledButton.tonal(
-        onPressed: () {
-          context.editBookCubit.addNewReading(Reading());
-        },
-        style: ButtonStyle(
-          shape: WidgetStatePropertyAll(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(cornerRadius),
-            ),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.add),
-            const SizedBox(width: 10),
-            Text(LocaleKeys.add_additional_reading_time.tr()),
-          ],
-        ),
-      ),
-    );
-  }
+  // _buildAddNewReadingButton method removed - readings feature deprecated
 }

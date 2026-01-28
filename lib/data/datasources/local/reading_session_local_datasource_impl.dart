@@ -22,4 +22,29 @@ class ReadingSessionLocalDatasourceImpl
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+
+  @override
+  Future<List<ReadingSessionModel>> getSessionsByBookId(int bookId) async {
+    final db = await _db.database;
+    final result = await db.query(
+      _table,
+      where: 'resource_id = ?',
+      whereArgs: [bookId],
+      orderBy: 'start_time DESC',
+    );
+    return result.map((e) => ReadingSessionModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<List<ReadingSessionModel>> getAllSessions() async {
+    final db = await _db.database;
+    final result = await db.query(_table, orderBy: 'start_time DESC');
+    return result.map((e) => ReadingSessionModel.fromJson(e)).toList();
+  }
+
+  @override
+  Future<void> deleteSessionsByBookId(int bookId) async {
+    final db = await _db.database;
+    await db.delete(_table, where: 'resource_id = ?', whereArgs: [bookId]);
+  }
 }

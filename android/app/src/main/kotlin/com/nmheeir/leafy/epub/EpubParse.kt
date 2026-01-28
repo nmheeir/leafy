@@ -1,13 +1,13 @@
-package com.example.leafy.epub
+package com.nmheeir.leafy.epub
 
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
-import com.example.leafy.epub.cache.EpubCache
-import com.example.leafy.epub.models.EpubBook
-import com.example.leafy.epub.models.EpubChapter
-import com.example.leafy.epub.models.EpubImage
+import com.nmheeir.leafy.epub.cache.EpubCache
+import com.nmheeir.leafy.epub.models.EpubBook
+import com.nmheeir.leafy.epub.models.EpubChapter
+import com.nmheeir.leafy.epub.models.EpubImage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.w3c.dom.Element
@@ -18,6 +18,7 @@ import java.io.InputStream
 import java.util.concurrent.ThreadLocalRandom
 import java.util.zip.ZipFile
 import java.util.zip.ZipInputStream
+import kotlin.collections.get
 
 
 /**

@@ -52,12 +52,9 @@ class LibraryState with _$LibraryState {
         final uniqueYears = <int>{};
 
         for (final book in books) {
-          // Duyệt qua lịch sử đọc của từng cuốn sách
-          for (final reading in book.readings) {
-            // Chỉ lấy năm nếu đã có ngày đọc xong
-            if (reading.finishDate != null) {
-              uniqueYears.add(reading.finishDate!.year);
-            }
+          // Lấy năm từ finishDate trực tiếp
+          if (book.finishDate != null) {
+            uniqueYears.add(book.finishDate!.year);
           }
         }
 

@@ -21,7 +21,7 @@ import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
   initialLocation: Routes.home,
-  observers: [getIt<HistoryObserver>()],
+  // observers: [getIt<HistoryObserver>()],
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),

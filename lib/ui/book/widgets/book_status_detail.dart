@@ -49,8 +49,9 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
             ],
           ),
 
-          // Row 3: History & Stats
-          if (widget.book.readings.isNotEmpty) ...[
+          // Row 3: History & Stats - using startDate/finishDate directly
+          if (widget.book.startDate != null ||
+              widget.book.finishDate != null) ...[
             const SizedBox(height: 24),
             _buildReadingHistory(context),
           ],
@@ -200,52 +201,47 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
   }
 
   List<Widget> _buildStartAndFinishDates(BuildContext context) {
-    if (widget.book.readings.isEmpty) return [];
+    // Use startDate and finishDate directly from book entity
+    if (widget.book.startDate == null && widget.book.finishDate == null) {
+      return [];
+    }
 
-    return widget.book.readings.asMap().entries.map((entry) {
-      final index = entry.key;
-      final reading = entry.value;
-      final text = _getReadingDateText(reading, context);
-      final isLast = index == widget.book.readings.length - 1;
+    final text = _getReadingDateTextFromBook(context);
 
-      return Padding(
-        padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.colorScheme.surface,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.calendar_today_rounded,
-                size: 14,
-                color: context.colorScheme.primary,
+    return [
+      Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: context.colorScheme.surface,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.calendar_today_rounded,
+              size: 14,
+              color: context.colorScheme.primary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: context.textTheme.bodyMedium?.copyWith(
+                color: context.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                text,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurface,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
-    }).toList();
+          ),
+        ],
+      ),
+    ];
   }
 
-  String _getReadingDateText(dynamic reading, BuildContext context) {
-    final startDate = reading.startDate;
-    final finishDate = reading.finishDate;
-    final readingTime = reading.readingTimeMs;
+  String _getReadingDateTextFromBook(BuildContext context) {
+    final startDate = widget.book.startDate;
+    final finishDate = widget.book.finishDate;
 
-    // Giả sử logic _generateReadingTime trả về string thời gian
+    // Generate reading time text
     final timeStr = _generateReadingTime(
       startDate: startDate,
       finishDate: finishDate,
@@ -277,27 +273,11 @@ class _BookStatusDetailState extends State<BookStatusDetail> {
   }
 
   Widget _generateHowManyTimesRead(BuildContext context) {
-    int timesRead = widget.book.readings
-        .where((r) => r.finishDate != null)
-        .length;
-    if (timesRead <= 1) return const SizedBox();
+    // Reading history feature using ReadingSession table - simplified here
+    // Just show if book has been finished
+    if (widget.book.finishDate == null) return const SizedBox();
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          Icon(Icons.history, size: 16, color: context.colorScheme.secondary),
-          const SizedBox(width: 6),
-          Text(
-            LocaleKeys.read_x_times.plural(widget.book.readings.length).tr(),
-            style: context.textTheme.labelMedium?.copyWith(
-              color: context.colorScheme.secondary,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
+    return const SizedBox(); // TODO: Query ReadingSession for multiple read-throughs
   }
 
   Widget _buildFavoriteButton(BuildContext context) {

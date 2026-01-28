@@ -1,8 +1,8 @@
-package com.example.leafy.epub
+package com.nmheeir.leafy.epub
 
 
 import android.graphics.Bitmap
-import com.example.leafy.epub.models.EpubBook
+import com.nmheeir.leafy.epub.models.EpubBook
 import java.io.ByteArrayOutputStream
 
 object EpubMapper {

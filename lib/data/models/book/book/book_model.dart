@@ -103,8 +103,6 @@ abstract class BookModel with _$BookModel {
       bookFormat: bookFormat,
       hasCover: hasCover,
       dateAdded: dateAdded,
-      // TODO: reading thành một bảng riêng. cần sửa lại book entity không nhận reading, thêm một entity mới là reading, ở đây sử dụng mảng rỗng để tránh lỗi
-      readings: [],
       dateModified: dateModified,
       startDate: startDate,
       finishDate: finishDate,

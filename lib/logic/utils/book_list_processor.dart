@@ -22,11 +22,9 @@ class BookListProcessor {
     if (sortState.years != null) {
       final yearsList = sortState.years!.split(Constants.tagDelimeter);
       list = list.where((book) {
-        return book.readings.any(
-          (r) =>
-              r.finishDate != null &&
-              yearsList.contains(r.finishDate!.year.toString()),
-        );
+        // Use finishDate directly instead of readings
+        if (book.finishDate == null) return false;
+        return yearsList.contains(book.finishDate!.year.toString());
       }).toList();
     }
 

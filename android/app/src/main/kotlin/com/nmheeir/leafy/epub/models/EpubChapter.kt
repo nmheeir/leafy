@@ -1,4 +1,4 @@
-package com.example.leafy.epub.models
+package com.nmheeir.leafy.epub.models
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

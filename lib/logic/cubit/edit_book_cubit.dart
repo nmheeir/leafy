@@ -2,9 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/data/models/book/reading_time/reading_time.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 import 'package:leafy/domain/gutendex/entities/gtd_person.dart';
 
 @injectable
@@ -39,7 +37,6 @@ class EditBookCubit extends Cubit<Book> {
       pages: pages,
       publicationYear: publishYear,
       bookFormat: defaultFormat,
-      readings: const [],
       tags: formattedTags,
       dateAdded: DateTime.now(),
       dateModified: DateTime.now(),
@@ -74,7 +71,6 @@ class EditBookCubit extends Cubit<Book> {
       author: newAuthor,
       description: description,
       status: BookStatus.unfinished,
-      readings: const [],
       tags: formattedTags,
       dateAdded: DateTime.now(),
       dateModified: DateTime.now(),
@@ -125,49 +121,9 @@ class EditBookCubit extends Cubit<Book> {
 
   void setHasCover(bool hasCover) => emit(state.copyWith(hasCover: hasCover));
 
-  // --- LOGIC XỬ LÝ DANH SÁCH ĐỌC (READINGS) ---
+  void setStartDate(DateTime? date) => emit(state.copyWith(startDate: date));
 
-  void addNewReading(Reading reading) {
-    // Luôn tạo list mới để đảm bảo tính immutability
-    emit(state.copyWith(readings: [...state.readings, reading]));
-  }
-
-  void removeReading(int index) {
-    if (index < 0 || index >= state.readings.length) return;
-
-    final readings = List<Reading>.from(state.readings)..removeAt(index);
-    emit(state.copyWith(readings: readings));
-  }
-
-  void setReadingStartDate(DateTime? date, int index) {
-    if (index < 0 || index >= state.readings.length) return;
-
-    final readings = List<Reading>.from(state.readings);
-    readings[index] = readings[index].copyWith(startDate: date);
-
-    emit(state.copyWith(readings: readings));
-  }
-
-  void setReadingFinishDate(DateTime? date, int index) {
-    if (index < 0 || index >= state.readings.length) return;
-
-    final readings = List<Reading>.from(state.readings);
-    readings[index] = readings[index].copyWith(finishDate: date);
-
-    emit(state.copyWith(readings: readings));
-  }
-
-  // ĐÃ FIX: Logic cập nhật CustomReadingTime
-  void setCustomReadingTime(ReadingTime? time, int index) {
-    if (index < 0 || index >= state.readings.length) return;
-
-    final readings = List<Reading>.from(state.readings);
-    readings[index] = readings[index].copyWith(
-      readingTimeMs: time!.milliSeconds,
-    );
-
-    emit(state.copyWith(readings: readings));
-  }
+  void setFinishDate(DateTime? date) => emit(state.copyWith(finishDate: date));
 
   // --- LOGIC XỬ LÝ TAGS ---
 

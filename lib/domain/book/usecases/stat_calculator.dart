@@ -319,7 +319,8 @@ class StatsCalculator {
     for (Book book in books) {
       if (book.pages == null || book.pages! == 0) continue;
 
-      if (book.readings.isEmpty) {
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate == null) {
         if (year != null) {
           continue;
         }
@@ -330,16 +331,14 @@ class StatsCalculator {
           shortestBook = book;
         }
       } else {
-        for (final reading in book.readings) {
-          if (year != null && reading.finishDate?.year != year) {
-            continue;
-          }
+        if (year != null && book.finishDate!.year != year) {
+          continue;
+        }
 
-          if (shortestBookPages == null || book.pages! < shortestBookPages) {
-            shortestBookPages = book.pages!;
-            shortestBookString = '${book.title} - ${book.author}';
-            shortestBook = book;
-          }
+        if (shortestBookPages == null || book.pages! < shortestBookPages) {
+          shortestBookPages = book.pages!;
+          shortestBookString = '${book.title} - ${book.author}';
+          shortestBook = book;
         }
       }
     }
@@ -387,7 +386,8 @@ class StatsCalculator {
     for (Book book in books) {
       if (book.pages == null || book.pages! == 0) continue;
 
-      if (book.readings.isEmpty) {
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate == null) {
         if (year != null) {
           continue;
         }
@@ -398,16 +398,14 @@ class StatsCalculator {
           longestBook = book;
         }
       } else {
-        for (final reading in book.readings) {
-          if (year != null && reading.finishDate?.year != year) {
-            continue;
-          }
+        if (year != null && book.finishDate!.year != year) {
+          continue;
+        }
 
-          if (longestBookPages == null || book.pages! > longestBookPages) {
-            longestBookPages = book.pages!;
-            longestBookString = '${book.title} - ${book.author}';
-            longestBook = book;
-          }
+        if (longestBookPages == null || book.pages! > longestBookPages) {
+          longestBookPages = book.pages!;
+          longestBookString = '${book.title} - ${book.author}';
+          longestBook = book;
         }
       }
     }
@@ -519,7 +517,8 @@ class StatsCalculator {
     for (Book book in books) {
       if (book.pages == null) continue;
 
-      if (book.readings.isEmpty) {
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate == null) {
         if (year != null) {
           continue;
         }
@@ -527,14 +526,12 @@ class StatsCalculator {
         finishedPages += book.pages!;
         countedBooks += 1;
       } else {
-        for (final reading in book.readings) {
-          if (year != null && reading.finishDate?.year != year) {
-            continue;
-          }
-
-          finishedPages += book.pages!;
-          countedBooks += 1;
+        if (year != null && book.finishDate!.year != year) {
+          continue;
         }
+
+        finishedPages += book.pages!;
+        countedBooks += 1;
       }
     }
 
@@ -572,18 +569,17 @@ class StatsCalculator {
     for (Book book in books) {
       if (book.rating == null) continue;
 
-      if (year == null && book.readings.isEmpty) {
+      // Use book.finishDate directly instead of readings
+      if (year == null && book.finishDate == null) {
         sumRating += book.rating! / 10;
         countedBooks += 1;
       } else {
-        for (final reading in book.readings) {
-          if (year != null && reading.finishDate?.year != year) {
-            continue;
-          }
-
-          sumRating += book.rating! / 10;
-          countedBooks += 1;
+        if (year != null && book.finishDate?.year != year) {
+          continue;
         }
+
+        sumRating += book.rating! / 10;
+        countedBooks += 1;
       }
     }
 
@@ -632,13 +628,12 @@ class StatsCalculator {
         continue;
       }
 
-      for (final reading in book.readings) {
-        if (reading.finishDate != null && book.pages != null) {
-          if (year == null || reading.finishDate!.year == year) {
-            final finishMonth = reading.finishDate!.month;
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate != null && book.pages != null) {
+        if (year == null || book.finishDate!.year == year) {
+          final finishMonth = book.finishDate!.month;
 
-            finishedPagesByMonth[finishMonth - 1] += book.pages!;
-          }
+          finishedPagesByMonth[finishMonth - 1] += book.pages!;
         }
       }
     }
@@ -685,13 +680,12 @@ class StatsCalculator {
         continue;
       }
 
-      for (final reading in book.readings) {
-        if (reading.finishDate != null) {
-          if (year == null || reading.finishDate!.year == year) {
-            final finishMonth = reading.finishDate!.month;
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate != null) {
+        if (year == null || book.finishDate!.year == year) {
+          final finishMonth = book.finishDate!.month;
 
-            finishedBooksByMonth[finishMonth - 1] += 1;
-          }
+          finishedBooksByMonth[finishMonth - 1] += 1;
         }
       }
     }
@@ -712,21 +706,9 @@ class StatsCalculator {
   }
 
   int _countFinishedBooks(List<Book> books) {
-    int finishedBooks = 0;
-
-    for (var book in books) {
-      if (book.readings.isEmpty) {
-        finishedBooks += 1;
-      } else {
-        for (final reading in book.readings) {
-          if (reading.finishDate != null) {
-            finishedBooks += 1;
-          }
-        }
-      }
-    }
-
-    return finishedBooks;
+    // All books passed here are already filtered to status=finished
+    // Just return the count directly
+    return books.length;
   }
 
   int _countFinishedPages(List<Book> books) {
@@ -734,15 +716,9 @@ class StatsCalculator {
 
     for (var book in books) {
       if (book.pages != null) {
-        if (book.readings.isEmpty) {
-          finishedPages += book.pages!;
-        } else {
-          for (final reading in book.readings) {
-            if (reading.finishDate != null) {
-              finishedPages += book.pages!;
-            }
-          }
-        }
+        // All books passed here are already filtered to status=finished
+        // Just count their pages directly
+        finishedPages += book.pages!;
       }
     }
 
@@ -753,13 +729,12 @@ class StatsCalculator {
     final years = List<int>.empty(growable: true);
 
     for (var book in books) {
-      for (final reading in book.readings) {
-        if (reading.finishDate != null) {
-          final year = reading.finishDate!.year;
+      // Use book.finishDate directly instead of readings
+      if (book.finishDate != null) {
+        final year = book.finishDate!.year;
 
-          if (!years.contains(year)) {
-            years.add(year);
-          }
+        if (!years.contains(year)) {
+          years.add(year);
         }
       }
     }

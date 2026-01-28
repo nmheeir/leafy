@@ -226,7 +226,6 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                                 final newBook = state.copyWith(
                                   title:
                                       '${state.title} ${LocaleKeys.copy_book.tr()}',
-                                  readings: [],
                                   rating: 0,
                                   id: null,
                                 );

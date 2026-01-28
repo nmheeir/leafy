@@ -1,7 +1,7 @@
-package com.example.leafy.epub.models
+package com.nmheeir.leafy.epub.models
 
 import android.graphics.Bitmap
-import com.example.leafy.epub.cache.BitmapSerializer
+import com.nmheeir.leafy.epub.cache.BitmapSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber

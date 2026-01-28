@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
-import 'package:leafy/domain/book/entities/reading.dart';
 
 class Book extends Equatable {
   final int? id;
@@ -21,8 +20,6 @@ class Book extends Equatable {
   final String? blurHash;
   final BookFormat bookFormat;
   final bool hasCover;
-  @Deprecated('Will be removed in a future release.')
-  final List<Reading> readings;
   final DateTime dateAdded;
   final DateTime dateModified;
   final DateTime? startDate;
@@ -50,9 +47,8 @@ class Book extends Equatable {
       blurHash: null,
       bookFormat: BookFormat.paperback,
       hasCover: false,
-      readings: const [],
       dateAdded: current,
-      dateModified: current, // fixed
+      dateModified: current,
       startDate: null,
       finishDate: null,
     );
@@ -76,7 +72,6 @@ class Book extends Equatable {
     this.blurHash,
     this.bookFormat = BookFormat.paperback,
     this.hasCover = false,
-    required this.readings,
     required this.dateAdded,
     required this.dateModified,
     this.startDate,
@@ -101,7 +96,6 @@ class Book extends Equatable {
     String? blurHash,
     BookFormat? bookFormat,
     bool? hasCover,
-    List<Reading>? readings,
     DateTime? dateAdded,
     DateTime? dateModified,
     DateTime? startDate,
@@ -125,7 +119,6 @@ class Book extends Equatable {
       blurHash: blurHash ?? this.blurHash,
       bookFormat: bookFormat ?? this.bookFormat,
       hasCover: hasCover ?? this.hasCover,
-      readings: readings ?? this.readings,
       dateAdded: dateAdded ?? this.dateAdded,
       dateModified: dateModified ?? this.dateModified,
       startDate: startDate ?? this.startDate,
@@ -152,7 +145,6 @@ class Book extends Equatable {
     blurHash,
     bookFormat,
     hasCover,
-    readings,
     dateAdded,
     dateModified,
     startDate,
