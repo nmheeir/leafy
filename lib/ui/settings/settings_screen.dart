@@ -69,7 +69,7 @@ class SettingsScreen extends StatelessWidget {
                       LocaleKeys.books_settings.tr(),
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        // fontWeight: FontWeight.bold,
                         color: context.colorScheme.primary,
                       ),
                     ),

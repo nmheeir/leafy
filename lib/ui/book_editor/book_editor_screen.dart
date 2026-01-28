@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
@@ -19,8 +20,8 @@ import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/widgets/book_file_card.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
@@ -428,13 +429,10 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
                 context.read<CurrentBookCubit>().setBook(bookSaved);
 
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BookScreen(heroTag: ""),
-                  ),
-                  (route) => route.isFirst,
-                );
+                // Sử dụng GoRouter để đồng bộ navigation state
+                // go() thay thế toàn bộ stack, đảm bảo không còn route dư
+                context.go(Routes.home);
+                context.push(Routes.book);
               },
               failure: (errorMessage) {
                 ScaffoldMessenger.of(context).showSnackBar(

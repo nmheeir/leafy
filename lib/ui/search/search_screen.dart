@@ -33,7 +33,6 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
-    context.localSearchBloc.close();
     super.dispose();
   }
 

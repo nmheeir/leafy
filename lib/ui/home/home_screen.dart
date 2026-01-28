@@ -47,22 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
     menuOptions.add(LocaleKeys.settings.tr());
   }
 
-  // BUG: Luồng điều hướng bị trùng route search
-  // Steps:
-  // 1. Từ Home → Search OL
-  // 2. Add Book → mở Book Editor → Save
-  // 3. Điều hướng về Book Screen
-  // 4. Nhấn Back → quay về Home
-  // 5. Từ Home nhấn icon Search
-  //
-  // Expected:
-  // Stack chỉ có 1 route search
-  //
-  // Actual:
-  // Navigation stack bị dư route:
-  // Index 0: /home
-  // Index 1: /search-ol
-  // Index 2: /search
   void __goToSearchInUserBooksPage() {
     context.push(Routes.search);
   }

@@ -1,5 +1,8 @@
 import 'package:go_router/go_router.dart';
+import 'package:leafy/core/utils/extensions/history_observer.dart';
+import 'package:leafy/di/injection.dart';
 import 'package:leafy/router/routes.dart';
+import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
 import 'package:leafy/ui/search/search_screen.dart';
 import 'package:leafy/ui/search_gtd/search_gtd_screen.dart';
@@ -18,10 +21,14 @@ import 'package:leafy/ui/welcome/welcome_screen.dart';
 
 GoRouter router() => GoRouter(
   initialLocation: Routes.home,
-  // observers: [getIt<HistoryObserver>()],
+  observers: [getIt<HistoryObserver>()],
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
+    GoRoute(
+      path: Routes.book,
+      builder: (context, state) => const BookScreen(heroTag: ''),
+    ),
     GoRoute(path: Routes.search, builder: (context, state) => SearchScreen()),
     GoRoute(
       path: Routes.setting,
