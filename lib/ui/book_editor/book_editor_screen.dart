@@ -27,7 +27,7 @@ import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart';
-import 'package:leafy/ui/book_editor/widgets/form_fields/tags_fiels.dart';
+import 'package:leafy/ui/book_editor/widgets/form_fields/book_tags_input.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -645,22 +645,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   //   textCapitalization: TextCapitalization.characters,
                   // ),
                   const SizedBox(height: 10),
-                  BlocSelector<LibraryCubit, LibraryState, List<String>>(
-                    selector: (state) => state.allTags,
-                    builder: (context, tags) {
-                      return TagsField(
-                        controller: _tagsCtrl,
-                        hint: LocaleKeys.enter_tags.tr(),
-                        icon: FontAwesomeIcons.tags,
-                        keyboardType: TextInputType.text,
-                        maxLength: Constants.maxTagLength,
-                        onSubmitted: (_) => _addNewTag(),
-                        onEditingComplete: () {},
-                        unselectTag: (tag) => _unselectTag(tag),
-                        allTags: tags,
-                      );
-                    },
-                  ),
+                  const BookTagsInput(),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   BookTextField(
                     controller: _myReviewCtrl,

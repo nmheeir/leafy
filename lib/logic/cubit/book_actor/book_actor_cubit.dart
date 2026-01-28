@@ -18,6 +18,8 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/ui/extensions/book_extension.dart';
 import 'package:leafy/core/constants/enums/reader_format.dart';
 import 'package:leafy/core/constants/enums/storage_type.dart';
+import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
+import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'package:uuid/uuid.dart';
 
 part 'book_actor_cubit.freezed.dart';
@@ -31,6 +33,8 @@ class BookActorCubit extends Cubit<BookActorState> {
   final BulkUpdateUseCase _bulkUpdateUseCase;
   final BulkDeleteUseCase _bulkDeleteUseCase;
   final AddBookResourceUseCase _addBookResourceUseCase;
+  final TagRepository _tagRepository;
+  final BookTagRepository _bookTagRepository;
 
   BookActorCubit(
     this._addBookUseCase,
@@ -39,6 +43,8 @@ class BookActorCubit extends Cubit<BookActorState> {
     this._bulkUpdateUseCase,
     this._bulkDeleteUseCase,
     this._addBookResourceUseCase,
+    this._tagRepository,
+    this._bookTagRepository,
   ) : super(const BookActorState.initial());
 
   Future<void> addBook(Book book, Uint8List? cover, [String? epubUrl]) async {
@@ -71,6 +77,9 @@ class BookActorCubit extends Cubit<BookActorState> {
           }, (resource) {});
         }
 
+        // Save tags after book is created
+        await _saveBookTags(newBook);
+
         emit(
           BookActorState.success(
             message: "Thêm sách thành công",
@@ -95,7 +104,11 @@ class BookActorCubit extends Cubit<BookActorState> {
           message: failure.message ?? LocaleKeys.error_no_error_return,
         ),
       ),
-      (_) => emit(const BookActorState.success(message: "Cập nhật thành công")),
+      (_) async {
+        // Update tags after book update
+        await _saveBookTags(book);
+        emit(const BookActorState.success(message: "Cập nhật thành công"));
+      },
     );
   }
 
@@ -201,5 +214,43 @@ class BookActorCubit extends Cubit<BookActorState> {
         ),
       ),
     );
+  }
+
+  /// Save book tags from the legacy tags field to the new tag system
+  Future<void> _saveBookTags(Book book) async {
+    if (book.id == null) return;
+    if (book.tags == null || book.tags!.isEmpty) {
+      // If no tags, clear existing associations
+      await _bookTagRepository.removeAllTagsFromBook(book.id!);
+      return;
+    }
+
+    final tagNames = book.tags!.split('|||||');
+    final List<int> tagIds = [];
+
+    // Get or create tags
+    for (final name in tagNames) {
+      if (name.trim().isEmpty) continue;
+
+      final result = await _tagRepository.getOrCreateTag(name.trim());
+      result.fold(
+        (failure) {
+          // Skip on failure
+        },
+        (tag) {
+          if (tag.id != null) {
+            tagIds.add(tag.id!);
+          }
+        },
+      );
+    }
+
+    // Remove all existing tags first
+    await _bookTagRepository.removeAllTagsFromBook(book.id!);
+
+    // Add new tags
+    for (final tagId in tagIds) {
+      await _bookTagRepository.addTagToBookById(book.id!, tagId);
+    }
   }
 }

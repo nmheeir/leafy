@@ -14,10 +14,19 @@ class DbSeeder {
 
   /// Main method to seed all data.
   /// [count] is the number of books to generate.
-  Future<void> seed({int count = 20}) async {
+  Future<void> seed({int count = 200}) async {
     await _clearAllTables();
+
+    // Seed tags first (referenced by book_tags)
+    await _seedTags();
+
+    // Seed books and resources
     await _seedBooksAndResources(count);
-    print('Seed complete: $count books and related derived data inserted.');
+
+    // Assign random tags to books
+    await _assignRandomTagsToBooks();
+
+    print('Seed complete: $count books, tags, and related data inserted.');
   }
 
   /// Deletes all data from tables in reverse dependency order.
@@ -29,9 +38,11 @@ class DbSeeder {
     batch.delete('reading_sessions');
     batch.delete('epub_translations');
     batch.delete('epub_summary');
+    batch.delete('book_tags'); // Junction table
     // Parent tables
     batch.delete('book_resources');
     batch.delete('books');
+    batch.delete('tags'); // Tag master table
     await batch.commit(noResult: true);
   }
 
@@ -138,7 +149,7 @@ class DbSeeder {
 
   Future<void> _seedReadingSessions(int resourceId) async {
     // Generate 0-10 sessions
-    final sessionCount = random.nextInt(11);
+    final sessionCount = 100 + random.nextInt(21);
     if (sessionCount == 0) return;
 
     final batch = db.batch();
@@ -216,5 +227,284 @@ class DbSeeder {
         'last_updated': DateTime.now().millisecondsSinceEpoch,
       });
     }
+  }
+
+  /// Seeds predefined tags (system + user examples)
+  Future<void> _seedTags() async {
+    final now = DateTime.now().toIso8601String();
+    final batch = db.batch();
+
+    // System tags (generated automatically)
+    final systemTags = [
+      {
+        'name': 'Recently Read',
+        'color': 0xFF2196F3, // Blue
+        'icon': '📖',
+        'priority': 100,
+        'is_system': 1,
+        'category': 'status',
+        'deleted': 0,
+        'created_at': now,
+        'updated_at': now,
+      },
+      {
+        'name': 'Favorite',
+        'color': 0xFFE91E63, // Pink
+        'icon': '❤️',
+        'priority': 99,
+        'is_system': 1,
+        'category': 'status',
+        'deleted': 0,
+        'created_at': now,
+        'updated_at': now,
+      },
+      {
+        'name': 'Finished',
+        'color': 0xFF4CAF50, // Green
+        'icon': '✓',
+        'priority': 98,
+        'is_system': 1,
+        'category': 'status',
+        'deleted': 0,
+        'created_at': now,
+        'updated_at': now,
+      },
+    ];
+
+    // User tags (thể loại phổ biến)
+    final userTags = [
+      // Fiction genres
+      {
+        'name': 'Fiction',
+        'color': 0xFF9C27B0, // Purple (but acceptable since it's data)
+        'icon': '📚',
+        'priority': 10,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Science Fiction',
+        'color': 0xFF00BCD4, // Cyan
+        'icon': '🚀',
+        'priority': 9,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Fantasy',
+        'color': 0xFFFF9800, // Orange
+        'icon': '🐉',
+        'priority': 9,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Mystery',
+        'color': 0xFF607D8B, // Blue Grey
+        'icon': '🔍',
+        'priority': 8,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Romance',
+        'color': 0xFFFF4081, // Pink Accent
+        'icon': '💕',
+        'priority': 8,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Thriller',
+        'color': 0xFFD32F2F, // Red
+        'icon': '🔪',
+        'priority': 8,
+        'is_system': 0,
+        'category': 'genre',
+      },
+
+      // Non-fiction genres
+      {
+        'name': 'Non-Fiction',
+        'color': 0xFF4CAF50, // Green
+        'icon': '📖',
+        'priority': 10,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Biography',
+        'color': 0xFF795548, // Brown
+        'icon': '👤',
+        'priority': 7,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'History',
+        'color': 0xFF8D6E63, // Brown lighten
+        'icon': '📜',
+        'priority': 7,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Self-Help',
+        'color': 0xFFFFC107, // Amber
+        'icon': '💪',
+        'priority': 8,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Business',
+        'color': 0xFF3F51B5, // Indigo
+        'icon': '💼',
+        'priority': 7,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Philosophy',
+        'color': 0xFF673AB7, // Deep Purple
+        'icon': '🤔',
+        'priority': 6,
+        'is_system': 0,
+        'category': 'genre',
+      },
+      {
+        'name': 'Science',
+        'color': 0xFF009688, // Teal
+        'icon': '🔬',
+        'priority': 7,
+        'is_system': 0,
+        'category': 'genre',
+      },
+
+      // Special categories
+      {
+        'name': 'Classic',
+        'color': 0xFF5D4037, // Brown Darken
+        'icon': '🎩',
+        'priority': 6,
+        'is_system': 0,
+        'category': 'special',
+      },
+      {
+        'name': 'Educational',
+        'color': 0xFF1976D2, // Blue Darken
+        'icon': '🎓',
+        'priority': 5,
+        'is_system': 0,
+        'category': 'special',
+      },
+      {
+        'name': 'Reference',
+        'color': 0xFF455A64, // Blue Grey Darken
+        'icon': '📋',
+        'priority': 5,
+        'is_system': 0,
+        'category': 'special',
+      },
+
+      // Vietnamese specific
+      {
+        'name': 'Kinh tế',
+        'color': 0xFF388E3C, // Green Darken
+        'icon': '📈',
+        'priority': 6,
+        'is_system': 0,
+        'category': 'vietnamese',
+      },
+      {
+        'name': 'Tiểu thuyết',
+        'color': 0xFFE64A19, // Deep Orange
+        'icon': '📕',
+        'priority': 6,
+        'is_system': 0,
+        'category': 'vietnamese',
+      },
+      {
+        'name': 'Kỹ năng sống',
+        'color': 0xFFF57C00, // Orange Darken
+        'icon': '✨',
+        'priority': 6,
+        'is_system': 0,
+        'category': 'vietnamese',
+      },
+    ];
+
+    // Insert system tags
+    for (final tag in systemTags) {
+      batch.insert('tags', tag);
+    }
+
+    // Insert user tags
+    for (final tag in userTags) {
+      batch.insert('tags', {
+        ...tag,
+        'deleted': 0,
+        'created_at': now,
+        'updated_at': now,
+      });
+    }
+
+    await batch.commit(noResult: true);
+    print('Seeded ${systemTags.length + userTags.length} tags.');
+  }
+
+  /// Assigns 1-5 random tags to each book
+  Future<void> _assignRandomTagsToBooks() async {
+    // Get all book IDs
+    final books = await db.query('books', columns: ['id']);
+
+    // Get all tag IDs (excluding system tags for random assignment)
+    final tags = await db.query(
+      'tags',
+      columns: ['id'],
+      where: 'is_system = ? AND deleted = ?',
+      whereArgs: [0, 0],
+    );
+
+    if (tags.isEmpty) {
+      print('No user tags available for assignment.');
+      return;
+    }
+
+    final batch = db.batch();
+    final now = DateTime.now().toIso8601String();
+    int relationshipCount = 0;
+
+    for (final book in books) {
+      final bookId = book['id'] as int;
+
+      // Assign 1-5 random tags per book
+      final tagCount = 1 + random.nextInt(5);
+      final selectedTags = <int>{};
+
+      // Randomly select unique tags
+      while (selectedTags.length < tagCount &&
+          selectedTags.length < tags.length) {
+        final randomTag = tags[random.nextInt(tags.length)];
+        selectedTags.add(randomTag['id'] as int);
+      }
+
+      // Insert book_tags relationships
+      int orderIndex = 0;
+      for (final tagId in selectedTags) {
+        batch.insert('book_tags', {
+          'book_id': bookId,
+          'tag_id': tagId,
+          'order_index': orderIndex++,
+          'created_at': now,
+        });
+        relationshipCount++;
+      }
+    }
+
+    await batch.commit(noResult: true);
+    print(
+      'Assigned $relationshipCount tag relationships to ${books.length} books.',
+    );
   }
 }

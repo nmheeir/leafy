@@ -33,6 +33,8 @@ import '../data/datasources/local/book_mark_local_datasource.dart' as _i328;
 import '../data/datasources/local/book_resource_local_datasource.dart' as _i880;
 import '../data/datasources/local/book_resource_local_datasource_impl.dart'
     as _i612;
+import '../data/datasources/local/book_tag_local_datasource.dart' as _i366;
+import '../data/datasources/local/book_tag_local_datasource_impl.dart' as _i439;
 import '../data/datasources/local/database_service.dart' as _i328;
 import '../data/datasources/local/device_local_datasource.dart' as _i689;
 import '../data/datasources/local/epub_file_local_datasource.dart' as _i620;
@@ -49,6 +51,8 @@ import '../data/datasources/local/reading_session_local_datasource_impl.dart'
     as _i653;
 import '../data/datasources/local/stats_local_datasource.dart' as _i101;
 import '../data/datasources/local/stats_local_datasource_impl.dart' as _i207;
+import '../data/datasources/local/tag_local_datasource.dart' as _i832;
+import '../data/datasources/local/tag_local_datasource_impl.dart' as _i651;
 import '../data/datasources/local/translation_local_datasource.dart' as _i890;
 import '../data/datasources/remote/gemini_translation_datasource.dart' as _i46;
 import '../data/datasources/remote/gutendex_remote_datasource/gutendex_remote_datasource.dart'
@@ -67,6 +71,7 @@ import '../data/file_import/services/metadata_extraction_service_impl.dart'
 import '../data/repositories/book_mark_repository_impl.dart' as _i1069;
 import '../data/repositories/book_repository_impl.dart' as _i329;
 import '../data/repositories/book_resource_repository_impl.dart' as _i722;
+import '../data/repositories/book_tag_repository_impl.dart' as _i405;
 import '../data/repositories/device/device_repository_impl.dart' as _i938;
 import '../data/repositories/epub_reader_repository_impl.dart' as _i608;
 import '../data/repositories/gutendex_repository_impl.dart' as _i779;
@@ -74,6 +79,7 @@ import '../data/repositories/open_lib_repository_impl.dart' as _i946;
 import '../data/repositories/reader_progress_repository_impl.dart' as _i919;
 import '../data/repositories/reading_session_repository_impl.dart' as _i297;
 import '../data/repositories/stats_repository_impl.dart' as _i540;
+import '../data/repositories/tag_repository_impl.dart' as _i359;
 import '../data/repositories/translation/translation_repository_impl.dart'
     as _i965;
 import '../domain/backup/repositories/backup_repository.dart' as _i609;
@@ -151,6 +157,8 @@ import '../domain/services/gemini_service.dart' as _i1052;
 import '../domain/services/gutendex_service.dart' as _i446;
 import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/statistics/repositories/stats_repository.dart' as _i1061;
+import '../domain/tag/repositories/book_tag_repository.dart' as _i470;
+import '../domain/tag/repositories/tag_repository.dart' as _i684;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
 import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
@@ -175,6 +183,7 @@ import '../logic/cubit/book_list_order_cubit.dart' as _i66;
 import '../logic/cubit/book_progress/book_progress_cubit.dart' as _i845;
 import '../logic/cubit/book_resource/book_resource_cubit.dart' as _i407;
 import '../logic/cubit/book_tab_index_cubit.dart' as _i744;
+import '../logic/cubit/book_tags/book_tags_cubit.dart' as _i916;
 import '../logic/cubit/current_book_cubit.dart' as _i754;
 import '../logic/cubit/default_book_format_cubit.dart' as _i185;
 import '../logic/cubit/default_book_tag_cubit.dart' as _i260;
@@ -188,6 +197,8 @@ import '../logic/cubit/library/library_cubit.dart' as _i939;
 import '../logic/cubit/pdf_reader/pdf_reader_cubit.dart' as _i628;
 import '../logic/cubit/reading_history/reading_history_cubit.dart' as _i420;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
+import '../logic/cubit/tag_details/tag_details_cubit.dart' as _i507;
+import '../logic/cubit/tag_management/tag_management_cubit.dart' as _i137;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
 import 'module/device_module.dart' as _i195;
 import 'module/logger_module.dart' as _i454;
@@ -354,6 +365,12 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1030.ReaderProgressLocalDatasourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.lazySingleton<_i832.TagLocalDataSource>(
+      () => _i651.TagLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
+    gh.lazySingleton<_i366.BookTagLocalDataSource>(
+      () => _i439.BookTagLocalDataSourceImpl(gh<_i328.DatabaseService>()),
+    );
     gh.lazySingleton<_i221.AppConfig>(
       () => _i221.AppConfigImpl(gh<_i558.FlutterSecureStorage>()),
     );
@@ -407,6 +424,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
+    gh.lazySingleton<_i684.TagRepository>(
+      () => _i359.TagRepositoryImpl(
+        gh<_i832.TagLocalDataSource>(),
+        gh<_i974.Logger>(),
+      ),
+    );
     gh.factory<_i466.DownloadGtdCoverUseCase>(
       () => _i466.DownloadGtdCoverUseCase(gh<_i844.GutendexRepository>()),
     );
@@ -429,6 +452,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i23.ReaderProgressRepository>(
       () => _i919.ReaderProgressRepositoryImpl(
         gh<_i770.ReaderProgressLocalDatasource>(),
+      ),
+    );
+    gh.lazySingleton<_i470.BookTagRepository>(
+      () => _i405.BookTagRepositoryImpl(
+        gh<_i366.BookTagLocalDataSource>(),
+        gh<_i832.TagLocalDataSource>(),
+        gh<_i974.Logger>(),
       ),
     );
     gh.factory<_i909.BulkDeleteUseCase>(
@@ -535,6 +565,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i466.DownloadGtdCoverUseCase>(),
       ),
     );
+    gh.factory<_i137.TagManagementCubit>(
+      () => _i137.TagManagementCubit(gh<_i684.TagRepository>()),
+    );
     gh.lazySingleton<_i47.DeleteBookResourceUseCase>(
       () => _i47.DeleteBookResourceUseCase(gh<_i1042.BookResourceRepository>()),
     );
@@ -547,6 +580,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i623.SaveImportedResourceUseCase(
         gh<_i1042.BookResourceRepository>(),
       ),
+    );
+    gh.factory<_i916.BookTagsCubit>(
+      () => _i916.BookTagsCubit(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i507.TagDetailsCubit>(
+      () => _i507.TagDetailsCubit(gh<_i470.BookTagRepository>()),
     );
     gh.factory<_i100.BackupRestoreCubit>(
       () => _i100.BackupRestoreCubit(
@@ -658,6 +697,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
+    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
+      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
+    );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(
         gh<_i660.AddBookUseCase>(),
@@ -666,10 +708,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i429.BulkUpdateUseCase>(),
         gh<_i909.BulkDeleteUseCase>(),
         gh<_i693.AddBookResourceUseCase>(),
+        gh<_i684.TagRepository>(),
+        gh<_i470.BookTagRepository>(),
       ),
-    );
-    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
-      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
     gh.lazySingleton<_i206.EpubReaderCubit>(
       () => _i206.EpubReaderCubit(

@@ -1,17 +1,20 @@
 import 'dart:io';
 
-import 'package:diacritic/diacritic.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/constants/enums/book_status.dart';
 import 'package:leafy/core/constants/enums/sort_type.dart';
+import 'package:leafy/core/errors/failures.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
+import 'package:leafy/domain/tag/entities/tag.dart';
+import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/rating_type/rating_type_bloc.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
@@ -19,6 +22,7 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/ui/common/image_placeholder.dart';
+import 'package:leafy/ui/common/widgets/tag_chip.dart';
 
 class BookCardList extends StatelessWidget {
   const BookCardList({
@@ -162,53 +166,34 @@ class BookCardList extends StatelessWidget {
   }
 
   Widget _buildTagsContent(bool displayTags, BuildContext context) {
-    if (displayTags) {
-      return (book.tags == null)
-          ? const SizedBox()
-          : Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Wrap(children: _generateTagChips(context: context)),
-                ),
-              ],
-            );
-    }
+    if (!displayTags) return const SizedBox();
 
-    return const SizedBox();
-  }
+    return FutureBuilder<Either<Failure, List<Tag>>>(
+      future: context.read<BookTagRepository>().getTagsForBook(book.id!),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return const SizedBox();
 
-  Widget _buildTagChip({required String tag, required BuildContext context}) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: FilterChip(
-        padding: const EdgeInsets.all(5),
-        label: Text(tag, style: const TextStyle(fontSize: 12)),
-        onSelected: (_) {},
-      ),
+        return snapshot.data!.fold((failure) => const SizedBox(), (tags) {
+          if (tags.isEmpty) return const SizedBox();
+
+          return Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: tags.take(3).map((tag) {
+                return TagChipCompact(
+                  tag: tag,
+                  onTap: () {
+                    // TODO: Navigate to tag filter with this tag
+                  },
+                );
+              }).toList(),
+            ),
+          );
+        });
+      },
     );
-  }
-
-  List<Widget> _generateTagChips({required BuildContext context}) {
-    final chips = List<Widget>.empty(growable: true);
-
-    if (book.tags == null) {
-      return [];
-    }
-
-    final tags = book.tags!.split('|||||');
-
-    tags.sort(
-      (a, b) => removeDiacritics(
-        a.toLowerCase(),
-      ).compareTo(removeDiacritics(b.toLowerCase())),
-    );
-
-    for (var tag in tags) {
-      chips.add(_buildTagChip(tag: tag, context: context));
-    }
-
-    return chips;
   }
 
   @override

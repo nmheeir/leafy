@@ -1,6 +1,6 @@
 class DbConstants {
   static const dbName = 'leafy.db';
-  static const dbVersion = 2;
+  static const dbVersion = 3;
 
   // =====================================================
   // 1. Bảng BOOKS – metadata thuần của sách
@@ -21,7 +21,6 @@ class DbConstants {
       finish_date TEXT,                     -- Ngày hoàn thành
       pages INTEGER,                        -- Tổng số trang (tham khảo)
       publication_year INTEGER,             -- Năm xuất bản
-      tags TEXT,                            -- Tag người dùng
       my_review TEXT,                       -- Review cá nhân
       notes TEXT,                           -- Ghi chú chung về sách
       has_cover INTEGER DEFAULT 0,          -- Có ảnh cover hay không
@@ -150,7 +149,70 @@ class DbConstants {
       'CREATE INDEX idx_book_marks_resource ON book_marks (resource_id);';
 
   // =====================================================
+  // 7. TAGS – Centralized tag management
+  // =====================================================
+  static const createTagsTable = '''
+    CREATE TABLE tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,           -- Tag name (unique constraint)
+      
+      -- Metadata
+      color INTEGER,                        -- Color code (int)
+      icon TEXT,                            -- Icon (emoji unicode)
+      priority INTEGER DEFAULT 0,           -- Sort priority
+      
+      -- Type & Classification
+      is_system INTEGER DEFAULT 0,          -- 1 = system tag, 0 = user tag
+      category TEXT,                        -- Category grouping (optional)
+      
+      -- Lifecycle
+      deleted INTEGER DEFAULT 0,            -- Soft delete (0 = active, 1 = deleted)
+      created_at TEXT NOT NULL,             -- Timestamp created
+      updated_at TEXT NOT NULL              -- Timestamp last updated
+    )
+  ''';
+
+  static const createTagsIndexes = [
+    'CREATE INDEX idx_tags_name ON tags (name)',
+    'CREATE INDEX idx_tags_deleted ON tags (deleted)',
+    'CREATE INDEX idx_tags_system ON tags (is_system)',
+  ];
+
+  // =====================================================
+  // 8. BOOK_TAGS – Junction table (Many-to-Many)
+  // =====================================================
+  static const createBookTagsTable = '''
+    CREATE TABLE book_tags (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      book_id INTEGER NOT NULL,             -- FK → books.id
+      tag_id INTEGER NOT NULL,              -- FK → tags.id
+      
+      -- Metadata for relationship
+      order_index INTEGER DEFAULT 0,        -- Display order
+      created_at TEXT NOT NULL,             -- Timestamp assigned
+      
+      FOREIGN KEY (book_id) REFERENCES books (id) ON DELETE CASCADE,
+      FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE,
+      
+      UNIQUE (book_id, tag_id)              -- Prevent duplicates
+    )
+  ''';
+
+  static const createBookTagsIndexes = [
+    'CREATE INDEX idx_book_tags_book ON book_tags (book_id)',
+    'CREATE INDEX idx_book_tags_tag ON book_tags (tag_id)',
+    'CREATE INDEX idx_book_tags_created ON book_tags (created_at)',
+  ];
+
+  // =====================================================
   // Migration placeholder
   // =====================================================
   static const migrateV1toV2 = [createBookMarksTable, createBookMarksIndex];
+
+  static const migrateV2toV3 = [
+    createTagsTable,
+    ...createTagsIndexes,
+    createBookTagsTable,
+    ...createBookTagsIndexes,
+  ];
 }

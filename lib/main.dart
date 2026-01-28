@@ -9,6 +9,8 @@ import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/core/services/connectivity_service.dart';
 import 'package:leafy/di/injection.dart';
+import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
+import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'package:leafy/logic/backup/backup_restore_cubit.dart';
 import 'package:leafy/logic/bloc/challenge_bloc/challenge_bloc.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart';
@@ -129,7 +131,11 @@ class App extends StatelessWidget {
   }
 
   dynamic _listOfRepositoryProviders(BuildContext context) {
-    return [RepositoryProvider(create: (_) => getIt<ConnectivityService>())];
+    return [
+      RepositoryProvider(create: (_) => getIt<ConnectivityService>()),
+      RepositoryProvider(create: (_) => getIt<TagRepository>()),
+      RepositoryProvider(create: (_) => getIt<BookTagRepository>()),
+    ];
   }
 
   @override

@@ -1,7 +1,8 @@
-import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
+import 'package:leafy/domain/tag/entities/tag.dart';
+import 'package:leafy/ui/common/widgets/tag_chip.dart';
 
 class BookTitleDetail extends StatelessWidget {
   const BookTitleDetail({
@@ -19,7 +20,7 @@ class BookTitleDetail extends StatelessWidget {
   final String author;
   final String publicationYear;
   final BookFormat bookType;
-  final List<String>? tags;
+  final List<Tag>? tags;
 
   @override
   Widget build(BuildContext context) {
@@ -79,45 +80,9 @@ class BookTitleDetail extends StatelessWidget {
               alignment: WrapAlignment.center,
               spacing: 8,
               runSpacing: 8,
-              children: _generateTagChips(context: context),
+              children: tags!.map((tag) => TagChip(tag: tag)).toList(),
             ),
         ],
-      ),
-    );
-  }
-
-  List<Widget> _generateTagChips({required BuildContext context}) {
-    if (tags == null) return [];
-
-    final sortedTags = List<String>.from(tags!);
-    sortedTags.sort(
-      (a, b) => removeDiacritics(
-        a.toLowerCase(),
-      ).compareTo(removeDiacritics(b.toLowerCase())),
-    );
-
-    return sortedTags
-        .map((tag) => _buildTagChip(tag: tag, context: context))
-        .toList();
-  }
-
-  Widget _buildTagChip({required String tag, required BuildContext context}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: context.colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: context.colorScheme.outline.withValues(alpha: 0.2),
-        ),
-      ),
-      child: Text(
-        tag,
-        style: TextStyle(
-          fontSize: 12,
-          color: context.colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w500,
-        ),
       ),
     );
   }

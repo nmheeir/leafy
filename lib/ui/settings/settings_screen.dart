@@ -1,5 +1,4 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,6 +19,7 @@ import 'package:leafy/data/datasources/local/database_service.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
+import 'package:leafy/ui/tags/tag_management_screen.dart';
 
 const String releasesUrl = 'https://github.com/nmheeir/leafy/releases';
 const String repoUrl = 'https://github.com/nmheeir/leafy';
@@ -78,6 +78,7 @@ class SettingsScreen extends StatelessWidget {
                       _buildDefaultBooksFormat(context),
                       _buildTabOrderSetting(context),
                       _buildDefaultTags(context),
+                      _buildTagManagement(context),
                       _buildDownloadMissingCovers(context),
                     ],
                   ),
@@ -157,7 +158,8 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (kDebugMode)
+                  // NOTE: need to change to to KDebugMode
+                  if (true)
                     SettingsSection(
                       title: Text(
                         'Developer',
@@ -398,6 +400,20 @@ class SettingsScreen extends StatelessWidget {
       leading: const Icon(FontAwesomeIcons.tags),
       onPressed: (context) {
         context.push(Routes.settingDefautlBookTag);
+      },
+    );
+  }
+
+  SettingsTile _buildTagManagement(BuildContext context) {
+    return SettingsTile.navigation(
+      title: const Text('Manage Tags', style: TextStyle(fontSize: 16)),
+      leading: const Icon(Icons.label_rounded),
+      description: const Text('View and organize all tags'),
+      onPressed: (context) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const TagManagementScreen()),
+        );
       },
     );
   }

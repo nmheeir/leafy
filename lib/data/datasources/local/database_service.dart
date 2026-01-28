@@ -56,6 +56,12 @@ class DatabaseService {
         await db.execute(script);
       }
     }
+
+    if (version >= 3) {
+      for (final script in DbConstants.migrateV2toV3) {
+        await db.execute(script);
+      }
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -63,6 +69,12 @@ class DatabaseService {
 
     if (oldVersion < 2) {
       for (final script in DbConstants.migrateV1toV2) {
+        batch.execute(script);
+      }
+    }
+
+    if (oldVersion < 3) {
+      for (final script in DbConstants.migrateV2toV3) {
         batch.execute(script);
       }
     }

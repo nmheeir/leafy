@@ -174,18 +174,32 @@ class BookLocalDataSourceImpl implements BookLocalDataSource {
   @override
   Future<List<BookModel>> getByTag(String tag) async {
     final db = await _db.database;
-    final result = await db.query(
-      _table,
-      where: 'tags IS NOT NULL AND deleted = 0',
-      orderBy: 'publication_year ASC',
+
+    // First, find the tag ID by name
+    final tagResult = await db.query(
+      'tags',
+      columns: ['id'],
+      where: 'name = ? AND deleted = 0',
+      whereArgs: [tag],
+      limit: 1,
     );
 
-    final books = result.map(BookModel.fromJson);
+    if (tagResult.isEmpty) return [];
 
-    return books.where((book) {
-      final tags = book.tags?.split('|||||') ?? [];
-      return tags.contains(tag);
-    }).toList();
+    final tagId = tagResult.first['id'] as int;
+
+    // Then get all books with this tag
+    final result = await db.rawQuery(
+      '''
+      SELECT b.* FROM $_table b
+      JOIN book_tags bt ON b.id = bt.book_id
+      WHERE bt.tag_id = ? AND b.deleted = 0
+      ORDER BY b.publication_year ASC
+    ''',
+      [tagId],
+    );
+
+    return result.map(BookModel.fromJson).toList();
   }
 
   @override
