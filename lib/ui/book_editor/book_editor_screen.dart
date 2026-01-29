@@ -15,7 +15,7 @@ import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
+
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
 import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
@@ -375,12 +375,20 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
                 if (!context.mounted) return;
 
-                context.read<CurrentBookCubit>().setBook(bookSaved);
+                // context.read<CurrentBookCubit>().setBook(bookSaved);
 
                 // Sử dụng GoRouter để đồng bộ navigation state
                 // go() thay thế toàn bộ stack, đảm bảo không còn route dư
                 context.go(Routes.home);
-                context.push(Routes.book);
+                if (bookSaved.id != null) {
+                  context.push(
+                    '${Routes.book}/${bookSaved.id}',
+                    extra: {
+                      'book': bookSaved,
+                      'heroTag': 'book_hero_${bookSaved.id}',
+                    },
+                  );
+                }
               },
               failure: (errorMessage) {
                 ScaffoldMessenger.of(context).showSnackBar(

@@ -22,12 +22,13 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_bloc.dart';
 import 'package:leafy/logic/bloc/stats_bloc/stats_bloc.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
+
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/book_list_order_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
 import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
 import 'package:leafy/logic/cubit/book_tab_index_cubit.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
+
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
@@ -83,7 +84,7 @@ class App extends StatelessWidget {
   dynamic _listOfBlocProviders(BuildContext context) {
     final bookProviders = [
       BlocProvider(create: (context) => getIt<EditBookCubit>()),
-      BlocProvider(create: (context) => getIt<CurrentBookCubit>()),
+
       BlocProvider(create: (context) => getIt<EditBookCoverCubit>()),
       BlocProvider(create: (context) => getIt<BookListsOrderCubit>()),
       BlocProvider(create: (context) => getIt<DisplayCubit>()),

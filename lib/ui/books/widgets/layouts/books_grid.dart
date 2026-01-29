@@ -1,13 +1,12 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/enums/display_type.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
-import 'package:leafy/ui/book/book_screen.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_grid.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_grid_detail.dart';
 import 'package:leafy/ui/books/widgets/number_of_books.dart';
@@ -44,11 +43,12 @@ class _BooksGridState extends State<BooksGrid>
       return;
     }
 
-    context.read<CurrentBookCubit>().setBook(widget.books[index]);
+    // context.read<CurrentBookCubit>().setBook(widget.books[index]);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => BookScreen(heroTag: heroTag)),
+    final book = widget.books[index];
+    context.push(
+      '${Routes.book}/${book.id}',
+      extra: {'book': book, 'heroTag': heroTag},
     );
   }
 

@@ -8,7 +8,7 @@ import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/book_progress/book_progress_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
+
 import 'package:leafy/logic/cubit/default_book_format_cubit.dart';
 import 'package:leafy/logic/cubit/default_book_tag_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
@@ -24,8 +24,6 @@ extension BlocExtensions on BuildContext {
   ///////////////////////////// CUBIT /////////////////////////////
 
   BookActorCubit get bookActorCubit => read<BookActorCubit>();
-
-  CurrentBookCubit get currentBookCubit => read<CurrentBookCubit>();
 
   TrashBinCubit get trashBinCubit => read<TrashBinCubit>();
 

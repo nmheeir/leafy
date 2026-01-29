@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book/book_screen.dart';
 import 'package:leafy/ui/home/home_screen.dart';
@@ -26,8 +27,24 @@ GoRouter router() => GoRouter(
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),
     GoRoute(path: Routes.home, builder: (context, state) => HomeScreen()),
     GoRoute(
-      path: Routes.book,
-      builder: (context, state) => const BookScreen(heroTag: ''),
+      path: '${Routes.book}/:id',
+      builder: (context, state) {
+        final idStr = state.pathParameters['id'];
+        final id = int.tryParse(idStr ?? '') ?? 0;
+
+        Book? book;
+        String heroTag = 'book_hero_$id'; // Default logic if not passed
+
+        if (state.extra is Book) {
+          book = state.extra as Book;
+        } else if (state.extra is Map<String, dynamic>) {
+          final map = state.extra as Map<String, dynamic>;
+          book = map['book'] as Book?;
+          heroTag = map['heroTag'] as String? ?? heroTag;
+        }
+
+        return BookScreen(heroTag: heroTag, bookId: id, initialBook: book);
+      },
     ),
     GoRoute(path: Routes.search, builder: (context, state) => SearchScreen()),
     GoRoute(

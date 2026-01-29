@@ -295,7 +295,7 @@ class BookReaderLauncherButton extends StatelessWidget {
 
     if (context.mounted) {
       if (result != null && result['is_just_finished'] == true) {
-        await context.currentBookCubit.refreshBook();
+        await context.bookDetailCubit.refresh();
         if (context.mounted) {
           showDialog(
             context: context,
@@ -304,7 +304,7 @@ class BookReaderLauncherButton extends StatelessWidget {
         }
       } else {
         await context.bookResourceCubit.loadResources(book.id ?? 0);
-        context.currentBookCubit.refreshBook();
+        context.bookDetailCubit.refresh();
         context.bookProgressCubit.loadProgress(resource.filePath!);
       }
     }

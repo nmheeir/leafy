@@ -7,7 +7,7 @@ import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
+import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
@@ -144,132 +144,133 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
                 : Brightness.dark,
           ),
           actions: [
-            BlocBuilder<CurrentBookCubit, Book>(
+            BlocBuilder<BookDetailCubit, BookDetailState>(
               builder: (context, state) {
-                // Add Resource Folder Button
-                final resourceInfo = IconButton(
-                  onPressed: () {
-                    if (state.id != null) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider.value(
-                            value: context
-                                .read<
-                                  BookResourceCubit
-                                >(), // Reuse existing cubit? Or create new?
-                            // BookScreen creates one. We can reuse or pass ID.
-                            // BookScreen uses BlocProvider(create: ...).
-                            // If we are in child, context.read works.
-                            // But wait, BookScreenAppBar is in Scaffold appbar.
-                            // Scaffold is child of MultiBlocProvider in BookScreen.
-                            // So context.read<BookResourceCubit>() works.
-                            // BUT BookResourceScreen likely needs the Cubit.
-                            // We can wrap BookResourceScreen with BlocProvider.value.
-                            // Or BookResourceScreen can create its own if we pass ID?
-                            // Reuse is better to keep state synced.
-                            child: BookResourceScreen(bookId: state.id!),
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.folder_open_outlined),
-                  tooltip: 'Resources',
-                );
-
-                if (moreButtonOptions.length == 2) {
-                  if (state.deleted == true) {
-                    moreButtonOptions.add(LocaleKeys.restore_book.tr());
-                    moreButtonOptions.add(LocaleKeys.delete_permanently.tr());
-                  } else {
-                    moreButtonOptions.add(LocaleKeys.delete_book.tr());
-                  }
-                }
-
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    resourceInfo,
-                    PopupMenuButton<String>(
-                      onSelected: (_) {},
-                      itemBuilder: (_) {
-                        return moreButtonOptions.map((String choice) {
-                          return PopupMenuItem<String>(
-                            value: choice,
-                            child: Text(choice),
-                            onTap: () async {
-                              context.read<EditBookCubit>().setBook(state);
-
-                              await Future.delayed(
-                                const Duration(milliseconds: 0),
-                              );
-                              if (!context.mounted) return;
-
-                              if (choice == moreButtonOptions[0]) {
-                                final cover = await getCoverBytes(state.id);
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => BookEditorScreen(
-                                      args: BookEditorArgs.fromLocal(
-                                        state,
-                                        // NOTE: nếu lỗi cover thì kiểm tra lại chỗ này
-                                        cover,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              } else if (choice == moreButtonOptions[1]) {
-                                final cover = await getCoverBytes(state.id);
-
-                                context.editBookCoverCubit.setCoverImage(cover);
-
-                                final newBook = state.copyWith(
-                                  title:
-                                      '${state.title} ${LocaleKeys.copy_book.tr()}',
-                                  rating: 0,
-                                  id: null,
-                                );
-
-                                context.read<EditBookCubit>().setBook(newBook);
-                                context.read<EditBookCubit>().setHasCover(true);
-
-                                // Navigator.of(context).push(
-                                //   MaterialPageRoute(
-                                //     builder: (_) => const BookEditorScreen(
-                                //       duplicatingBook: true,
-                                //     ),
-                                //   ),
-                                // );
-                              } else if (choice == moreButtonOptions[2]) {
-                                if (state.deleted == false) {
-                                  _showDeleteRestoreDialog(
-                                    context,
-                                    true,
-                                    null,
-                                    state,
-                                  );
-                                } else {
-                                  _showDeleteRestoreDialog(
-                                    context,
-                                    false,
-                                    null,
-                                    state,
-                                  );
-                                }
-                              } else if (choice == moreButtonOptions[3]) {
-                                _showDeleteRestoreDialog(
-                                  context,
-                                  true,
-                                  true,
-                                  state,
-                                );
-                              }
-                            },
+                return state.maybeWhen(
+                  loaded: (bookWithDetails) {
+                    final bookState = bookWithDetails.book;
+                    // Add Resource Folder Button
+                    final resourceInfo = IconButton(
+                      onPressed: () {
+                        if (bookState.id != null) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<BookResourceCubit>(),
+                                child: BookResourceScreen(
+                                  bookId: bookState.id!,
+                                ),
+                              ),
+                            ),
                           );
-                        }).toList();
+                        }
                       },
-                    ),
-                  ],
+                      icon: const Icon(Icons.folder_open_outlined),
+                      tooltip: 'Resources',
+                    );
+
+                    // Reset options to base state explicitly just in case
+                    final options = List<String>.from(moreButtonOptions);
+
+                    if (options.length == 2) {
+                      if (bookState.deleted == true) {
+                        options.add(LocaleKeys.restore_book.tr());
+                        options.add(LocaleKeys.delete_permanently.tr());
+                      } else {
+                        options.add(LocaleKeys.delete_book.tr());
+                      }
+                    }
+
+                    return Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        resourceInfo,
+                        PopupMenuButton<String>(
+                          onSelected: (_) {},
+                          itemBuilder: (_) {
+                            return options.map((String choice) {
+                              return PopupMenuItem<String>(
+                                value: choice,
+                                child: Text(choice),
+                                onTap: () async {
+                                  context.read<EditBookCubit>().setBook(
+                                    bookState,
+                                  );
+
+                                  await Future.delayed(
+                                    const Duration(milliseconds: 0),
+                                  );
+                                  if (!context.mounted) return;
+
+                                  if (choice == options[0]) {
+                                    final cover = await getCoverBytes(
+                                      bookState.id,
+                                    );
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => BookEditorScreen(
+                                          args: BookEditorArgs.fromLocal(
+                                            bookState,
+                                            cover,
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  } else if (choice == options[1]) {
+                                    final cover = await getCoverBytes(
+                                      bookState.id,
+                                    );
+
+                                    context.editBookCoverCubit.setCoverImage(
+                                      cover,
+                                    );
+
+                                    final newBook = bookState.copyWith(
+                                      title:
+                                          '${bookState.title} ${LocaleKeys.copy_book.tr()}',
+                                      rating: 0,
+                                      id: null,
+                                    );
+
+                                    context.read<EditBookCubit>().setBook(
+                                      newBook,
+                                    );
+                                    context.read<EditBookCubit>().setHasCover(
+                                      true,
+                                    );
+                                  } else if (choice == options[2]) {
+                                    if (bookState.deleted == false) {
+                                      _showDeleteRestoreDialog(
+                                        context,
+                                        true,
+                                        null,
+                                        bookState,
+                                      );
+                                    } else {
+                                      _showDeleteRestoreDialog(
+                                        context,
+                                        false,
+                                        null,
+                                        bookState,
+                                      );
+                                    }
+                                  } else if (choice == options[3]) {
+                                    _showDeleteRestoreDialog(
+                                      context,
+                                      true,
+                                      true,
+                                      bookState,
+                                    );
+                                  }
+                                },
+                              );
+                            }).toList();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                  orElse: () => const SizedBox.shrink(),
                 );
               },
             ),

@@ -1,12 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart'; // context.colorScheme
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/bloc/local_search/local_search_bloc.dart'; // Import Bloc mới
 import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/ui/book/book_screen.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/books/widgets/cards/book_card_list.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
@@ -132,19 +133,9 @@ class _SearchScreenState extends State<SearchScreen> {
           ), // Fix withAlpha deprecation nếu dùng Flutter mới
           onPressed: () {
             if (book.id == null) return;
-
-            // --- NAVIGATION LOGIC ---
-            // Không dùng CurrentBookCubit nữa. Truyền trực tiếp ID/Book.
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => BookScreen(
-                  heroTag: heroTag,
-                  // Giả sử BookScreen đã được update để nhận tham số này
-                  // bookId: book.id!,
-                  // previewBook: book,
-                ),
-              ),
+            context.push(
+              '${Routes.book}/${book.id}',
+              extra: {'book': book, 'heroTag': heroTag},
             );
           },
         );

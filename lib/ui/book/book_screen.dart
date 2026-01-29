@@ -8,8 +8,7 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
-import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/utils/extensions.dart';
+
 import 'package:leafy/ui/book/widgets/book_detail.dart';
 import 'package:leafy/ui/book/widgets/book_detail_long.dart';
 import 'package:leafy/ui/book/widgets/book_detailed_date_added_update.dart';
@@ -23,9 +22,16 @@ import 'package:leafy/ui/common/image_placeholder.dart';
 import 'package:leafy/ui/extensions/book_format_extension.dart';
 
 class BookScreen extends StatelessWidget {
-  const BookScreen({super.key, required this.heroTag});
+  const BookScreen({
+    super.key,
+    required this.heroTag,
+    required this.bookId,
+    this.initialBook,
+  });
 
   final String heroTag;
+  final int bookId;
+  final Book? initialBook;
 
   @override
   Widget build(BuildContext context) {
@@ -33,48 +39,34 @@ class BookScreen extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
-        // BookDetailCubit: single source of truth for book + tags + resources
         BlocProvider(
           create: (context) {
             final cubit = getIt<BookDetailCubit>();
-            final bookId = context.read<CurrentBookCubit>().state.id;
-            if (bookId != null) {
-              cubit.loadBook(bookId);
+
+            if (initialBook != null) {
+              cubit.setBook(initialBook!);
             }
+
+            cubit.loadBook(bookId);
             return cubit;
           },
         ),
-        // BookResourceCubit: kept for resource management operations
         BlocProvider(
           create: (context) {
             final cubit = getIt<BookResourceCubit>();
-            final bookId = context.read<CurrentBookCubit>().state.id;
-            if (bookId != null) {
-              cubit.loadResources(bookId);
-            }
+            cubit.loadResources(bookId);
             return cubit;
           },
         ),
       ],
       child: MultiBlocListener(
         listeners: [
-          // Sync BookDetailCubit when CurrentBookCubit changes
-          BlocListener<CurrentBookCubit, Book>(
-            listenWhen: (previous, current) =>
-                previous.id != current.id && current.id != null,
-            listener: (context, state) {
-              context.read<BookDetailCubit>().loadBook(state.id!);
-              context.read<BookResourceCubit>().loadResources(state.id!);
-            },
-          ),
           // Handle BookActor actions (edit, delete, etc.)
           BlocListener<BookActorCubit, BookActorState>(
             listener: (context, actorState) {
               actorState.maybeWhen(
                 success: (message, book) {
                   if (book != null) {
-                    // Update both cubits for compatibility
-                    context.currentBookCubit.setBook(book);
                     context.read<BookDetailCubit>().updateBook(book);
                   }
 

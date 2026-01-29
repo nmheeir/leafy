@@ -213,7 +213,6 @@ import '../logic/cubit/book_progress/book_progress_cubit.dart' as _i845;
 import '../logic/cubit/book_resource/book_resource_cubit.dart' as _i407;
 import '../logic/cubit/book_tab_index_cubit.dart' as _i744;
 import '../logic/cubit/book_tags/book_tags_cubit.dart' as _i916;
-import '../logic/cubit/current_book_cubit.dart' as _i754;
 import '../logic/cubit/default_book_format_cubit.dart' as _i185;
 import '../logic/cubit/default_book_tag_cubit.dart' as _i260;
 import '../logic/cubit/display_cubit.dart' as _i985;
@@ -546,9 +545,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i660.AddBookUseCase>(
       () => _i660.AddBookUseCase(gh<_i29.BookRepository>()),
-    );
-    gh.factory<_i754.CurrentBookCubit>(
-      () => _i754.CurrentBookCubit(gh<_i29.BookRepository>()),
     );
     gh.lazySingleton<_i770.LogReadingSessionByPathUseCase>(
       () => _i770.LogReadingSessionByPathUseCase(
