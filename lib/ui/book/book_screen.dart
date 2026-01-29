@@ -127,7 +127,7 @@ class BookScreen extends StatelessWidget {
         children: [
           _buildCoverSpace(mediaQuery, book),
           Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildTitleDetail(details),
               BookStatusDetail(book: book),

@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/domain/tag/entities/tag.dart';
 import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
-import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/ui/common/widgets/tag_input_field.dart';
+import 'package:leafy/ui/book_editor/widgets/tag_input_field.dart';
 
 /// Book Tags Input Widget for Book Editor
 ///
@@ -17,7 +16,10 @@ class BookTagsInput extends StatefulWidget {
   /// Callback when tags are changed - parent can use this to track changes
   final void Function(List<Tag> tags)? onTagsChanged;
 
-  const BookTagsInput({super.key, this.onTagsChanged});
+  /// Initial tags to pre-fill (e.g., from Gutendex)
+  final List<String>? initialTags;
+
+  const BookTagsInput({super.key, this.onTagsChanged, this.initialTags});
 
   @override
   State<BookTagsInput> createState() => BookTagsInputState();
@@ -61,10 +63,24 @@ class BookTagsInputState extends State<BookTagsInput> {
         },
       );
     } else {
-      // New book - start with empty tags
-      setState(() {
-        _isLoading = false;
-      });
+      // New book - start with initial tags if provided
+      if (widget.initialTags != null && widget.initialTags!.isNotEmpty) {
+        final now = DateTime.now();
+        final initialTagObjects = widget.initialTags!
+            .map((name) => Tag(name: name, createdAt: now, updatedAt: now))
+            .toList();
+
+        setState(() {
+          _selectedTags = initialTagObjects;
+          _isLoading = false;
+        });
+        widget.onTagsChanged?.call(initialTagObjects);
+      } else {
+        // Empty tags
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -73,36 +89,6 @@ class BookTagsInputState extends State<BookTagsInput> {
       _selectedTags = tags;
     });
     widget.onTagsChanged?.call(tags);
-  }
-
-  /// Save tags to database for the given book ID
-  /// This should be called by the parent after the book is saved
-  Future<void> saveTagsToBook(int bookId) async {
-    final bookTagRepo = context.read<BookTagRepository>();
-    final tagRepo = context.read<TagRepository>();
-
-    // First, remove all existing tags
-    await bookTagRepo.removeAllTagsFromBook(bookId);
-
-    // Then add each selected tag
-    for (final tag in _selectedTags) {
-      if (tag.id != null) {
-        await bookTagRepo.addTagToBookById(bookId, tag.id!);
-      } else {
-        // If tag doesn't have ID, need to get or create it first
-        final result = await tagRepo.getOrCreateTag(tag.name);
-        result.fold(
-          (failure) {
-            // Skip on failure
-          },
-          (createdTag) async {
-            if (createdTag.id != null) {
-              await bookTagRepo.addTagToBookById(bookId, createdTag.id!);
-            }
-          },
-        );
-      }
-    }
   }
 
   @override

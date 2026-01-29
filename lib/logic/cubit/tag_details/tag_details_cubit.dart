@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
 import 'tag_details_state.dart';
 
+// Cubit để load sách theo tag
 @injectable
 class TagDetailsCubit extends Cubit<TagDetailsState> {
   final BookTagRepository _repository;

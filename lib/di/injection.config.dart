@@ -186,6 +186,7 @@ import '../domain/tag/usecases/merge_tags.dart' as _i861;
 import '../domain/tag/usecases/remove_all_tags_from_book.dart' as _i110;
 import '../domain/tag/usecases/remove_tag_from_book.dart' as _i967;
 import '../domain/tag/usecases/restore_tag.dart' as _i915;
+import '../domain/tag/usecases/update_book_tags.dart' as _i662;
 import '../domain/tag/usecases/update_tag.dart' as _i697;
 import '../domain/tag/usecases/update_tag_order.dart' as _i316;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
@@ -703,6 +704,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i845.BookProgressCubit>(
       () => _i845.BookProgressCubit(gh<_i709.GetReaderProgressByPathUseCase>()),
     );
+    gh.lazySingleton<_i662.UpdateBookTagsUseCase>(
+      () => _i662.UpdateBookTagsUseCase(
+        gh<_i470.BookTagRepository>(),
+        gh<_i684.TagRepository>(),
+      ),
+    );
     gh.factory<_i939.LibraryCubit>(
       () => _i939.LibraryCubit(
         gh<_i864.WatchAllBooksUseCase>(),
@@ -807,16 +814,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
-    gh.factory<_i607.BookActorCubit>(
-      () => _i607.BookActorCubit(
-        gh<_i660.AddBookUseCase>(),
-        gh<_i552.UpdateBookUseCase>(),
-        gh<_i565.DeleteBookUseCase>(),
-        gh<_i429.BulkUpdateUseCase>(),
-        gh<_i909.BulkDeleteUseCase>(),
-        gh<_i693.AddBookResourceUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
       () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
     );
@@ -825,6 +822,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i29.BookRepository>(),
         gh<_i472.GetTagsForBookUseCase>(),
         gh<_i452.GetBookResourcesUseCase>(),
+      ),
+    );
+    gh.factory<_i607.BookActorCubit>(
+      () => _i607.BookActorCubit(
+        gh<_i660.AddBookUseCase>(),
+        gh<_i552.UpdateBookUseCase>(),
+        gh<_i565.DeleteBookUseCase>(),
+        gh<_i429.BulkUpdateUseCase>(),
+        gh<_i909.BulkDeleteUseCase>(),
+        gh<_i693.AddBookResourceUseCase>(),
+        gh<_i662.UpdateBookTagsUseCase>(),
       ),
     );
     gh.factory<_i23.BookDetailCubit>(

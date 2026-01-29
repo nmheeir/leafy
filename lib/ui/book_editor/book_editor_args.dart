@@ -17,6 +17,8 @@ class BookEditorArgs {
   final bool isGutenbergUrl;
   final String? downloadFileUrl; // URL để tải file epub (dành cho Gutendex)
 
+  final List<String>? initialTags;
+
   BookEditorArgs({
     required this.initialBook,
     this.isEditMode = false,
@@ -24,17 +26,23 @@ class BookEditorArgs {
     this.isGutenbergUrl = false,
     this.localCoverBytes,
     this.downloadFileUrl,
+    this.initialTags,
   });
 
   // --- NGUỒN 1: GUTENDEX ---
   factory BookEditorArgs.fromGutendex(GtdBook gtdBook) {
-    // Note: Tags (bookshelves + subjects) are now managed through the Tag system.
-    // They should be saved via use cases after the book is created.
+    // Combine bookshelves and subjects, remove duplicates
+    final allTags = <String>{
+      ...gtdBook.bookshelves,
+      ...gtdBook.subjects,
+    }.toList();
+
     return BookEditorArgs(
       isEditMode: false,
       remoteCoverUrl: gtdBook.formats!.imageJpeg,
       isGutenbergUrl: true,
       downloadFileUrl: gtdBook.formats!.applicationEpubZip,
+      initialTags: allTags,
       initialBook: Book(
         title: gtdBook.title ?? '',
         author: gtdBook.authors.firstOrNull?.name ?? 'Unknown',

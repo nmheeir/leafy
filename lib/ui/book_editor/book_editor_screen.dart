@@ -31,27 +31,7 @@ import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class BookEditorScreen extends StatefulWidget {
-  const BookEditorScreen({
-    super.key,
-    // this.fromGutendex = false,
-    // this.fromOpenLibrary = false,
-    // this.fromOpenLibraryEdition = false,
-    // this.editingExistingBook = false,
-    // this.duplicatingBook = false,
-    // this.coverOpenLibraryID,
-    // this.gutendexFormat,
-    // this.work,
-    required this.args,
-  });
-
-  // final bool fromGutendex;
-  // final bool fromOpenLibrary;
-  // final bool fromOpenLibraryEdition;
-  // final bool editingExistingBook;
-  // final bool duplicatingBook;
-  // final int? coverOpenLibraryID;
-  // final GtdFormat? gutendexFormat;
-  // final String? work;
+  const BookEditorScreen({super.key, required this.args});
 
   final BookEditorArgs args;
 
@@ -141,6 +121,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       coverBytes = context.editBookCoverCubit.state.coverData;
     }
 
+    // Get selected tags from the input widget state using GlobalKey
+    final tags = _bookTagsInputKey.currentState?.selectedTags;
+
     if (widget.args.isEditMode) {
       // --- UPDATE EXISTING BOOK ---
       final updatedBook = bookData.copyWith(dateModified: DateTime.now());
@@ -148,13 +131,10 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
 
       if (updatedBook.hasCover == false) {
         context.editBookCoverCubit.deleteCover(updatedBook.id);
-        context.bookActorCubit.updateBook(updatedBook, null);
+        context.bookActorCubit.updateBook(updatedBook, null, tags: tags);
       } else {
-        context.bookActorCubit.updateBook(updatedBook, coverBytes);
+        context.bookActorCubit.updateBook(updatedBook, coverBytes, tags: tags);
       }
-      // Note: We don't pop here anymore, we wait for the success execution in BlocListener
-      // preventing race conditions where tags wouldn't be saved if we popped too early
-      // Navigator.pop(context);
     } else {
       // --- ADD NEW BOOK ---
       // Nếu có URL file download (từ Gutendex) thì truyền vào
@@ -164,11 +144,12 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
         context.bookActorCubit.addBook(
           bookData,
           coverBytes,
-          widget.args.downloadFileUrl,
+          epubUrl: widget.args.downloadFileUrl,
+          tags: tags,
         );
       } else {
         // Trường hợp OpenLibrary hoặc nhập tay
-        context.bookActorCubit.addBook(bookData, coverBytes);
+        context.bookActorCubit.addBook(bookData, coverBytes, tags: tags);
       }
     }
   }
@@ -361,21 +342,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
             state.maybeWhen(
               success: (message, newBook) async {
                 var bookSaved = context.editBookCubit.state;
-
                 if (newBook != null) {
                   bookSaved = newBook;
                 }
 
-                // IMPORTANT: Save tags after book has been saved/updated and we have an ID
-                if (bookSaved.id != null) {
-                  await _bookTagsInputKey.currentState?.saveTagsToBook(
-                    bookSaved.id!,
-                  );
-                }
-
                 if (!context.mounted) return;
-
-                // context.read<CurrentBookCubit>().setBook(bookSaved);
 
                 // Sử dụng GoRouter để đồng bộ navigation state
                 // go() thay thế toàn bộ stack, đảm bảo không còn route dư
@@ -393,7 +364,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
               failure: (errorMessage) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(errorMessage), // Hoặc .tr() nếu là key
+                    content: Text(errorMessage),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -402,6 +373,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
             );
           },
         ),
+
         BlocListener<BookEditorActionCubit, BookEditorActionState>(
           listener: (context, state) {
             // Logic update Cover tự động
@@ -506,31 +478,36 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
-                  BookTagsInput(key: _bookTagsInputKey),
+                  BookTagsInput(
+                    key: _bookTagsInputKey,
+                    initialTags: widget.args.initialTags,
+                  ),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
-                  //NOTE: Review thì sau khi đọc xong sách mới có thể viết
-                  BookTextField(
-                    controller: _myReviewCtrl,
-                    hint: LocaleKeys.my_review.tr(),
-                    icon: FontAwesomeIcons.solidKeyboard,
-                    keyboardType: TextInputType.multiline,
-                    maxLength: 5000,
-                    hideCounter: false,
-                    maxLines: 15,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
-                  const SizedBox(height: 10),
-                  //NOTE: Notes thì sau khi đọc xong sách mới có thể viết
-                  BookTextField(
-                    controller: _notesCtrl,
-                    hint: LocaleKeys.notes.tr(),
-                    icon: FontAwesomeIcons.noteSticky,
-                    keyboardType: TextInputType.multiline,
-                    maxLength: 5000,
-                    hideCounter: false,
-                    maxLines: 15,
-                    textCapitalization: TextCapitalization.sentences,
-                  ),
+                  //NOTE: Review thì chỉ khi trong edit mode (tức đã đọc hoặc thêm vào thư viện) mới có thể viết
+                  if (widget.args.isEditMode) ...[
+                    BookTextField(
+                      controller: _myReviewCtrl,
+                      hint: LocaleKeys.my_review.tr(),
+                      icon: FontAwesomeIcons.solidKeyboard,
+                      keyboardType: TextInputType.multiline,
+                      maxLength: 5000,
+                      hideCounter: false,
+                      maxLines: 15,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                    const SizedBox(height: 10),
+                    //NOTE: Notes thì sau khi đọc xong sách mới có thể viết
+                    BookTextField(
+                      controller: _notesCtrl,
+                      hint: LocaleKeys.notes.tr(),
+                      icon: FontAwesomeIcons.noteSticky,
+                      keyboardType: TextInputType.multiline,
+                      maxLength: 5000,
+                      hideCounter: false,
+                      maxLines: 15,
+                      textCapitalization: TextCapitalization.sentences,
+                    ),
+                  ],
                   const SizedBox(height: 30),
                   Row(
                     children: [

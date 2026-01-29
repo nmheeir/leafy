@@ -20,6 +20,9 @@ import 'package:leafy/core/constants/enums/reader_format.dart';
 import 'package:leafy/core/constants/enums/storage_type.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:leafy/domain/tag/entities/tag.dart';
+import 'package:leafy/domain/tag/usecases/update_book_tags.dart';
+
 part 'book_actor_cubit.freezed.dart';
 part 'book_actor_state.dart';
 
@@ -31,6 +34,7 @@ class BookActorCubit extends Cubit<BookActorState> {
   final BulkUpdateUseCase _bulkUpdateUseCase;
   final BulkDeleteUseCase _bulkDeleteUseCase;
   final AddBookResourceUseCase _addBookResourceUseCase;
+  final UpdateBookTagsUseCase _updateBookTagsUseCase;
 
   BookActorCubit(
     this._addBookUseCase,
@@ -39,9 +43,15 @@ class BookActorCubit extends Cubit<BookActorState> {
     this._bulkUpdateUseCase,
     this._bulkDeleteUseCase,
     this._addBookResourceUseCase,
+    this._updateBookTagsUseCase,
   ) : super(const BookActorState.initial());
 
-  Future<void> addBook(Book book, Uint8List? cover, [String? epubUrl]) async {
+  Future<void> addBook(
+    Book book,
+    Uint8List? cover, {
+    String? epubUrl,
+    List<Tag>? tags,
+  }) async {
     emit(const BookActorState.loading());
 
     final result = await _addBookUseCase(
@@ -54,7 +64,7 @@ class BookActorCubit extends Cubit<BookActorState> {
       ),
       (newBook) async {
         if (epubUrl != null) {
-          final resourceResult = await _addBookResourceUseCase(
+          await _addBookResourceUseCase(
             AddBookResourceParams(
               bookId: newBook.id!,
               uuid: const Uuid().v4(),
@@ -64,11 +74,12 @@ class BookActorCubit extends Cubit<BookActorState> {
               url: epubUrl,
             ),
           );
+        }
 
-          resourceResult.fold((failure) {
-            // Note: If resource creation fails, we might want to warn the user but the book is created.
-            // For now, let's just log or emit success for the book.
-          }, (resource) {});
+        if (tags != null) {
+          await _updateBookTagsUseCase(
+            UpdateBookTagsParams(bookId: newBook.id!, tags: tags),
+          );
         }
 
         emit(
@@ -82,7 +93,11 @@ class BookActorCubit extends Cubit<BookActorState> {
   }
 
   /// Xử lý cập nhật sách
-  Future<void> updateBook(Book book, Uint8List? cover) async {
+  Future<void> updateBook(
+    Book book,
+    Uint8List? cover, {
+    List<Tag>? tags,
+  }) async {
     emit(const BookActorState.loading());
 
     final result = await _updateBookUseCase(
@@ -95,7 +110,14 @@ class BookActorCubit extends Cubit<BookActorState> {
           message: failure.message ?? LocaleKeys.error_no_error_return,
         ),
       ),
-      (_) => emit(const BookActorState.success(message: "Cập nhật thành công")),
+      (_) async {
+        if (tags != null && book.id != null) {
+          await _updateBookTagsUseCase(
+            UpdateBookTagsParams(bookId: book.id!, tags: tags),
+          );
+        }
+        emit(const BookActorState.success(message: "Cập nhật thành công"));
+      },
     );
   }
 

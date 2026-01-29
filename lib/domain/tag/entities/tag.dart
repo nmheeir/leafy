@@ -41,6 +41,19 @@ class Tag extends Equatable {
     );
   }
 
+  factory Tag.initial({required String name}) {
+    final now = DateTime.now();
+    return Tag(
+      name: name,
+      createdAt: now,
+      updatedAt: now,
+      isSystem: false,
+      category: null,
+      deleted: false,
+      priority: 0,
+    );
+  }
+
   Tag copyWith({
     int? id,
     String? name,

@@ -4,6 +4,7 @@ import 'package:leafy/domain/tag/entities/tag.dart';
 import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'tag_management_state.dart';
 
+// Cubit để quản lý tag
 @injectable
 class TagManagementCubit extends Cubit<TagManagementState> {
   final TagRepository _repository;

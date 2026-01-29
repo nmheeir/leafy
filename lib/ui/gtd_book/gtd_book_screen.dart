@@ -308,13 +308,6 @@ class GtdBookScreen extends StatelessWidget {
             BookEditorScreen(args: BookEditorArgs.fromGutendex(book)),
       ),
     );
-
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     content: Text("Preparing to save '${book.title}'..."),
-    //     action: SnackBarAction(label: "GO", onPressed: () {}),
-    //   ),
-    // );
   }
 
   Widget _buildStatsRow(BuildContext context) {
