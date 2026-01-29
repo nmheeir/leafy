@@ -39,6 +39,7 @@ import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/pdf_reader/pdf_reader_cubit.dart';
 import 'package:leafy/logic/cubit/selected_book_cubit.dart';
 import 'package:leafy/logic/cubit/ai_settings/ai_settings_cubit.dart';
+import 'package:leafy/logic/cubit/tag_filter/tag_filter_cubit.dart';
 import 'package:leafy/logic/cubit/trash/trash_bin_cubit.dart';
 import 'package:leafy/logic/cubit/epub_reader/epub_reader_cubit.dart';
 import 'package:path_provider/path_provider.dart';
@@ -103,6 +104,7 @@ class App extends StatelessWidget {
       BlocProvider(create: (context) => getIt<AISettingsCubit>()),
       BlocProvider(create: (context) => getIt<PdfReaderCubit>()),
       BlocProvider(create: (context) => getIt<BackupRestoreCubit>()),
+      BlocProvider(create: (context) => getIt<TagFilterCubit>()),
 
       //Sort
       BlocProvider(create: (_) => getIt<SortInProgressBooksBloc>()),

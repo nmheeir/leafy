@@ -14,8 +14,9 @@ import 'package:leafy/ui/books/widgets/books_tag_chip.dart';
 import 'package:leafy/ui/books/widgets/empty_books_list.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_grid.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
-import 'package:leafy/ui/common/widgets/tag_filter_widget.dart';
+import 'package:leafy/ui/books/widgets/tag_filter_sheet.dart';
 import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
+import 'package:leafy/logic/cubit/tag_filter/tag_filter_cubit.dart';
 
 class BooksScreen extends StatefulWidget {
   const BooksScreen({super.key});
@@ -37,6 +38,7 @@ class _BooksScreenState extends State<BooksScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _chipScrollController = ScrollController();
+    context.read<TagFilterCubit>();
   }
 
   @override
@@ -150,13 +152,13 @@ class _BooksScreenState extends State<BooksScreen>
     final state = bloc.state;
 
     // Generic function to show sheet (needs to import TagFilterWidget)
-    showTagFilterSheet(
+    TagFilterSheet.show(
       context,
-      initialTags: state.selectedTags,
-      initialMode: state.filterMode,
       onFilterChanged: (selectedTags, mode) {
         bloc.add(FilterByTagsChanged(tags: selectedTags, mode: mode));
       },
+      initialTags: state.selectedTags,
+      initialMode: state.filterMode,
     );
   }
 

@@ -227,6 +227,7 @@ import '../logic/cubit/pdf_reader/pdf_reader_cubit.dart' as _i628;
 import '../logic/cubit/reading_history/reading_history_cubit.dart' as _i420;
 import '../logic/cubit/selected_book_cubit.dart' as _i772;
 import '../logic/cubit/tag_details/tag_details_cubit.dart' as _i507;
+import '../logic/cubit/tag_filter/tag_filter_cubit.dart' as _i376;
 import '../logic/cubit/tag_management/tag_management_cubit.dart' as _i137;
 import '../logic/cubit/trash/trash_bin_cubit.dart' as _i821;
 import 'module/device_module.dart' as _i195;
@@ -682,6 +683,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i507.TagDetailsCubit>(
       () => _i507.TagDetailsCubit(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i376.TagFilterCubit>(
+      () => _i376.TagFilterCubit(gh<_i684.TagRepository>()),
     );
     gh.factory<_i100.BackupRestoreCubit>(
       () => _i100.BackupRestoreCubit(

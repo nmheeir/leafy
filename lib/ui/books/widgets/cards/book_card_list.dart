@@ -22,7 +22,7 @@ import 'package:leafy/logic/bloc/sort_bloc/sort_state.dart';
 import 'package:leafy/logic/cubit/display_cubit.dart';
 import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/ui/common/image_placeholder.dart';
-import 'package:leafy/ui/common/widgets/tag_chip.dart';
+import 'package:leafy/ui/common/tag_chip.dart';
 
 class BookCardList extends StatelessWidget {
   const BookCardList({

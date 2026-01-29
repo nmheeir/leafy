@@ -4,7 +4,7 @@ import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/tag/entities/tag.dart';
 import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'package:leafy/logic/bloc/tag_search/tag_search_bloc.dart';
-import 'package:leafy/ui/common/widgets/tag_chip.dart';
+import 'package:leafy/ui/common/tag_chip.dart';
 
 /// Premium tag input widget with autocomplete and Material Design 3 aesthetics
 class TagInputField extends StatelessWidget {

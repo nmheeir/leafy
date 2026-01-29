@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/tag/entities/tag.dart';
-import 'package:leafy/ui/common/widgets/tag_chip.dart';
+import 'package:leafy/ui/common/tag_chip.dart';
 
 class BookTitleDetail extends StatelessWidget {
   const BookTitleDetail({

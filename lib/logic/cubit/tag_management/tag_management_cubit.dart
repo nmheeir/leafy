@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/domain/tag/entities/tag.dart';
@@ -8,9 +10,19 @@ import 'tag_management_state.dart';
 @injectable
 class TagManagementCubit extends Cubit<TagManagementState> {
   final TagRepository _repository;
+  late final StreamSubscription<void> _tagStreamSubscription;
 
   TagManagementCubit(this._repository) : super(const TagManagementState()) {
     loadTags();
+    _tagStreamSubscription = _repository.activeTagsStream.listen((_) {
+      loadTags();
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _tagStreamSubscription.cancel();
+    return super.close();
   }
 
   Future<void> loadTags() async {
@@ -57,7 +69,6 @@ class TagManagementCubit extends Cubit<TagManagementState> {
       },
       (newTag) {
         onSuccess();
-        loadTags();
       },
     );
   }
@@ -76,7 +87,6 @@ class TagManagementCubit extends Cubit<TagManagementState> {
       },
       (_) {
         onSuccess();
-        loadTags();
       },
     );
   }
@@ -95,7 +105,6 @@ class TagManagementCubit extends Cubit<TagManagementState> {
       },
       (_) {
         onSuccess();
-        loadTags();
       },
     );
   }

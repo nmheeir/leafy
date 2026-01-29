@@ -31,11 +31,8 @@ class BookEditorArgs {
 
   // --- NGUỒN 1: GUTENDEX ---
   factory BookEditorArgs.fromGutendex(GtdBook gtdBook) {
-    // Combine bookshelves and subjects, remove duplicates
-    final allTags = <String>{
-      ...gtdBook.bookshelves,
-      ...gtdBook.subjects,
-    }.toList();
+    // Remove duplicates subjects
+    final allTags = <String>{...gtdBook.subjects}.toList();
 
     return BookEditorArgs(
       isEditMode: false,

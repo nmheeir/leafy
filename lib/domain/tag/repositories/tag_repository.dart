@@ -54,4 +54,7 @@ abstract class TagRepository {
 
   /// Merge two tags
   Future<Either<Failure, Unit>> mergeTags(int sourceTagId, int targetTagId);
+
+  /// Stream of active tag updates
+  Stream<void> get activeTagsStream;
 }

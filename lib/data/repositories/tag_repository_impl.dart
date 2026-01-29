@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:leafy/core/errors/failures.dart';
@@ -11,8 +12,12 @@ import 'package:logger/logger.dart';
 class TagRepositoryImpl implements TagRepository {
   final TagLocalDataSource _tagLocalDataSource;
   final Logger _logger;
+  final _controller = StreamController<void>.broadcast();
 
   TagRepositoryImpl(this._tagLocalDataSource, this._logger);
+
+  @override
+  Stream<void> get activeTagsStream => _controller.stream;
 
   @override
   Future<Either<Failure, List<Tag>>> getAllActiveTags() async {
@@ -102,6 +107,7 @@ class TagRepositoryImpl implements TagRepository {
 
       final tagId = await _tagLocalDataSource.create(newTag);
       _logger.i('TagRepository: Created new tag "$name" (ID: $tagId)');
+      _controller.add(null);
 
       return Right(newTag.copyWith(id: tagId).toEntity());
     } catch (e, stackTrace) {
@@ -121,6 +127,7 @@ class TagRepositoryImpl implements TagRepository {
 
       final tagId = await _tagLocalDataSource.create(TagModel.fromEntity(tag));
       _logger.i('TagRepository: Tag created successfully (ID: $tagId)');
+      _controller.add(null);
 
       return Right(tag.copyWith(id: tagId));
     } catch (e, stackTrace) {
@@ -142,6 +149,7 @@ class TagRepositoryImpl implements TagRepository {
       await _tagLocalDataSource.update(TagModel.fromEntity(updatedTag));
 
       _logger.i('TagRepository: Tag updated successfully');
+      _controller.add(null);
       return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
@@ -161,6 +169,7 @@ class TagRepositoryImpl implements TagRepository {
       await _tagLocalDataSource.softDelete(id);
 
       _logger.i('TagRepository: Tag soft deleted');
+      _controller.add(null);
       return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
@@ -180,6 +189,7 @@ class TagRepositoryImpl implements TagRepository {
       await _tagLocalDataSource.restore(id);
 
       _logger.i('TagRepository: Tag restored');
+      _controller.add(null);
       return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
@@ -269,6 +279,7 @@ class TagRepositoryImpl implements TagRepository {
       }
 
       _logger.i('TagRepository: Cleaned up $deletedCount orphaned tags');
+      if (deletedCount > 0) _controller.add(null);
       return Right(deletedCount);
     } catch (e, stackTrace) {
       _logger.e(
@@ -320,6 +331,7 @@ class TagRepositoryImpl implements TagRepository {
       await _tagLocalDataSource.mergeTags(sourceTagId, targetTagId);
 
       _logger.i('TagRepository: Tags merged successfully');
+      _controller.add(null);
       return right(unit);
     } catch (e, stackTrace) {
       _logger.e(
