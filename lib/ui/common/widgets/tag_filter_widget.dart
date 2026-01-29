@@ -5,7 +5,7 @@ import 'package:leafy/domain/tag/entities/tag.dart';
 import 'package:leafy/domain/tag/repositories/tag_repository.dart';
 import 'package:leafy/ui/common/widgets/tag_chip.dart';
 
-enum TagFilterMode { any, all, exclude }
+import 'package:leafy/core/constants/enums/index.dart';
 
 /// Beautiful Material Design 3 tag filter widget
 class TagFilterWidget extends StatefulWidget {
@@ -160,48 +160,6 @@ class _TagFilterWidgetState extends State<TagFilterWidget> {
           ),
 
           const SizedBox(height: 16),
-
-          // Selected tags
-          if (_selectedTags.isNotEmpty) ...[
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: context.colorScheme.primaryContainer.withValues(
-                  alpha: 0.5,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: context.colorScheme.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Selected (${_selectedTags.length})',
-                    style: context.textTheme.labelMedium?.copyWith(
-                      color: context.colorScheme.onPrimaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _selectedTags.map((tag) {
-                      return TagChip(
-                        tag: tag,
-                        selected: true,
-                        onDelete: () => _toggleTag(tag),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-          ],
 
           // Available tags
           Flexible(

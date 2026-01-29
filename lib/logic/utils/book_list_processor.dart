@@ -28,14 +28,29 @@ class BookListProcessor {
       }).toList();
     }
 
-    // 3. Filter Tags
-    if (sortState.tags != null) {
-      list = _filterTags(
-        list: list,
-        tags: sortState.tags!,
-        asAnd: sortState.filterTagsAsAnd,
-        filterOut: sortState.filterOutTags,
-      );
+    // 3. Filter Tags (New Async Logic)
+    if (sortState.filteredBookIds != null) {
+      // Logic:
+      // - If Exclude: filteredBookIds contains books TO HIDE.
+      // - If Any/All: filteredBookIds contains books TO SHOW.
+
+      if (sortState.filterMode == TagFilterMode.exclude) {
+        list = list
+            .where(
+              (book) =>
+                  book.id != null &&
+                  !sortState.filteredBookIds!.contains(book.id),
+            )
+            .toList();
+      } else {
+        list = list
+            .where(
+              (book) =>
+                  book.id != null &&
+                  sortState.filteredBookIds!.contains(book.id),
+            )
+            .toList();
+      }
     }
 
     // 4. Filter Book Type
@@ -49,24 +64,6 @@ class BookListProcessor {
       sortType: sortState.sortType,
       isAsc: sortState.isAsc,
     );
-  }
-
-  static List<Book> _filterTags({
-    required List<Book> list,
-    required String tags,
-    required bool asAnd,
-    required bool filterOut,
-  }) {
-    // TODO: Tag filtering now requires async lookup from BookTagRepository.
-    // This synchronous processor cannot directly filter by tags anymore.
-    // Consider:
-    // 1. Pre-loading tags for each book before calling this processor
-    // 2. Using a separate async filter method
-    // 3. Passing a Map<int, List<String>> bookIdToTags parameter
-
-    // For now, return the list unfiltered when tag filter is applied.
-    // The UI should be updated to use the new tag system for filtering.
-    return list;
   }
 
   static List<Book> _sort({

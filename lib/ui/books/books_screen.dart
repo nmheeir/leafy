@@ -14,6 +14,8 @@ import 'package:leafy/ui/books/widgets/books_tag_chip.dart';
 import 'package:leafy/ui/books/widgets/empty_books_list.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_grid.dart';
 import 'package:leafy/ui/books/widgets/layouts/books_list.dart';
+import 'package:leafy/ui/common/widgets/tag_filter_widget.dart';
+import 'package:leafy/logic/bloc/sort_bloc/sort_event.dart';
 
 class BooksScreen extends StatefulWidget {
   const BooksScreen({super.key});
@@ -55,13 +57,26 @@ class _BooksScreenState extends State<BooksScreen>
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             SizedBox(height: MediaQuery.of(context).padding.top),
-            // Thanh Chips chọn Tab
-            SingleChildScrollView(
-              controller: _chipScrollController,
-              scrollDirection: Axis.horizontal,
+            // Thanh Chips chọn Tab + Filter Button
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: _buildTabChips(context, bookListsOrder),
+                children: [
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _chipScrollController,
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: _buildTabChips(context, bookListsOrder),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.filter_list_rounded),
+                    onPressed: () => _showFilterSheet(context, bookListsOrder),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 8),
@@ -87,8 +102,7 @@ class _BooksScreenState extends State<BooksScreen>
       switch (status) {
         case BookStatus.finished:
           return _buildGenericBooksTab<SortFinishedBooksBloc>(
-            listGetter: (state) =>
-                state.finishedBooks,
+            listGetter: (state) => state.finishedBooks,
             listNumber: 0,
           );
         case BookStatus.inProgress:
@@ -110,9 +124,43 @@ class _BooksScreenState extends State<BooksScreen>
     }).toList();
   }
 
-  /// Hàm Generic để build Tab. Giúp giảm lặp code (DRY).
-  /// [TSortBloc]: Loại Bloc sort tương ứng (vd: SortFinishedBooksBloc)
-  /// [listGetter]: Hàm lấy list sách tương ứng từ LibraryState
+  void _showFilterSheet(BuildContext context, List<BookStatus> bookListsOrder) {
+    if (!context.mounted) return;
+
+    final currentStatus = bookListsOrder[_tabController.index];
+    SortBloc? activeBloc;
+
+    // Resolve active bloc
+    switch (currentStatus) {
+      case BookStatus.finished:
+        activeBloc = context.read<SortFinishedBooksBloc>();
+        break;
+      case BookStatus.inProgress:
+        activeBloc = context.read<SortInProgressBooksBloc>();
+        break;
+      case BookStatus.forLater:
+        activeBloc = context.read<SortForLaterBooksBloc>();
+        break;
+      case BookStatus.unfinished:
+        activeBloc = context.read<SortUnfinishedBooksBloc>();
+        break;
+    }
+
+    final bloc = activeBloc;
+    final state = bloc.state;
+
+    // Generic function to show sheet (needs to import TagFilterWidget)
+    showTagFilterSheet(
+      context,
+      initialTags: state.selectedTags,
+      initialMode: state.filterMode,
+      onFilterChanged: (selectedTags, mode) {
+        bloc.add(FilterByTagsChanged(tags: selectedTags, mode: mode));
+      },
+    );
+  }
+
+  /// Hàm Generic để build Tab...
   Widget _buildGenericBooksTab<TSortBloc extends BlocBase<SortState>>({
     required List<Book> Function(LibraryState) listGetter,
     required int listNumber,
@@ -202,9 +250,7 @@ class _BooksScreenState extends State<BooksScreen>
       }
 
       return Padding(
-        padding: const EdgeInsets.only(
-          right: 10,
-        ),
+        padding: const EdgeInsets.only(right: 10),
         child: BooksTagChip(
           index: index,
           tabController: _tabController,

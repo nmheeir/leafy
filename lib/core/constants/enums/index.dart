@@ -12,3 +12,4 @@ export 'epub_reader_setting/image_color_effect.dart';
 export 'epub_reader_setting/image_alignment.dart';
 export 'epub_reader_setting/progress_count_type.dart';
 export 'translation_language.dart';
+export 'tag_filter_mode.dart';

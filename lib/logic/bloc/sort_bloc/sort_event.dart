@@ -1,3 +1,4 @@
+import 'package:leafy/domain/tag/entities/tag.dart';
 import 'package:equatable/equatable.dart';
 import 'package:leafy/core/constants/enums/index.dart';
 
@@ -48,29 +49,12 @@ class ChangeYearsEvent extends SortEvent {
   List<Object?> get props => [years];
 }
 
-class ChangeTagsEvent extends SortEvent {
-  final String? tags;
+class FilterByTagsChanged extends SortEvent {
+  final List<Tag> tags;
+  final TagFilterMode mode;
 
-  const ChangeTagsEvent(this.tags);
-
-  @override
-  List<Object?> get props => [tags];
-}
-
-class ChangeFilterTagsAsAnd extends SortEvent {
-  final bool filterTagsAsAnd;
-
-  const ChangeFilterTagsAsAnd(this.filterTagsAsAnd);
+  const FilterByTagsChanged({required this.tags, required this.mode});
 
   @override
-  List<Object?> get props => [filterTagsAsAnd];
-}
-
-class ChangeFilterOutTags extends SortEvent {
-  final bool filterOutTags;
-
-  const ChangeFilterOutTags(this.filterOutTags);
-
-  @override
-  List<Object?> get props => [filterOutTags];
+  List<Object?> get props => [tags, mode];
 }

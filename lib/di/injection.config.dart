@@ -247,18 +247,6 @@ extension GetItInjectableX on _i174.GetIt {
     final networkModule = _$NetworkModule();
     gh.factory<_i854.ChallengeBloc>(() => _i854.ChallengeBloc());
     gh.factory<_i280.RatingTypeBloc>(() => _i280.RatingTypeBloc());
-    gh.factory<_i713.SortFinishedBooksBloc>(
-      () => _i713.SortFinishedBooksBloc(),
-    );
-    gh.factory<_i713.SortInProgressBooksBloc>(
-      () => _i713.SortInProgressBooksBloc(),
-    );
-    gh.factory<_i713.SortForLaterBooksBloc>(
-      () => _i713.SortForLaterBooksBloc(),
-    );
-    gh.factory<_i713.SortUnfinishedBooksBloc>(
-      () => _i713.SortUnfinishedBooksBloc(),
-    );
     gh.factory<_i774.ThemeBloc>(() => _i774.ThemeBloc());
     gh.factory<_i66.BookListsOrderCubit>(() => _i66.BookListsOrderCubit());
     gh.factory<_i744.BookTabIndexCubit>(() => _i744.BookTabIndexCubit());
@@ -751,6 +739,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i517.ResetBrightnessUseCase>(),
         gh<_i737.SetOrientation>(),
       ),
+    );
+    gh.factory<_i713.SortFinishedBooksBloc>(
+      () => _i713.SortFinishedBooksBloc(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i713.SortInProgressBooksBloc>(
+      () => _i713.SortInProgressBooksBloc(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i713.SortForLaterBooksBloc>(
+      () => _i713.SortForLaterBooksBloc(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i713.SortUnfinishedBooksBloc>(
+      () => _i713.SortUnfinishedBooksBloc(gh<_i470.BookTagRepository>()),
     );
     gh.factory<_i916.BookTagsCubit>(
       () => _i916.BookTagsCubit(gh<_i472.GetTagsForBookUseCase>()),
