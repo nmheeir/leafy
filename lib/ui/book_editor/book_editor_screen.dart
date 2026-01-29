@@ -6,8 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/enums/book_format.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
@@ -16,18 +16,17 @@ import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_editor_action/book_editor_action_cubit.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
-import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/cubit/edit_book_cover/edit_book_cover_cubit.dart';
-import 'package:leafy/router/routes.dart';
+import 'package:leafy/logic/cubit/library/library_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:leafy/ui/book_editor/book_editor_args.dart';
-import 'package:leafy/ui/book_editor/widgets/book_file_card.dart';
 import 'package:leafy/ui/book_editor/widgets/book_rating_bar.dart';
 import 'package:leafy/ui/book_editor/widgets/book_status_row.dart';
 import 'package:leafy/ui/book_editor/widgets/covers/cover_view_edit.dart';
+import 'package:leafy/ui/book_editor/widgets/form_fields/book_tags_input.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_text_field.dart';
 import 'package:leafy/ui/book_editor/widgets/form_fields/book_type_dropdown.dart';
-import 'package:leafy/ui/book_editor/widgets/form_fields/book_tags_input.dart';
 import 'package:leafy/ui/common/keyboard_dismissable.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -67,12 +66,11 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
   final _pagesCtrl = TextEditingController();
   final _pubYearCtrl = TextEditingController();
   final _descriptionCtrl = TextEditingController();
-  final _tagsCtrl = TextEditingController();
   final _myReviewCtrl = TextEditingController();
   final _notesCtrl = TextEditingController();
 
-  String? _currentFilePath;
-  String? _currentDownloadUrl;
+  // Key to access BookTagsInput state for saving tags
+  final _bookTagsInputKey = GlobalKey<BookTagsInputState>();
 
   final _animDuration = const Duration(milliseconds: 250);
 
@@ -154,7 +152,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       } else {
         context.bookActorCubit.updateBook(updatedBook, coverBytes);
       }
-      Navigator.pop(context);
+      // Note: We don't pop here anymore, we wait for the success execution in BlocListener
+      // preventing race conditions where tags wouldn't be saved if we popped too early
+      // Navigator.pop(context);
     } else {
       // --- ADD NEW BOOK ---
       // Nếu có URL file download (từ Gutendex) thì truyền vào
@@ -267,22 +267,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     );
   }
 
-  void _addNewTag() {
-    final tag = _tagsCtrl.text;
-
-    if (tag.isEmpty) {
-      FocusManager.instance.primaryFocus?.unfocus();
-      return;
-    }
-
-    context.editBookCubit.addNewTag(_tagsCtrl.text);
-
-    _tagsCtrl.clear();
-  }
-
-  void _unselectTag(String tag) {
-    context.editBookCubit.removeTag(tag);
-  }
+  // _addNewTag and _unselectTag methods removed
 
   void _attachListeners() {
     _titleCtrl.addListener(() {
@@ -325,7 +310,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     context.bookEditorActionCubit.reset();
 
     final args = widget.args;
-    _currentDownloadUrl = widget.args.downloadFileUrl;
 
     // 2. Set dữ liệu sách vào Cubit & Controller
     // Logic này dùng chung cho cả Edit và Add New
@@ -362,7 +346,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     _pagesCtrl.dispose();
     _pubYearCtrl.dispose();
     _descriptionCtrl.dispose();
-    _tagsCtrl.dispose();
     _myReviewCtrl.dispose();
     _notesCtrl.dispose();
 
@@ -375,13 +358,22 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
       listeners: [
         BlocListener<BookActorCubit, BookActorState>(
           listener: (context, state) {
-            state.whenOrNull(
-              success: (message, newBook) {
+            state.maybeWhen(
+              success: (message, newBook) async {
                 var bookSaved = context.editBookCubit.state;
 
                 if (newBook != null) {
                   bookSaved = newBook;
                 }
+
+                // IMPORTANT: Save tags after book has been saved/updated and we have an ID
+                if (bookSaved.id != null) {
+                  await _bookTagsInputKey.currentState?.saveTagsToBook(
+                    bookSaved.id!,
+                  );
+                }
+
+                if (!context.mounted) return;
 
                 context.read<CurrentBookCubit>().setBook(bookSaved);
 
@@ -398,6 +390,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                   ),
                 );
               },
+              orElse: () {},
             );
           },
         ),
@@ -505,7 +498,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
-                  const BookTagsInput(),
+                  BookTagsInput(key: _bookTagsInputKey),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   //NOTE: Review thì sau khi đọc xong sách mới có thể viết
                   BookTextField(

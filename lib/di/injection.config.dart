@@ -91,6 +91,7 @@ import '../domain/book/usecases/delete_book.dart' as _i565;
 import '../domain/book/usecases/download_gtd_cover.dart' as _i466;
 import '../domain/book/usecases/download_ol_cover.dart' as _i151;
 import '../domain/book/usecases/get_book.dart' as _i137;
+import '../domain/book/usecases/get_book_with_details.dart' as _i469;
 import '../domain/book/usecases/get_deleted_book.dart' as _i679;
 import '../domain/book/usecases/mark_book_finished.dart' as _i838;
 import '../domain/book/usecases/restore_book.dart' as _i675;
@@ -531,9 +532,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
-    gh.factory<_i23.BookDetailCubit>(
-      () => _i23.BookDetailCubit(gh<_i137.GetBookUseCase>()),
-    );
     gh.lazySingleton<_i709.GetReaderProgressByPathUseCase>(
       () => _i709.GetReaderProgressByPathUseCase(
         gh<_i23.ReaderProgressRepository>(),
@@ -697,9 +695,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i316.UpdateTagOrderUseCase>(
       () => _i316.UpdateTagOrderUseCase(gh<_i470.BookTagRepository>()),
     );
-    gh.factory<_i916.BookTagsCubit>(
-      () => _i916.BookTagsCubit(gh<_i470.BookTagRepository>()),
-    );
     gh.factory<_i507.TagDetailsCubit>(
       () => _i507.TagDetailsCubit(gh<_i470.BookTagRepository>()),
     );
@@ -753,6 +748,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i517.ResetBrightnessUseCase>(),
         gh<_i737.SetOrientation>(),
       ),
+    );
+    gh.factory<_i916.BookTagsCubit>(
+      () => _i916.BookTagsCubit(gh<_i472.GetTagsForBookUseCase>()),
     );
     gh.lazySingleton<_i119.FileProcessingService>(
       () =>
@@ -813,9 +811,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
-    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
-      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
-    );
     gh.factory<_i607.BookActorCubit>(
       () => _i607.BookActorCubit(
         gh<_i660.AddBookUseCase>(),
@@ -824,9 +819,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i429.BulkUpdateUseCase>(),
         gh<_i909.BulkDeleteUseCase>(),
         gh<_i693.AddBookResourceUseCase>(),
-        gh<_i684.TagRepository>(),
-        gh<_i470.BookTagRepository>(),
       ),
+    );
+    gh.lazySingleton<_i390.ProcessLocalFilesUseCase>(
+      () => _i390.ProcessLocalFilesUseCase(gh<_i119.FileProcessingService>()),
+    );
+    gh.factory<_i469.GetBookWithDetailsUseCase>(
+      () => _i469.GetBookWithDetailsUseCase(
+        gh<_i29.BookRepository>(),
+        gh<_i472.GetTagsForBookUseCase>(),
+        gh<_i452.GetBookResourcesUseCase>(),
+      ),
+    );
+    gh.factory<_i23.BookDetailCubit>(
+      () => _i23.BookDetailCubit(gh<_i469.GetBookWithDetailsUseCase>()),
     );
     gh.lazySingleton<_i206.EpubReaderCubit>(
       () => _i206.EpubReaderCubit(

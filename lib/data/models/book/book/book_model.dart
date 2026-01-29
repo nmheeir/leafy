@@ -42,7 +42,6 @@ abstract class BookModel with _$BookModel {
 
     @JsonKey(name: 'pages') int? pages,
     @JsonKey(name: 'publication_year') int? publicationYear,
-    @JsonKey(name: 'tags') String? tags,
     @JsonKey(name: 'my_review') String? myReview,
     @JsonKey(name: 'notes') String? notes,
 
@@ -77,7 +76,6 @@ abstract class BookModel with _$BookModel {
       rating: entity.rating,
       status: entity.status,
       subtitle: entity.subtitle,
-      tags: entity.tags,
       startDate: entity.startDate,
       finishDate: entity.finishDate,
     );
@@ -96,7 +94,6 @@ abstract class BookModel with _$BookModel {
       rating: rating,
       pages: pages,
       publicationYear: publicationYear,
-      tags: tags,
       myReview: myReview,
       notes: notes,
       blurHash: blurHash,

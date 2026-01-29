@@ -28,7 +28,8 @@ class BookEditorArgs {
 
   // --- NGUỒN 1: GUTENDEX ---
   factory BookEditorArgs.fromGutendex(GtdBook gtdBook) {
-    final allTags = [...gtdBook.bookshelves, ...gtdBook.subjects].join('|||||');
+    // Note: Tags (bookshelves + subjects) are now managed through the Tag system.
+    // They should be saved via use cases after the book is created.
     return BookEditorArgs(
       isEditMode: false,
       remoteCoverUrl: gtdBook.formats!.imageJpeg,
@@ -37,10 +38,7 @@ class BookEditorArgs {
       initialBook: Book(
         title: gtdBook.title ?? '',
         author: gtdBook.authors.firstOrNull?.name ?? 'Unknown',
-        // Map logic kiểm tra EPUB ở đây luôn
-        // hasFileAttached: format.applicationEpubZip != null,
         description: gtdBook.summaries.join('\n\n'),
-        tags: allTags,
         status: BookStatus.unfinished,
         dateAdded: DateTime.now(),
         dateModified: DateTime.now(),

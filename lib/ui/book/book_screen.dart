@@ -3,12 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/book/entities/book.dart';
-import 'package:leafy/domain/tag/entities/tag.dart';
+import 'package:leafy/domain/book/entities/book_with_details.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
 import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
+import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
-import 'package:leafy/logic/cubit/book_tags/book_tags_cubit.dart';
-import 'package:leafy/logic/cubit/book_tags/book_tags_state.dart';
 import 'package:leafy/logic/cubit/current_book_cubit.dart';
 import 'package:leafy/logic/utils/extensions.dart';
 import 'package:leafy/ui/book/widgets/book_detail.dart';
@@ -34,6 +33,18 @@ class BookScreen extends StatelessWidget {
 
     return MultiBlocProvider(
       providers: [
+        // BookDetailCubit: single source of truth for book + tags + resources
+        BlocProvider(
+          create: (context) {
+            final cubit = getIt<BookDetailCubit>();
+            final bookId = context.read<CurrentBookCubit>().state.id;
+            if (bookId != null) {
+              cubit.loadBook(bookId);
+            }
+            return cubit;
+          },
+        ),
+        // BookResourceCubit: kept for resource management operations
         BlocProvider(
           create: (context) {
             final cubit = getIt<BookResourceCubit>();
@@ -44,33 +55,27 @@ class BookScreen extends StatelessWidget {
             return cubit;
           },
         ),
-        BlocProvider(
-          create: (context) {
-            final cubit = getIt<BookTagsCubit>();
-            final bookId = context.read<CurrentBookCubit>().state.id;
-            if (bookId != null) {
-              cubit.loadTags(bookId);
-            }
-            return cubit;
-          },
-        ),
       ],
       child: MultiBlocListener(
         listeners: [
+          // Sync BookDetailCubit when CurrentBookCubit changes
           BlocListener<CurrentBookCubit, Book>(
             listenWhen: (previous, current) =>
                 previous.id != current.id && current.id != null,
             listener: (context, state) {
+              context.read<BookDetailCubit>().loadBook(state.id!);
               context.read<BookResourceCubit>().loadResources(state.id!);
-              context.read<BookTagsCubit>().loadTags(state.id!);
             },
           ),
+          // Handle BookActor actions (edit, delete, etc.)
           BlocListener<BookActorCubit, BookActorState>(
             listener: (context, actorState) {
               actorState.maybeWhen(
                 success: (message, book) {
                   if (book != null) {
+                    // Update both cubits for compatibility
                     context.currentBookCubit.setBook(book);
+                    context.read<BookDetailCubit>().updateBook(book);
                   }
 
                   ScaffoldMessenger.of(
@@ -96,40 +101,21 @@ class BookScreen extends StatelessWidget {
           child: Scaffold(
             extendBodyBehindAppBar: true,
             appBar: const BookScreenAppBar(),
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildCoverSpace(mediaQuery),
-                  BlocBuilder<CurrentBookCubit, Book>(
-                    builder: (context, state) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildTitleDetail(context, state),
-                          BookStatusDetail(book: state),
-                          BookReaderLauncherButton(book: state),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: ReadingStatsCard(
-                              bookId: state.id!,
-                              bookTitle: state.title,
-                            ),
-                          ),
-                          _buildBookFormatDetail(state),
-                          _buildPublicationYearDetail(state),
-                          _buildPagesDetail(state),
-                          const SizedBox(height: 50),
-                          _buildDescriptionDetail(state),
-                          _buildMyReviewDetail(state),
-                          _buildNotesDetail(state),
-                          _buildEditDates(state),
-                          const SizedBox(height: 100),
-                        ],
-                      );
-                    },
+            body: BlocBuilder<BookDetailCubit, BookDetailState>(
+              builder: (context, state) {
+                return state.maybeMap(
+                  loading: (_) =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (errorState) =>
+                      Center(child: Text(errorState.message)),
+                  loaded: (loadedState) => _buildContent(
+                    context,
+                    mediaQuery,
+                    loadedState.bookWithDetails,
                   ),
-                ],
-              ),
+                  orElse: () => const SizedBox.shrink(),
+                );
+              },
             ),
           ),
         ),
@@ -137,107 +123,129 @@ class BookScreen extends StatelessWidget {
     );
   }
 
-  BookDetailDateAddedUpdated _buildEditDates(Book state) {
-    return BookDetailDateAddedUpdated(
-      dateAdded: state.dateAdded,
-      dateModified: state.dateModified,
+  Widget _buildContent(
+    BuildContext context,
+    MediaQueryData mediaQuery,
+    BookWithDetails details,
+  ) {
+    final book = details.book;
+
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildCoverSpace(mediaQuery, book),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTitleDetail(details),
+              BookStatusDetail(book: book),
+              BookReaderLauncherButton(book: book),
+              if (book.id != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: ReadingStatsCard(
+                    bookId: book.id!,
+                    bookTitle: book.title,
+                  ),
+                ),
+              _buildBookFormatDetail(book),
+              _buildPublicationYearDetail(book),
+              _buildPagesDetail(book),
+              const SizedBox(height: 50),
+              _buildDescriptionDetail(book),
+              _buildMyReviewDetail(book),
+              _buildNotesDetail(book),
+              _buildEditDates(book),
+              const SizedBox(height: 100),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildNotesDetail(Book state) {
-    return (state.notes != null && state.notes!.isNotEmpty)
-        ? BookDetailLong(title: LocaleKeys.notes.tr(), text: state.notes!)
+  BookDetailDateAddedUpdated _buildEditDates(Book book) {
+    return BookDetailDateAddedUpdated(
+      dateAdded: book.dateAdded,
+      dateModified: book.dateModified,
+    );
+  }
+
+  Widget _buildNotesDetail(Book book) {
+    return (book.notes != null && book.notes!.isNotEmpty)
+        ? BookDetailLong(title: LocaleKeys.notes.tr(), text: book.notes!)
         : const SizedBox();
   }
 
-  Widget _buildMyReviewDetail(Book state) {
-    return (state.myReview != null && state.myReview!.isNotEmpty)
-        ? BookDetailLong(
-            title: LocaleKeys.my_review.tr(),
-            text: state.myReview!,
-          )
+  Widget _buildMyReviewDetail(Book book) {
+    return (book.myReview != null && book.myReview!.isNotEmpty)
+        ? BookDetailLong(title: LocaleKeys.my_review.tr(), text: book.myReview!)
         : const SizedBox();
   }
 
-  Widget _buildDescriptionDetail(Book state) {
-    return (state.description != null && state.description!.isNotEmpty)
+  Widget _buildDescriptionDetail(Book book) {
+    return (book.description != null && book.description!.isNotEmpty)
         ? BookDetailLong(
             title: LocaleKeys.description.tr(),
-            text: state.description!,
+            text: book.description!,
           )
         : const SizedBox();
   }
 
-  Widget _buildPagesDetail(Book state) {
-    return (state.pages != null)
+  Widget _buildPagesDetail(Book book) {
+    return (book.pages != null)
         ? BookDetail(
             title: LocaleKeys.pages_uppercase.tr(),
-            text: (state.pages ?? "").toString(),
+            text: (book.pages ?? "").toString(),
           )
         : const SizedBox();
   }
 
-  Widget _buildBookFormatDetail(Book state) {
+  Widget _buildBookFormatDetail(Book book) {
     return BookDetail(
       title: LocaleKeys.book_format.tr(),
-      text: state.bookFormat.text,
+      text: book.bookFormat.text,
     );
   }
 
-  Widget _buildPublicationYearDetail(Book state) {
-    return (state.publicationYear != null)
+  Widget _buildPublicationYearDetail(Book book) {
+    return (book.publicationYear != null)
         ? BookDetail(
             title: LocaleKeys.enter_publication_year.tr(),
-            text: (state.publicationYear ?? "").toString(),
+            text: (book.publicationYear ?? "").toString(),
           )
         : const SizedBox();
   }
 
-  Widget _buildCoverSpace(MediaQueryData mediaQuery) {
-    return BlocBuilder<CurrentBookCubit, Book>(
-      buildWhen: (previous, current) => previous.blurHash != current.blurHash,
-      builder: (context, state) {
-        return state.hasCover == true
-            ? Center(
-                child: CoverView(heroTag: heroTag, book: state),
-              )
-            : Container(
-                padding: EdgeInsets.fromLTRB(
-                  50,
-                  mediaQuery.padding.top + 20,
-                  50,
-                  50,
-                ),
-                height:
-                    (mediaQuery.size.height / 2.5) +
-                    mediaQuery.padding.top +
-                    20,
-                width: double.infinity,
-                child: const ImagePlaceholder(borderRadius: 10),
-              );
-      },
-    );
+  Widget _buildCoverSpace(MediaQueryData mediaQuery, Book book) {
+    return book.hasCover == true
+        ? Center(
+            child: CoverView(heroTag: heroTag, book: book),
+          )
+        : Container(
+            padding: EdgeInsets.fromLTRB(
+              50,
+              mediaQuery.padding.top + 20,
+              50,
+              50,
+            ),
+            height:
+                (mediaQuery.size.height / 2.5) + mediaQuery.padding.top + 20,
+            width: double.infinity,
+            child: const ImagePlaceholder(borderRadius: 10),
+          );
   }
 
-  Widget _buildTitleDetail(BuildContext context, Book state) {
-    if (state.id == null) return const SizedBox();
+  Widget _buildTitleDetail(BookWithDetails details) {
+    if (details.id == null) return const SizedBox();
 
-    return BlocBuilder<BookTagsCubit, BookTagsState>(
-      builder: (context, tagsState) {
-        final tags = tagsState.maybeMap(
-          success: (s) => s.tags,
-          orElse: () => <Tag>[],
-        );
-
-        return BookTitleDetail(
-          title: state.title.toString(),
-          subtitle: state.subtitle,
-          author: state.author.toString(),
-          publicationYear: (state.publicationYear ?? "").toString(),
-          tags: tags,
-          bookType: state.bookFormat,
-        );
-      },
+    return BookTitleDetail(
+      title: details.title,
+      subtitle: details.book.subtitle,
+      author: details.book.author,
+      publicationYear: (details.book.publicationYear ?? "").toString(),
+      tags: details.tags,
+      bookType: details.book.bookFormat,
     );
   }
 }

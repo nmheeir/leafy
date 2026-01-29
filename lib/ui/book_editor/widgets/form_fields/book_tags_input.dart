@@ -10,16 +10,25 @@ import 'package:leafy/ui/common/widgets/tag_input_field.dart';
 ///
 /// This widget handles tag creation and editing in the book editor.
 /// It integrates with the new tag system using TagRepository and BookTagRepository.
+///
+/// Tags are managed independently from the Book entity since book.tags field
+/// has been removed. Tags are saved directly via use cases when the book is saved.
 class BookTagsInput extends StatefulWidget {
-  const BookTagsInput({super.key});
+  /// Callback when tags are changed - parent can use this to track changes
+  final void Function(List<Tag> tags)? onTagsChanged;
+
+  const BookTagsInput({super.key, this.onTagsChanged});
 
   @override
-  State<BookTagsInput> createState() => _BookTagsInputState();
+  State<BookTagsInput> createState() => BookTagsInputState();
 }
 
-class _BookTagsInputState extends State<BookTagsInput> {
+class BookTagsInputState extends State<BookTagsInput> {
   List<Tag> _selectedTags = [];
   bool _isLoading = true;
+
+  /// Get current selected tags (can be accessed by parent via GlobalKey)
+  List<Tag> get selectedTags => _selectedTags;
 
   @override
   void initState() {
@@ -48,57 +57,52 @@ class _BookTagsInputState extends State<BookTagsInput> {
             _selectedTags = tags;
             _isLoading = false;
           });
+          widget.onTagsChanged?.call(tags);
         },
       );
     } else {
-      // New book - check if there are legacy tags to migrate
-      if (book.tags != null && book.tags!.isNotEmpty) {
-        await _migrateLegacyTags(book.tags!);
-      }
-
+      // New book - start with empty tags
       setState(() {
         _isLoading = false;
       });
     }
   }
 
-  Future<void> _migrateLegacyTags(String legacyTags) async {
-    final tagNames = legacyTags.split('|||||');
-    final tagRepo = context.read<TagRepository>();
-    final List<Tag> tags = [];
-
-    for (final name in tagNames) {
-      if (name.trim().isEmpty) continue;
-
-      final result = await tagRepo.getOrCreateTag(name.trim());
-      result.fold(
-        (failure) {
-          // Skip on failure
-        },
-        (tag) {
-          tags.add(tag);
-        },
-      );
-    }
-
-    setState(() {
-      _selectedTags = tags;
-    });
-  }
-
   void _handleTagsChanged(List<Tag> tags) {
     setState(() {
       _selectedTags = tags;
     });
+    widget.onTagsChanged?.call(tags);
+  }
 
-    // Update the book's legacy tags field for backward compatibility
-    // This will be used during save to create the associations
-    final tagNames = tags.map((t) => t.name).join('|||||');
-    context.read<EditBookCubit>().emit(
-      context.read<EditBookCubit>().state.copyWith(
-        tags: tagNames.isEmpty ? null : tagNames,
-      ),
-    );
+  /// Save tags to database for the given book ID
+  /// This should be called by the parent after the book is saved
+  Future<void> saveTagsToBook(int bookId) async {
+    final bookTagRepo = context.read<BookTagRepository>();
+    final tagRepo = context.read<TagRepository>();
+
+    // First, remove all existing tags
+    await bookTagRepo.removeAllTagsFromBook(bookId);
+
+    // Then add each selected tag
+    for (final tag in _selectedTags) {
+      if (tag.id != null) {
+        await bookTagRepo.addTagToBookById(bookId, tag.id!);
+      } else {
+        // If tag doesn't have ID, need to get or create it first
+        final result = await tagRepo.getOrCreateTag(tag.name);
+        result.fold(
+          (failure) {
+            // Skip on failure
+          },
+          (createdTag) async {
+            if (createdTag.id != null) {
+              await bookTagRepo.addTagToBookById(bookId, createdTag.id!);
+            }
+          },
+        );
+      }
+    }
   }
 
   @override

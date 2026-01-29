@@ -29,8 +29,6 @@ class _TagInputFieldState extends State<TagInputField> {
   final FocusNode _focusNode = FocusNode();
   List<Tag> _availableTags = [];
   List<Tag> _filteredTags = [];
-  bool _isLoading = false;
-
   @override
   void initState() {
     super.initState();
@@ -46,21 +44,17 @@ class _TagInputFieldState extends State<TagInputField> {
   }
 
   Future<void> _loadAvailableTags() async {
-    setState(() => _isLoading = true);
-
     final tagRepository = context.read<TagRepository>();
     final result = await tagRepository.getAllActiveTags();
 
     result.fold(
       (failure) {
         // Handle error
-        setState(() => _isLoading = false);
       },
       (tags) {
         setState(() {
           _availableTags = tags;
           _filteredTags = [];
-          _isLoading = false;
         });
       },
     );

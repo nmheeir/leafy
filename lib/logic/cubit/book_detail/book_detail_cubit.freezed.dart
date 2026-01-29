@@ -128,12 +128,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( Book book)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  initial,TResult Function()?  loading,TResult Function( BookWithDetails bookWithDetails)?  loaded,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.book);case _Error() when error != null:
+return loaded(_that.bookWithDetails);case _Error() when error != null:
 return error(_that.message);case _:
   return orElse();
 
@@ -152,12 +152,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( Book book)  loaded,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  initial,required TResult Function()  loading,required TResult Function( BookWithDetails bookWithDetails)  loaded,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case _Initial():
 return initial();case _Loading():
 return loading();case _Loaded():
-return loaded(_that.book);case _Error():
+return loaded(_that.bookWithDetails);case _Error():
 return error(_that.message);case _:
   throw StateError('Unexpected subclass');
 
@@ -175,12 +175,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( Book book)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  initial,TResult? Function()?  loading,TResult? Function( BookWithDetails bookWithDetails)?  loaded,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case _Initial() when initial != null:
 return initial();case _Loading() when loading != null:
 return loading();case _Loaded() when loaded != null:
-return loaded(_that.book);case _Error() when error != null:
+return loaded(_that.bookWithDetails);case _Error() when error != null:
 return error(_that.message);case _:
   return null;
 
@@ -257,10 +257,10 @@ String toString() {
 
 
 class _Loaded implements BookDetailState {
-  const _Loaded(this.book);
+  const _Loaded(this.bookWithDetails);
   
 
- final  Book book;
+ final  BookWithDetails bookWithDetails;
 
 /// Create a copy of BookDetailState
 /// with the given fields replaced by the non-null parameter values.
@@ -272,16 +272,16 @@ _$LoadedCopyWith<_Loaded> get copyWith => __$LoadedCopyWithImpl<_Loaded>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.book, book) || other.book == book));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Loaded&&(identical(other.bookWithDetails, bookWithDetails) || other.bookWithDetails == bookWithDetails));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,book);
+int get hashCode => Object.hash(runtimeType,bookWithDetails);
 
 @override
 String toString() {
-  return 'BookDetailState.loaded(book: $book)';
+  return 'BookDetailState.loaded(bookWithDetails: $bookWithDetails)';
 }
 
 
@@ -292,7 +292,7 @@ abstract mixin class _$LoadedCopyWith<$Res> implements $BookDetailStateCopyWith<
   factory _$LoadedCopyWith(_Loaded value, $Res Function(_Loaded) _then) = __$LoadedCopyWithImpl;
 @useResult
 $Res call({
- Book book
+ BookWithDetails bookWithDetails
 });
 
 
@@ -309,10 +309,10 @@ class __$LoadedCopyWithImpl<$Res>
 
 /// Create a copy of BookDetailState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? book = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? bookWithDetails = null,}) {
   return _then(_Loaded(
-null == book ? _self.book : book // ignore: cast_nullable_to_non_nullable
-as Book,
+null == bookWithDetails ? _self.bookWithDetails : bookWithDetails // ignore: cast_nullable_to_non_nullable
+as BookWithDetails,
   ));
 }
 

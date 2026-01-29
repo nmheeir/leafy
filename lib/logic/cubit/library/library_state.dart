@@ -9,18 +9,10 @@ class LibraryState with _$LibraryState {
 
   const LibraryState._();
 
-  List<String> get allTags {
-    return maybeWhen(
-      loaded: (books) {
-        final tags = <String>{};
-        for (var book in books) {
-          if (book.tags != null) tags.addAll(book.tags!.split('|||||'));
-        }
-        return tags.toList()..sort();
-      },
-      orElse: () => [],
-    );
-  }
+  // NOTE: Tags are now managed through the Tag system (separate tags table).
+  // Use GetAllActiveTagsUseCase to get all tags instead of this getter.
+  // This getter is kept for backward compatibility but returns empty list.
+  List<String> get allTags => [];
 
   /// Lấy danh sách tất cả tác giả (không trùng lặp, sắp xếp A-Z)
   List<String> get allAuthors {

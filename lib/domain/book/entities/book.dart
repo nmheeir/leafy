@@ -14,7 +14,6 @@ class Book extends Equatable {
   final int? rating;
   final int? pages;
   final int? publicationYear;
-  final String? tags;
   final String? myReview;
   final String? notes;
   final String? blurHash;
@@ -41,7 +40,6 @@ class Book extends Equatable {
       rating: null,
       pages: null,
       publicationYear: null,
-      tags: null,
       myReview: null,
       notes: null,
       blurHash: null,
@@ -66,7 +64,6 @@ class Book extends Equatable {
     this.rating,
     this.pages,
     this.publicationYear,
-    this.tags,
     this.myReview,
     this.notes,
     this.blurHash,
@@ -113,7 +110,6 @@ class Book extends Equatable {
       rating: rating ?? this.rating,
       pages: pages ?? this.pages,
       publicationYear: publicationYear ?? this.publicationYear,
-      tags: tags ?? this.tags,
       myReview: myReview ?? this.myReview,
       notes: notes ?? this.notes,
       blurHash: blurHash ?? this.blurHash,
@@ -139,7 +135,6 @@ class Book extends Equatable {
     rating,
     pages,
     publicationYear,
-    tags,
     myReview,
     notes,
     blurHash,

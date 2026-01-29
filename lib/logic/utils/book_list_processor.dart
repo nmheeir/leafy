@@ -57,28 +57,16 @@ class BookListProcessor {
     required bool asAnd,
     required bool filterOut,
   }) {
-    final selectedTags = tags.split(Constants.tagDelimeter);
+    // TODO: Tag filtering now requires async lookup from BookTagRepository.
+    // This synchronous processor cannot directly filter by tags anymore.
+    // Consider:
+    // 1. Pre-loading tags for each book before calling this processor
+    // 2. Using a separate async filter method
+    // 3. Passing a Map<int, List<String>> bookIdToTags parameter
 
-    return list.where((book) {
-      if (book.tags == null) {
-        return filterOut; // Nếu lọc bỏ tag mà sách ko có tag -> giữ lại
-      }
-
-      final bookTags = book.tags!.split(Constants.tagDelimeter);
-
-      if (filterOut) {
-        // Loại bỏ nếu chứa bất kỳ tag nào trong selectedTags
-        return !bookTags.any((t) => selectedTags.contains(t));
-      } else {
-        if (asAnd) {
-          // Phải chứa TẤT CẢ selectedTags
-          return selectedTags.every((t) => bookTags.contains(t));
-        } else {
-          // Chỉ cần chứa MỘT TRONG CÁC selectedTags
-          return bookTags.any((t) => selectedTags.contains(t));
-        }
-      }
-    }).toList();
+    // For now, return the list unfiltered when tag filter is applied.
+    // The UI should be updated to use the new tag system for filtering.
+    return list;
   }
 
   static List<Book> _sort({

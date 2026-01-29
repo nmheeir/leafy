@@ -8,8 +8,6 @@ import 'package:leafy/domain/statistics/entities/daily_reading.dart';
 import 'package:leafy/domain/statistics/entities/genre_stats.dart';
 import 'package:leafy/domain/statistics/repositories/stats_repository.dart';
 
-import 'dart:developer';
-
 import 'package:logger/logger.dart';
 
 part 'stats_event.dart';

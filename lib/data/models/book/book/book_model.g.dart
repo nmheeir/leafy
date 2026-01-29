@@ -35,7 +35,6 @@ _BookModel _$BookModelFromJson(Map<String, dynamic> json) => _BookModel(
   dateModified: DateTime.parse(json['date_modified'] as String),
   pages: (json['pages'] as num?)?.toInt(),
   publicationYear: (json['publication_year'] as num?)?.toInt(),
-  tags: json['tags'] as String?,
   myReview: json['my_review'] as String?,
   notes: json['notes'] as String?,
   hasCover: json['has_cover'] == null
@@ -62,7 +61,6 @@ Map<String, dynamic> _$BookModelToJson(_BookModel instance) =>
       'date_modified': instance.dateModified.toIso8601String(),
       'pages': instance.pages,
       'publication_year': instance.publicationYear,
-      'tags': instance.tags,
       'my_review': instance.myReview,
       'notes': instance.notes,
       'has_cover': const IntToBoolConverter().toJson(instance.hasCover),

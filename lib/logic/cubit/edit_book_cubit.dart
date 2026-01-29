@@ -19,13 +19,12 @@ class EditBookCubit extends Cubit<Book> {
     String? olidRaw,
     int? publishYear,
     required BookFormat defaultFormat,
-    required List<String> defaultTags,
+    required List<String>
+    defaultTags, // Tags sẽ được xử lý riêng qua EditBookTagsCubit
     BookStatus? status,
     int? coverId,
   }) {
-    final String? formattedTags = defaultTags.isNotEmpty
-        ? defaultTags.join('|||||')
-        : null;
+    // Note: defaultTags sẽ được xử lý riêng trong BookEditorScreen thông qua use cases
 
     final newBook = Book(
       id: null,
@@ -37,7 +36,6 @@ class EditBookCubit extends Cubit<Book> {
       pages: pages,
       publicationYear: publishYear,
       bookFormat: defaultFormat,
-      tags: formattedTags,
       dateAdded: DateTime.now(),
       dateModified: DateTime.now(),
 
@@ -60,18 +58,13 @@ class EditBookCubit extends Cubit<Book> {
     BookStatus? status,
   }) {
     final newAuthor = authors.map((e) => e.name ?? "Unknown").join(", ");
-    final allTags = [...bookshelves, ...subjects];
-
-    final String? formattedTags = allTags.isNotEmpty
-        ? allTags.join('|||||')
-        : null;
+    // Note: bookshelves và subjects (tags) sẽ được xử lý riêng trong BookEditorScreen
 
     final newBook = Book(
       title: title ?? 'Unknow title',
       author: newAuthor,
       description: description,
       status: BookStatus.unfinished,
-      tags: formattedTags,
       dateAdded: DateTime.now(),
       dateModified: DateTime.now(),
     );
@@ -125,35 +118,7 @@ class EditBookCubit extends Cubit<Book> {
 
   void setFinishDate(DateTime? date) => emit(state.copyWith(finishDate: date));
 
-  // --- LOGIC XỬ LÝ TAGS ---
-
-  void addNewTag(String tag) {
-    // Clean tag input
-    tag = tag.trim().replaceAll('@', '').replaceAll('|', '');
-    if (tag.isEmpty) return;
-
-    final currentTags = state.tags?.split('|||||') ?? [];
-    if (currentTags.contains(tag)) return; // Tránh trùng lặp
-
-    final newTagsList = [...currentTags, tag];
-
-    // Sort tag cho đẹp nếu muốn
-    newTagsList.sort();
-
-    emit(state.copyWith(tags: newTagsList.join('|||||')));
-  }
-
-  void removeTag(String tag) {
-    final currentTags = state.tags?.split('|||||') ?? [];
-
-    if (!currentTags.contains(tag)) return;
-
-    currentTags.remove(tag);
-
-    emit(
-      state.copyWith(
-        tags: currentTags.isEmpty ? null : currentTags.join('|||||'),
-      ),
-    );
-  }
+  // NOTE: Tags are now managed separately through EditBookTagsCubit
+  // The addNewTag and removeTag methods have been removed.
+  // Use the BookTagsInput widget which handles tag operations via use cases.
 }
