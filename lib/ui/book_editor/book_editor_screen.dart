@@ -318,45 +318,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     });
   }
 
-  // TODO: uncomment this
-  // void _setDefaultTags(Book book) {
-  //   final defaultTags = context.read<DefaultBookTagsCubit>().state;
-
-  //   if (book.id == null) {
-  //     context.editBookCubit.setBook(
-  //       book.copyWith(
-  //         tags: defaultTags.isNotEmpty ? defaultTags.join('|||||') : null,
-  //       ),
-  //     );
-  //   }
-  // }
-
-  void _handlePickFile() async {
-    // TODO: Sử dụng file_picker package để chọn file .epub
-    // FilePickerResult? result = await FilePicker.platform.pickFiles(
-    //   type: FileType.custom,
-    //   allowedExtensions: ['epub'],
-    // );
-
-    // if (result != null) {
-    //   setState(() {
-    //     _currentFilePath = result.files.single.path;
-    //     _currentDownloadUrl = null; // Nếu pick file local thì bỏ url download đi
-    //   });
-    //   // Update vào Cubit nếu cần: context.editBookCubit.setFilePath(...)
-    // }
-
-    debugPrint("User clicked Pick File");
-  }
-
-  void _handleDeleteFile() {
-    setState(() {
-      _currentFilePath = null;
-      _currentDownloadUrl = null;
-    });
-    // Update vào Cubit: context.editBookCubit.setFilePath(null);
-  }
-
   @override
   void initState() {
     super.initState();
@@ -364,8 +325,6 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
     context.bookEditorActionCubit.reset();
 
     final args = widget.args;
-    // _currentFilePath = widget.args.initialBook.filePath;
-    // _currentFilePath = "adsfjlajdf";
     _currentDownloadUrl = widget.args.downloadFileUrl;
 
     // 2. Set dữ liệu sách vào Cubit & Controller
@@ -514,14 +473,14 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 10),
-                  BookFileCard(
-                    localFilePath: _currentFilePath,
-                    downloadUrl: _currentDownloadUrl,
-                    onPickFile: _handlePickFile,
-                    onDeleteFile: _handleDeleteFile,
-                  ),
-                  const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  // const SizedBox(height: 10),
+                  // BookFileCard(
+                  //   localFilePath: _currentFilePath,
+                  //   downloadUrl: _currentDownloadUrl,
+                  //   onPickFile: _handlePickFile,
+                  //   onDeleteFile: _handleDeleteFile,
+                  // ),
+                  // const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   if (widget.args.isEditMode)
                     BookStatusRow(
                       animDuration: _animDuration,
@@ -529,45 +488,10 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     ),
                   const SizedBox(height: 10),
                   BookRatingBar(animDuration: _animDuration),
-                  // Readings section removed - now using ReadingSession table
-                  // _buildAddNewReadingButton(context),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
                   BookTypeDropdown(
                     bookTypes: bookTypes,
                     changeBookType: _changeBookType,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      // DEPRECATED
-                      // Expanded(
-                      //   child: BookTextField(
-                      //     controller: _pagesCtrl,
-                      //     hint: LocaleKeys.enter_pages.tr(),
-                      //     icon: FontAwesomeIcons.solidFileLines,
-                      //     keyboardType: TextInputType.number,
-                      //     inputFormatters: <TextInputFormatter>[
-                      //       FilteringTextInputFormatter.digitsOnly,
-                      //     ],
-                      //     maxLength: 10,
-                      //     padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
-                      //   ),
-                      // ),
-                      // DEPRECATED
-                      // Expanded(
-                      //   child: BookTextField(
-                      //     controller: _pubYearCtrl,
-                      //     hint: LocaleKeys.enter_publication_year.tr(),
-                      //     icon: FontAwesomeIcons.solidCalendar,
-                      //     keyboardType: TextInputType.number,
-                      //     inputFormatters: <TextInputFormatter>[
-                      //       FilteringTextInputFormatter.digitsOnly,
-                      //     ],
-                      //     maxLength: 4,
-                      //     padding: const EdgeInsets.fromLTRB(5, 0, 10, 0),
-                      //   ),
-                      // ),
-                    ],
                   ),
                   const SizedBox(height: 10),
                   BookTextField(
@@ -581,72 +505,9 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
-                  // DEPRECATED:
-                  // Row(
-                  //   children: [
-                  //     Expanded(
-                  //       child: BookTextField(
-                  //         controller: _isbnCtrl,
-                  //         hint: LocaleKeys.isbn.tr(),
-                  //         icon: FontAwesomeIcons.i,
-                  //         textCapitalization: TextCapitalization.characters,
-                  //         keyboardType: TextInputType.text,
-                  //         maxLength: 20,
-                  //       ),
-                  //     ),
-                  //     InkWell(
-                  //       customBorder: RoundedRectangleBorder(
-                  //         borderRadius: BorderRadius.circular(cornerRadius),
-                  //       ),
-                  //       onTap: () async {
-                  //         // var result = await BarcodeScanner.scan(
-                  //         //   options: ScanOptions(
-                  //         //     strings: {
-                  //         //       'cancel': LocaleKeys.cancel.tr(),
-                  //         //       'flash_on': LocaleKeys.flash_on.tr(),
-                  //         //       'flash_off': LocaleKeys.flash_off.tr(),
-                  //         //     },
-                  //         //   ),
-                  //         // );
-
-                  //         // if (result.type == ResultType.Barcode) {
-                  //         //   setState(() {
-                  //         //     _isbnCtrl.text = result.rawContent;
-                  //         //   });
-                  //         // }
-                  //       },
-                  //       child: Container(
-                  //         height: 60,
-                  //         width: 60,
-                  //         padding: const EdgeInsets.all(10),
-                  //         decoration: BoxDecoration(
-                  //           borderRadius: BorderRadius.circular(cornerRadius),
-                  //           color: context.colorScheme.surfaceContainerHighest
-                  //               .withValues(alpha: 0.5),
-                  //         ),
-                  //         child: Icon(
-                  //           FontAwesomeIcons.barcode,
-                  //           size: 28,
-                  //           color: context.colorScheme.primary,
-                  //         ),
-                  //       ),
-                  //     ),
-                  //     const SizedBox(width: 10),
-                  //   ],
-                  // ),
-                  const SizedBox(height: 10),
-                  // DEPRECATED:
-                  // BookTextField(
-                  //   controller: _olidCtrl,
-                  //   hint: LocaleKeys.open_library_ID.tr(),
-                  //   icon: FontAwesomeIcons.o,
-                  //   keyboardType: TextInputType.text,
-                  //   maxLength: 20,
-                  //   textCapitalization: TextCapitalization.characters,
-                  // ),
-                  const SizedBox(height: 10),
                   const BookTagsInput(),
                   const Padding(padding: EdgeInsets.all(10), child: Divider()),
+                  //NOTE: Review thì sau khi đọc xong sách mới có thể viết
                   BookTextField(
                     controller: _myReviewCtrl,
                     hint: LocaleKeys.my_review.tr(),
@@ -658,6 +519,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                     textCapitalization: TextCapitalization.sentences,
                   ),
                   const SizedBox(height: 10),
+                  //NOTE: Notes thì sau khi đọc xong sách mới có thể viết
                   BookTextField(
                     controller: _notesCtrl,
                     hint: LocaleKeys.notes.tr(),

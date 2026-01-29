@@ -159,6 +159,34 @@ import '../domain/services/open_library_service.dart' as _i625;
 import '../domain/statistics/repositories/stats_repository.dart' as _i1061;
 import '../domain/tag/repositories/book_tag_repository.dart' as _i470;
 import '../domain/tag/repositories/tag_repository.dart' as _i684;
+import '../domain/tag/usecases/add_tag_to_book.dart' as _i131;
+import '../domain/tag/usecases/add_tag_to_book_by_id.dart' as _i638;
+import '../domain/tag/usecases/cleanup_orphaned_tags.dart' as _i609;
+import '../domain/tag/usecases/count_books_for_tag.dart' as _i450;
+import '../domain/tag/usecases/create_tag.dart' as _i194;
+import '../domain/tag/usecases/delete_tag.dart' as _i865;
+import '../domain/tag/usecases/find_orphaned_tags.dart' as _i419;
+import '../domain/tag/usecases/find_related_books.dart' as _i342;
+import '../domain/tag/usecases/get_all_active_tags.dart' as _i495;
+import '../domain/tag/usecases/get_books_with_all_tags.dart' as _i1000;
+import '../domain/tag/usecases/get_books_with_any_tag.dart' as _i369;
+import '../domain/tag/usecases/get_books_with_tag.dart' as _i171;
+import '../domain/tag/usecases/get_books_with_tag_excluding_tag.dart' as _i484;
+import '../domain/tag/usecases/get_frequently_tagged_together.dart' as _i170;
+import '../domain/tag/usecases/get_or_create_tag.dart' as _i890;
+import '../domain/tag/usecases/get_system_tags.dart' as _i897;
+import '../domain/tag/usecases/get_tag_by_id.dart' as _i721;
+import '../domain/tag/usecases/get_tag_by_name.dart' as _i42;
+import '../domain/tag/usecases/get_tag_statistics.dart' as _i992;
+import '../domain/tag/usecases/get_tags_by_category.dart' as _i972;
+import '../domain/tag/usecases/get_tags_for_book.dart' as _i472;
+import '../domain/tag/usecases/get_user_tags.dart' as _i342;
+import '../domain/tag/usecases/merge_tags.dart' as _i861;
+import '../domain/tag/usecases/remove_all_tags_from_book.dart' as _i110;
+import '../domain/tag/usecases/remove_tag_from_book.dart' as _i967;
+import '../domain/tag/usecases/restore_tag.dart' as _i915;
+import '../domain/tag/usecases/update_tag.dart' as _i697;
+import '../domain/tag/usecases/update_tag_order.dart' as _i316;
 import '../domain/translation/repository/translation_repository.dart' as _i499;
 import '../domain/translation/usecases/generate_chapter_summary.dart' as _i431;
 import '../domain/translation/usecases/get_translated_chapter.dart' as _i533;
@@ -565,6 +593,51 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i466.DownloadGtdCoverUseCase>(),
       ),
     );
+    gh.factory<_i609.CleanupOrphanedTagsUseCase>(
+      () => _i609.CleanupOrphanedTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i194.CreateTagUseCase>(
+      () => _i194.CreateTagUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i865.DeleteTagUseCase>(
+      () => _i865.DeleteTagUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i419.FindOrphanedTagsUseCase>(
+      () => _i419.FindOrphanedTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i495.GetAllActiveTagsUseCase>(
+      () => _i495.GetAllActiveTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i890.GetOrCreateTagUseCase>(
+      () => _i890.GetOrCreateTagUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i897.GetSystemTagsUseCase>(
+      () => _i897.GetSystemTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i721.GetTagByIdUseCase>(
+      () => _i721.GetTagByIdUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i42.GetTagByNameUseCase>(
+      () => _i42.GetTagByNameUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i992.GetTagStatisticsUseCase>(
+      () => _i992.GetTagStatisticsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i972.GetTagsByCategoryUseCase>(
+      () => _i972.GetTagsByCategoryUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i342.GetUserTagsUseCase>(
+      () => _i342.GetUserTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i861.MergeTagsUseCase>(
+      () => _i861.MergeTagsUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i915.RestoreTagUseCase>(
+      () => _i915.RestoreTagUseCase(gh<_i684.TagRepository>()),
+    );
+    gh.factory<_i697.UpdateTagUseCase>(
+      () => _i697.UpdateTagUseCase(gh<_i684.TagRepository>()),
+    );
     gh.factory<_i137.TagManagementCubit>(
       () => _i137.TagManagementCubit(gh<_i684.TagRepository>()),
     );
@@ -580,6 +653,49 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i623.SaveImportedResourceUseCase(
         gh<_i1042.BookResourceRepository>(),
       ),
+    );
+    gh.factory<_i131.AddTagToBookUseCase>(
+      () => _i131.AddTagToBookUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i638.AddTagToBookByIdUseCase>(
+      () => _i638.AddTagToBookByIdUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i450.CountBooksForTagUseCase>(
+      () => _i450.CountBooksForTagUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i342.FindRelatedBooksUseCase>(
+      () => _i342.FindRelatedBooksUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i1000.GetBooksWithAllTagsUseCase>(
+      () => _i1000.GetBooksWithAllTagsUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i369.GetBooksWithAnyTagUseCase>(
+      () => _i369.GetBooksWithAnyTagUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i171.GetBooksWithTagUseCase>(
+      () => _i171.GetBooksWithTagUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i484.GetBooksWithTagExcludingTagUseCase>(
+      () => _i484.GetBooksWithTagExcludingTagUseCase(
+        gh<_i470.BookTagRepository>(),
+      ),
+    );
+    gh.factory<_i170.GetFrequentlyTaggedTogetherUseCase>(
+      () => _i170.GetFrequentlyTaggedTogetherUseCase(
+        gh<_i470.BookTagRepository>(),
+      ),
+    );
+    gh.factory<_i472.GetTagsForBookUseCase>(
+      () => _i472.GetTagsForBookUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i110.RemoveAllTagsFromBookUseCase>(
+      () => _i110.RemoveAllTagsFromBookUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i967.RemoveTagFromBookUseCase>(
+      () => _i967.RemoveTagFromBookUseCase(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i316.UpdateTagOrderUseCase>(
+      () => _i316.UpdateTagOrderUseCase(gh<_i470.BookTagRepository>()),
     );
     gh.factory<_i916.BookTagsCubit>(
       () => _i916.BookTagsCubit(gh<_i470.BookTagRepository>()),
