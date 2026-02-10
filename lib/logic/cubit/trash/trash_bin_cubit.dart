@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/domain/book/usecases/get_deleted_book.dart';
+import 'package:leafy/domain/book/usecases/delete_book_permanently.dart';
 import 'package:leafy/domain/book/usecases/restore_book.dart';
 import 'package:logger/logger.dart';
 
@@ -14,8 +15,8 @@ part 'trash_bin_state.dart';
 class TrashBinCubit extends Cubit<TrashBinState> {
   final GetDeletedBooksUseCase _getDeletedBooksUseCase;
   final RestoreBookUseCase _restoreBookUseCase;
+  final DeleteBookPermanentlyUseCase _deleteBookPermanentlyUseCase;
   final Logger _logger;
-  // final DeleteBookPermanentlyUseCase _deleteBookPermanentlyUseCase;
 
   // Cache danh sách local để Optimistic Update (Cập nhật UI ngay lập tức)
   List<Book> _currentDeletedBooks = [];
@@ -24,7 +25,7 @@ class TrashBinCubit extends Cubit<TrashBinState> {
     this._logger,
     this._getDeletedBooksUseCase,
     this._restoreBookUseCase,
-    // this._deleteBookPermanentlyUseCase,
+    this._deleteBookPermanentlyUseCase,
   ) : super(const TrashBinState.initial());
 
   /// Use Case 1: Lấy danh sách sách đã xóa
@@ -77,24 +78,24 @@ class TrashBinCubit extends Cubit<TrashBinState> {
 
   /// Use Case 3: Xóa vĩnh viễn (Hard Delete)
   Future<void> deletePermanently(int bookId) async {
-    // final result = await _deleteBookPermanentlyUseCase(bookId);
+    final result = await _deleteBookPermanentlyUseCase(bookId);
 
-    // result.fold(
-    //   (failure) => emit(TrashBinState.error(failure.message ?? "Xóa thất bại")),
-    //   (_) {
-    //     _currentDeletedBooks.removeWhere((book) => book.id == bookId);
+    result.fold(
+      (failure) => emit(TrashBinState.error(failure.message ?? "Xóa thất bại")),
+      (_) {
+        _currentDeletedBooks.removeWhere((book) => book.id == bookId);
 
-    //     emit(const TrashBinState.actionSuccess("Đã xóa vĩnh viễn"));
+        emit(const TrashBinState.actionSuccess("Đã xóa vĩnh viễn"));
 
-    //     if (_currentDeletedBooks.isEmpty) {
-    //       emit(const TrashBinState.empty());
-    //     } else {
-    //       emit(
-    //         TrashBinState.loaded(deletedBooks: List.from(_currentDeletedBooks)),
-    //       );
-    //     }
-    //   },
-    // );
+        if (_currentDeletedBooks.isEmpty) {
+          emit(const TrashBinState.empty());
+        } else {
+          emit(
+            TrashBinState.loaded(deletedBooks: List.from(_currentDeletedBooks)),
+          );
+        }
+      },
+    );
   }
 
   Future<void> emptyTrash() async {

@@ -2,7 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:leafy/core/constants/constants.dart';
+// import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
@@ -120,7 +120,8 @@ class _TrashScreenState extends State<TrashScreen> {
   Widget _buildTrashList(List<Book> books) {
     return ListView.builder(
       itemCount: books.length,
-      padding: const EdgeInsets.only(bottom: 20),
+      // Add more bottom padding to avoid FAB overlap (if any) and look better
+      padding: const EdgeInsets.fromLTRB(0, 10, 0, 100),
       itemBuilder: (context, index) {
         final book = books[index];
         final uniqueKey = Key('trash_${book.id}');
@@ -132,24 +133,25 @@ class _TrashScreenState extends State<TrashScreen> {
             context,
             Alignment.centerLeft,
             Colors.green,
-            Icons.restore,
+            Icons.restore_from_trash_rounded,
             LocaleKeys.restore_book.tr(),
           ),
           secondaryBackground: _buildSwipeBackground(
             context,
             Alignment.centerRight,
-            Colors.red,
-            Icons.delete_forever,
+            context.colorScheme.error,
+            Icons.delete_forever_rounded,
             LocaleKeys.delete_permanently.tr(),
           ),
           confirmDismiss: (direction) async {
-            // Vuốt phái -> trái: hiển thị confirm delete permently dialog
+            // Vuốt phải -> trái (EndToStart): Confirm delete permanently
             if (direction == DismissDirection.endToStart) {
               return await _showConfirmDialog(
                 context,
                 LocaleKeys.delete_perm_question.tr(),
               );
             }
+            // Swipe Left -> Right (StartToEnd): Restore immediately
             return true;
           },
           onDismissed: (direction) {
@@ -162,7 +164,7 @@ class _TrashScreenState extends State<TrashScreen> {
           child: BookCardList(
             book: book,
             heroTag: 'trash_hero_${book.id}',
-            addBottomPadding: index == books.length - 1,
+            addBottomPadding: false, // Handle padding in ListView
             onPressed: () {},
           ),
         );
@@ -179,14 +181,18 @@ class _TrashScreenState extends State<TrashScreen> {
   ) {
     return Container(
       alignment: alignment,
-      color: color,
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+      ),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white),
-          const SizedBox(width: 8),
-          if (alignment == Alignment.centerLeft)
+          if (alignment == Alignment.centerLeft) ...[
+            Icon(icon, color: Colors.white),
+            const SizedBox(width: 8),
             Text(
               label,
               style: const TextStyle(
@@ -194,6 +200,17 @@ class _TrashScreenState extends State<TrashScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ] else ...[
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(icon, color: Colors.white),
+          ],
         ],
       ),
     );
@@ -204,24 +221,37 @@ class _TrashScreenState extends State<TrashScreen> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(cornerRadius),
+              backgroundColor: context.colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
+              title: Row(
+                children: [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: context.colorScheme.error,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(title, style: const TextStyle(fontSize: 18)),
+                  ),
+                ],
               ),
-              title: Text(title, style: const TextStyle(fontSize: 16)),
+              content: Text(
+                'This action cannot be undone. Are you sure?',
+                style: TextStyle(color: context.colorScheme.onSurfaceVariant),
+              ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(LocaleKeys.no.tr()),
                 ),
-                FilledButton(
+                FilledButton.icon(
                   onPressed: () => Navigator.of(context).pop(true),
+                  icon: const Icon(Icons.delete_forever, size: 18),
+                  label: Text(LocaleKeys.yes.tr()),
                   style: FilledButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(cornerRadius),
-                    ),
-                    backgroundColor: Colors.red, // Nút xóa màu đỏ cho cảnh báo
+                    backgroundColor: context.colorScheme.error,
+                    foregroundColor: context.colorScheme.onError,
                   ),
-                  child: Text(LocaleKeys.yes.tr()),
                 ),
               ],
             );

@@ -88,6 +88,7 @@ import '../domain/book/usecases/add_book.dart' as _i660;
 import '../domain/book/usecases/bulk_delete.dart' as _i909;
 import '../domain/book/usecases/bulk_update.dart' as _i429;
 import '../domain/book/usecases/delete_book.dart' as _i565;
+import '../domain/book/usecases/delete_book_permanently.dart' as _i713;
 import '../domain/book/usecases/download_gtd_cover.dart' as _i466;
 import '../domain/book/usecases/download_ol_cover.dart' as _i151;
 import '../domain/book/usecases/get_book.dart' as _i137;
@@ -521,6 +522,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.Logger>(),
       ),
     );
+    gh.factory<_i713.DeleteBookPermanentlyUseCase>(
+      () => _i713.DeleteBookPermanentlyUseCase(gh<_i29.BookRepository>()),
+    );
     gh.lazySingleton<_i709.GetReaderProgressByPathUseCase>(
       () => _i709.GetReaderProgressByPathUseCase(
         gh<_i23.ReaderProgressRepository>(),
@@ -553,13 +557,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i737.SetOrientation>(
       () => _i737.SetOrientation(gh<_i70.DeviceRepository>()),
-    );
-    gh.factory<_i821.TrashBinCubit>(
-      () => _i821.TrashBinCubit(
-        gh<_i974.Logger>(),
-        gh<_i679.GetDeletedBooksUseCase>(),
-        gh<_i675.RestoreBookUseCase>(),
-      ),
     );
     gh.lazySingleton<_i120.TranslationRemoteDataSource>(
       () => _i434.SmartTranslationRemoteDataSource(
@@ -683,6 +680,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i507.TagDetailsCubit>(
       () => _i507.TagDetailsCubit(gh<_i470.BookTagRepository>()),
+    );
+    gh.factory<_i821.TrashBinCubit>(
+      () => _i821.TrashBinCubit(
+        gh<_i974.Logger>(),
+        gh<_i679.GetDeletedBooksUseCase>(),
+        gh<_i675.RestoreBookUseCase>(),
+        gh<_i713.DeleteBookPermanentlyUseCase>(),
+      ),
     );
     gh.factory<_i376.TagFilterCubit>(
       () => _i376.TagFilterCubit(gh<_i684.TagRepository>()),
