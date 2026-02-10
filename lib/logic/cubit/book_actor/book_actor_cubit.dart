@@ -116,7 +116,9 @@ class BookActorCubit extends Cubit<BookActorState> {
             UpdateBookTagsParams(bookId: book.id!, tags: tags),
           );
         }
-        emit(const BookActorState.success(message: "Cập nhật thành công"));
+        emit(
+          BookActorState.success(message: "Cập nhật thành công", book: book),
+        );
       },
     );
   }

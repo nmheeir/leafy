@@ -446,7 +446,7 @@ class _BookEditorScreenState extends State<BookEditorScreen> {
                       );
                     },
                   ),
-                  // const SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   // BookFileCard(
                   //   localFilePath: _currentFilePath,
                   //   downloadUrl: _currentDownloadUrl,

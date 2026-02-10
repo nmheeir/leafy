@@ -66,9 +66,17 @@ class BookScreen extends StatelessWidget {
             listener: (context, actorState) {
               actorState.maybeWhen(
                 success: (message, book) {
-                  if (book != null) {
-                    context.read<BookDetailCubit>().updateBook(book);
+                  // Handle navigation if book is deleted (soft or hard delete)
+                  if (book == null || book.deleted == true) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(message)));
+                    Navigator.of(context).pop();
+                    return;
                   }
+
+                  // Update Detail Cubit if regular update
+                  context.read<BookDetailCubit>().updateBook(book);
 
                   ScaffoldMessenger.of(
                     context,

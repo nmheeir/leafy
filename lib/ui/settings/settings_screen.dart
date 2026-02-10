@@ -75,11 +75,11 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     tiles: <SettingsTile>[
                       _buildTrashSetting(context),
-                      _buildDefaultBooksFormat(context),
+                      // _buildDefaultBooksFormat(context),
                       _buildTabOrderSetting(context),
-                      _buildDefaultTags(context),
+                      // _buildDefaultTags(context),
                       _buildTagManagement(context),
-                      _buildDownloadMissingCovers(context),
+                      // _buildDownloadMissingCovers(context),
                     ],
                   ),
                   SettingsSection(
@@ -388,19 +388,6 @@ class SettingsScreen extends StatelessWidget {
       title: Text(LocaleKeys.tabs_order.tr(), style: TextStyle(fontSize: 16)),
       leading: const FaIcon(FontAwesomeIcons.tableColumns),
       onPressed: (context) => context.push(Routes.settingBookListOrder),
-    );
-  }
-
-  SettingsTile _buildDefaultTags(BuildContext context) {
-    return SettingsTile.navigation(
-      title: Text(
-        LocaleKeys.set_default_tags.tr(),
-        style: TextStyle(fontSize: 16),
-      ),
-      leading: const Icon(FontAwesomeIcons.tags),
-      onPressed: (context) {
-        context.push(Routes.settingDefautlBookTag);
-      },
     );
   }
 

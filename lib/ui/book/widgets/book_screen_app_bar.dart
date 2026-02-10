@@ -2,26 +2,25 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/data/models/book/utils/utils.dart';
 import 'package:leafy/domain/book/entities/book.dart';
 import 'package:leafy/generated/locale_keys.g.dart';
+import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/logic/bloc/theme/theme_bloc.dart';
+import 'package:leafy/logic/cubit/book_actor/book_actor_cubit.dart';
 import 'package:leafy/logic/cubit/book_detail/book_detail_cubit.dart';
-import 'package:leafy/logic/cubit/edit_book_cubit.dart';
-import 'package:leafy/logic/utils/extensions.dart';
-import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/logic/cubit/book_resource/book_resource_cubit.dart';
+import 'package:leafy/logic/cubit/edit_book_cubit.dart';
+// import 'package:leafy/logic/utils/extensions.dart';
+import 'package:leafy/ui/book_editor/book_editor_args.dart';
 import 'package:leafy/ui/book_editor/book_editor_screen.dart';
 import 'package:leafy/ui/book_resource/book_resource_screen.dart';
 
 class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BookScreenAppBar({super.key});
 
-  static final _appBar = AppBar();
-
   @override
-  Size get preferredSize => _appBar.preferredSize;
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 
   void _showDeleteRestoreDialog(
     BuildContext context,
@@ -32,52 +31,59 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final isPermanentDelete = deleted && deletePermanently == true;
+        final isRestore = !deleted;
+
         return AlertDialog(
-          // shape: Platform.isAndroid
-          //     ? RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(cornerRadius),
-          //       )
-          //     : null,
+          icon: Icon(
+            isPermanentDelete
+                ? Icons.delete_forever_rounded
+                : isRestore
+                ? Icons.restore_from_trash_rounded
+                : Icons.delete_outline_rounded,
+            color: context.colorScheme.primary,
+          ),
           title: Text(
-            deleted
-                ? deletePermanently == true
-                      ? LocaleKeys.delete_perm_question.tr()
-                      : LocaleKeys.delete_book_question.tr()
-                : LocaleKeys.restore_book_question.tr(),
+            isPermanentDelete
+                ? LocaleKeys.delete_perm_question.tr()
+                : isRestore
+                ? LocaleKeys.restore_book_question.tr()
+                : LocaleKeys.delete_book_question.tr(),
+            textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 18),
           ),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
+          content: Text(
+            isPermanentDelete
+                ? 'This action cannot be undone.'
+                : isRestore
+                ? 'The book will be moved back to your library.'
+                : 'The book will be moved to the trash bin.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: context.colorScheme.onSurfaceVariant),
+          ),
           actions: [
-            FilledButton(
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(cornerRadius),
-                ),
-              ),
-              onPressed: () => _deleteAction(
-                deletePermanently: deletePermanently,
-                book: book,
-                context: context,
-                deleted: deleted,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(LocaleKeys.yes.tr()),
-              ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(LocaleKeys.no.tr()),
             ),
             FilledButton.tonal(
-              style: FilledButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(cornerRadius),
-                ),
-              ),
               onPressed: () {
-                Navigator.of(context).pop();
+                _deleteAction(
+                  deletePermanently: deletePermanently,
+                  book: book,
+                  context: context,
+                  deleted: deleted,
+                );
               },
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Text(LocaleKeys.no.tr()),
+              style: FilledButton.styleFrom(
+                backgroundColor: isPermanentDelete
+                    ? context.colorScheme.errorContainer
+                    : context.colorScheme.primaryContainer,
+                foregroundColor: isPermanentDelete
+                    ? context.colorScheme.onErrorContainer
+                    : context.colorScheme.onPrimaryContainer,
               ),
+              child: Text(LocaleKeys.yes.tr()),
             ),
           ],
         );
@@ -91,192 +97,195 @@ class BookScreenAppBar extends StatelessWidget implements PreferredSizeWidget {
     required BuildContext context,
     required bool deleted,
   }) {
+    // Perform deletion/restoration
     if (deletePermanently == true) {
-      _deleteBookPermanently(context, book);
+      context.read<BookActorCubit>().deleteBook(book.id!);
     } else {
-      _changeDeleteStatus(context, deleted, book);
+      final updatedBook = book.copyWith(deleted: deleted);
+      context.read<BookActorCubit>().updateBook(updatedBook, null);
     }
-
-    Navigator.of(context).pop();
-    Navigator.of(context).pop();
-  }
-
-  Future<void> _changeDeleteStatus(
-    BuildContext context,
-    bool deleted,
-    Book book,
-  ) async {
-    book = book.copyWith(deleted: deleted);
-
-    await context.bookActorCubit.updateBook(book, null);
-    // bookCubit.getDeletedBooks();
-  }
-
-  Future<void> _deleteBookPermanently(BuildContext context, Book book) async {
-    if (book.id != null) {
-      await context.bookActorCubit.deleteBook(book.id!);
-    }
-
-    // bookCubit.getDeletedBooks();
+    Navigator.of(context).pop(); // Close dialog
   }
 
   @override
   Widget build(BuildContext context) {
-    final moreButtonOptions = [
-      LocaleKeys.edit_book.tr(),
-      LocaleKeys.duplicate_book.tr(),
-    ];
-
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
         final themeMode = (state as SetThemeState).themeMode;
+        final isDark =
+            themeMode == ThemeMode.dark ||
+            (themeMode == ThemeMode.system &&
+                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+
         return AppBar(
           backgroundColor: Colors.transparent,
+          elevation: 0,
           scrolledUnderElevation: 0,
           systemOverlayStyle: SystemUiOverlayStyle(
             statusBarColor: Colors.transparent,
-            statusBarIconBrightness: themeMode == ThemeMode.system
-                ? MediaQuery.platformBrightnessOf(context) == Brightness.dark
-                      ? Brightness.light
-                      : Brightness.dark
-                : themeMode == ThemeMode.dark
+            statusBarIconBrightness: isDark
                 ? Brightness.light
                 : Brightness.dark,
+            statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          ),
+          leading: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: context.colorScheme.surface.withValues(
+                alpha: 0.8,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, size: 20),
+                onPressed: () => Navigator.of(context).pop(),
+                tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+              ),
+            ),
           ),
           actions: [
-            BlocBuilder<BookDetailCubit, BookDetailState>(
-              builder: (context, state) {
-                return state.maybeWhen(
-                  loaded: (bookWithDetails) {
-                    final bookState = bookWithDetails.book;
-                    // Add Resource Folder Button
-                    final resourceInfo = IconButton(
-                      onPressed: () {
-                        if (bookState.id != null) {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider.value(
-                                value: context.read<BookResourceCubit>(),
-                                child: BookResourceScreen(
-                                  bookId: bookState.id!,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.folder_open_outlined),
-                      tooltip: 'Resources',
-                    );
-
-                    // Reset options to base state explicitly just in case
-                    final options = List<String>.from(moreButtonOptions);
-
-                    if (options.length == 2) {
-                      if (bookState.deleted == true) {
-                        options.add(LocaleKeys.restore_book.tr());
-                        options.add(LocaleKeys.delete_permanently.tr());
-                      } else {
-                        options.add(LocaleKeys.delete_book.tr());
-                      }
-                    }
-
-                    return Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        resourceInfo,
-                        PopupMenuButton<String>(
-                          onSelected: (_) {},
-                          itemBuilder: (_) {
-                            return options.map((String choice) {
-                              return PopupMenuItem<String>(
-                                value: choice,
-                                child: Text(choice),
-                                onTap: () async {
-                                  context.read<EditBookCubit>().setBook(
-                                    bookState,
-                                  );
-
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 0),
-                                  );
-                                  if (!context.mounted) return;
-
-                                  if (choice == options[0]) {
-                                    final cover = await getCoverBytes(
-                                      bookState.id,
-                                    );
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (_) => BookEditorScreen(
-                                          args: BookEditorArgs.fromLocal(
-                                            bookState,
-                                            cover,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  } else if (choice == options[1]) {
-                                    final cover = await getCoverBytes(
-                                      bookState.id,
-                                    );
-
-                                    context.editBookCoverCubit.setCoverImage(
-                                      cover,
-                                    );
-
-                                    final newBook = bookState.copyWith(
-                                      title:
-                                          '${bookState.title} ${LocaleKeys.copy_book.tr()}',
-                                      rating: 0,
-                                      id: null,
-                                    );
-
-                                    context.read<EditBookCubit>().setBook(
-                                      newBook,
-                                    );
-                                    context.read<EditBookCubit>().setHasCover(
-                                      true,
-                                    );
-                                  } else if (choice == options[2]) {
-                                    if (bookState.deleted == false) {
-                                      _showDeleteRestoreDialog(
-                                        context,
-                                        true,
-                                        null,
-                                        bookState,
-                                      );
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: CircleAvatar(
+                backgroundColor: context.colorScheme.surface.withValues(
+                  alpha: 0.8,
+                ),
+                child: BlocBuilder<BookDetailCubit, BookDetailState>(
+                  builder: (context, state) {
+                    return state.maybeWhen(
+                      loaded: (bookWithDetails) {
+                        final book = bookWithDetails.book;
+                        return MenuAnchor(
+                          builder:
+                              (
+                                BuildContext context,
+                                MenuController controller,
+                                Widget? child,
+                              ) {
+                                return IconButton(
+                                  onPressed: () {
+                                    if (controller.isOpen) {
+                                      controller.close();
                                     } else {
-                                      _showDeleteRestoreDialog(
-                                        context,
-                                        false,
-                                        null,
-                                        bookState,
-                                      );
+                                      controller.open();
                                     }
-                                  } else if (choice == options[3]) {
-                                    _showDeleteRestoreDialog(
-                                      context,
-                                      true,
-                                      true,
-                                      bookState,
-                                    );
-                                  }
-                                },
-                              );
-                            }).toList();
-                          },
-                        ),
-                      ],
+                                  },
+                                  icon: const Icon(Icons.more_vert, size: 20),
+                                  tooltip: 'More options',
+                                );
+                              },
+                          menuChildren: _buildMenuItems(context, book),
+                        );
+                      },
+                      orElse: () => const SizedBox.shrink(),
                     );
                   },
-                  orElse: () => const SizedBox.shrink(),
-                );
-              },
+                ),
+              ),
             ),
           ],
         );
       },
+    );
+  }
+
+  List<Widget> _buildMenuItems(BuildContext context, Book book) {
+    final List<Widget> items = [];
+
+    // Edit Item
+    items.add(
+      MenuItemButton(
+        leadingIcon: const Icon(Icons.edit_outlined),
+        onPressed: () => _editBook(context, book),
+        child: Text(LocaleKeys.edit_book.tr()),
+      ),
+    );
+
+    // Resource Folder Item
+    if (book.id != null) {
+      items.add(
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.folder_open_outlined),
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider.value(
+                  value: context.read<BookResourceCubit>(),
+                  child: BookResourceScreen(bookId: book.id!),
+                ),
+              ),
+            );
+          },
+          child: const Text('Resources'),
+        ),
+      );
+    }
+
+    // Delete / Restore Options
+    if (book.deleted == true) {
+      items.add(
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.restore_from_trash_outlined),
+          onPressed: () => _showDeleteRestoreDialog(
+            context,
+            false, // deleted => false (Restore)
+            null,
+            book,
+          ),
+          child: Text(LocaleKeys.restore_book.tr()),
+        ),
+      );
+      items.add(
+        MenuItemButton(
+          leadingIcon: Icon(
+            Icons.delete_forever_outlined,
+            color: context.colorScheme.error,
+          ),
+          onPressed: () => _showDeleteRestoreDialog(
+            context,
+            true, // deleted => true
+            true, // permanently => true
+            book,
+          ),
+          child: Text(
+            LocaleKeys.delete_permanently.tr(),
+            style: TextStyle(color: context.colorScheme.error),
+          ),
+        ),
+      );
+    } else {
+      items.add(
+        MenuItemButton(
+          leadingIcon: Icon(
+            Icons.delete_outline,
+            color: context.colorScheme.error,
+          ),
+          onPressed: () => _showDeleteRestoreDialog(
+            context,
+            true, // deleted => true (Move to trash)
+            null,
+            book,
+          ),
+          child: Text(
+            LocaleKeys.delete_book.tr(),
+            style: TextStyle(color: context.colorScheme.error),
+          ),
+        ),
+      );
+    }
+
+    return items;
+  }
+
+  Future<void> _editBook(BuildContext context, Book book) async {
+    context.read<EditBookCubit>().setBook(book);
+    final cover = await getCoverBytes(book.id);
+
+    if (!context.mounted) return;
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) =>
+            BookEditorScreen(args: BookEditorArgs.fromLocal(book, cover)),
+      ),
     );
   }
 }
