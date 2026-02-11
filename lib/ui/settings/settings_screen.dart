@@ -94,6 +94,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     tiles: <SettingsTile>[
                       _buildBackupRestoreSetting(context),
+                      _buildShowWelcomeScreenSetting(context),
                       _buildAppearanceSetting(context),
                       _buildLanguageSetting(context),
                     ],
@@ -425,6 +426,17 @@ class SettingsScreen extends StatelessWidget {
       ),
       leading: const Icon(Icons.settings_backup_restore_rounded),
       onPressed: (context) => context.push(Routes.settingBackupRestore),
+    );
+  }
+
+  SettingsTile _buildShowWelcomeScreenSetting(BuildContext context) {
+    return SettingsTile.navigation(
+      title: Text(
+        LocaleKeys.settings_show_welcome_screen.tr(),
+        style: TextStyle(fontSize: 16),
+      ),
+      leading: const Icon(Icons.waving_hand_rounded),
+      onPressed: (context) => context.push(Routes.welcome),
     );
   }
 

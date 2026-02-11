@@ -164,6 +164,7 @@ abstract class  LocaleKeys {
   static const translate_app = 'translate_app';
   static const translate_app_description = 'translate_app_description';
   static const app = 'app';
+  static const settings_show_welcome_screen = 'settings_show_welcome_screen';
   static const apperance = 'apperance';
   static const about = 'about';
   static const version = 'version';

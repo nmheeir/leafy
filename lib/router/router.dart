@@ -19,9 +19,31 @@ import 'package:leafy/ui/settings/screens/settings_book_list_order_screen.dart';
 import 'package:leafy/ui/settings/settings_screen.dart';
 import 'package:leafy/ui/trash_screen/trash_screen.dart';
 import 'package:leafy/ui/welcome/welcome_screen.dart';
+import 'package:leafy/core/services/intro_service.dart';
+import 'package:leafy/di/injection.dart';
 
 GoRouter router() => GoRouter(
   initialLocation: Routes.home,
+  redirect: (context, state) {
+    final introService = getIt<IntroService>();
+    final isFirstTime = introService.isFirstTime;
+    final isWelcomeRoute = state.fullPath == Routes.welcome;
+
+    if (isFirstTime && !isWelcomeRoute) {
+      return Routes.welcome;
+    }
+
+    if (!isFirstTime && isWelcomeRoute) {
+      // If user manually navigates via settings, allow it.
+      // But if user tries to go to welcome directly (e.g. deep link) when not first time,
+      // maybe we should redirect to home?
+      // For now, let's assume manual navigation is intentional.
+      // However, the original request says "user can revisit". So we should allow it.
+      return null;
+    }
+
+    return null;
+  },
   // observers: [getIt<HistoryObserver>()],
   routes: [
     GoRoute(path: Routes.welcome, builder: (context, state) => WelcomeScreen()),

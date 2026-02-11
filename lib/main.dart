@@ -53,7 +53,7 @@ void main() async {
   await EasyLocalization.ensureInitialized();
   await pdfrxFlutterInitialize(dismissPdfiumWasmWarnings: true);
 
-  configureDependencies();
+  await configureDependencies();
 
   appDocumentsDirectory = await getApplicationDocumentsDirectory();
   appTempDirectory = await getTemporaryDirectory();

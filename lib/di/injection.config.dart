@@ -19,9 +19,11 @@ import 'package:logger/logger.dart' as _i974;
 import 'package:logger/web.dart' as _i120;
 import 'package:pretty_dio_logger/pretty_dio_logger.dart' as _i528;
 import 'package:screen_brightness/screen_brightness.dart' as _i108;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
 import '../core/config/app_config.dart' as _i221;
 import '../core/services/connectivity_service.dart' as _i786;
+import '../core/services/intro_service.dart' as _i331;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/backup/backup_repository_impl.dart' as _i845;
 import '../data/backup/backup_service.dart' as _i189;
@@ -263,6 +265,10 @@ extension GetItInjectableX on _i174.GetIt {
       () => storageModule.documentsDir,
       preResolve: true,
     );
+    await gh.singletonAsync<_i460.SharedPreferences>(
+      () => storageModule.prefs,
+      preResolve: true,
+    );
     gh.lazySingleton<_i786.ConnectivityService>(
       () => _i786.ConnectivityService(),
     );
@@ -284,6 +290,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i798.NetworkFileDataSource>(
       () => _i643.NetworkFileDataSourceImpl(gh<_i361.Dio>()),
+    );
+    gh.singleton<_i331.IntroService>(
+      () => _i331.IntroService(gh<_i460.SharedPreferences>()),
     );
     gh.lazySingleton<_i890.TranslationLocalDataSource>(
       () => _i890.TranslationLocalDataSourceImpl(gh<_i328.DatabaseService>()),
