@@ -460,5 +460,22 @@ abstract class  LocaleKeys {
   static const book_sessions = 'book.sessions';
   static const book_last_read = 'book.last_read';
   static const book = 'book';
+  static const notification_title = 'notification.title';
+  static const notification_denied = 'notification.denied';
+  static const notification_denied_description = 'notification.denied_description';
+  static const notification_request = 'notification.request';
+  static const notification_request_description = 'notification.request_description';
+  static const notification_test = 'notification.test';
+  static const notification_send_test = 'notification.send_test';
+  static const notification_test_sent = 'notification.test_sent';
+  static const notification_tap_to_verify = 'notification.tap_to_verify';
+  static const notification_daily_reminder = 'notification.daily_reminder';
+  static const notification_daily_reminder_description = 'notification.daily_reminder_description';
+  static const notification_daily_reminder_time = 'notification.daily_reminder_time';
+  static const notification_daily_reminder_time_description = 'notification.daily_reminder_time_description';
+  static const notification_daily_reminder_time_24 = 'notification.daily_reminder_time_24';
+  static const notification_daily_reminder_time_12 = 'notification.daily_reminder_time_12';
+  static const notification_enable_daily_reminder = 'notification.enable_daily_reminder';
+  static const notification = 'notification';
 
 }

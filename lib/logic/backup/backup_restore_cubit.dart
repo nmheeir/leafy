@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/services/notification_service.dart';
 import 'package:leafy/domain/backup/repositories/backup_repository.dart';
 import 'package:leafy/domain/book/repositories/book_repository.dart';
 import 'package:leafy/logic/backup/backup_restore_state.dart';
@@ -10,9 +11,13 @@ import 'package:share_plus/share_plus.dart';
 class BackupRestoreCubit extends Cubit<BackupRestoreState> {
   final BackupRepository _backupRepository;
   final BookRepository _bookRepository;
+  final NotificationService _notificationService;
 
-  BackupRestoreCubit(this._backupRepository, this._bookRepository)
-    : super(const BackupRestoreState());
+  BackupRestoreCubit(
+    this._backupRepository,
+    this._bookRepository,
+    this._notificationService,
+  ) : super(const BackupRestoreState());
 
   /// Tạo local backup
   Future<void> createLocalBackup() async {
@@ -40,21 +45,25 @@ class BackupRestoreCubit extends Cubit<BackupRestoreState> {
     );
 
     backupResult.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: BackupStatus.failure,
-          errorMessage: failure.message ?? 'Unknown error',
-        ),
-      ),
-      (result) => emit(
-        state.copyWith(
-          status: BackupStatus.success,
-          message:
-              'Backup created successfully!\n'
-              '${result.metadata?.totalBooks ?? 0} books, '
-              '${result.metadata?.totalCovers ?? 0} covers',
-        ),
-      ),
+      (failure) {
+        _notificationService.showBackupFailure(
+          message: failure.message ?? 'Unknown error',
+        );
+        emit(
+          state.copyWith(
+            status: BackupStatus.failure,
+            errorMessage: failure.message ?? 'Unknown error',
+          ),
+        );
+      },
+      (result) {
+        final msg =
+            'Backup created successfully!\n'
+            '${result.metadata?.totalBooks ?? 0} books, '
+            '${result.metadata?.totalCovers ?? 0} covers';
+        _notificationService.showBackupSuccess(message: msg);
+        emit(state.copyWith(status: BackupStatus.success, message: msg));
+      },
     );
   }
 
@@ -131,19 +140,29 @@ class BackupRestoreCubit extends Cubit<BackupRestoreState> {
     final result = await _backupRepository.createCloudBackup();
 
     result.fold(
-      (failure) => emit(
-        state.copyWith(
-          status: BackupStatus.failure,
-          errorMessage: failure.message ?? 'Unknown error',
-        ),
-      ),
-      (result) => emit(
-        state.copyWith(
-          status: BackupStatus.success,
+      (failure) {
+        _notificationService.showBackupFailure(
+          message: failure.message ?? 'Unknown error',
+        );
+        emit(
+          state.copyWith(
+            status: BackupStatus.failure,
+            errorMessage: failure.message ?? 'Unknown error',
+          ),
+        );
+      },
+      (result) {
+        _notificationService.showBackupSuccess(
           message: 'Cloud backup created successfully!',
-          isGoogleSignedIn: true,
-        ),
-      ),
+        );
+        emit(
+          state.copyWith(
+            status: BackupStatus.success,
+            message: 'Cloud backup created successfully!',
+            isGoogleSignedIn: true,
+          ),
+        );
+      },
     );
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:leafy/core/constants/constants.dart';
 import 'package:leafy/core/constants/locale/locale.dart';
 import 'package:leafy/core/services/connectivity_service.dart';
+import 'package:leafy/core/services/notification_service.dart';
 import 'package:leafy/di/injection.dart';
 import 'package:leafy/domain/tag/repositories/book_tag_repository.dart';
 import 'package:leafy/domain/tag/repositories/tag_repository.dart';
@@ -46,6 +49,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'package:leafy/core/utils/app_globals.dart';
 import 'package:leafy/core/theme/app_theme_provider.dart';
+import 'package:leafy/router/routes.dart';
 import 'package:pdfrx/pdfrx.dart';
 
 void main() async {
@@ -62,6 +66,10 @@ void main() async {
 
   await initializeDateFormatting();
   dateFormat = DateFormat.yMMMd();
+
+  // Initialize notification service
+  final notificationService = getIt<NotificationService>();
+  await notificationService.init();
 
   final localeCodes = supportedLocales.map((e) => e.locale).toList();
 
@@ -171,6 +179,47 @@ class LeafyApp extends StatefulWidget {
 }
 
 class _LeafyAppState extends State<LeafyApp> {
+  late final StreamSubscription<String> _notificationSub;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Handle cold-start notification tap
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pending = NotificationService.pendingPayload;
+      if (pending != null) {
+        NotificationService.pendingPayload = null;
+        _handleNotificationPayload(pending);
+      }
+    });
+
+    // Handle notification taps while app is running
+    _notificationSub = NotificationService.onNotificationTap.stream.listen(
+      _handleNotificationPayload,
+    );
+  }
+
+  @override
+  void dispose() {
+    _notificationSub.cancel();
+    super.dispose();
+  }
+
+  void _handleNotificationPayload(String payloadJson) {
+    try {
+      final payload = NotificationPayload.fromJson(payloadJson);
+      if (payload.action == NotificationPayload.actionOpenBook &&
+          payload.bookId != null) {
+        appRouter.push('${Routes.book}/${payload.bookId}');
+      } else if (payload.action == NotificationPayload.actionOpenHome) {
+        appRouter.go(Routes.home);
+      }
+    } catch (_) {
+      // Invalid payload, ignore
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizationsDelegates = [...context.localizationDelegates];

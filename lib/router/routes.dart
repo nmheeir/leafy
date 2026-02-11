@@ -16,6 +16,7 @@ abstract final class Routes {
   static const settingDefautlBookTag = '/setting-default-book-tag';
   static const settingEpubReader = '/setting-epub-reader';
   static const settingAiApi = '/setting-ai-api';
+  static const settingNotification = '/setting-notification';
   static const epubView = '/epub-view';
   static const searchGutendex = '/search-gutendex';
   static const readingHistory = '/reading-history';

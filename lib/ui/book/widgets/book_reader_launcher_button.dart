@@ -141,7 +141,10 @@ class BookReaderLauncherButton extends StatelessWidget {
           context,
           text: "Download",
           icon: Icons.download,
-          onTap: () => context.bookResourceCubit.downloadResource(resource),
+          onTap: () => context.bookResourceCubit.downloadResource(
+            resource,
+            bookName: book.title,
+          ),
         );
       } else {
         return _buildActionButton(
@@ -241,7 +244,10 @@ class BookReaderLauncherButton extends StatelessWidget {
                     if (fileExists) {
                       _openReader(context, resource);
                     } else if (resource.url != null) {
-                      context.bookResourceCubit.downloadResource(resource);
+                      context.bookResourceCubit.downloadResource(
+                        resource,
+                        bookName: book.title,
+                      );
                     }
                   },
                 );

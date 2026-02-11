@@ -485,5 +485,23 @@
     "total_time": "Total Time",
     "sessions": "Sessions",
     "last_read": "Last Read"
+  },
+  "notification": {
+    "title": "Notification",
+    "denied": "Notification permission denied",
+    "denied_description": "Please enable notification permission in the app settings.",
+    "request": "Request notification permission",
+    "request_description": "Leafy needs notification permission to show notifications.",
+    "test": "Test",
+    "send_test": "Send test notification",
+    "test_sent": "Test notification sent!",
+    "tap_to_verify": "Tap to verify notifications are working",
+    "daily_reminder": "Daily reminder",
+    "daily_reminder_description": "Receive a daily reminder to read.",
+    "daily_reminder_time": "Daily reminder time",
+    "daily_reminder_time_description": "Set the time for the daily reminder.",
+    "daily_reminder_time_24": "24-hour format",
+    "daily_reminder_time_12": "12-hour format",
+    "enable_daily_reminder": "Enable daily reminder"
   }
 }

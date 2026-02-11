@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:leafy/core/services/notification_service.dart';
 import 'package:leafy/core/usecase/usecase.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/file_helper.dart';
@@ -28,6 +29,7 @@ class BookResourceCubit extends Cubit<BookResourceState> {
   final SaveImportedResourceUseCase _saveImportedResourceUseCase;
   final DownloadResourceUseCase _downloadResourceUseCase;
   final Logger _logger;
+  final NotificationService _notificationService;
 
   BookResourceCubit(
     this._logger,
@@ -38,6 +40,7 @@ class BookResourceCubit extends Cubit<BookResourceState> {
     this._saveImportedResourceUseCase,
     this._deleteBookResourceUseCase,
     this._downloadResourceUseCase,
+    this._notificationService,
   ) : super(const BookResourceState.initial());
 
   int? _bookId;
@@ -56,15 +59,21 @@ class BookResourceCubit extends Cubit<BookResourceState> {
     );
   }
 
-  Future<void> downloadResource(BookResource resource) async {
+  Future<void> downloadResource(
+    BookResource resource, {
+    String? bookName,
+  }) async {
     if (resource.url == null) {
       emit(const BookResourceState.failure("Resource has no URL"));
       return;
     }
 
+    final displayName = bookName ?? 'Book';
+
     emit(BookResourceState.downloading(resource.uuid, 0.0));
 
     // 1. Download file
+    final notifId = resource.uuid.hashCode.abs() % 10000;
     final downloadResult = await _downloadResourceUseCase(
       DownloadResourceParams(
         fileName: resource.uuid.take(6),
@@ -72,6 +81,11 @@ class BookResourceCubit extends Cubit<BookResourceState> {
         onProgress: (progress) {
           _logger.d("Download progress: $progress");
           emit(BookResourceState.downloading(resource.uuid, progress));
+          _notificationService.showDownloadProgress(
+            notificationId: notifId,
+            title: 'Downloading: $displayName',
+            progress: (progress * 100).toInt(),
+          );
         },
         forceReload: true,
       ),
@@ -79,6 +93,9 @@ class BookResourceCubit extends Cubit<BookResourceState> {
 
     await downloadResult.fold(
       (failure) async {
+        _notificationService.cancelNotification(
+          NotificationIds.downloadBase + notifId,
+        );
         emit(BookResourceState.failure(failure.message ?? 'Download failed'));
         if (_bookId != null) loadResources(_bookId!);
       },
@@ -98,6 +115,11 @@ class BookResourceCubit extends Cubit<BookResourceState> {
           (failure) =>
               emit(BookResourceState.failure("Failed to update resource path")),
           (_) async {
+            _notificationService.showDownloadComplete(
+              notificationId: notifId,
+              title: displayName,
+              bookId: _bookId,
+            );
             if (_bookId != null) {
               await loadResources(_bookId!);
             } else {

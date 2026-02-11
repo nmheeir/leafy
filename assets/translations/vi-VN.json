@@ -485,5 +485,23 @@
     "total_time": "Tổng thời gian",
     "sessions": "Số phiên đọc",
     "last_read": "Lần đọc cuối"
+  },
+  "notification": {
+    "title": "Thông báo",
+    "denied": "Quyền thông báo bị từ chối",
+    "denied_description": "Vui lòng bật quyền thông báo trong cài đặt ứng dụng.",
+    "request": "Yêu cầu quyền thông báo",
+    "request_description": "Leafy cần quyền thông báo để hiển thị các thông báo.",
+    "test": "Kiểm tra",
+    "send_test": "Gửi thông báo kiểm tra",
+    "test_sent": "Đã gửi thông báo kiểm tra!",
+    "tap_to_verify": "Nhấn để xác nhận thông báo đang hoạt động bình thường",
+    "daily_reminder": "Nhắc nhở hàng ngày",
+    "daily_reminder_description": "Nhận lời nhắc đọc sách hàng ngày.",
+    "daily_reminder_time": "Giờ nhắc nhở hàng ngày",
+    "daily_reminder_time_description": "Thiết lập thời gian cho lời nhắc hàng ngày.",
+    "daily_reminder_time_24": "Định dạng 24 giờ",
+    "daily_reminder_time_12": "Định dạng 12 giờ",
+    "enable_daily_reminder": "Bật nhắc nhở hàng ngày"
   }
 }

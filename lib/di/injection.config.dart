@@ -24,6 +24,7 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import '../core/config/app_config.dart' as _i221;
 import '../core/services/connectivity_service.dart' as _i786;
 import '../core/services/intro_service.dart' as _i331;
+import '../core/services/notification_service.dart' as _i570;
 import '../core/utils/extensions/history_observer.dart' as _i308;
 import '../data/backup/backup_repository_impl.dart' as _i845;
 import '../data/backup/backup_service.dart' as _i189;
@@ -393,6 +394,12 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1030.ReaderProgressLocalDatasourceImpl(gh<_i328.DatabaseService>()),
     );
+    gh.singleton<_i570.NotificationService>(
+      () => _i570.NotificationService(
+        gh<_i460.SharedPreferences>(),
+        gh<_i974.Logger>(),
+      ),
+    );
     gh.lazySingleton<_i832.TagLocalDataSource>(
       () => _i651.TagLocalDataSourceImpl(gh<_i328.DatabaseService>()),
     );
@@ -529,6 +536,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i52.OpenLibSearchBloc(
         gh<_i14.OpenLibSearchUseCase>(),
         gh<_i974.Logger>(),
+      ),
+    );
+    gh.factory<_i100.BackupRestoreCubit>(
+      () => _i100.BackupRestoreCubit(
+        gh<_i609.BackupRepository>(),
+        gh<_i29.BookRepository>(),
+        gh<_i570.NotificationService>(),
       ),
     );
     gh.factory<_i713.DeleteBookPermanentlyUseCase>(
@@ -701,12 +715,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i376.TagFilterCubit>(
       () => _i376.TagFilterCubit(gh<_i684.TagRepository>()),
     );
-    gh.factory<_i100.BackupRestoreCubit>(
-      () => _i100.BackupRestoreCubit(
-        gh<_i609.BackupRepository>(),
-        gh<_i29.BookRepository>(),
-      ),
-    );
     gh.factory<_i845.BookProgressCubit>(
       () => _i845.BookProgressCubit(gh<_i709.GetReaderProgressByPathUseCase>()),
     );
@@ -853,6 +861,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i662.UpdateBookTagsUseCase>(),
       ),
     );
+    gh.factory<_i407.BookResourceCubit>(
+      () => _i407.BookResourceCubit(
+        gh<_i974.Logger>(),
+        gh<_i452.GetBookResourcesUseCase>(),
+        gh<_i589.UpdateBookResourceFileUseCase>(),
+        gh<_i568.PickLocalFilesUseCase>(),
+        gh<_i390.ProcessLocalFilesUseCase>(),
+        gh<_i623.SaveImportedResourceUseCase>(),
+        gh<_i47.DeleteBookResourceUseCase>(),
+        gh<_i598.DownloadResourceUseCase>(),
+        gh<_i570.NotificationService>(),
+      ),
+    );
     gh.factory<_i23.BookDetailCubit>(
       () => _i23.BookDetailCubit(gh<_i469.GetBookWithDetailsUseCase>()),
     );
@@ -865,18 +886,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i770.LogReadingSessionByPathUseCase>(),
         gh<_i838.MarkBookFinishedUseCase>(),
         gh<_i27.StreamTranslateChapterUseCase>(),
-      ),
-    );
-    gh.factory<_i407.BookResourceCubit>(
-      () => _i407.BookResourceCubit(
-        gh<_i974.Logger>(),
-        gh<_i452.GetBookResourcesUseCase>(),
-        gh<_i589.UpdateBookResourceFileUseCase>(),
-        gh<_i568.PickLocalFilesUseCase>(),
-        gh<_i390.ProcessLocalFilesUseCase>(),
-        gh<_i623.SaveImportedResourceUseCase>(),
-        gh<_i47.DeleteBookResourceUseCase>(),
-        gh<_i598.DownloadResourceUseCase>(),
       ),
     );
     return this;

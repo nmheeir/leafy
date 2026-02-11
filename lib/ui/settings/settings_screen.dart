@@ -94,6 +94,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     tiles: <SettingsTile>[
                       _buildBackupRestoreSetting(context),
+                      _buildNotificationSetting(context),
                       _buildShowWelcomeScreenSetting(context),
                       _buildAppearanceSetting(context),
                       _buildLanguageSetting(context),
@@ -426,6 +427,14 @@ class SettingsScreen extends StatelessWidget {
       ),
       leading: const Icon(Icons.settings_backup_restore_rounded),
       onPressed: (context) => context.push(Routes.settingBackupRestore),
+    );
+  }
+
+  SettingsTile _buildNotificationSetting(BuildContext context) {
+    return SettingsTile.navigation(
+      title: const Text('Notifications', style: TextStyle(fontSize: 16)),
+      leading: const Icon(Icons.notifications_outlined),
+      onPressed: (context) => context.push(Routes.settingNotification),
     );
   }
 
