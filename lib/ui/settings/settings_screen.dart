@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -159,7 +160,7 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   ),
                   // NOTE: need to change to to KDebugMode
-                  if (true)
+                  if (kDebugMode)
                     SettingsSection(
                       title: Text(
                         'Developer',
