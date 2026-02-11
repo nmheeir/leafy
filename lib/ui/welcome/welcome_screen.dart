@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 import 'package:leafy/core/services/intro_service.dart';
 import 'package:leafy/core/utils/extensions/extensions.dart';
 import 'package:leafy/core/utils/helpers/file_helper.dart';

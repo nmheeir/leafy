@@ -191,7 +191,7 @@ class SettingBackupRestoreScreen extends StatelessWidget {
         style: const TextStyle(fontSize: 16),
       ),
       leading: Image.asset(
-        'assets/icons/icon_cropped.png',
+        'assets/icons/leafy_logo_transparent.png',
         width: 24,
         height: 24,
       ),

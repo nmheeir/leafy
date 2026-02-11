@@ -34,11 +34,6 @@ GoRouter router() => GoRouter(
     }
 
     if (!isFirstTime && isWelcomeRoute) {
-      // If user manually navigates via settings, allow it.
-      // But if user tries to go to welcome directly (e.g. deep link) when not first time,
-      // maybe we should redirect to home?
-      // For now, let's assume manual navigation is intentional.
-      // However, the original request says "user can revisit". So we should allow it.
       return null;
     }
 
