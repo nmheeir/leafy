@@ -62,10 +62,10 @@ class WelcomePageChoices extends StatelessWidget {
             width: double.infinity,
             child: FilledButton(
               onPressed: getStarted,
-              child: Text(LocaleKeys.start_button.tr()),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 16),
               ),
+              child: Text(LocaleKeys.start_button.tr()),
             ),
           ),
           const SizedBox(height: 48), // Bottom padding

@@ -114,6 +114,7 @@ dev_dependencies:
   faker: ^2.2.0
   sqflite_common_ffi: ^2.4.0+2
   flutter_native_splash: ^2.4.7
+  flutter_launcher_icons: ^0.14.4
 
 melos:
   useRootAsPackage: true
