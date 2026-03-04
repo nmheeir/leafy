@@ -6,5 +6,6 @@
     "gutendex",
     "openlibrary",
     "splitted"
-  ]
+  ],
+  "dart.flutterSdkPath": ".fvm/versions/3.41.3"
 }
